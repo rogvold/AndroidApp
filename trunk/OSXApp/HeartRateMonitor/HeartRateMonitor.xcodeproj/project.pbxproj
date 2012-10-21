@@ -15,9 +15,9 @@
 		44B0266113F5D44000541EA5 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 44B0265F13F5D44000541EA5 /* MainMenu.xib */; };
 		44B0268013F5DABB00541EA5 /* Heart.png in Resources */ = {isa = PBXBuildFile; fileRef = 44B0267F13F5DABB00541EA5 /* Heart.png */; };
 		44B0268213F5DD2A00541EA5 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 44B0268113F5DD2A00541EA5 /* QuartzCore.framework */; };
-		5B16F6931634110900CDE4E1 /* JSONKit.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B16F6921634110900CDE4E1 /* JSONKit.m */; };
 		9A090D9013FDBF7E00CCE962 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 9A090D8F13FDBF7E00CCE962 /* AppIcon.icns */; };
 		9A8EF42513FC835E00CDFA4B /* Human.png in Resources */ = {isa = PBXBuildFile; fileRef = 9A8EF42413FC835E00CDFA4B /* Human.png */; };
+		FAAC96A016348ECC007F1EFC /* JSONKit.m in Sources */ = {isa = PBXBuildFile; fileRef = FAAC969F16348ECC007F1EFC /* JSONKit.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,10 +36,10 @@
 		44B0266013F5D44000541EA5 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		44B0267F13F5DABB00541EA5 /* Heart.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Heart.png; sourceTree = "<group>"; };
 		44B0268113F5DD2A00541EA5 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
-		5B16F6911634110900CDE4E1 /* JSONKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JSONKit.h; path = "../johnezang-JSONKit-8215763/JSONKit.h"; sourceTree = "<group>"; };
-		5B16F6921634110900CDE4E1 /* JSONKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = JSONKit.m; path = "../johnezang-JSONKit-8215763/JSONKit.m"; sourceTree = "<group>"; };
 		9A090D8F13FDBF7E00CCE962 /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		9A8EF42413FC835E00CDFA4B /* Human.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Human.png; sourceTree = "<group>"; };
+		FAAC969E16348ECC007F1EFC /* JSONKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JSONKit.h; path = HeartRateMonitor/JSONKit.h; sourceTree = "<group>"; };
+		FAAC969F16348ECC007F1EFC /* JSONKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = JSONKit.m; path = HeartRateMonitor/JSONKit.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -123,8 +123,8 @@
 		5B16F68F163410E900CDE4E1 /* JSON */ = {
 			isa = PBXGroup;
 			children = (
-				5B16F6911634110900CDE4E1 /* JSONKit.h */,
-				5B16F6921634110900CDE4E1 /* JSONKit.m */,
+				FAAC969E16348ECC007F1EFC /* JSONKit.h */,
+				FAAC969F16348ECC007F1EFC /* JSONKit.m */,
 			);
 			name = JSON;
 			sourceTree = "<group>";
@@ -197,7 +197,7 @@
 			files = (
 				44B0265713F5D44000541EA5 /* main.m in Sources */,
 				44B0265E13F5D44000541EA5 /* HeartRateMonitorAppDelegate.m in Sources */,
-				5B16F6931634110900CDE4E1 /* JSONKit.m in Sources */,
+				FAAC96A016348ECC007F1EFC /* JSONKit.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
