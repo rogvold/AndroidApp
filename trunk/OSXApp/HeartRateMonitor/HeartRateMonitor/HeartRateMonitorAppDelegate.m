@@ -48,7 +48,6 @@
 #import "HeartRateMonitorAppDelegate.h"
 #import <QuartzCore/QuartzCore.h>
 #import "JSONKit.h"
-#include <mach/mach.h>
 
 @implementation HeartRateMonitorAppDelegate
 
@@ -265,31 +264,32 @@
 // Send intervals to server
 - (void) sendRRs:(NSArray *)rrs
 {
-    NSData* jsonData = [self makeJSON:rrs];
-    
-    NSURL* url = [NSURL URLWithString:@"http://5.9.107.99"];
+    //NSData* jsonData = [self makeJSON:rrs];
+    NSString* jsonString = [self makeJSON:rrs];
+    NSURL* url = [NSURL URLWithString:@"http://rogvold.campus.mipt.ru:8080/BaseProjectWeb/faces/input"];
     
     NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:url];
     [request setHTTPMethod:@"POST"];
     [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-    [request setHTTPBody:jsonData];
+    [request setHTTPBody:[[@"json=" stringByAppendingString:jsonString] dataUsingEncoding:NSUTF8StringEncoding]];
     [NSURLConnection connectionWithRequest:[request autorelease] delegate:self];
 }
 
 // Make json based on array of rr intervals
--(NSData *) makeJSON:(NSArray *)rrs
+-(NSString *) makeJSON:(NSArray *)rrs
 {
     NSDateFormatter* dateFormatter = [[[NSDateFormatter alloc] init] autorelease];
     [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss.SSS"];
     NSString* dateString = [dateFormatter stringFromDate:startTime];
     NSLog(dateString);
     // !!! HARDCODE: user_id, device_id, device_name
-    NSArray* objects = [NSArray arrayWithObjects:dateString, @"id", @"Polar H7", rrs, @"123", nil];
+    NSArray* objects = [NSArray arrayWithObjects:dateString, @"456", @"Polar H7", rrs, @"123", nil];
     NSArray* keys = [NSArray arrayWithObjects:@"start", @"device_id", @"device_name", @"rates", @"user_id", nil];
     NSDictionary* JSONDictionary = [NSDictionary dictionaryWithObjects:objects forKeys:keys];
     NSString* json = [JSONDictionary JSONString];
     NSLog(json);
-    return [JSONDictionary JSONData];
+    return json;
+    //return [JSONDictionary JSONData];
 }
 
 /*
