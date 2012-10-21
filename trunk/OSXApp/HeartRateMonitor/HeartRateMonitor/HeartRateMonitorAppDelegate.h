@@ -82,6 +82,7 @@
 @property (retain) NSMutableArray *heartRateMonitors;
 @property (copy) NSString *manufacturer;
 @property (copy) NSString *connected;
+@property (nonatomic, strong) CBPeripheral *currentlyConnectedPeripheral;
 // RR intervals
 @property (retain) NSMutableArray *RRs;
 // Queue for intervals waiting to be sent

@@ -63,6 +63,7 @@
 @synthesize RRs;
 @synthesize RRsToSend;
 @synthesize startTime;
+@synthesize currentlyConnectedPeripheral;
 
 #define PULSESCALE 1.2
 #define PULSEDURATION 0.2
@@ -282,9 +283,8 @@
     [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss.SSS"];
     NSString* dateString = [dateFormatter stringFromDate:startTime];
     NSLog(dateString);
-    // !!! HARDCODE: user_id, device_id, device_name
-    NSArray* objects = [NSArray arrayWithObjects:dateString, @"456", @"Polar H7", rrs, @"123", nil];
-    NSArray* keys = [NSArray arrayWithObjects:@"start", @"device_id", @"device_name", @"rates", @"user_id", nil];
+    NSArray* objects = [NSArray arrayWithObjects:dateString, [self.currentlyConnectedPeripheral UUID], [self.currentlyConnectedPeripheral name], rrs, @"123", nil];
+    NSArray* keys = [NSArray arrayWithObjects:@"start", @"device_id", @"device_name", @"rates", @"id", nil];
     NSDictionary* JSONDictionary = [NSDictionary dictionaryWithObjects:objects forKeys:keys];
     NSString* json = [JSONDictionary JSONString];
     NSLog(json);
@@ -424,6 +424,8 @@
 {    
     [aPeripheral setDelegate:self];
     [aPeripheral discoverServices:nil];
+    
+    self.currentlyConnectedPeripheral = aPeripheral;
 	
 	self.connected = @"Connected";
     [connectButton setTitle:@"Disconnect"];
