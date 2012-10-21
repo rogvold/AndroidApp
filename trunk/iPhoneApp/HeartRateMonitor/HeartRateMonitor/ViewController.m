@@ -9,7 +9,8 @@
 #import "ViewController.h"
 #import <CoreBluetooth/CoreBluetooth.h>
 #import <CoreFoundation/CoreFoundation.h>
-#import <mach/time_value.h>
+#import "JSONKit.h"
+#include <mach/mach.h>
 
 @interface ViewController () <CBCentralManagerDelegate, CBPeripheralDelegate, UITableViewDataSource, UITableViewDelegate>
 @property (strong) NSMutableArray *heartRateMonitors;
@@ -20,6 +21,15 @@
 @property (nonatomic, strong) CBCentralManager *manager;
 @property (nonatomic, strong) CBPeripheral *currentlyConnectedPeripheral;
 @property (nonatomic, strong) CBPeripheral *lastConnectedPeripheral;
+// RR intervals
+@property (retain) NSMutableArray *RRs;
+// Queue for intervals waiting to be sent
+@property (retain) NSMutableArray *RRsToSend;
+// Start time for each portion of intervals sending to server
+@property (retain) NSDate *startTime;
+
+- (void) sendRRs:(NSArray *)rrs;
+
 //@property (strong) NSMutableArray *heartRate;
 @end
 
@@ -32,6 +42,10 @@
 @synthesize bpm = _bpm;
 @synthesize currentlyConnectedPeripheral = _currentlyConnectedPeripheral;
 @synthesize lastConnectedPeripheral = _lastConnectedPeripheral;
+
+@synthesize RRs;
+@synthesize RRsToSend;
+@synthesize startTime;
 //@synthesize heartRate = _heartRate;
 
 
@@ -40,6 +54,9 @@
 {
     [super loadView];
     self.heartRateMonitors = [NSMutableArray array];
+    self.RRs = [NSMutableArray array];
+    self.RRsToSend = [NSMutableArray array];
+    self.startTime = nil;
     self.manager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
     [self startScan];
 }
@@ -130,10 +147,10 @@
         }
         self.currentlyConnectedPeripheral = device;
         [self.manager connectPeripheral:self.currentlyConnectedPeripheral
-                            options:[NSDictionary dictionaryWithObject:
-                                     [NSNumber numberWithBool:YES]
-                                                                forKey:
-                                     CBConnectPeripheralOptionNotifyOnDisconnectionKey]];
+                                options:[NSDictionary dictionaryWithObject:
+                                         [NSNumber numberWithBool:YES]
+                                                                    forKey:
+                                         CBConnectPeripheralOptionNotifyOnDisconnectionKey]];
         [self connectedMonitor].text = [self.currentlyConnectedPeripheral name];
         [self connectedMonitor].enabled = TRUE;
         [self heartRateLabel].enabled = TRUE;
@@ -164,7 +181,7 @@
 		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:cellID];
     
 	device = [self.heartRateMonitors objectAtIndex:row];
-        
+    
     if ([[device name] length])
         [[cell textLabel] setText:[device name]];
     else
@@ -318,15 +335,46 @@ didDiscoverCharacteristicsForService:(CBService *)service
 {
     const uint8_t *reportData = [data bytes];
     uint16_t bpm = 0;
-    
-    if ((reportData[0] & 0x01) == 0) {
-        // uint8 bpm
+    // n of byte containing rr
+    int rrByte = 2;
+    if ((reportData[0] & 0x01) == 0)
+    {
+        /* uint8 bpm */
         bpm = reportData[1];
-    } else {
-        // uint16 bpm
-        bpm = CFSwapInt16LittleToHost(*(uint16_t *)(&reportData[1]));
     }
-    //NSLog(@"bpm %d", bpm);
+    else
+    {
+        /* uint16 bpm */
+        bpm = CFSwapInt16LittleToHost(*(uint16_t *)(&reportData[1]));
+        rrByte++;
+    }
+    if ((reportData[0] & 0x04) == 1){
+        // Energy field is present
+        rrByte += 2;
+    }
+    
+    if ((reportData[0] & 0x05) == 0) {
+        NSLog(@"RR intervals aren't present");
+    } else {
+        NSLog(@"RR intervals are present");
+        NSMutableArray* rrs = [NSMutableArray array];
+        uint16_t rr = (CFSwapInt16LittleToHost(*(uint16_t *)(&reportData[rrByte])) * 1000) / 1024;
+        while (rr != 0) {
+            NSLog([NSString stringWithFormat:@"RR: %d", rr]);
+            [rrs addObject:[NSNumber numberWithInt:rr]];
+            rrByte += 2;
+            rr = (CFSwapInt16LittleToHost(*(uint16_t *)(&reportData[rrByte])) * 1000) / 1024;
+        }
+        [RRs addObjectsFromArray:rrs];
+        [RRsToSend addObjectsFromArray:rrs];
+        // Send every 10 intervals to server
+        if ([RRsToSend count] >= 10) {
+            [self sendRRs:RRsToSend];
+            [RRsToSend removeAllObjects];
+            self.startTime = [NSDate date];
+            
+        }
+    }
     self.heartRateLabel.text = [NSString stringWithFormat:@"%d", bpm];
     //[[self heartRate] addObject:];
 }
@@ -395,5 +443,36 @@ didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic
         NSLog(@"Manufacturer Name = %@", manufacturer);
     }
 }
+
+// Send intervals to server
+- (void) sendRRs:(NSArray *)rrs
+{
+    NSData* jsonData = [self makeJSON:rrs];
+    
+    NSURL* url = [NSURL URLWithString:@"http://rogvold.campus.mipt.ru:8080/BaseProjectWeb/faces/input"];
+    
+    NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:url];
+    [request setHTTPMethod:@"POST"];
+    [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
+    [request setHTTPBody:jsonData];
+    [NSURLConnection connectionWithRequest:request delegate:self];
+}
+
+// Make json based on array of rr intervals
+-(NSData *) makeJSON:(NSArray *)rrs
+{
+    NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
+    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss.SSS"];
+    NSString* dateString = [dateFormatter stringFromDate:startTime];
+    NSLog(dateString);
+    // !!! HARDCODE: user_id, device_id, device_name
+    NSArray* objects = [NSArray arrayWithObjects:dateString, [self.currentlyConnectedPeripheral UUID], [self.currentlyConnectedPeripheral name], rrs, @"123", nil];
+    NSArray* keys = [NSArray arrayWithObjects:@"start", @"device_id", @"device_name", @"rates", @"id", nil];
+    NSDictionary* JSONDictionary = [NSDictionary dictionaryWithObjects:objects forKeys:keys];
+    NSString* json = [JSONDictionary JSONString];
+    NSLog(json);
+    return [JSONDictionary JSONData];
+}
+
 
 @end

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FAAC96C516349C34007F1EFC /* JSONKit.m in Sources */ = {isa = PBXBuildFile; fileRef = FAAC96C416349C34007F1EFC /* JSONKit.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		FAB310A216282EE5005B3E4A /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAB310A116282EE5005B3E4A /* QuartzCore.framework */; };
 		FAB3113216289876005B3E4A /* GraphViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FAB3113116289876005B3E4A /* GraphViewController.m */; };
 		FACB18FA1621844300BF2D66 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FACB18F91621844300BF2D66 /* UIKit.framework */; };
@@ -39,6 +40,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		FAAC96C316349C34007F1EFC /* JSONKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = JSONKit.h; path = HeartRateMonitor/JSONKit.h; sourceTree = "<group>"; };
+		FAAC96C416349C34007F1EFC /* JSONKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = JSONKit.m; path = HeartRateMonitor/JSONKit.m; sourceTree = "<group>"; };
 		FAB310A116282EE5005B3E4A /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		FAB3113016289876005B3E4A /* GraphViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GraphViewController.h; sourceTree = "<group>"; };
 		FAB3113116289876005B3E4A /* GraphViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GraphViewController.m; sourceTree = "<group>"; };
@@ -93,9 +96,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		FAAC96BA163492BC007F1EFC /* JSON */ = {
+			isa = PBXGroup;
+			children = (
+				FAAC96C316349C34007F1EFC /* JSONKit.h */,
+				FAAC96C416349C34007F1EFC /* JSONKit.m */,
+			);
+			name = JSON;
+			sourceTree = "<group>";
+		};
 		FACB18EA1621844300BF2D66 = {
 			isa = PBXGroup;
 			children = (
+				FAAC96BA163492BC007F1EFC /* JSON */,
 				FACB18FF1621844300BF2D66 /* HeartRateMonitor */,
 				FACB19231621844300BF2D66 /* HeartRateMonitorTests */,
 				FACB18F81621844300BF2D66 /* Frameworks */,
@@ -287,6 +300,7 @@
 				FACB190A1621844300BF2D66 /* AppDelegate.m in Sources */,
 				FACB19161621844300BF2D66 /* ViewController.m in Sources */,
 				FAB3113216289876005B3E4A /* GraphViewController.m in Sources */,
+				FAAC96C516349C34007F1EFC /* JSONKit.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
