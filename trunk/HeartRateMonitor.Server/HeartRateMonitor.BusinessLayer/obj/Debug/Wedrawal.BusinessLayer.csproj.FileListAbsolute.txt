@@ -1,0 +1,7 @@
+C:\Users\Yuriy\Documents\Visual Studio 2010\Projects\WedrawalServer\Wedrawal.Server\Wedrawal.BusinessLayer\bin\Debug\Wedrawal.BusinessLayer.dll
+C:\Users\Yuriy\Documents\Visual Studio 2010\Projects\WedrawalServer\Wedrawal.Server\Wedrawal.BusinessLayer\bin\Debug\Wedrawal.BusinessLayer.pdb
+C:\Users\Yuriy\Documents\Visual Studio 2010\Projects\WedrawalServer\Wedrawal.Server\Wedrawal.BusinessLayer\bin\Debug\MongoDB.Bson.dll
+C:\Users\Yuriy\Documents\Visual Studio 2010\Projects\WedrawalServer\Wedrawal.Server\Wedrawal.BusinessLayer\bin\Debug\MongoDB.Driver.dll
+C:\Users\Yuriy\Documents\Visual Studio 2010\Projects\WedrawalServer\Wedrawal.Server\Wedrawal.BusinessLayer\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Yuriy\Documents\Visual Studio 2010\Projects\WedrawalServer\Wedrawal.Server\Wedrawal.BusinessLayer\obj\Debug\Wedrawal.BusinessLayer.dll
+C:\Users\Yuriy\Documents\Visual Studio 2010\Projects\WedrawalServer\Wedrawal.Server\Wedrawal.BusinessLayer\obj\Debug\Wedrawal.BusinessLayer.pdb

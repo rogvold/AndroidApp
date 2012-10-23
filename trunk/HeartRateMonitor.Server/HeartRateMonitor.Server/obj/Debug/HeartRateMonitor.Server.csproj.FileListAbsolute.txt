@@ -1,0 +1,13 @@
+C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.Server\bin\HeartRateMonitor.Server.dll
+C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.Server\bin\HeartRateMonitor.Server.pdb
+C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.Server\bin\EntityFramework.dll
+C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.Server\bin\HeartRateMonitor.BusinessLayer.dll
+C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.Server\bin\MongoDB.Driver.dll
+C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.Server\bin\HeartRateMonitor.BusinessLayer.pdb
+C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.Server\bin\EntityFramework.xml
+C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.Server\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.Server\obj\Debug\HeartRateMonitor.Server.Resource.resources
+C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.Server\obj\Debug\GenerateResource.read.1.tlog
+C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.Server\obj\Debug\GenerateResource.write.1.tlog
+C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.Server\obj\Debug\HeartRateMonitor.Server.dll
+C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.Server\obj\Debug\HeartRateMonitor.Server.pdb

@@ -1,0 +1,13 @@
+C:\Users\Yuriy\Documents\Visual Studio 2010\Projects\WedrawalServer\Wedrawal.Server\Wedrawal.Server\bin\Wedrawal.Server.dll
+C:\Users\Yuriy\Documents\Visual Studio 2010\Projects\WedrawalServer\Wedrawal.Server\Wedrawal.Server\bin\Wedrawal.Server.pdb
+C:\Users\Yuriy\Documents\Visual Studio 2010\Projects\WedrawalServer\Wedrawal.Server\Wedrawal.Server\bin\EntityFramework.dll
+C:\Users\Yuriy\Documents\Visual Studio 2010\Projects\WedrawalServer\Wedrawal.Server\Wedrawal.Server\bin\Wedrawal.BusinessLayer.dll
+C:\Users\Yuriy\Documents\Visual Studio 2010\Projects\WedrawalServer\Wedrawal.Server\Wedrawal.Server\bin\MongoDB.Driver.dll
+C:\Users\Yuriy\Documents\Visual Studio 2010\Projects\WedrawalServer\Wedrawal.Server\Wedrawal.Server\bin\Wedrawal.BusinessLayer.pdb
+C:\Users\Yuriy\Documents\Visual Studio 2010\Projects\WedrawalServer\Wedrawal.Server\Wedrawal.Server\bin\EntityFramework.xml
+C:\Users\Yuriy\Documents\Visual Studio 2010\Projects\WedrawalServer\Wedrawal.Server\Wedrawal.Server\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Yuriy\Documents\Visual Studio 2010\Projects\WedrawalServer\Wedrawal.Server\Wedrawal.Server\obj\Debug\Wedrawal.Server.Resource.resources
+C:\Users\Yuriy\Documents\Visual Studio 2010\Projects\WedrawalServer\Wedrawal.Server\Wedrawal.Server\obj\Debug\GenerateResource.read.1.tlog
+C:\Users\Yuriy\Documents\Visual Studio 2010\Projects\WedrawalServer\Wedrawal.Server\Wedrawal.Server\obj\Debug\GenerateResource.write.1.tlog
+C:\Users\Yuriy\Documents\Visual Studio 2010\Projects\WedrawalServer\Wedrawal.Server\Wedrawal.Server\obj\Debug\Wedrawal.Server.dll
+C:\Users\Yuriy\Documents\Visual Studio 2010\Projects\WedrawalServer\Wedrawal.Server\Wedrawal.Server\obj\Debug\Wedrawal.Server.pdb
