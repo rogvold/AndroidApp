@@ -11,3 +11,5 @@ C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateM
 C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.Server\obj\Debug\GenerateResource.write.1.tlog
 C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.Server\obj\Debug\HeartRateMonitor.Server.dll
 C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.Server\obj\Debug\HeartRateMonitor.Server.pdb
+C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.Server\bin\HeartRateMonitor.Math.exe
+C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.Server\bin\HeartRateMonitor.Math.pdb
