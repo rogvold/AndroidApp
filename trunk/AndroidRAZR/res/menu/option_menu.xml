@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/menu_conn_dev2"
+          android:title="@string/menu_conn_dev2" />
+                  
+    <item android:id="@+id/menu_exit"
+          android:title="@string/menu_exit" />
+                  
+</menu>
