@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent" android:layout_height="wrap_content"
+    android:orientation="vertical" android:background="#ff444444">
+    
+    <ImageView android:src="@drawable/dialog_divider_horizontal_light"
+        android:layout_width="fill_parent" android:layout_height="wrap_content"
+        android:visibility="visible" android:paddingBottom="10dip" android:paddingTop="10dip"/>
+        
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:visibility="visible" android:id="@+id/m_ll2">
+        <Button 
+        	android:shadowDx="0" android:layout_width="wrap_content" android:shadowDy="0" android:shadowRadius="2" android:textStyle="bold" android:layout_height="wrap_content" android:textColor="#ff00ff00" android:textAppearance="?android:attr/textAppearanceMedium" android:id="@+id/m_bt_dev2" android:shadowColor="#00000000" android:text="Moto BLE"></Button>
+        
+        <TextView  
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:paddingTop="3dip" android:paddingLeft="5dip" android:paddingRight="5dip" android:paddingBottom="3dip"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Motorola BLE HS:"
+        android:visibility="gone"/>
+        <TextView  
+            android:id="@+id/m_device2"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:paddingTop="3dip" android:paddingLeft="5dip" android:paddingRight="5dip" android:paddingBottom="3dip"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text=""
+        />
+    </LinearLayout>  
+    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" android:visibility="visible" android:id="@+id/m_tb2">
+
+      <TableRow android:layout_width="wrap_content" android:layout_height="wrap_content">
+        <TextView  
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:paddingTop="3dip" android:paddingLeft="5dip" android:paddingRight="5dip" android:paddingBottom="3dip"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="State:"
+        />
+        <TextView
+            android:id="@+id/m_state2"  
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:paddingTop="3dip" android:paddingLeft="5dip" android:paddingRight="5dip" android:paddingBottom="3dip"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textSize="10sp"
+            android:text="Not Connected"
+        android:visibility="visible"/>
+      </TableRow>
+      
+      <TableRow android:layout_width="wrap_content" android:layout_height="wrap_content">
+        <TextView  
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:paddingTop="3dip" android:paddingLeft="5dip" android:paddingRight="5dip" android:paddingBottom="3dip"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="HR:"
+        />
+        <TextView
+            android:id="@+id/m_hr2"  
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:paddingTop="3dip" android:paddingLeft="5dip" android:paddingRight="5dip" android:paddingBottom="3dip"
+            android:text="    bpm"
+        android:visibility="visible" android:textAppearance="?android:attr/textAppearanceLarge"/>
+      </TableRow>
+      <TableRow android:layout_width="wrap_content" android:layout_height="wrap_content">
+          <Button android:layout_height="wrap_content" android:shadowDy="0" android:layout_width="wrap_content" android:shadowDx="0" android:shadowRadius="2" android:shadowColor="#00000000" android:textColor="#ff00ff00" android:textAppearance="?android:attr/textAppearanceMedium" android:id="@+id/m_bt_senloc" android:text="Sensor Location"></Button>
+          <TextView android:paddingRight="5dip" android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceLarge" android:paddingLeft="5dip" android:paddingTop="3dip" android:layout_height="wrap_content" android:paddingBottom="3dip" android:text="Sensor Loc:" android:visibility="gone"></TextView>
+          <TextView android:paddingRight="5dip" android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceMedium" android:paddingLeft="5dip" android:paddingTop="3dip" android:layout_height="wrap_content" android:paddingBottom="3dip" android:text="  " android:id="@+id/m_tv_senloc"></TextView>
+      </TableRow>
+      <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+          <TextView android:text="Enable Indication" android:shadowDx="0" android:shadowDy="0" android:shadowRadius="2" android:textColor="#ff00ff00" android:textAppearance="?android:attr/textAppearanceMedium" android:layout_width="wrap_content" android:layout_height="wrap_content" android:shadowColor="#00000000" android:layout_centerVertical="true"></TextView>
+          <CheckBox android:layout_width="wrap_content" android:layout_alignParentRight="true" android:layout_height="wrap_content" android:id="@+id/m_cb_indi"></CheckBox>
+      </RelativeLayout>
+      <RelativeLayout android:layout_width="fill_parent" android:layout_height="wrap_content">
+          <TextView android:shadowRadius="2" android:shadowDy="0" android:layout_width="wrap_content" android:shadowDx="0" android:textColor="#ff00ff00" android:layout_centerVertical="true" android:shadowColor="#00000000" android:layout_height="wrap_content" android:textAppearance="?android:attr/textAppearanceMedium" android:text="Enable Notification"></TextView>
+          <CheckBox android:layout_width="wrap_content" android:layout_alignParentRight="true" android:layout_height="wrap_content" android:id="@+id/m_cb_noti"></CheckBox>
+      </RelativeLayout>
+    </TableLayout>
+    <TextView android:paddingRight="5dip" android:textAppearance="?android:attr/textAppearanceMedium" android:layout_height="wrap_content" android:paddingLeft="5dip" android:paddingTop="3dip" android:id="@+id/m_log" android:textColor="@color/subtitle_text" android:layout_width="fill_parent" android:background="@color/subtitle_background" android:paddingBottom="3dip" android:text="Log: ( Tap to resize log window )"></TextView>
+    <ListView android:visibility="visible" android:transcriptMode="alwaysScroll" android:layout_weight="1" android:layout_width="fill_parent" android:id="@+id/in" android:layout_height="fill_parent" android:stackFromBottom="true"></ListView>
+</LinearLayout>
