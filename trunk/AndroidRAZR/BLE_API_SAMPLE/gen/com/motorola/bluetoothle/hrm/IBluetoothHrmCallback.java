@@ -1,6 +1,6 @@
 /*
  * This file is auto-generated.  DO NOT MODIFY.
- * Original file: D:\\Android\\Motorola_BLE_API_sample\\src\\com\\motorola\\bluetoothle\\hrm\\IBluetoothHrmCallback.aidl
+ * Original file: D:\\Android\\workspace\\com.motorola.cp.hrm.BtBioActivity\\src\\com\\motorola\\bluetoothle\\hrm\\IBluetoothHrmCallback.aidl
  */
 package com.motorola.bluetoothle.hrm;
 /**

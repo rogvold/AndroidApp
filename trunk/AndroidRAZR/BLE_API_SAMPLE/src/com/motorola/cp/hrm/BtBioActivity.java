@@ -30,7 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package com.motorola.cp.hrm;
 
-import android.os.ParcelUuid;
+import android.os.ParcelUuid; 
 import java.util.Set;
 import java.util.regex.Pattern;
 
