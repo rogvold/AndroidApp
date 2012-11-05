@@ -133,23 +133,28 @@ public class BtBioActivity extends Activity  {
     
 	boolean leDisconn = true;
 
-    private Handler mUIUpdateHandler = new Handler(){
-		public void handleMessage(android.os.Message msg) {
+    private Handler mUIUpdateHandler = new Handler()
+    {
+		public void handleMessage(android.os.Message msg) 
+		{
 			updateUI();
 		};
     };
  
     IBluetoothHrm mHrmService = null;
-    ServiceConnection mConnection = new ServiceConnection() {
+    ServiceConnection mConnection = new ServiceConnection() 
+    {
 
     	public void onServiceConnected(ComponentName className,
-    			IBinder service) {
+    			IBinder service) 
+    	{
     		mHrmService = IBluetoothHrm.Stub.asInterface(service);
     		mBLEBound = true;
     		mLogArrayAdapter.add("IBluetoothHrm service binded");
     	}
 
-    	public void onServiceDisconnected(ComponentName arg0) {
+    	public void onServiceDisconnected(ComponentName arg0) 
+    	{
     		mHrmService = null;
     		mBLEBound = false;    	
     		mLogArrayAdapter.add("IBluetoothHrm service un-binded");
@@ -158,36 +163,39 @@ public class BtBioActivity extends Activity  {
 
     
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) 
+    {
     	super.onCreate(savedInstanceState);
     	mContext = this.getApplicationContext();
         /* Check if Bluetooth Low Energy is supported on phone */
         try 
         {
-        Class<?> object = Class.forName(className); 
-        ifPhoneSupportsLE = true;
-
-        } catch (Exception e) {
-        ifPhoneSupportsLE = false;
+	        Class<?> object = Class.forName(className); 
+	        ifPhoneSupportsLE = true;
+        } catch (Exception e) 
+        {
+        	ifPhoneSupportsLE = false;
         } //End logic to check Low Energy support
         
-      if (!ifPhoneSupportsLE) {
-        	
-        	String message = "Bluetooth Low Energy is not supported on this phone !";
+      if (!ifPhoneSupportsLE) 
+      {	
+        	String message = "Bluetooth Low Energy is not supported on this phone!";
             Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show(); 
             finish();
             return;
-        } else {
-        
-         data[0] = 0x00;
+      } 
+      else 
+      {
+        data[0] = 0x00;
 		data[1] = 0x00;
-        
+		
         // Set up the window layout
         setContentView(R.layout.main);
- 
+        
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (mBluetoothAdapter == null) {
+        if (mBluetoothAdapter == null) 
+        {
             Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
             finish();
             return;
@@ -208,15 +216,19 @@ public class BtBioActivity extends Activity  {
 		hrmUUID = HRM.toString();
         
 		
-        findViewById(R.id.m_log).setOnClickListener(new OnClickListener() {
-            public void onClick(View v) {
-            	if(log_clicked ==false){
-
+        findViewById(R.id.m_log).setOnClickListener(new OnClickListener() 
+        {
+            public void onClick(View v) 
+            {
+            	if(log_clicked ==false)
+            	{
             		findViewById(R.id.m_ll2).setVisibility( View.GONE );
             		findViewById(R.id.m_tb2).setVisibility( View.GONE );
 
             		log_clicked = true;
-            	}else{
+            	}
+            	else
+            	{
 
             		findViewById(R.id.m_ll2).setVisibility( View.VISIBLE );
             		findViewById(R.id.m_tb2).setVisibility( View.VISIBLE );
@@ -226,21 +238,32 @@ public class BtBioActivity extends Activity  {
         });
 
         mCbIndi = (CheckBox) findViewById(R.id.m_cb_indi);
-        mCbIndi.setOnClickListener(new OnClickListener() {
-        	public void onClick(View v) {
+        mCbIndi.setOnClickListener(new OnClickListener() 
+        {
+        	public void onClick(View v) 
+        	{
         		Log.i(TAG, "mBtIndi");
-        		if(mCbIndi.isChecked()){
-        			try {
+        		if(mCbIndi.isChecked())
+        		{
+        			try 
+        			{
                 		Log.i(TAG, "mBtIndi set to be enabled");
         				mHrmService.setLeData(device1, hrmUUID,BluetoothGatt.OPERATION_ENABLE_INDICATION, data, 2);
-        			} catch (RemoteException e) {
+        			} 
+        			catch (RemoteException e) 
+        			{
         				Log.e(TAG, "mBtIndi", e);
         			}
-        		}else{
-        			try {
+        		}
+        		else
+        		{
+        			try 
+        			{
                 		Log.i(TAG, "mBtIndi set to be disabled");
         				mHrmService.setLeData(device1, hrmUUID, BluetoothGatt.OPERATION_DISABLE_INDICATION, data, 2);
-        			} catch (RemoteException e) {
+        			} 
+        			catch (RemoteException e) 
+        			{
         				Log.e(TAG, "mBtIndi", e);
         			}                    
         		}
@@ -248,27 +271,37 @@ public class BtBioActivity extends Activity  {
         });
         
         mCbNoti = (CheckBox) findViewById(R.id.m_cb_noti);
-        mCbNoti.setOnClickListener(new OnClickListener() {
-        	public void onClick(View v) {
+        mCbNoti.setOnClickListener(new OnClickListener() 
+        {
+        	public void onClick(View v) 
+        	{
         		Log.i(TAG, "mBtNoti");
-        		if(mCbNoti.isChecked()){
+        		if(mCbNoti.isChecked())
+        		{
         			mLogArrayAdapter.add("notification enabled");
         			
-        			try {
+        			try 
+        			{
         				Log.i(TAG, "mBtNoti set to be enabled");
         				mHrmService.setLeData(device1, hrmUUID,BluetoothGatt.OPERATION_ENABLE_NOTIFICATION, data, 2);
-        			} catch (RemoteException e) {
+        			} 
+        			catch (RemoteException e) 
+        			{
         				Log.e(TAG, "mBtNoti", e);
         			}
         			
-        		}else{
+        		}
+        		else
+        		{
         			mLogArrayAdapter.add("notification disabled");
 
         			
         			try {
         				Log.i(TAG, "mBtNoti set to be disabled");
         				mHrmService.setLeData(device1, hrmUUID,BluetoothGatt.OPERATION_DISABLE_NOTIFICATION, data, 2);
-        			} catch (RemoteException e) {
+        				}
+        			catch (RemoteException e) 
+        			{
         				Log.e(TAG, "mBtNoti", e);
         			}
 
@@ -276,13 +309,17 @@ public class BtBioActivity extends Activity  {
         	}
         });
         
-        mBtSenLoc.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View view) {
+        mBtSenLoc.setOnClickListener(new View.OnClickListener() 
+        {
+            public void onClick(View view) 
+            {
                 Log.i(TAG, "read sensor location");
 
-                try {
+                try 
+                {
                 	mHrmService.getLeData(device1, hrmUUID,	BluetoothGatt.OPERATION_READ_SENSOR_LOCATION);
-                } catch (RemoteException e) {
+                } catch (RemoteException e) 
+                {
                     Log.e(TAG, "pull sensor location ", e);
                 }
 
@@ -298,69 +335,80 @@ public class BtBioActivity extends Activity  {
  	   registerReceiver(mConn_Receiver, filter_scan);  
  	   flag_leRcvrReg = true;
  	   
-      Intent intent1 = new Intent(IBluetoothHrm.class.getName());
-      getApplicationContext().bindService(intent1, mConnection, Context.BIND_AUTO_CREATE);
-		mLogArrayAdapter.add("Request IBluetoothHrm service binding...");
-		Log.d(TAG, "Request IBluetoothHrm service binding...");
+ 	   Intent intent1 = new Intent(IBluetoothHrm.class.getName());
+ 	   getApplicationContext().bindService(intent1, mConnection, Context.BIND_AUTO_CREATE);
+ 	   mLogArrayAdapter.add("Request IBluetoothHrm service binding...");
+ 	   Log.d(TAG, "Request IBluetoothHrm service binding...");
 
-      Intent intent2 = new Intent(BluetoothGatt.ACTION_START_LE);
-      intent2.putExtra(BluetoothGatt.EXTRA_PRIMARY_UUID,hrmUUID);//HRM service UUID
-      sendBroadcast(intent2);
+ 	   Intent intent2 = new Intent(BluetoothGatt.ACTION_START_LE);
+ 	   intent2.putExtra(BluetoothGatt.EXTRA_PRIMARY_UUID,hrmUUID);//HRM service UUID
+ 	   sendBroadcast(intent2);
       
-      callback1 = new callback(hrmUUID);
-      mContext = this.getApplicationContext(); 
+ 	   callback1 = new callback(hrmUUID);
+ 	   mContext = this.getApplicationContext(); 
     }
    }
 
     
     @Override
-    protected void onStart() {
+    protected void onStart() 
+    {
         super.onStart();
         if (DEBUG) Log.i(TAG, "onStart()");
         
-        if (!mBluetoothAdapter.isEnabled()) {
+        if (!mBluetoothAdapter.isEnabled()) 
+        {
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
-        } else {
+        } 
+        else 
+        {
             // TODO: Set up BT HR Monitor
         }        
     }
     
     @Override
-    protected void onResume() {
+    protected void onResume() 
+    {
         super.onResume();
         if (DEBUG) Log.i(TAG, "onResume()");
-     
         // TODO: If BT HR Monitor is setup but not started, then start it.
     }
     
     @Override
-    protected void onPause() {
+    protected void onPause() 
+    {
     	
         super.onPause();
         if (DEBUG) Log.i(TAG, "onPause()");
     }
     
     @Override
-    protected void onStop() {
-    	
+    protected void onStop() 
+    {	
         super.onStop();
         if (DEBUG) Log.i(TAG, "onStop()");
     }
     
     @Override
-    protected void onDestroy() {
+    protected void onDestroy() 
+    {
         super.onDestroy();
         if (DEBUG) Log.i(TAG, "onDestroy()");
     	
         if(!leDisconn){
-        	if(mLeState == CONNECTED){
-        		if (device1 != null) {
+        	if(mLeState == CONNECTED)
+        	{
+        		if (device1 != null) 
+        		{
         			mLeState = DISCONNECTING;
         			Log.i(TAG, "disconnecting LE");
-        			try {
+        			try 
+        			{
         				mHrmService.disconnectLe(device1, hrmUUID);
-        			} catch (RemoteException e) {
+        			} 
+        			catch (RemoteException e) 
+        			{
         				Log.e(TAG, "", e);
         				mLeState = DISCONNECTED;
         			}
@@ -384,25 +432,23 @@ public class BtBioActivity extends Activity  {
     	if(mHrmService != null)mHrmService = null;
     }
     
-
-    
-    
-    
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) 
+    {
         if (DEBUG) Log.i(TAG, "onActivityResult() code: " + resultCode);
-        
-        switch (requestCode) {
-
-        case REQUEST_ENABLE_BT :
-            if (resultCode == Activity.RESULT_OK) {
-               // TODO: Set up BT HR Monitor
-            }
-            else {
-                Log.e(TAG, "onActivityResult(): BT not enabled");
-                Toast.makeText(this, R.string.bt_not_enabled_leaving, Toast.LENGTH_SHORT).show();
-                finish();
-            }
-            break;
+        switch (requestCode) 
+        {
+	        case REQUEST_ENABLE_BT :
+	            if (resultCode == Activity.RESULT_OK) 
+	            {
+	               // TODO: Set up BT HR Monitor
+	            }
+	            else 
+	            {
+	                Log.e(TAG, "onActivityResult(): BT not enabled");
+	                Toast.makeText(this, R.string.bt_not_enabled_leaving, Toast.LENGTH_SHORT).show();
+	                finish();
+	            }
+	            break;
         }
     }
     
@@ -428,10 +474,12 @@ public class BtBioActivity extends Activity  {
 			   	     if (device1 != null) {
 			   	    	 mLeState = DISCONNECTING;
 			                Log.i(TAG, "disconnecting LE");
-			                try {
-			              	 mHrmService.disconnectLe(device1, hrmUUID);			     
-			                } catch (RemoteException e) {
-			                    
+			                try 
+			                {
+			                	mHrmService.disconnectLe(device1, hrmUUID);			     
+			                } 
+			                catch (RemoteException e) 
+			                {
 			                    mLeState = DISCONNECTED;
 			                }
 			   	     }
@@ -441,41 +489,45 @@ public class BtBioActivity extends Activity  {
 			}
 			finish();			
 			return true;
-						
         }
         return false;
     }
  
 	
 
-    private void showPairedDeviceSelectDialog() {
+    private void showPairedDeviceSelectDialog() 
+    {
     	
-    	   OnItemClickListener mPairedListClickListener = new OnItemClickListener() {
-               public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
+    	   OnItemClickListener mPairedListClickListener = new OnItemClickListener() 
+    	   {
+               public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) 
+               {
 //       			audioAlert();
-
-                	mBluetoothAdapter.cancelDiscovery();
-
+            	   mBluetoothAdapter.cancelDiscovery();
+            	   //String devName = mPairedDevicesArrayAdapter.getItem(0);
+            	   
                    String info = ((TextView) v).getText().toString();
                    Log.d("BTBioActivity", "the total length is " + info.length() );
-                 //  String deviceAddress = info.substring(info.length() - 19);
-                   String deviceAddress = "00:24:1C:A2:6F:DA";
+                   
+                   //String deviceAddress = info.substring(info.length() - 19);
+                   String deviceAddress = getDeviceAddressFromDeviceInfo(info);
                    
                    device1 = mBluetoothAdapter.getRemoteDevice(deviceAddress);
                    
-                  // mLogArrayAdapter.add("device1 is "+device1.toString()+ " " + device1.getName().toString()+" "+device1.getAddress().toString());
+                   //mLogArrayAdapter.add("device1 is "+device1.toString()+ " " + device1.getName().toString()+" "+device1.getAddress().toString());
 
                    if(device1!=null){
                        
                 	   ((DialogInterface) mDialog).cancel();
 
-                	 //  mLogArrayAdapter.add("device: "+device1);
+                	   mLogArrayAdapter.add("device: "+device1);
                                	   
                 	   mTvDevice2.setText(device1.getName().toString() );
                 	
                 	   try {
                 	
                 	       //int status = mHrmService.connectLe(device1, hrmUUID,  callback1);
+                		   
                 		   int status = mHrmService.connectLe(device1, "0000180d00001000800000805f9b34fb", callback1);
                 		   if (status == BluetoothGatt.SUCCESS){
                 			   mLogArrayAdapter.add("connectLe sent out succesfully.");
@@ -490,7 +542,11 @@ public class BtBioActivity extends Activity  {
                 	   }
                    }
  
-               }       
+               }
+
+			private String getDeviceAddressFromDeviceInfo(String info) {
+				return info.split("\n")[1];
+			}       
            };
     	
     	
@@ -553,36 +609,42 @@ public class BtBioActivity extends Activity  {
     
     private class callback extends IBluetoothHrmCallback.Stub {
     	private String service;
-        callback(String serv) {
+        callback(String serv) 
+        {
         	 service = serv;
-
         }
 
-        public void indicationLeCb(BluetoothDevice device, String service, int length, byte[] data) {
+        public void indicationLeCb(BluetoothDevice device, String service, int length, byte[] data) 
+        {
         	Log.i(TAG,"indicationLeCb" );
         	parseData(length , data);
-       }
+        }
 
         public void notificationLeCb(BluetoothDevice device, String service, int length,
-        		byte[] data) {
+        		byte[] data) 
+        {
         	Log.i(TAG,"notificationLeCb" );
         	parseData(length , data);
         }
     }
     
-    private final BroadcastReceiver mConn_Receiver = new BroadcastReceiver() {
+    private final BroadcastReceiver mConn_Receiver = new BroadcastReceiver() 
+    {
 
 		@Override
-		public void onReceive(Context context, Intent intent) {
+		public void onReceive(Context context, Intent intent) 
+		{
 			// TODO Auto-generated method stub
 			String action = intent.getAction();
 			mLogArrayAdapter.add("some broadcast, action is: "+action);
-			if (BluetoothGatt.CONNECT_COMPLETE.equals(action)) {
+			if (BluetoothGatt.CONNECT_COMPLETE.equals(action)) 
+			{
 				mLogArrayAdapter.add("LE connection complete - ");
 
 				int status = intent.getIntExtra("status", BluetoothGatt.FAILURE);
 				String service = intent.getStringExtra("uuid");// Todo
-				if (status == BluetoothGatt.SUCCESS ) {
+				if (status == BluetoothGatt.SUCCESS) 
+				{
 					mLogArrayAdapter.add("Connected successfully ! Service: "+service);	
 					
 					mTvState2.setText("  Connected  ");
@@ -591,73 +653,87 @@ public class BtBioActivity extends Activity  {
 
 					mLeState = CONNECTED;
 							                
-				} else if (status != BluetoothGatt.SUCCESS ) {	                    
-					mLogArrayAdapter.add("Connection failed. Service: "+service);
-					
-					mTvState2.setText("  Not Connected  ");
-					mLeState = DISCONNECTED;
-				}
+				} 
+				else if (status != BluetoothGatt.SUCCESS) 
+					 {	                    
+					 	mLogArrayAdapter.add("Connection failed. Service: "+service);
+						
+						mTvState2.setText("  Not Connected  ");
+						mLeState = DISCONNECTED;
+					 }
 			}
-			else if (action.equals(BluetoothGatt.DISCONNECT_COMPLETE)) {
-                int status = intent.getIntExtra("status", BluetoothGatt.FAILURE);
-                intent.getStringExtra("uuid");
-                if (status == BluetoothGatt.SUCCESS ) {
-                    mLeState = DISCONNECTED;
-                    device1 = null;
-					mTvState2.setText("  Not Connected  ");
-                } else if (status != BluetoothGatt.SUCCESS ) {
-                	mLeState = DISCONNECTED;
-                    device1 = null;
-					mTvState2.setText("  Not Connected  ");
-                }
-
-            }
+			else if (action.equals(BluetoothGatt.DISCONNECT_COMPLETE)) 
+				{
+	             	int status = intent.getIntExtra("status", BluetoothGatt.FAILURE);
+	                intent.getStringExtra("uuid");
+	                if (status == BluetoothGatt.SUCCESS) 
+	                {
+	                    mLeState = DISCONNECTED;
+	                    device1 = null;
+						mTvState2.setText("  Not Connected  ");
+	                } 
+	                else if (status != BluetoothGatt.SUCCESS) 
+		                {
+		                	mLeState = DISCONNECTED;
+		                    device1 = null;
+							mTvState2.setText("  Not Connected  ");
+		                }
+	
+				}
+				else if ((BluetoothGatt.GET_COMPLETE).equals(action)) 
+					{
+		                int status = intent.getIntExtra("status", BluetoothGatt.FAILURE);
+		                String service = intent.getStringExtra("uuid");// Todo
+		                int length = intent.getIntExtra("length", 0);
+		                if(status == BluetoothGatt.SUCCESS)
+		                {
+		                	if ((length >= 0) && service.equalsIgnoreCase(hrmUUID)) 
+		                	{
+		                		byte[] data = new byte[length];
+		                		data = intent.getByteArrayExtra("data");
+		                		mSensorLocation = data[0];
+		                		Log.v(TAG, "onReceive GET_COMPLETE data first byte " + data[0]);
+		                		
+		                		mLogArrayAdapter.add("Sensor Location returned by GET_COMPLETE: "+getStringSensorLocation(mSensorLocation));
+		                		mUIUpdateHandler.sendEmptyMessage(0);
+		
+		                		updateUI();                	
+		            		}
+		                }
+		                else
+		                {
+		        			Toast.makeText(mContext, "Sensor query failed! ", Toast.LENGTH_LONG).show();
+		                }
+		            }
+					else if (action.equals(BluetoothGatt.SET_COMPLETE)) 
+						{
+							mLogArrayAdapter.add("SET COMPLETE received, action is: "+action);
+			        		Log.e(TAG, "SET COMPLETE received: " + action);
 			
-			else if ((BluetoothGatt.GET_COMPLETE).equals(action)) {
-                int status = intent.getIntExtra("status", BluetoothGatt.FAILURE);
-                String service = intent.getStringExtra("uuid");// Todo
-                int length = intent.getIntExtra("length", 0);
-                if(status == BluetoothGatt.SUCCESS ){
-                	if ((length >= 0) && service.equalsIgnoreCase(hrmUUID)) {
-                		byte[] data = new byte[length];
-                		data = intent.getByteArrayExtra("data");
-                		mSensorLocation = data[0];
-                		Log.v(TAG, "onReceive GET_COMPLETE data first byte " + data[0]);
-                		
-                		mLogArrayAdapter.add("Sensor Location returned by GET_COMPLETE: "+getStringSensorLocation(mSensorLocation));
-                		mUIUpdateHandler.sendEmptyMessage(0);
-
-//                		updateUI();                	
-                		}
-                }else{
-        			Toast.makeText(mContext, "Sensor query failed! ", Toast.LENGTH_LONG).show();
-                }
-            }
-			else if (action.equals(BluetoothGatt.SET_COMPLETE)) {
-				mLogArrayAdapter.add("SET COMPLETE received, action is: "+action);
-        		Log.e(TAG, "SET COMPLETE received: " + action);
-
-                int status = intent.getIntExtra("status", BluetoothGatt.FAILURE);
-                String service = intent.getStringExtra("uuid");// Todo
-                if (status == BluetoothGatt.SUCCESS && service.equalsIgnoreCase(hrmUUID)) {
-                }else if(status != BluetoothGatt.SUCCESS && service.equalsIgnoreCase(hrmUUID)){
-        			Toast.makeText(mContext, "Notification enabling failed! ", Toast.LENGTH_LONG).show();
-                } 
-            }
-			
+			                int status = intent.getIntExtra("status", BluetoothGatt.FAILURE);
+			                String service = intent.getStringExtra("uuid");// Todo
+			                if (status == BluetoothGatt.SUCCESS && service.equalsIgnoreCase(hrmUUID)) 
+			                {
+			                }
+			                else if(status != BluetoothGatt.SUCCESS && service.equalsIgnoreCase(hrmUUID))
+				                {
+				        			Toast.makeText(mContext, "Notification enabling failed! ", Toast.LENGTH_LONG).show();
+				                } 
+			            }
 		}
-
 	};
 	
-	
-	private void parseData(int length , byte[] data){
+	private void parseData(int length , byte[] data)
+	{
 		mHeartBeatsPerMinute = 0;
-		if (data[1] != 0) {
+		if (data[1] != 0) 
+		{
 			mHeartBeatsPerMinute = ((data[0] & 0xFF) << 8) + (data[1] & 0xFF);
-		} else {
+		} 
+		else 
+		{
 			mHeartBeatsPerMinute = data[0] & 0xFF;
 		}
-
 		//correct the raw data from LE call back that if>128, it becomes negative
 		mHeartBeatsPerMinute = (data[0] < 0) ? (128+(128+mHeartBeatsPerMinute)):(mHeartBeatsPerMinute);
 
@@ -665,24 +741,25 @@ public class BtBioActivity extends Activity  {
 		mEnergyExpended |= ((data[3] & 0xFF)<<8);
 
 		mUIUpdateHandler.sendEmptyMessage(0);
-
 	}
-
 	
-	private void updateUI(){
+	private void updateUI()
+	{
 		Log.v(TAG, "updateUI parse han");
-		if(mHeartBeatsPerMinute!= previous_mHeartBeatsPerMinute){
+		if(mHeartBeatsPerMinute!= previous_mHeartBeatsPerMinute)
+		{
 			Log.d(TAG, mHeartBeatsPerMinute + " bpm");
 			mTvHR2.setText( " "+mHeartBeatsPerMinute + " bpm");
 			previous_mHeartBeatsPerMinute = mHeartBeatsPerMinute;
 		}
-
 			mTvSenLoc.setText(getStringSensorLocation(mSensorLocation));
 	}
 	
-	public String getStringSensorLocation(int intLocation){
+	public String getStringSensorLocation(int intLocation)
+	{
 		String strLocation = null;
-		switch(intLocation){
+		switch(intLocation)
+		{
 			case 0:
 				strLocation = "Other";
 				break;
@@ -709,10 +786,8 @@ public class BtBioActivity extends Activity  {
 			default:
 				strLocation = "Unknown";
 				break;
-			}
+		}
 		Log.v(TAG,"getStringSensorLocation" + strLocation);
 		return strLocation;
-
 	}
-
 }
