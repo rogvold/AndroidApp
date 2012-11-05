@@ -3,12 +3,35 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+    <ListView
+        android:id="@+id/bondedDevicesList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/textView1"
+        android:layout_marginTop="142dp"
+        android:clickable="true"
+        android:visibility="visible" >
+
+    </ListView>
+
     <TextView
+        android:id="@+id/bpmTv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:text="@string/hello_world"
-        tools:context=".HrmActivity" />
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="117dp"
+        android:layout_marginTop="54dp"
+        android:text="0 bpm" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:text="uuid: " />
 
 </RelativeLayout>
