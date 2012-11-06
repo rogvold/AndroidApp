@@ -1,6 +1,7 @@
 package org.macondo.polar.evaluation;
 
 import org.macondo.polar.data.Training;
+import org.macondo.polar.evaluation.statistics.Average;
 
 import java.util.List;
 import java.util.LinkedList;

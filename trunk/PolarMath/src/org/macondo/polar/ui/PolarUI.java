@@ -5,6 +5,9 @@ import org.macondo.polar.data.Training;
 import org.macondo.polar.evaluation.*;
 import org.macondo.polar.evaluation.geometry.EvaluateBasicHistogram;
 import org.macondo.polar.evaluation.geometry.EvaluateAdvancedHistogram;
+import org.macondo.polar.evaluation.statistics.Average;
+import org.macondo.polar.evaluation.statistics.SDNN;
+import org.macondo.polar.evaluation.time.PNN50;
 
 import java.util.List;
 import java.util.Arrays;

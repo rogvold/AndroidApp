@@ -1,6 +1,8 @@
 package org.macondo.polar.evaluation;
 
 import org.macondo.polar.data.Training;
+import org.macondo.polar.evaluation.statistics.Average;
+import org.macondo.polar.evaluation.statistics.SDNN;
 
 /**
  * <p></p>

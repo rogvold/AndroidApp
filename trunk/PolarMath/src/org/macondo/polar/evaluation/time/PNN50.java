@@ -1,6 +1,7 @@
-package org.macondo.polar.evaluation;
+package org.macondo.polar.evaluation.time;
 
 import org.macondo.polar.data.Training;
+import org.macondo.polar.evaluation.Evaluation;
 
 import java.util.List;
 
