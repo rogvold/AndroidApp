@@ -6,8 +6,11 @@ import org.macondo.polar.evaluation.Evaluation;
 public class IN implements Evaluation<Double> {
 	
 	public Double evaluate(Training training) {
-		// TODO: implement
-		return null;
+		double bp = new BP().evaluate(training);
+		double amo = new AMoPercents().evaluate(training);
+		double mo = new Mo().evaluate(training);
+		
+		return amo / (2 * bp * mo);
 	}
 
 }
