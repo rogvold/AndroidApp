@@ -1,6 +1,6 @@
 /*
  * This file is auto-generated.  DO NOT MODIFY.
- * Original file: D:\\Android\\workspace\\RazrHrmApp\\src\\com\\motorola\\bluetoothle\\hrm\\IBluetoothHrmCallback.aidl
+ * Original file: /Users/yuriy/Documents/Work/Eclipse_Projects/RazrHrmApp/src/com/motorola/bluetoothle/hrm/IBluetoothHrmCallback.aidl
  */
 package com.motorola.bluetoothle.hrm;
 /**
