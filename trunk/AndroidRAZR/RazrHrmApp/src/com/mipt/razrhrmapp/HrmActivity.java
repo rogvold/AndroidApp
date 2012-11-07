@@ -1,14 +1,19 @@
 package com.mipt.razrhrmapp;
 
-import com.motorola.bluetoothle.BluetoothGatt;
-import com.motorola.bluetoothle.hrm.IBluetoothHrm;
-import com.motorola.bluetoothle.hrm.IBluetoothHrmCallback;
+import java.sql.Date;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Queue;
 
-import android.os.Bundle;
-import android.os.Handler;
-import android.os.IBinder;
-import android.os.ParcelUuid;
-import android.os.RemoteException;
+import org.json.*;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -18,16 +23,36 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.text.InputFilter.LengthFilter;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.ParcelUuid;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.*;
+import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.motorola.bluetoothle.BluetoothGatt;
+import com.motorola.bluetoothle.hrm.IBluetoothHrm;
+import com.motorola.bluetoothle.hrm.IBluetoothHrmCallback;
 
 public class HrmActivity extends Activity {
 
+	//Debugging
+	private static final boolean DEBUG = true;
+	private static final String  TAG = "HrmActivity";
+	
+	// Bluetooth Intent request codes
+    private static final int REQUEST_ENABLE_BT = 2;
+	
     private Context mContext;
 	private boolean ifPhoneSupportsBLE;
 	private int[] data;
@@ -55,13 +80,19 @@ public class HrmActivity extends Activity {
 	private ListView bondedDevicesList;
 	private Button connectButton;
 	private TextView bpmTv;
-	private ArrayAdapter mBondedDevicesListAdapter;
+	private ArrayAdapter<String> mBondedDevicesListAdapter;
+	private TextView connectedTv;
+	private TextView uuidTv;
 	
 	private boolean deviceConnected = false;
 	
 	private int mHeartBeatsPerMinute;
 	private int mEnergyExpended;
 	private int previous_mHeartBeatsPerMinute;
+	
+	//For sending requests to server
+	private Queue<Integer> RrIntervals;
+	private boolean isNewSession = true;
 	
 	IBluetoothHrm mHrmService = null;
     ServiceConnection mConnection = new ServiceConnection() 
@@ -101,6 +132,19 @@ public class HrmActivity extends Activity {
 		}
 		//mTvSenLoc.setText(getStringSensorLocation(mSensorLocation));
 	}
+    
+    public boolean resetBasics()
+    {
+    	try
+    	{
+    		RrIntervals = new LinkedList();
+    		return true;
+    	}
+    	catch (Exception e)
+    	{
+    		return false;
+    	}
+    }
 
 	@Override
     public void onCreate(Bundle savedInstanceState) 
@@ -124,7 +168,7 @@ public class HrmActivity extends Activity {
         	finish();
         	return;
         } 
-        else 
+        else
         {
         	//data[0] = 0x00;
   			//data[1] = 0x00;
@@ -137,13 +181,39 @@ public class HrmActivity extends Activity {
   			bondedDevicesList = (ListView)findViewById(R.id.bondedDevicesList);
   			bondedDevicesList.setAdapter(mBondedDevicesListAdapter);
   			bpmTv = (TextView)findViewById(R.id.bpmTv);
+  			connectedTv = (TextView)findViewById(R.id.connectedTv);
+  			uuidTv = (TextView)findViewById(R.id.uuidTv);
+  			
   			bondedDevicesList.setOnItemClickListener(new OnItemClickListener()
   			{
   				public void onItemClick(AdapterView<?> parent, View v, int pos, long id)
   				{
   					if (deviceConnected)
   					{
-  						//TODO disconnect device
+  						if (mBleDevice != null)
+  						{
+  							try 
+  							{
+  								Log.d("OnItemClick", "disconnecting device...");
+  								int status = mHrmService.disconnectLe(mBleDevice, "0000180d00001000800000805f9b34fb");
+  								if (status == BluetoothGatt.SUCCESS)
+  								{
+									Log.i("OnDisconnect", "disconnectLe sent out succesfully.");
+									mBleState = DISCONNECTING;
+									mHeartBeatsPerMinute = 0;
+				                    connectedTv.setText("HRM is not connected");
+									uuidTv.setText("uuid : null");
+									mUIUpdateHandler.sendEmptyMessage(0);
+  								}
+  								else
+  								{
+									Log.e("onDisconnect", "DisconnectLe sent out but failed");
+								}
+  							} catch (RemoteException e) {
+  								// TODO Auto-generated catch block
+  								Log.e("OnConnect", e.getMessage());
+  							}
+						}
   					}
   					else
   					{
@@ -153,11 +223,11 @@ public class HrmActivity extends Activity {
   						String deviceAddress = getDeviceAddressFromDeviceInfo(info);
   						
   						mBleDevice = mBluetoothAdapter.getRemoteDevice(deviceAddress);
-  						
-  						if (mBleDevice != null)
+  						if (mBleDevice != null &&  resetBasics())
   						{
   							try 
   							{
+  								Log.d("OnItemClick", "connecting device...");
   								int status = mHrmService.connectLe(mBleDevice, "0000180d00001000800000805f9b34fb", mIndNotCallback);
   								if (status == BluetoothGatt.SUCCESS)
   								{
@@ -248,9 +318,11 @@ public class HrmActivity extends Activity {
 						BleDisconn = false;
 						mBleState = CONNECTED;
 						deviceConnected = true;
+						connectedTv.setText("CONNECTED");
+						uuidTv.setText("uuid : " + service);
 						break;
 					default : 
-						Log.i("onReceive", "Connection failed. Service: "+service);
+						Log.e("onReceive", "Connection failed. Service: "+service);
 						mBleState = DISCONNECTED;
 						break;
 				}
@@ -265,10 +337,13 @@ public class HrmActivity extends Activity {
 					case BluetoothGatt.SUCCESS :
 						mBleState = DISCONNECTED;
 	                    mBleDevice = null;
+	                    deviceConnected = false;
+	                    connectedTv.setText("HRM is not connected");
+						uuidTv.setText("uuid : null");
 						break;
 					default : 
-						mBleState = DISCONNECTED;
-	                    mBleDevice = null;
+						//mBleState = CONNECTED;
+	                    //mBleDevice = null;
 	                    break;
 				}
 			}//endif disconnect_complete
@@ -291,7 +366,7 @@ public class HrmActivity extends Activity {
 	                		//Log.i("onReceive", "Sensor Location returned by GET_COMPLETE: "+getStringSensorLocation(mSensorLocation));
 	                		mUIUpdateHandler.sendEmptyMessage(0);
 
-	                		updateUI();                	
+	                		//updateUI();                	
 	            		}
 						break;
 					default : 
@@ -303,7 +378,6 @@ public class HrmActivity extends Activity {
 			if (action.equals(BluetoothGatt.SET_COMPLETE)) 
 			{
 				Log.i("onReceive", "SET COMPLETE received, action is: "+action);
-        		Log.e("SET COMPLETE", "SET COMPLETE received: " + action);
 
                 int status = intent.getIntExtra("status", BluetoothGatt.FAILURE);
                 String service = intent.getStringExtra("uuid");// Todo
@@ -354,7 +428,134 @@ public class HrmActivity extends Activity {
 
 		mEnergyExpended |= data[2] & 0xFF;
 		mEnergyExpended |= ((data[3] & 0xFF)<<8);
-
+		int i = 4;
+		while (i < data.length)
+		{
+			RrIntervals.add(((data[i] & 0xFF) + ((data[i + 1] & 0xFF) << 8)) * 1000 / 1024);
+			if (RrIntervals.size() == 10)
+				makeNewJson();
+			i += 2;
+		}
 		mUIUpdateHandler.sendEmptyMessage(0);
 	}
+	
+	private void makeNewJson() 
+	{
+		// TODO Auto-generated method stub
+		JSONObject msg = new JSONObject();
+		try 
+		{
+			///HARDCODE: user_id, device_id, device_name
+			Integer[] a = new Integer[10];
+			for (int i = 0; i < 10; i++)
+				a[i] = RrIntervals.poll();
+			msg.put("device_name", "Polar H7");
+			msg.put("rates", Arrays.asList(a));
+			msg.put("id", "201");
+			if (isNewSession)
+				msg.put("create", "1");
+			else 
+				msg.put("create", "0");
+			msg.put("password", "m2d3_vO");
+			msg.put("device_id", "456");
+			String dt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS").format(Calendar.getInstance().getTime());
+			msg.put("start", dt);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+    protected void onStart() 
+    {
+        super.onStart();
+        if (DEBUG) Log.i(TAG, "onStart()");
+        
+        if (!mBluetoothAdapter.isEnabled()) 
+        {
+            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
+        } 
+        else 
+        {
+            // TODO: Set up BT HR Monitor
+        }        
+    }
+    
+    @Override
+    protected void onResume() 
+    {
+        super.onResume();
+        if (DEBUG) Log.i(TAG, "onResume()");
+        // TODO: If BT HR Monitor is setup but not started, then start it.
+    }
+    
+    @Override
+    protected void onPause() 
+    {
+    	
+        super.onPause();
+        if (DEBUG) Log.i(TAG, "onPause()");
+    }
+    
+    @Override
+    protected void onStop() 
+    {	
+        super.onStop();
+        if (DEBUG) Log.i(TAG, "onStop()");
+    }
+    
+    @Override
+    protected void onDestroy() 
+    {
+        super.onDestroy();
+        if (DEBUG) Log.i(TAG, "onDestroy()");
+    	
+        if(!BleDisconn){
+        	if(mBleState == CONNECTED)
+        	{
+        		if (mBleDevice != null) 
+        		{
+        			mBleState = DISCONNECTING;
+        			Log.i(TAG, "disconnecting LE");
+        			try 
+        			{
+        				mHrmService.disconnectLe(mBleDevice, hrmUUID);
+        			} 
+        			catch (RemoteException e) 
+        			{
+        				Log.e(TAG, "", e);
+        				mBleState = DISCONNECTED;
+        			}
+        		}
+        	}
+        	BleDisconn = true;
+        }
+        if(flag_BleRcvrReg)
+        {
+        	flag_BleRcvrReg = false;
+        	unregisterReceiver(mConn_Receiver);
+        }
+    	
+    	if (mHrmService != null) {
+    		Log.i(TAG, "unbinding service");
+    		getApplicationContext().unbindService(mConnection);
+    	}
+    	
+    	if(mConnection != null)mConnection = null;
+    	if(mIndNotCallback != null)mIndNotCallback = null;
+    	if(mHrmService != null)mHrmService = null;
+    }
+    
+    private class SendJsonTask extends AsyncTask<JSONObject, Void/*Progress*/, Void/*Result*/> {
+
+    	@Override
+    	protected Void doInBackground(JSONObject... params)
+    	{
+    		
+    		
+    		return null;
+    	}    	   	
+    }
 }
