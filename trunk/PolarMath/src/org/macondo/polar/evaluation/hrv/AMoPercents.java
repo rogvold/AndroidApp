@@ -1,22 +1,23 @@
 package org.macondo.polar.evaluation.hrv;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.macondo.polar.data.Training;
 import org.macondo.polar.evaluation.Evaluation;
-import org.macondo.polar.util.Math;
+import org.macondo.polar.util.Histogram;
 
-public class AMoPercents implements Evaluation<Double> {
+public class AMoPercents implements Evaluation<Integer> {
 	
-	public Double evaluate(Training training) {
+	public Integer evaluate(Training training) {
 		List<Integer> intervals = training.getIntervals();
+		Histogram h = new Histogram(intervals.size()).init();
+		for (Integer interval : intervals) {
+            h.addRRInterval(interval);
+        }
+		int maxRangeValue = h.getMaxIntervalNumber();
+		int totalCount = h.getTotalCount();
 		
-		int maxRangeValue = Math.getMaxRangeValue(intervals);
-		int totalCount = Math.getTotalCount();
-		
-		return (maxRangeValue / (double) totalCount) * 100;
+		return (int)((maxRangeValue /  (double) totalCount) * 100);
 	}
 
 }

@@ -12,8 +12,8 @@ import java.util.List;
  *
  * @author <a href="mailto:ktsibriy@gmail.com">Kirill Y. Tsibriy</a>
  */
-public class PNN50 implements Evaluation<Double> {
-    public Double evaluate(Training training) {
+public class PNN50 implements Evaluation<Integer> {
+    public Integer evaluate(Training training) {
         final List<Integer> intervals = training.getIntervals();
         int pnn = 0;
 
@@ -27,6 +27,6 @@ public class PNN50 implements Evaluation<Double> {
             }
         }
 
-        return ((double) pnn) / (intervals.size() - 1);
+        return (int)(((double) pnn) / (intervals.size() - 1) * 100);
     }
 }

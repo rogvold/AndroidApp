@@ -1,8 +1,9 @@
-package org.macondo.polar.evaluation;
-
-import org.macondo.polar.data.Training;
+package org.macondo.polar.evaluation.statistics;
 
 import java.util.List;
+
+import org.macondo.polar.data.Training;
+import org.macondo.polar.evaluation.Evaluation;
 
 /**
  * <p></p>
@@ -23,6 +24,6 @@ public class RMSSD implements Evaluation<Integer> {
             total += (now - before) * (now - before);
         }
 
-        return (int) Math.sqrt(total / (intervals.size() - 1));
+        return (int) Math.sqrt(total / intervals.size());
     }
 }
