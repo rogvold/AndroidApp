@@ -399,7 +399,7 @@ public class HrmActivity extends Activity {
 		public void indicationLeCb(BluetoothDevice device, String service,
 				int length, byte[] data) {
 			Log.i("indicationLeCb", "indicationLeCb");
-			//parseData(length, data);
+			// parseData(length, data);
 		}
 
 		public void notificationLeCb(BluetoothDevice device, String service,
@@ -425,8 +425,9 @@ public class HrmActivity extends Activity {
 		mEnergyExpended |= ((data[3] & 0xFF) << 8);
 		int i = 4;
 		while (i < data.length) {
-			RrIntervals
-					.add(((data[i] & 0xFF) + ((data[i + 1] & 0xFF) << 8)) * 1000 / 1024);
+			int RR = ((data[i] & 0xFF) + ((data[i + 1] & 0xFF) << 8)) * 1000 / 1024;
+			RrIntervals.add(RR);
+			Log.w("PARSEDATA", Integer.toString(RR));
 			if (RrIntervals.size() == 10)
 				makeNewJson();
 			i += 2;
@@ -445,12 +446,10 @@ public class HrmActivity extends Activity {
 			msg.put("device_name", "Polar H7");
 			msg.put("rates", new JSONArray(Arrays.asList(a)));
 			msg.put("id", "201");
-			if (isNewSession)
-			{
+			if (isNewSession) {
 				msg.put("create", "1");
 				isNewSession = false;
-			}
-			else
+			} else
 				msg.put("create", "0");
 			msg.put("password", "m2d3_vO");
 			msg.put("device_id", "456");
@@ -556,7 +555,8 @@ public class HrmActivity extends Activity {
 				se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
 						"application/x-www-form-urlencoded"));
 				post.setEntity(se);
-				post.addHeader(HTTP.CONTENT_TYPE, "application/x-www-form-urlencoded");
+				post.addHeader(HTTP.CONTENT_TYPE,
+						"application/x-www-form-urlencoded");
 				response = mClient.execute(post);
 				Log.i("POST", params[0].toString());
 				/* Checking response */
