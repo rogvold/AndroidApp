@@ -56,6 +56,7 @@ public class HrmActivity extends Activity {
 	// Debugging
 	private static final boolean DEBUG = true;
 	private static final String TAG = "HrmActivity";
+	private static int parity = 0;
 
 	// Bluetooth Intent request codes
 	private static final int REQUEST_ENABLE_BT = 2;
@@ -399,18 +400,20 @@ public class HrmActivity extends Activity {
 		public void indicationLeCb(BluetoothDevice device, String service,
 				int length, byte[] data) {
 			Log.i("indicationLeCb", "indicationLeCb");
-			// parseData(length, data);
+			//parseData(length, data);
 		}
 
 		public void notificationLeCb(BluetoothDevice device, String service,
 				int length, byte[] data) {
 			Log.i("notificationLeCb", "notificationLeCb");
-			parseData(length, data);
+			if (parity == 0)
+				parseData(length, data);
+			parity = 1 - parity;
 		}
 	}
 
 	private void parseData(int length, byte[] data) {
-		Log.w("parsedata", Byte.toString(data[0]) + " " + Byte.toString(data[4]) + " " + Byte.toString(data[5]));
+//		Log.w("parsedata", Byte.toString(data[0]) + " " + Byte.toString(data[4]) + " " + Byte.toString(data[5]));
 		mHeartBeatsPerMinute = 0;
 		if (data[1] != 0) {
 			mHeartBeatsPerMinute = ((data[0] & 0xFF) << 8) + (data[1] & 0xFF);
@@ -430,8 +433,8 @@ public class HrmActivity extends Activity {
 			int RR = ((data[i] & 0xFF) + ((data[i + 1] & 0xFF) << 8)) * 1000 / 1024;
 			RrIntervals.add(RR);
 			Log.w("PARSEDATA", Integer.toString(RR));
-			//if (RrIntervals.size() == 10)
-			//	makeNewJson();
+			if (RrIntervals.size() == 10)
+				makeNewJson();
 			i += 2;
 		}
 		mUIUpdateHandler.sendEmptyMessage(0);
