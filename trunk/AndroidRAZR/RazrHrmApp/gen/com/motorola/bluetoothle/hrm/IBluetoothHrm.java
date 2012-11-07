@@ -1,6 +1,6 @@
 /*
  * This file is auto-generated.  DO NOT MODIFY.
- * Original file: /Users/yuriy/Documents/Work/Eclipse_Projects/RazrHrmApp/src/com/motorola/bluetoothle/hrm/IBluetoothHrm.aidl
+ * Original file: D:\\Android\\workspace\\RazrHrmApp\\src\\com\\motorola\\bluetoothle\\hrm\\IBluetoothHrm.aidl
  */
 package com.motorola.bluetoothle.hrm;
 /*

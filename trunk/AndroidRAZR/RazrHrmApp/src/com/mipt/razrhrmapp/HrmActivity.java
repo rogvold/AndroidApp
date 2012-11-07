@@ -14,7 +14,9 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.protocol.HTTP;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -141,6 +143,7 @@ public class HrmActivity extends Activity {
 	public boolean resetBasics() {
 		try {
 			RrIntervals = new LinkedList();
+			isNewSession = true;
 			return true;
 		} catch (Exception e) {
 			return false;
@@ -149,6 +152,7 @@ public class HrmActivity extends Activity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		HttpConnectionParams.setConnectionTimeout(mClient.getParams(), 5000);
 		super.onCreate(savedInstanceState);
 		// setContentView(R.layout.activity_hrm);
 
@@ -199,6 +203,7 @@ public class HrmActivity extends Activity {
 									connectedTv.setText("HRM is not connected");
 									uuidTv.setText("uuid : null");
 									mUIUpdateHandler.sendEmptyMessage(0);
+									resetBasics();
 								} else {
 									Log.e("onDisconnect",
 											"DisconnectLe sent out but failed");
@@ -394,7 +399,7 @@ public class HrmActivity extends Activity {
 		public void indicationLeCb(BluetoothDevice device, String service,
 				int length, byte[] data) {
 			Log.i("indicationLeCb", "indicationLeCb");
-			parseData(length, data);
+			//parseData(length, data);
 		}
 
 		public void notificationLeCb(BluetoothDevice device, String service,
@@ -438,10 +443,13 @@ public class HrmActivity extends Activity {
 			for (int i = 0; i < 10; i++)
 				a[i] = RrIntervals.poll();
 			msg.put("device_name", "Polar H7");
-			msg.put("rates", Arrays.asList(a));
+			msg.put("rates", new JSONArray(Arrays.asList(a)));
 			msg.put("id", "201");
 			if (isNewSession)
+			{
 				msg.put("create", "1");
+				isNewSession = false;
+			}
 			else
 				msg.put("create", "0");
 			msg.put("password", "m2d3_vO");
@@ -541,14 +549,16 @@ public class HrmActivity extends Activity {
 		protected String doInBackground(JSONObject... params) {
 			try {
 				HttpResponse response = null;
-				String url = "http://rogvold.campus.mipt.ru:8080/BaseProjectWeb/faces/input";
+				String url = "http://93.175.2.184:8080/BaseProjectWeb/faces/input";
 				HttpPost post = new HttpPost(url);
-				StringEntity se = new StringEntity("data="
+				StringEntity se = new StringEntity("json="
 						+ params[0].toString());
 				se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE,
 						"application/x-www-form-urlencoded"));
 				post.setEntity(se);
+				post.addHeader(HTTP.CONTENT_TYPE, "application/x-www-form-urlencoded");
 				response = mClient.execute(post);
+				Log.i("POST", params[0].toString());
 				/* Checking response */
 				if (response != null) {
 					BufferedReader reader = new BufferedReader(
@@ -564,15 +574,21 @@ public class HrmActivity extends Activity {
 					return json;
 				}
 			} catch (Exception e) {
-				//TODO:
+				e.printStackTrace();
+				// TODO:
 			}
 			return null;
 		}
-		
+
 		@Override
 		protected void onPostExecute(String result) {
-			//TODO:
+			// TODO:
+			if (result == null)
+				Log.e("ONPOSTEXECUTE", "error");
+			else
+				Log.i("ONPOSTEXECUTE", result);
 		}
+
 	}
 
 }
