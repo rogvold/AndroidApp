@@ -132,8 +132,8 @@ public class HrmActivity extends Activity {
 
 	private void updateUI() {
 		Log.v("Update GUI", "updateUI parse han");
+		Log.d("onUpdateGui", mHeartBeatsPerMinute + " bpm");
 		if (mHeartBeatsPerMinute != previous_mHeartBeatsPerMinute) {
-			Log.d("onUpdateGui", mHeartBeatsPerMinute + " bpm");
 			bpmTv.setText(" " + mHeartBeatsPerMinute + " bpm");
 			previous_mHeartBeatsPerMinute = mHeartBeatsPerMinute;
 		}
@@ -410,6 +410,7 @@ public class HrmActivity extends Activity {
 	}
 
 	private void parseData(int length, byte[] data) {
+		Log.w("parsedata", Byte.toString(data[0]) + " " + Byte.toString(data[4]) + " " + Byte.toString(data[5]));
 		mHeartBeatsPerMinute = 0;
 		if (data[1] != 0) {
 			mHeartBeatsPerMinute = ((data[0] & 0xFF) << 8) + (data[1] & 0xFF);
@@ -424,12 +425,13 @@ public class HrmActivity extends Activity {
 		mEnergyExpended |= data[2] & 0xFF;
 		mEnergyExpended |= ((data[3] & 0xFF) << 8);
 		int i = 4;
-		while (i < data.length) {
+		while (i < data.length) 
+		{
 			int RR = ((data[i] & 0xFF) + ((data[i + 1] & 0xFF) << 8)) * 1000 / 1024;
 			RrIntervals.add(RR);
 			Log.w("PARSEDATA", Integer.toString(RR));
-			if (RrIntervals.size() == 10)
-				makeNewJson();
+			//if (RrIntervals.size() == 10)
+			//	makeNewJson();
 			i += 2;
 		}
 		mUIUpdateHandler.sendEmptyMessage(0);
@@ -445,7 +447,7 @@ public class HrmActivity extends Activity {
 				a[i] = RrIntervals.poll();
 			msg.put("device_name", "Polar H7");
 			msg.put("rates", new JSONArray(Arrays.asList(a)));
-			msg.put("id", "201");
+			msg.put("id", "751");
 			if (isNewSession) {
 				msg.put("create", "1");
 				isNewSession = false;
@@ -548,7 +550,7 @@ public class HrmActivity extends Activity {
 		protected String doInBackground(JSONObject... params) {
 			try {
 				HttpResponse response = null;
-				String url = "http://93.175.2.184:8080/BaseProjectWeb/faces/input";
+				String url = "http://reshaka.ru:8080/BaseProjectWeb/faces/input";
 				HttpPost post = new HttpPost(url);
 				StringEntity se = new StringEntity("json="
 						+ params[0].toString());
