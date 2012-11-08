@@ -47,7 +47,6 @@
 
 #import "HeartRateMonitorAppDelegate.h"
 #import <QuartzCore/QuartzCore.h>
-#import "JSONKit.h"
 
 @implementation HeartRateMonitorAppDelegate
 
@@ -265,7 +264,6 @@
 // Send intervals to server
 - (void) sendRRs:(NSArray *)rrs
 {
-    //NSData* jsonData = [self makeJSON:rrs];
     NSString* jsonString = [self makeJSON:rrs];
     NSURL* url = [NSURL URLWithString:@"http://rogvold.campus.mipt.ru:8080/BaseProjectWeb/faces/input"];
     
@@ -282,14 +280,19 @@
     NSDateFormatter* dateFormatter = [[[NSDateFormatter alloc] init] autorelease];
     [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss.SSS"];
     NSString* dateString = [dateFormatter stringFromDate:startTime];
-    NSLog(dateString);
-    NSArray* objects = [NSArray arrayWithObjects:dateString, [self.currentlyConnectedPeripheral UUID], [self.currentlyConnectedPeripheral name], rrs, @"123", nil];
+    NSString* uuid = (NSString *)CFUUIDCreateString(NULL, [self.currentlyConnectedPeripheral UUID]);
+    NSArray* objects = [NSArray arrayWithObjects:dateString, uuid, [self.currentlyConnectedPeripheral name], rrs, @"123", nil];
     NSArray* keys = [NSArray arrayWithObjects:@"start", @"device_id", @"device_name", @"rates", @"id", nil];
     NSDictionary* JSONDictionary = [NSDictionary dictionaryWithObjects:objects forKeys:keys];
-    NSString* json = [JSONDictionary JSONString];
-    NSLog(json);
+    NSError* error = nil;
+    NSData* jsonData = [NSJSONSerialization dataWithJSONObject:JSONDictionary options:NSJSONWritingPrettyPrinted error:&error];
+    NSString* json = nil;
+    if (! jsonData) {
+        NSLog(@"Got an error: %@", error);
+    } else {
+        json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    }
     return json;
-    //return [JSONDictionary JSONData];
 }
 
 /*

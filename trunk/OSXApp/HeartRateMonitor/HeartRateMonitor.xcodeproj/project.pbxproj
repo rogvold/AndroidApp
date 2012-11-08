@@ -15,7 +15,6 @@
 		44B0266113F5D44000541EA5 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 44B0265F13F5D44000541EA5 /* MainMenu.xib */; };
 		44B0268013F5DABB00541EA5 /* Heart.png in Resources */ = {isa = PBXBuildFile; fileRef = 44B0267F13F5DABB00541EA5 /* Heart.png */; };
 		44B0268213F5DD2A00541EA5 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 44B0268113F5DD2A00541EA5 /* QuartzCore.framework */; };
-		5B18BF64163492EF00608BC7 /* JSONKit.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B18BF63163492EF00608BC7 /* JSONKit.m */; };
 		9A090D9013FDBF7E00CCE962 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 9A090D8F13FDBF7E00CCE962 /* AppIcon.icns */; };
 		9A8EF42513FC835E00CDFA4B /* Human.png in Resources */ = {isa = PBXBuildFile; fileRef = 9A8EF42413FC835E00CDFA4B /* Human.png */; };
 /* End PBXBuildFile section */
@@ -36,8 +35,6 @@
 		44B0266013F5D44000541EA5 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		44B0267F13F5DABB00541EA5 /* Heart.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Heart.png; sourceTree = "<group>"; };
 		44B0268113F5DD2A00541EA5 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
-		5B18BF62163492EF00608BC7 /* JSONKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSONKit.h; sourceTree = "<group>"; };
-		5B18BF63163492EF00608BC7 /* JSONKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSONKit.m; sourceTree = "<group>"; };
 		9A090D8F13FDBF7E00CCE962 /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		9A8EF42413FC835E00CDFA4B /* Human.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Human.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -59,7 +56,6 @@
 		44B0263B13F5D44000541EA5 = {
 			isa = PBXGroup;
 			children = (
-				5B16F68F163410E900CDE4E1 /* JSON */,
 				44B0265013F5D44000541EA5 /* HeartRateMonitor */,
 				44B0264913F5D44000541EA5 /* Frameworks */,
 				44B0264713F5D44000541EA5 /* Products */,
@@ -118,15 +114,6 @@
 				44B0265813F5D44000541EA5 /* HeartRateMonitor-Prefix.pch */,
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		5B16F68F163410E900CDE4E1 /* JSON */ = {
-			isa = PBXGroup;
-			children = (
-				5B18BF62163492EF00608BC7 /* JSONKit.h */,
-				5B18BF63163492EF00608BC7 /* JSONKit.m */,
-			);
-			name = JSON;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -197,7 +184,6 @@
 			files = (
 				44B0265713F5D44000541EA5 /* main.m in Sources */,
 				44B0265E13F5D44000541EA5 /* HeartRateMonitorAppDelegate.m in Sources */,
-				5B18BF64163492EF00608BC7 /* JSONKit.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
