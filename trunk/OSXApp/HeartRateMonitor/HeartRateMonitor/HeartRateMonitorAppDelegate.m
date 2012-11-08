@@ -47,6 +47,7 @@
 
 #import "HeartRateMonitorAppDelegate.h"
 #import <QuartzCore/QuartzCore.h>
+#import "JSONKit.h"
 
 @implementation HeartRateMonitorAppDelegate
 
@@ -62,7 +63,7 @@
 @synthesize RRs;
 @synthesize RRsToSend;
 @synthesize startTime;
-@synthesize currentlyConnectedPeripheral;
+@synthesize create;
 
 #define PULSESCALE 1.2
 #define PULSEDURATION 0.2
@@ -70,6 +71,7 @@
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
     self.heartRate = 0;
+    create = 1;
     /* autoConnect = TRUE; */  /* uncomment this line if you want to automatically connect to previosly known peripheral */
     self.heartRateMonitors = [NSMutableArray array];
     
@@ -264,13 +266,19 @@
 // Send intervals to server
 - (void) sendRRs:(NSArray *)rrs
 {
+    //NSData* jsonData = [self makeJSON:rrs];
     NSString* jsonString = [self makeJSON:rrs];
     NSURL* url = [NSURL URLWithString:@"http://rogvold.campus.mipt.ru:8080/BaseProjectWeb/faces/input"];
     
+    
+    NSString* stringToSend = [@"json=" stringByAppendingString:jsonString];
+    NSData* dataToSend = [stringToSend dataUsingEncoding:NSUTF8StringEncoding];
+
+    
     NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:url];
     [request setHTTPMethod:@"POST"];
-    [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-    [request setHTTPBody:[[@"json=" stringByAppendingString:jsonString] dataUsingEncoding:NSUTF8StringEncoding]];
+    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+    [request setHTTPBody:dataToSend];
     [NSURLConnection connectionWithRequest:[request autorelease] delegate:self];
 }
 
@@ -280,19 +288,16 @@
     NSDateFormatter* dateFormatter = [[[NSDateFormatter alloc] init] autorelease];
     [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss.SSS"];
     NSString* dateString = [dateFormatter stringFromDate:startTime];
-    NSString* uuid = (NSString *)CFUUIDCreateString(NULL, [self.currentlyConnectedPeripheral UUID]);
-    NSArray* objects = [NSArray arrayWithObjects:dateString, uuid, [self.currentlyConnectedPeripheral name], rrs, @"123", nil];
-    NSArray* keys = [NSArray arrayWithObjects:@"start", @"device_id", @"device_name", @"rates", @"id", nil];
+    NSLog(dateString);
+    // !!! HARDCODE: user_id, device_id, device_name
+    NSArray* objects = [NSArray arrayWithObjects:dateString, @"456", @"Polar H7", rrs, @"107", @"02034242", create == 0 ? @"0" : @"1", nil];
+    NSArray* keys = [NSArray arrayWithObjects:@"start", @"device_id", @"device_name", @"rates", @"id", @"password", @"create", nil];
+    create = 0;
     NSDictionary* JSONDictionary = [NSDictionary dictionaryWithObjects:objects forKeys:keys];
-    NSError* error = nil;
-    NSData* jsonData = [NSJSONSerialization dataWithJSONObject:JSONDictionary options:NSJSONWritingPrettyPrinted error:&error];
-    NSString* json = nil;
-    if (! jsonData) {
-        NSLog(@"Got an error: %@", error);
-    } else {
-        json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-    }
+    NSString* json = [JSONDictionary JSONString];
+    NSLog(json);
     return json;
+    //return [JSONDictionary JSONData];
 }
 
 /*
@@ -427,8 +432,6 @@
 {    
     [aPeripheral setDelegate:self];
     [aPeripheral discoverServices:nil];
-    
-    self.currentlyConnectedPeripheral = aPeripheral;
 	
 	self.connected = @"Connected";
     [connectButton setTitle:@"Disconnect"];

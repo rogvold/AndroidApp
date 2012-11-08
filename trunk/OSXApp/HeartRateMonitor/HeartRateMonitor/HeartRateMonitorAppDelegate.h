@@ -89,6 +89,7 @@
 @property (retain) NSMutableArray *RRsToSend;
 // Start time for each portion of intervals sending to server
 @property (retain) NSDate *startTime;
+@property (assign) int create;
 
 - (IBAction) openScanSheet:(id) sender;
 - (IBAction) closeScanSheet:(id)sender;
