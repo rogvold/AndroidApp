@@ -447,32 +447,35 @@ didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic
 // Send intervals to server
 - (void) sendRRs:(NSArray *)rrs
 {
-    NSData* jsonData = [self makeJSON:rrs];
-    
+    NSString* jsonString = [self makeJSON:rrs];
     NSURL* url = [NSURL URLWithString:@"http://rogvold.campus.mipt.ru:8080/BaseProjectWeb/faces/input"];
     
     NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:url];
     [request setHTTPMethod:@"POST"];
     [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-    [request setHTTPBody:jsonData];
+    [request setHTTPBody:[[@"json=" stringByAppendingString:jsonString] dataUsingEncoding:NSUTF8StringEncoding]];
     [NSURLConnection connectionWithRequest:request delegate:self];
 }
 
 // Make json based on array of rr intervals
--(NSData *) makeJSON:(NSArray *)rrs
+-(NSString *) makeJSON:(NSArray *)rrs
 {
     NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
     [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss.SSS"];
     NSString* dateString = [dateFormatter stringFromDate:startTime];
-    NSLog(dateString);
-    // !!! HARDCODE: user_id, device_id, device_name
-    NSArray* objects = [NSArray arrayWithObjects:dateString, [self.currentlyConnectedPeripheral UUID], [self.currentlyConnectedPeripheral name], rrs, @"123", nil];
+    NSString* uuid = (__bridge NSString *)CFUUIDCreateString(NULL, [self.currentlyConnectedPeripheral UUID]);
+    NSArray* objects = [NSArray arrayWithObjects:dateString, uuid, [self.currentlyConnectedPeripheral name], rrs, @"123", nil];
     NSArray* keys = [NSArray arrayWithObjects:@"start", @"device_id", @"device_name", @"rates", @"id", nil];
     NSDictionary* JSONDictionary = [NSDictionary dictionaryWithObjects:objects forKeys:keys];
-    NSString* json = [JSONDictionary JSONString];
-    NSLog(json);
-    return [JSONDictionary JSONData];
+    NSError* error = nil;
+    NSData* jsonData = [NSJSONSerialization dataWithJSONObject:JSONDictionary options:NSJSONWritingPrettyPrinted error:&error];
+    NSString* json = nil;
+    if (! jsonData) {
+        NSLog(@"Got an error: %@", error);
+    } else {
+        json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    }
+    return json;
 }
-
 
 @end
