@@ -257,10 +257,12 @@
 		44B0267A13F5D44000541EA5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "HeartRateMonitor/HeartRateMonitor-Prefix.pch";
 				INFOPLIST_FILE = "HeartRateMonitor/HeartRateMonitor-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -268,10 +270,12 @@
 		44B0267B13F5D44000541EA5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "HeartRateMonitor/HeartRateMonitor-Prefix.pch";
 				INFOPLIST_FILE = "HeartRateMonitor/HeartRateMonitor-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;

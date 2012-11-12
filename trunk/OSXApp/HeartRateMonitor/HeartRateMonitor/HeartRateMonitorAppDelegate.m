@@ -53,20 +53,12 @@
 
 @synthesize window;
 @synthesize heartRate;
-@synthesize heartView;
-@synthesize pulseTimer;
-@synthesize scanSheet;
 @synthesize heartRateMonitors;
 @synthesize arrayController;
-@synthesize manufacturer;
-@synthesize connected;
 @synthesize RRs;
 @synthesize RRsToSend;
 @synthesize startTime;
 @synthesize create;
-
-#define PULSESCALE 1.2
-#define PULSEDURATION 0.2
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
@@ -78,18 +70,10 @@
     self.RRs = [NSMutableArray array];
     self.RRsToSend = [NSMutableArray array];
     self.startTime = nil;
-       
-    [NSAnimationContext beginGrouping];
-    [[NSAnimationContext currentContext] setDuration:0.];
-    [self.heartView layer].position = CGPointMake( [[self.heartView layer] frame].size.width / 2, [[self.heartView layer] frame].size.height / 2 );
-    [self.heartView layer].anchorPoint = CGPointMake(0.5, 0.5);
-    [NSAnimationContext endGrouping];
+    self.currentlyConnectedPeripheral = nil;
 
     manager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
-    if( autoConnect )
-    {
-        [self startScan];
-    }
+    [self startScan];
 }
 
 - (void) dealloc
@@ -97,13 +81,9 @@
     [self stopScan];
     
     [peripheral setDelegate:nil];
-    [peripheral release];
     
-    [heartRateMonitors release];
         
-    [manager release];
     
-    [super dealloc];
 }
 
 /* 
@@ -114,63 +94,6 @@
     if(peripheral)
     {
         [manager cancelPeripheralConnection:peripheral];
-    }
-}
-
-#pragma mark - Scan sheet methods
-
-/* 
- Open scan sheet to discover heart rate peripherals if it is LE capable hardware 
-*/
-- (IBAction)openScanSheet:(id)sender 
-{
-    if( [self isLECapableHardware] )
-    {
-        autoConnect = FALSE;
-        [arrayController removeObjects:heartRateMonitors];
-        [NSApp beginSheet:self.scanSheet modalForWindow:self.window modalDelegate:self didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) contextInfo:nil];
-        [self startScan];
-    }
-}
-
-/*
- Close scan sheet once device is selected
-*/
-- (IBAction)closeScanSheet:(id)sender 
-{
-    [NSApp endSheet:self.scanSheet returnCode:NSAlertDefaultReturn];
-    [self.scanSheet orderOut:self];
-}
-
-/*
- Close scan sheet without choosing any device
-*/
-- (IBAction)cancelScanSheet:(id)sender 
-{
-    [NSApp endSheet:self.scanSheet returnCode:NSAlertAlternateReturn];
-    [self.scanSheet orderOut:self];
-}
-
-/* 
- This method is called when Scan sheet is closed. Initiate connection to selected heart rate peripheral
-*/
-- (void)sheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo 
-{
-    [self stopScan];
-    if( returnCode == NSAlertDefaultReturn )
-    {
-        NSIndexSet *indexes = [self.arrayController selectionIndexes];
-        if ([indexes count] != 0) 
-        {
-            NSUInteger anIndex = [indexes firstIndex];
-            peripheral = [self.heartRateMonitors objectAtIndex:anIndex];
-            [peripheral retain];
-            [indicatorButton setHidden:FALSE];
-            [progressIndicator setHidden:FALSE];
-            [progressIndicator startAnimation:self];
-            [connectButton setTitle:@"Cancel"];
-            [manager connectPeripheral:peripheral options:nil];
-        }
     }
 }
 
@@ -189,17 +112,44 @@
     else if (peripheral)
     {
         /* Device is not connected, cancel pendig connection */
-        [indicatorButton setHidden:TRUE];
-        [progressIndicator setHidden:TRUE];
-        [progressIndicator stopAnimation:self];
         [connectButton setTitle:@"Connect"];
         [manager cancelPeripheralConnection:peripheral];
-        [self openScanSheet:nil];
     }
     else
     {   /* No outstanding connection, open scan sheet */
-        [self openScanSheet:nil];
+        NSIndexSet *indexes = [self.arrayController selectionIndexes];
+        if ([indexes count] != 0)
+        {
+            NSUInteger anIndex = [indexes firstIndex];
+            peripheral = (self.heartRateMonitors)[anIndex];
+            
+            [connectButton setTitle:@"Disconnect"];
+            [manager connectPeripheral:peripheral options:nil];
+        }
     }
+}
+
+- (IBAction) loginButtonPressed:(id)sender
+{
+    self.loginValue = [self.loginField stringValue];
+    self.passwordValue = [self.passwordField stringValue];
+    [self loginButton].hidden = true;
+    [self loginField].hidden = true;
+    [self passwordField].hidden = true;
+    [self login].hidden = true;
+    [self password].hidden = true;
+    [self connectButton].hidden = false;
+    [self heartRateLabel].hidden = false;
+    [self bpmLabel].hidden = false;
+    [self sensors].hidden = false;
+    [self sensorsTable].hidden = false;
+    NSRect frame = [self.window frame];
+    frame.size.width = 535;
+    frame.size.height = 211;
+    frame.origin.x = 370;
+    frame.origin.y = 294;
+    [self.window setFrame:frame display:YES animate:YES];
+    [self startScan];
 }
 
 #pragma mark - Heart Rate Data
@@ -236,7 +186,7 @@
         NSMutableArray* rrs = [NSMutableArray array];
         uint16_t rr = (CFSwapInt16LittleToHost(*(uint16_t *)(&reportData[rrByte])) * 1000) / 1024;
         while (rr != 0) {
-            NSLog([NSString stringWithFormat:@"RR: %d", rr]);
+            NSLog(@"%@", [NSString stringWithFormat:@"RR: %d", rr]);
             [rrs addObject:[NSNumber numberWithInt:rr]];
             rrByte += 2;
             rr = (CFSwapInt16LittleToHost(*(uint16_t *)(&reportData[rrByte])) * 1000) / 1024;
@@ -254,21 +204,16 @@
         
     }
         
-    uint16_t oldBpm = self.heartRate;
     self.heartRate = bpm;
-    if (oldBpm == 0) 
-    {
-        [self pulse];
-        self.pulseTimer = [NSTimer scheduledTimerWithTimeInterval:(60. / heartRate) target:self selector:@selector(pulse) userInfo:nil repeats:NO];
-    }
 }
 
+#pragma mark Json methods
 // Send intervals to server
 - (void) sendRRs:(NSArray *)rrs
 {
     //NSData* jsonData = [self makeJSON:rrs];
     NSString* jsonString = [self makeJSON:rrs];
-    NSURL* url = [NSURL URLWithString:@"http://rogvold.campus.mipt.ru:8080/BaseProjectWeb/faces/input"];
+    NSURL* url = [NSURL URLWithString:@"http://reshaka.ru:8080/BaseProjectWeb/faces/input"];
     
     
     NSString* stringToSend = [@"json=" stringByAppendingString:jsonString];
@@ -279,45 +224,33 @@
     [request setHTTPMethod:@"POST"];
     [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
     [request setHTTPBody:dataToSend];
-    [NSURLConnection connectionWithRequest:[request autorelease] delegate:self];
+    [NSURLConnection connectionWithRequest:request delegate:self];
 }
 
 // Make json based on array of rr intervals
 -(NSString *) makeJSON:(NSArray *)rrs
 {
-    NSDateFormatter* dateFormatter = [[[NSDateFormatter alloc] init] autorelease];
+    NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
     [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss.SSS"];
     NSString* dateString = [dateFormatter stringFromDate:startTime];
-    NSLog(dateString);
-    // !!! HARDCODE: user_id, device_id, device_name
-    NSArray* objects = [NSArray arrayWithObjects:dateString, @"456", @"Polar H7", rrs, @"107", @"02034242", create == 0 ? @"0" : @"1", nil];
-    NSArray* keys = [NSArray arrayWithObjects:@"start", @"device_id", @"device_name", @"rates", @"id", @"password", @"create", nil];
-    create = 0;
+    NSString* uuid = (NSString *)CFBridgingRelease(CFUUIDCreateString(NULL, [self.currentlyConnectedPeripheral UUID]));
+    NSArray* objects = @[dateString, uuid, [self.currentlyConnectedPeripheral name], rrs, self.loginValue, self.passwordValue, self.create == 0 ? @"0" : @"1"];
+    NSArray* keys = @[@"start", @"device_id", @"device_name", @"rates", @"id", @"password", @"create"];
+    
+    self.create = 0;
     NSDictionary* JSONDictionary = [NSDictionary dictionaryWithObjects:objects forKeys:keys];
-    NSString* json = [JSONDictionary JSONString];
-    NSLog(json);
+    NSError* error = nil;
+    NSData* jsonData = [NSJSONSerialization dataWithJSONObject:JSONDictionary options:NSJSONWritingPrettyPrinted error:&error];
+    NSString* json = nil;
+    if (! jsonData)
+    {
+        NSLog(@"Got an error: %@", error);
+    }
+    else
+    {
+        json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    }
     return json;
-    //return [JSONDictionary JSONData];
-}
-
-/*
- Update pulse UI
- */
-- (void) pulse 
-{
-    CABasicAnimation *pulseAnimation = [CABasicAnimation animationWithKeyPath:@"transform.scale"];
-    
-    pulseAnimation.toValue = [NSNumber numberWithFloat:PULSESCALE];
-    pulseAnimation.fromValue = [NSNumber numberWithFloat:1.0];
-    
-    pulseAnimation.duration = PULSEDURATION;
-    pulseAnimation.repeatCount = 1;
-    pulseAnimation.autoreverses = YES;
-    pulseAnimation.timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseIn];
-    
-    [[heartView layer] addAnimation:pulseAnimation forKey:@"scale"];
-    
-    self.pulseTimer = [NSTimer scheduledTimerWithTimeInterval:(60. / heartRate) target:self selector:@selector(pulse) userInfo:nil repeats:NO];
 }
 
 #pragma mark - Start/Stop Scan methods
@@ -350,12 +283,10 @@
     
     NSLog(@"Central manager state: %@", state);
     
-    [self cancelScanSheet:nil];
-    
-    NSAlert *alert = [[[NSAlert alloc] init] autorelease];
+    NSAlert *alert = [[NSAlert alloc] init];
     [alert setMessageText:state];
     [alert addButtonWithTitle:@"OK"];
-    [alert setIcon:[[[NSImage alloc] initWithContentsOfFile:@"AppIcon"] autorelease]];
+    [alert setIcon:[[NSImage alloc] initWithContentsOfFile:@"AppIcon"]];
     [alert beginSheetModalForWindow:[self window] modalDelegate:self didEndSelector:nil contextInfo:nil];
     return FALSE;
 }
@@ -365,7 +296,7 @@
  */
 - (void) startScan 
 {
-    [manager scanForPeripheralsWithServices:[NSArray arrayWithObject:[CBUUID UUIDWithString:@"180D"]] options:nil];
+    [manager scanForPeripheralsWithServices:@[[CBUUID UUIDWithString:@"180D"]] options:nil];
 }
 
 /*
@@ -397,7 +328,7 @@
     /* Retreive already known devices */
     if(autoConnect)
     {
-        [manager retrievePeripherals:[NSArray arrayWithObject:(id)aPeripheral.UUID]];
+        [manager retrievePeripherals:@[(id)aPeripheral.UUID]];
     }
 }
 
@@ -414,13 +345,9 @@
     /* If there are any known devices, automatically connect to it.*/
     if([peripherals count] >=1)
     {
-        [indicatorButton setHidden:FALSE];
-        [progressIndicator setHidden:FALSE];
-        [progressIndicator startAnimation:self];
-        peripheral = [peripherals objectAtIndex:0];
-        [peripheral retain];
+        peripheral = peripherals[0];
         [connectButton setTitle:@"Cancel"];
-        [manager connectPeripheral:peripheral options:[NSDictionary dictionaryWithObject:[NSNumber numberWithBool:YES] forKey:CBConnectPeripheralOptionNotifyOnDisconnectionKey]];
+        [manager connectPeripheral:peripheral options:@{CBConnectPeripheralOptionNotifyOnDisconnectionKey: @YES}];
     }
 }
 
@@ -432,12 +359,8 @@
 {    
     [aPeripheral setDelegate:self];
     [aPeripheral discoverServices:nil];
-	
-	self.connected = @"Connected";
-    [connectButton setTitle:@"Disconnect"];
-    [indicatorButton setHidden:TRUE];
-    [progressIndicator setHidden:TRUE];
-    [progressIndicator stopAnimation:self];
+    [self.connectButton setTitle:@"Disconnect"];
+    self.currentlyConnectedPeripheral = aPeripheral;
     self.startTime = [NSDate date];
 }
 
@@ -447,14 +370,12 @@
  */
 - (void)centralManager:(CBCentralManager *)central didDisconnectPeripheral:(CBPeripheral *)aPeripheral error:(NSError *)error
 {
-	self.connected = @"Not connected";
-    [connectButton setTitle:@"Connect"];
-    self.manufacturer = @"";
+    [self.connectButton setTitle:@"Connect"];
     self.heartRate = 0;
+    self.currentlyConnectedPeripheral = nil;
     if( peripheral )
     {
         [peripheral setDelegate:nil];
-        [peripheral release];
         peripheral = nil;
     }
 }
@@ -469,7 +390,6 @@
     if( peripheral )
     {
         [peripheral setDelegate:nil];
-        [peripheral release];
         peripheral = nil;
     }
 }
@@ -621,15 +541,9 @@
     /* Value for device Name received */
     else if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:CBUUIDDeviceNameString]])
     {
-        NSString * deviceName = [[[NSString alloc] initWithData:characteristic.value encoding:NSUTF8StringEncoding] autorelease];
+        NSString * deviceName = [[NSString alloc] initWithData:characteristic.value encoding:NSUTF8StringEncoding];
         NSLog(@"Device Name = %@", deviceName);
     } 
-    /* Value for manufacturer name received */
-    else if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:@"2A29"]]) 
-    {
-        self.manufacturer = [[[NSString alloc] initWithData:characteristic.value encoding:NSUTF8StringEncoding] autorelease];
-        NSLog(@"Manufacturer Name = %@", self.manufacturer);
-    }
 }
 
 @end

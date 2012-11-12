@@ -51,9 +51,6 @@
 @interface HeartRateMonitorAppDelegate : NSObject <NSApplicationDelegate, CBCentralManagerDelegate, CBPeripheralDelegate> 
 {
     NSWindow *window;
-    NSWindow *scanSheet;
-    NSView *heartView;
-    NSTimer *pulseTimer;
     NSArrayController *arrayController;
     
     CBCentralManager *manager;
@@ -61,46 +58,48 @@
     
     NSMutableArray *heartRateMonitors;
     
-    NSString *manufacturer;
-    
     uint16_t heartRate;
     
     IBOutlet NSButton* connectButton;
-    BOOL autoConnect;
-    
-    // Progress Indicator
-    IBOutlet NSButton * indicatorButton;
-    IBOutlet NSProgressIndicator *progressIndicator;    
+    BOOL autoConnect; 
 }
 
-@property (assign) IBOutlet NSWindow *window;
-@property (assign) IBOutlet NSWindow *scanSheet;
-@property (assign) IBOutlet NSView *heartView;
-@property (assign) IBOutlet NSArrayController *arrayController;
+@property (strong) IBOutlet NSWindow *window;
+@property (strong) IBOutlet NSArrayController *arrayController;
+@property (strong) IBOutlet NSTextField *loginField;
+@property (strong) IBOutlet NSSecureTextField *passwordField;
+@property (strong) IBOutlet NSTextField *login;
+@property (strong) IBOutlet NSTextField *password;
+@property (strong) IBOutlet NSButton *loginButton;
+@property (strong) IBOutlet NSButton *connectButton;
+
+@property (strong) IBOutlet NSTextField *heartRateLabel;
+@property (strong) IBOutlet NSTextField *bpmLabel;
+@property (strong) IBOutlet NSScrollView *sensors;
+
+@property (strong) IBOutlet NSTableView *sensorsTable;
+
 @property (assign) uint16_t heartRate;
-@property (retain) NSTimer *pulseTimer;
-@property (retain) NSMutableArray *heartRateMonitors;
-@property (copy) NSString *manufacturer;
-@property (copy) NSString *connected;
+@property (strong) NSMutableArray *heartRateMonitors;
 @property (nonatomic, strong) CBPeripheral *currentlyConnectedPeripheral;
 // RR intervals
-@property (retain) NSMutableArray *RRs;
+@property (strong) NSMutableArray *RRs;
 // Queue for intervals waiting to be sent
-@property (retain) NSMutableArray *RRsToSend;
+@property (strong) NSMutableArray *RRsToSend;
 // Start time for each portion of intervals sending to server
-@property (retain) NSDate *startTime;
+@property (strong) NSDate *startTime;
 @property (assign) int create;
 
-- (IBAction) openScanSheet:(id) sender;
-- (IBAction) closeScanSheet:(id)sender;
-- (IBAction) cancelScanSheet:(id)sender;
+@property (strong) NSString *loginValue;
+@property (strong) NSString *passwordValue;
+
 - (IBAction) connectButtonPressed:(id)sender;
+- (IBAction) loginButtonPressed:(id)sender;
 
 - (void) startScan;
 - (void) stopScan;
 - (BOOL) isLECapableHardware;
 
-- (void) pulse;
 - (void) updateWithHRMData:(NSData *)data;
 
 - (void) sendRRs:(NSArray *)rrs;
