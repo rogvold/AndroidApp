@@ -1,9 +1,10 @@
 package org.macondo.polar.evaluation;
 
-import org.macondo.polar.data.Training;
-
 import java.util.LinkedList;
 import java.util.List;
+
+import org.macondo.polar.data.Training;
+import org.macondo.polar.util.TimedValue;
 
 /**
  * <p></p>

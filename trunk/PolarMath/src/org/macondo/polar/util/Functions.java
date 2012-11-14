@@ -1,4 +1,4 @@
-package org.macondo.polar.evaluation;
+package org.macondo.polar.util;
 
 /**
  * <p>Some basic functions for FFT</p>

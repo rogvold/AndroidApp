@@ -7,16 +7,26 @@ import java.util.List;
 import org.macondo.polar.data.Training;
 import org.macondo.polar.evaluation.CV;
 import org.macondo.polar.evaluation.Evaluation;
-import org.macondo.polar.evaluation.TimedValue;
+import org.macondo.polar.evaluation.FrequencyFromIntervals;
 import org.macondo.polar.evaluation.hrv.AMoPercents;
 import org.macondo.polar.evaluation.hrv.BP;
 import org.macondo.polar.evaluation.hrv.IN;
-import org.macondo.polar.evaluation.hrv.Mo;
+import org.macondo.polar.evaluation.spectrum.HF;
+import org.macondo.polar.evaluation.spectrum.HFPercents;
+import org.macondo.polar.evaluation.spectrum.IC;
+import org.macondo.polar.evaluation.spectrum.LF;
+import org.macondo.polar.evaluation.spectrum.LFPercents;
+import org.macondo.polar.evaluation.spectrum.TP;
+import org.macondo.polar.evaluation.spectrum.ULF;
+import org.macondo.polar.evaluation.spectrum.ULFPercents;
+import org.macondo.polar.evaluation.spectrum.VLF;
+import org.macondo.polar.evaluation.spectrum.VLFPercents;
 import org.macondo.polar.evaluation.statistics.Average;
 import org.macondo.polar.evaluation.statistics.RMSSD;
 import org.macondo.polar.evaluation.statistics.SDNN;
 import org.macondo.polar.evaluation.time.PNN50;
 import org.macondo.polar.ui.hr.GraphDisplayPanel;
+import org.macondo.polar.util.TimedValue;
 
 /**
  * <p></p>
@@ -34,8 +44,12 @@ public class PolarUI {
             new CV(),
             new AMoPercents(),
             new BP(),
-            new Mo(),
-            new IN()
+            new IN(),
+            new HFPercents(),
+            new LFPercents(),
+            new ULFPercents(),
+            new VLFPercents(),
+            new IC()
     ));
 
 

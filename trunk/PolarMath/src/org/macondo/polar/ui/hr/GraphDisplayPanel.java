@@ -1,20 +1,23 @@
 package org.macondo.polar.ui.hr;
 
-import org.macondo.polar.data.Training;
-import org.macondo.polar.evaluation.TimedValue;
-
-import javax.swing.*;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.SoftBevelBorder;
-import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.ListIterator;
+
+import javax.swing.JPanel;
+import javax.swing.border.BevelBorder;
+import javax.swing.border.SoftBevelBorder;
+
+import org.macondo.polar.data.Training;
+import org.macondo.polar.util.TimedValue;
 
 /**
  * <p>Panel for displaying graphs</p>

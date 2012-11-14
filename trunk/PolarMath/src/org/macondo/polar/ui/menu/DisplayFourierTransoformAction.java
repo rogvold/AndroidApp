@@ -1,15 +1,15 @@
 package org.macondo.polar.ui.menu;
 
-import org.macondo.polar.ui.PolarUI;
-import org.macondo.polar.ui.Polar;
-import org.macondo.polar.evaluation.FFT;
-import org.macondo.polar.evaluation.Harmonics;
-import org.macondo.polar.evaluation.TimedValue;
-
-import javax.swing.*;
 import java.awt.event.ActionEvent;
-import java.util.List;
 import java.util.LinkedList;
+import java.util.List;
+
+import javax.swing.AbstractAction;
+
+import org.macondo.polar.ui.Polar;
+import org.macondo.polar.util.FFT;
+import org.macondo.polar.util.Periodogram;
+import org.macondo.polar.util.TimedValue;
 
 /**
  * <p></p>
@@ -24,13 +24,13 @@ public class DisplayFourierTransoformAction extends AbstractAction {
     }
 
     public void actionPerformed(ActionEvent e) {
-        final List<Harmonics> fft = Polar.getPolarUI().getTraining().evaluate(new FFT());
+        final List<Periodogram> fft = Polar.getPolarUI().getTraining().evaluate(new FFT());
         List<TimedValue<Integer>> values = new LinkedList<TimedValue<Integer>>();
 
-        for (Harmonics harmonics : fft) {
+        for (Periodogram periodogram : fft) {
             values.add(new TimedValue<Integer>(
-                    (int) (100000 * harmonics.getFrequency()),
-                    (int) harmonics.getValue().abs()
+                    (int) (100000 * periodogram.getFrequency()),
+                    (int) periodogram.getValue()
             ));
         }
 

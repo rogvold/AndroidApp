@@ -1,9 +1,9 @@
 package org.macondo.polar.data;
 
-import org.macondo.polar.evaluation.Evaluation;
-
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
+
+import org.macondo.polar.evaluation.Evaluation;
 
 /**
  * <p></p>

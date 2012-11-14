@@ -6,8 +6,11 @@ import org.macondo.polar.evaluation.Evaluation;
 public class IC implements Evaluation<Double> {
 	
 	public Double evaluate(Training training) {
-		// TODO: implement
-		return null;
+		double hf = training.evaluate(new HF());
+		double lf = training.evaluate(new LF());
+		double vlf = training.evaluate(new LF());
+		
+		return (lf + vlf) / hf;
 	}
 
 }

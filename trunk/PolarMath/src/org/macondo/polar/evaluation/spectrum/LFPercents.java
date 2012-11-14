@@ -6,8 +6,9 @@ import org.macondo.polar.evaluation.Evaluation;
 public class LFPercents implements Evaluation<Double> {
 	
 	public Double evaluate(Training training) {
-		// TODO: implement
-		return null;
+		double lf = training.evaluate(new LF());
+		double tp = training.evaluate(new TP());
+		return (lf / tp) * 100;
 	}
 
 }

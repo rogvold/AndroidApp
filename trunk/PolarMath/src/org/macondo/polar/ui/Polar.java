@@ -1,11 +1,11 @@
 package org.macondo.polar.ui;
 
-import org.macondo.polar.ui.menu.PolarMenu;
-import org.macondo.polar.data.Training;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
 import java.io.IOException;
+
+import javax.swing.JFrame;
+
+import org.macondo.polar.ui.menu.PolarMenu;
 
 /**
  * <p></p>

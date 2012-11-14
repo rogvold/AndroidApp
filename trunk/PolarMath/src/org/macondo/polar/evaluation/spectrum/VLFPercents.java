@@ -6,8 +6,9 @@ import org.macondo.polar.evaluation.Evaluation;
 public class VLFPercents implements Evaluation<Double> {
 	
 	public Double evaluate(Training training) {
-		// TODO: implement
-		return null;
+		double vlf = training.evaluate(new VLF());
+		double tp = training.evaluate(new TP());
+		return (vlf / tp) * 100;
 	}
 
 }

@@ -11,7 +11,8 @@ public class Mo implements Evaluation<Double> {
 	public Double evaluate(Training training) {
 		List<Integer> intervals = training.getIntervals();
 		
-		Histogram h = new Histogram(intervals.size()).init();
+		//Histogram h = new Histogram(intervals.size()).init();
+		Histogram h = new Histogram().init();
 		for (Integer interval : intervals) {
             h.addRRInterval(interval);
         }

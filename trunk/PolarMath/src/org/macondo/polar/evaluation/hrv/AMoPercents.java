@@ -10,7 +10,8 @@ public class AMoPercents implements Evaluation<Integer> {
 	
 	public Integer evaluate(Training training) {
 		List<Integer> intervals = training.getIntervals();
-		Histogram h = new Histogram(intervals.size()).init();
+		//Histogram h = new Histogram(intervals.size()).init();
+		Histogram h = new Histogram().init();
 		for (Integer interval : intervals) {
             h.addRRInterval(interval);
         }
