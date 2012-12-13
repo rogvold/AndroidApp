@@ -235,7 +235,7 @@
     NSString* dateString = [dateFormatter stringFromDate:startTime];
     NSString* uuid = (NSString *)CFBridgingRelease(CFUUIDCreateString(NULL, [self.currentlyConnectedPeripheral UUID]));
     NSArray* objects = @[dateString, uuid, [self.currentlyConnectedPeripheral name], rrs, self.loginValue, self.passwordValue, self.create == 0 ? @"0" : @"1"];
-    NSArray* keys = @[@"start", @"device_id", @"device_name", @"rates", @"id", @"password", @"create"];
+    NSArray* keys = @[@"start", @"device_id", @"device_name", @"rates", @"email", @"password", @"create"];
     
     self.create = 0;
     NSDictionary* JSONDictionary = [NSDictionary dictionaryWithObjects:objects forKeys:keys];
