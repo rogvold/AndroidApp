@@ -45,8 +45,7 @@ public class PolarUI {
             new LFPercents(),
             new ULFPercents(),
             new VLFPercents(),
-            new IC(),
-            new Autocorrelation()
+            new IC()
     ));
 
 
