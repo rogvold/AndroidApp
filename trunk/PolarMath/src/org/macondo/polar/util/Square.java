@@ -20,7 +20,7 @@ public class Square {
 	public double Calculate(){
 		double square = 0;
 		Collections.sort(this.periodogram, Square.FrequencyComparator);
-		for (int i = 0; i < this.periodogram.size() - 1; i++) {
+		/*for (int i = 0; i < this.periodogram.size() - 1; i++) {
 			double value1 = this.periodogram.get(i).getValue();
 			double value2 = this.periodogram.get(i + 1).getValue();
 			double freq1 = this.periodogram.get(i).getFrequency();
@@ -41,7 +41,12 @@ public class Square {
 			}
 			double avgValue = (value1 + value2) / 2;
 			double freq = freq2 - freq1;
-			square += freq * avgValue;
+			square += freq * avgValue * 1000000;
+		}*/
+		for (int i = 0, size = periodogram.size(); i < size; i++) {
+			if (periodogram.get(i).getFrequency() >= left && periodogram.get(i).getFrequency() <= right) {
+				square += periodogram.get(i).getValue();
+			}
 		}
 		return square;
 	}
