@@ -27,6 +27,8 @@
 		FACB19281621844300BF2D66 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = FACB19261621844300BF2D66 /* InfoPlist.strings */; };
 		FACB192B1621844300BF2D66 /* HeartRateMonitorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FACB192A1621844300BF2D66 /* HeartRateMonitorTests.m */; };
 		FACB19351621866800BF2D66 /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FACB19341621866800BF2D66 /* CoreBluetooth.framework */; };
+		FAE1C86E167E34A7004F927B /* KeychainItemWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = FAE1C86D167E34A7004F927B /* KeychainItemWrapper.m */; };
+		FAE1C871167E3941004F927B /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAE1C870167E3941004F927B /* Security.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,6 +70,9 @@
 		FACB19291621844300BF2D66 /* HeartRateMonitorTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HeartRateMonitorTests.h; sourceTree = "<group>"; };
 		FACB192A1621844300BF2D66 /* HeartRateMonitorTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = HeartRateMonitorTests.m; sourceTree = "<group>"; };
 		FACB19341621866800BF2D66 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
+		FAE1C86C167E34A7004F927B /* KeychainItemWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KeychainItemWrapper.h; sourceTree = "<group>"; };
+		FAE1C86D167E34A7004F927B /* KeychainItemWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KeychainItemWrapper.m; sourceTree = "<group>"; };
+		FAE1C870167E3941004F927B /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +80,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FAE1C871167E3941004F927B /* Security.framework in Frameworks */,
 				FAB310A216282EE5005B3E4A /* QuartzCore.framework in Frameworks */,
 				FACB19351621866800BF2D66 /* CoreBluetooth.framework in Frameworks */,
 				FACB18FA1621844300BF2D66 /* UIKit.framework in Frameworks */,
@@ -99,6 +105,7 @@
 		FACB18EA1621844300BF2D66 = {
 			isa = PBXGroup;
 			children = (
+				FAE1C870167E3941004F927B /* Security.framework */,
 				FACB18FF1621844300BF2D66 /* HeartRateMonitor */,
 				FACB19231621844300BF2D66 /* HeartRateMonitorTests */,
 				FACB18F81621844300BF2D66 /* Frameworks */,
@@ -131,6 +138,8 @@
 		FACB18FF1621844300BF2D66 /* HeartRateMonitor */ = {
 			isa = PBXGroup;
 			children = (
+				FAE1C86C167E34A7004F927B /* KeychainItemWrapper.h */,
+				FAE1C86D167E34A7004F927B /* KeychainItemWrapper.m */,
 				FACB19081621844300BF2D66 /* AppDelegate.h */,
 				FACB19091621844300BF2D66 /* AppDelegate.m */,
 				FACB19111621844300BF2D66 /* MainStoryboard.storyboard */,
@@ -293,6 +302,7 @@
 				FACB19161621844300BF2D66 /* ViewController.m in Sources */,
 				FAB3113216289876005B3E4A /* GraphViewController.m in Sources */,
 				FA82F4AA167E24CF007939DA /* LoginViewController.m in Sources */,
+				FAE1C86E167E34A7004F927B /* KeychainItemWrapper.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
