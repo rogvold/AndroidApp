@@ -69,8 +69,6 @@
 @property (strong) IBOutlet NSArrayController *arrayController;
 @property (strong) IBOutlet NSTextField *loginField;
 @property (strong) IBOutlet NSSecureTextField *passwordField;
-@property (strong) IBOutlet NSTextField *login;
-@property (strong) IBOutlet NSTextField *password;
 @property (strong) IBOutlet NSButton *loginButton;
 @property (strong) IBOutlet NSButton *connectButton;
 

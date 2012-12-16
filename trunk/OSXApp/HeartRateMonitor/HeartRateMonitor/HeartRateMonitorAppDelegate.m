@@ -158,8 +158,6 @@
     [self loginField].hidden = true;
     [self saveLogin].hidden = true;
     [self passwordField].hidden = true;
-    [self login].hidden = true;
-    [self password].hidden = true;
     [self connectButton].hidden = false;
     [self heartRateLabel].hidden = false;
     [self bpmLabel].hidden = false;
