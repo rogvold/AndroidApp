@@ -47,6 +47,7 @@
 
 #import "HeartRateMonitorAppDelegate.h"
 #import <QuartzCore/QuartzCore.h>
+#import "EMKeychain.h"
 #import "JSONKit.h"
 
 @implementation HeartRateMonitorAppDelegate
@@ -71,9 +72,18 @@
     self.RRsToSend = [NSMutableArray array];
     self.startTime = nil;
     self.currentlyConnectedPeripheral = nil;
+    self.serviceName = @"HRMLogin";
+    self.keychain = [EMGenericKeychainItem genericKeychainItemForService: self.serviceName withUsername:nil];
+    
+    NSString *log = self.keychain.username;
+    NSString *pass = self.keychain.password;
+    if (log && pass)
+    {
+        self.loginField.stringValue = log;
+        self.passwordField.stringValue = pass;
+    }
 
     manager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
-    [self startScan];
 }
 
 - (void) dealloc
@@ -133,8 +143,20 @@
 {
     self.loginValue = [self.loginField stringValue];
     self.passwordValue = [self.passwordField stringValue];
+    
+    if (self.saveLogin.state == NSOnState && !self.keychain ||
+        (self.keychain && (self.keychain.username != self.loginValue ||
+                           self.keychain.password != self.passwordValue)))
+    {
+        [EMGenericKeychainItem deleteKeychainItem:self.keychain error:nil];
+        self.keychain = [EMGenericKeychainItem addGenericKeychainItemForService: self.serviceName
+                                                                   withUsername: self.loginValue
+                                                                       password: self.passwordValue];
+    }
+    
     [self loginButton].hidden = true;
     [self loginField].hidden = true;
+    [self saveLogin].hidden = true;
     [self passwordField].hidden = true;
     [self login].hidden = true;
     [self password].hidden = true;

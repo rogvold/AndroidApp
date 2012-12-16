@@ -17,6 +17,8 @@
 		44B0268213F5DD2A00541EA5 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 44B0268113F5DD2A00541EA5 /* QuartzCore.framework */; };
 		9A090D9013FDBF7E00CCE962 /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 9A090D8F13FDBF7E00CCE962 /* AppIcon.icns */; };
 		9A8EF42513FC835E00CDFA4B /* Human.png in Resources */ = {isa = PBXBuildFile; fileRef = 9A8EF42413FC835E00CDFA4B /* Human.png */; };
+		FAE1C87B167E41BD004F927B /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAE1C87A167E41BD004F927B /* Security.framework */; };
+		FAE1C881167E46D7004F927B /* EMKeychain.m in Sources */ = {isa = PBXBuildFile; fileRef = FAE1C880167E46D7004F927B /* EMKeychain.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +39,9 @@
 		44B0268113F5DD2A00541EA5 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		9A090D8F13FDBF7E00CCE962 /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = AppIcon.icns; sourceTree = "<group>"; };
 		9A8EF42413FC835E00CDFA4B /* Human.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Human.png; sourceTree = "<group>"; };
+		FAE1C87A167E41BD004F927B /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
+		FAE1C87F167E46D7004F927B /* EMKeychain.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EMKeychain.h; sourceTree = "<group>"; };
+		FAE1C880167E46D7004F927B /* EMKeychain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EMKeychain.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -44,6 +49,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FAE1C87B167E41BD004F927B /* Security.framework in Frameworks */,
 				449EC7C713F9A3110074C363 /* IOBluetooth.framework in Frameworks */,
 				44B0268213F5DD2A00541EA5 /* QuartzCore.framework in Frameworks */,
 				44B0264B13F5D44000541EA5 /* Cocoa.framework in Frameworks */,
@@ -73,6 +79,7 @@
 		44B0264913F5D44000541EA5 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FAE1C87A167E41BD004F927B /* Security.framework */,
 				449EC7C613F9A3110074C363 /* IOBluetooth.framework */,
 				44B0268113F5DD2A00541EA5 /* QuartzCore.framework */,
 				44B0264A13F5D44000541EA5 /* Cocoa.framework */,
@@ -94,6 +101,8 @@
 		44B0265013F5D44000541EA5 /* HeartRateMonitor */ = {
 			isa = PBXGroup;
 			children = (
+				FAE1C87F167E46D7004F927B /* EMKeychain.h */,
+				FAE1C880167E46D7004F927B /* EMKeychain.m */,
 				44B0265C13F5D44000541EA5 /* HeartRateMonitorAppDelegate.h */,
 				44B0265D13F5D44000541EA5 /* HeartRateMonitorAppDelegate.m */,
 				44B0265F13F5D44000541EA5 /* MainMenu.xib */,
@@ -184,6 +193,7 @@
 			files = (
 				44B0265713F5D44000541EA5 /* main.m in Sources */,
 				44B0265E13F5D44000541EA5 /* HeartRateMonitorAppDelegate.m in Sources */,
+				FAE1C881167E46D7004F927B /* EMKeychain.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

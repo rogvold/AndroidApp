@@ -47,6 +47,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <IOBluetooth/IOBluetooth.h>
+#import "EMKeychain.h"
 
 @interface HeartRateMonitorAppDelegate : NSObject <NSApplicationDelegate, CBCentralManagerDelegate, CBPeripheralDelegate> 
 {
@@ -92,6 +93,9 @@
 
 @property (strong) NSString *loginValue;
 @property (strong) NSString *passwordValue;
+@property (strong) NSString *serviceName;
+@property (strong) IBOutlet NSButton *saveLogin;
+@property (strong) EMKeychainItem *keychain;
 
 - (IBAction) connectButtonPressed:(id)sender;
 - (IBAction) loginButtonPressed:(id)sender;
