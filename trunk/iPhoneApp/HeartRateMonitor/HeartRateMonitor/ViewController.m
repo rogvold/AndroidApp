@@ -9,26 +9,9 @@
 #import "ViewController.h"
 #import <CoreBluetooth/CoreBluetooth.h>
 #import <CoreFoundation/CoreFoundation.h>
-#import "JSONKit.h"
 #include <mach/mach.h>
 
 @interface ViewController () <CBCentralManagerDelegate, CBPeripheralDelegate, UITableViewDataSource, UITableViewDelegate>
-@property (strong) NSMutableArray *heartRateMonitors;
-@property (nonatomic, strong) IBOutlet UILabel *heartRateLabel;
-@property (nonatomic, strong) IBOutlet UILabel *connectedMonitor;
-@property (nonatomic, strong) IBOutlet UITableView *sensorsTable;
-@property (nonatomic, strong) IBOutlet UILabel *bpm;
-@property (nonatomic, strong) CBCentralManager *manager;
-@property (nonatomic, strong) CBPeripheral *currentlyConnectedPeripheral;
-@property (nonatomic, strong) CBPeripheral *lastConnectedPeripheral;
-// RR intervals
-@property (retain) NSMutableArray *RRs;
-// Queue for intervals waiting to be sent
-@property (retain) NSMutableArray *RRsToSend;
-// Start time for each portion of intervals sending to server
-@property (retain) NSDate *startTime;
-
-- (void) sendRRs:(NSArray *)rrs;
 
 //@property (strong) NSMutableArray *heartRate;
 @end
@@ -46,9 +29,9 @@
 @synthesize RRs;
 @synthesize RRsToSend;
 @synthesize startTime;
-//@synthesize heartRate = _heartRate;
-
-
+@synthesize create;
+@synthesize login =_login;
+@synthesize password = _password;
 
 - (void)loadView
 {
@@ -57,6 +40,7 @@
     self.RRs = [NSMutableArray array];
     self.RRsToSend = [NSMutableArray array];
     self.startTime = nil;
+    self.create = 1;
     self.manager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
     [self startScan];
 }
@@ -226,6 +210,7 @@
     [aPeripheral setDelegate:self];
     [aPeripheral discoverServices:nil];
     [self setLastConnectedPeripheral:aPeripheral];
+    self.startTime = [NSDate date];
     [[self sensorsTable] reloadData];
 }
 
@@ -360,7 +345,7 @@ didDiscoverCharacteristicsForService:(CBService *)service
         NSMutableArray* rrs = [NSMutableArray array];
         uint16_t rr = (CFSwapInt16LittleToHost(*(uint16_t *)(&reportData[rrByte])) * 1000) / 1024;
         while (rr != 0) {
-            NSLog([NSString stringWithFormat:@"RR: %d", rr]);
+            NSLog(@"%@", [NSString stringWithFormat:@"RR: %d", rr]);
             [rrs addObject:[NSNumber numberWithInt:rr]];
             rrByte += 2;
             rr = (CFSwapInt16LittleToHost(*(uint16_t *)(&reportData[rrByte])) * 1000) / 1024;
@@ -372,7 +357,6 @@ didDiscoverCharacteristicsForService:(CBService *)service
             [self sendRRs:RRsToSend];
             [RRsToSend removeAllObjects];
             self.startTime = [NSDate date];
-            
         }
     }
     self.heartRateLabel.text = [NSString stringWithFormat:@"%d", bpm];
@@ -448,12 +432,17 @@ didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic
 - (void) sendRRs:(NSArray *)rrs
 {
     NSString* jsonString = [self makeJSON:rrs];
-    NSURL* url = [NSURL URLWithString:@"http://rogvold.campus.mipt.ru:8080/BaseProjectWeb/faces/input"];
+    NSURL* url = [NSURL URLWithString:@"http://reshaka.ru:8080/BaseProjectWeb/faces/input"];
+    
+    
+    NSString* stringToSend = [@"json=" stringByAppendingString:jsonString];
+    NSData* dataToSend = [stringToSend dataUsingEncoding:NSUTF8StringEncoding];
+    
     
     NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:url];
     [request setHTTPMethod:@"POST"];
-    [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-    [request setHTTPBody:[[@"json=" stringByAppendingString:jsonString] dataUsingEncoding:NSUTF8StringEncoding]];
+    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+    [request setHTTPBody:dataToSend];
     [NSURLConnection connectionWithRequest:request delegate:self];
 }
 
@@ -464,15 +453,20 @@ didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic
     [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss.SSS"];
     NSString* dateString = [dateFormatter stringFromDate:startTime];
     NSString* uuid = (__bridge NSString *)CFUUIDCreateString(NULL, [self.currentlyConnectedPeripheral UUID]);
-    NSArray* objects = [NSArray arrayWithObjects:dateString, uuid, [self.currentlyConnectedPeripheral name], rrs, @"123", nil];
-    NSArray* keys = [NSArray arrayWithObjects:@"start", @"device_id", @"device_name", @"rates", @"id", nil];
+    // !!! HARDCODE: user_id, device_id, device_name
+    NSArray* objects = [NSArray arrayWithObjects:dateString, uuid, [self.currentlyConnectedPeripheral name], rrs, self.login, self.password, self.create == 0 ? @"0" : @"1", nil];
+    NSArray* keys = [NSArray arrayWithObjects:@"start", @"device_id", @"device_name", @"rates", @"email", @"password", @"create", nil];
+    self.create = 0;
     NSDictionary* JSONDictionary = [NSDictionary dictionaryWithObjects:objects forKeys:keys];
     NSError* error = nil;
     NSData* jsonData = [NSJSONSerialization dataWithJSONObject:JSONDictionary options:NSJSONWritingPrettyPrinted error:&error];
     NSString* json = nil;
-    if (! jsonData) {
+    if (! jsonData)
+    {
         NSLog(@"Got an error: %@", error);
-    } else {
+    }
+    else
+    {
         json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
     }
     return json;
