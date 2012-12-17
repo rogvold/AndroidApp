@@ -159,7 +159,7 @@ public class HrmActivity extends Activity {
 
 		/* Check if Bluetooth Low Energy is supported on phone */
 		try {
-			Class<?> object = Class.forName(className);
+			Class<?> object = Class.forName(className);//className = "android.bluetooth.BluetoothGattService"
 			ifPhoneSupportsBLE = true;
 		} catch (Exception e) {
 			ifPhoneSupportsBLE = false;
@@ -400,7 +400,9 @@ public class HrmActivity extends Activity {
 		public void indicationLeCb(BluetoothDevice device, String service,
 				int length, byte[] data) {
 			Log.i("indicationLeCb", "indicationLeCb");
-			//parseData(length, data);
+			if (parity == 0)
+				parseData(length, data);
+			parity = 1 - parity;
 		}
 
 		public void notificationLeCb(BluetoothDevice device, String service,
@@ -450,7 +452,8 @@ public class HrmActivity extends Activity {
 				a[i] = RrIntervals.poll();
 			msg.put("device_name", "Polar H7");
 			msg.put("rates", new JSONArray(Arrays.asList(a)));
-			msg.put("id", "751");
+			msg.put("email", "ruzov.vo@gmail.com");
+			msg.put("id", "123");
 			if (isNewSession) {
 				msg.put("create", "1");
 				isNewSession = false;

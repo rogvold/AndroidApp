@@ -18,7 +18,7 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name=".HrmActivity"
-            android:label="@string/title_activity_hrm" >
+            android:label="@string/title_activity_hrm">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
