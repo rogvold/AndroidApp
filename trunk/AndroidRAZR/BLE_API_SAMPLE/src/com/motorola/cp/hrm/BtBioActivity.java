@@ -616,14 +616,14 @@ public class BtBioActivity extends Activity  {
 
         public void indicationLeCb(BluetoothDevice device, String service, int length, byte[] data) 
         {
-        	Log.i(TAG,"indicationLeCb" );
+        	Log.i(TAG,"indicationLeCb " + Byte.toString(data[0]) + " " + Byte.toString(data[4]) + " " + Byte.toString(data[5]));
         	parseData(length , data);
         }
 
         public void notificationLeCb(BluetoothDevice device, String service, int length,
         		byte[] data) 
         {
-        	Log.i(TAG,"notificationLeCb" );
+        	Log.i(TAG,"notificationLeCb " + Byte.toString(data[0]) + " " + Byte.toString(data[4]) + " " + Byte.toString(data[5]));
         	parseData(length , data);
         }
     }
