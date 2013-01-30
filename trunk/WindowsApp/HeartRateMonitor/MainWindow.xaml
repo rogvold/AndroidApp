@@ -1,19 +1,27 @@
 ﻿<Window x:Class="HeartRateMonitor.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="350" Width="509.44">
+        xmlns:custom="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Input.Toolkit"
+        Title="MainWindow" Height="390" Width="366.559" Closed="WindowClosed">
     <Grid Margin="0,0,2,0">
-        <Label Content="Connected dongle:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0"/>
-        <Label x:Name="dongleName" Content="" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="128,10,0,0" Width="271"/>
-        <Button Content="Discover" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="45,41,0,0" Click="DiscoverButtonPressed"/>
-        <ListBox x:Name="deviceList" HorizontalAlignment="Left" Height="100" VerticalAlignment="Top" Width="274" Margin="125,41,0,0" SourceUpdated="deviceList_SourceUpdated"/>
-        <Button Content="Stop" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="45,68,0,0" Click="StopDiscoverButtonPressed"/>
-        <Button x:Name="connectButton" Content="Connect" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="45,146,0,0" Click="ConnectButtonPressed"/>
-        <Button Content="Open" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="404,14,0,0" Click="OpenPortButtonClick"/>
-        <Label x:Name="connectedSensor" Content="" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="125,146,0,0" Width="274"/>
-        <Button x:Name="disconnectButton" Content="Disconnect" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Margin="404,146,0,0" Click="DisconnectButtonPressed"/>
-        <Label x:Name="heartRate" Content="0" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="45,213,0,0" FontSize="36" Width="75"/>
-        <Label Content="bpm" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="125,229,0,0" FontSize="24"/>
-
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="18*"/>
+            <ColumnDefinition Width="10*"/>
+            <ColumnDefinition Width="97*"/>
+        </Grid.ColumnDefinitions>
+        <Label Content="Connected dongle:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="4.06,75.116,0,0" Grid.ColumnSpan="3"/>
+        <Label x:Name="dongleName" Content="" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35.293,75.076,0,0" Width="225.189" Grid.Column="2"/>
+        <ListBox x:Name="deviceList" HorizontalAlignment="Left" Height="100" VerticalAlignment="Top" Width="336.061" Margin="4.06,106.036,0,0" Grid.ColumnSpan="3"/>
+        <Button x:Name="connectButton" Content="Connect" HorizontalAlignment="Left" VerticalAlignment="Top" Width="64.017" Margin="4.06,211.076,0,0" Click="ConnectButtonPressed" Grid.ColumnSpan="2"/>
+        <Label x:Name="connectedSensor" Content="" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,211.076,0,0" Width="162.115" Grid.Column="2"/>
+        <Button x:Name="disconnectButton" Content="Disconnect" HorizontalAlignment="Left" VerticalAlignment="Top" Width="64" Margin="196.482,211.036,0,0" Click="DisconnectButtonPressed" Grid.Column="2"/>
+        <Label x:Name="heartRate" Content="0" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="4.06,278.076,0,0" FontSize="36" Width="75" Grid.ColumnSpan="2"/>
+        <Label Content="bpm" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,294.076,0,0" FontSize="24" Grid.Column="2"/>
+        <Label Content="Login:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20.513,10,0,0" Grid.ColumnSpan="2"/>
+        <Label Content="Password:" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,44.156,0,0" Grid.ColumnSpan="2"/>
+        <Button Content="Sign in" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Grid.Column="2" Margin="185.482,12,0,0" Click="SignInButtonPressed" TabIndex="2"/>
+        <PasswordBox x:Name="passwordField" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Column="1" Margin="12.365,44.156,0,0" Width="180" Height="26.04" TabIndex="1" Grid.ColumnSpan="2" VerticalContentAlignment="Center"/>
+        <custom:AutoCompleteBox x:Name="usernameField" HorizontalAlignment="Left" VerticalAlignment="Top" Grid.Column="1" Margin="12.364,9.92,0,0" Width="180" Height="26.04" TabIndex="0" Grid.ColumnSpan="2" VerticalContentAlignment="Center"/>
+        
     </Grid>
 </Window>

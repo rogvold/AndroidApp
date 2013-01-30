@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -14,12 +13,16 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using BGAPI;
 using System.Threading;
 using System.IO;
 using System.ComponentModel;
 using System.Windows.Threading;
-using System.Diagnostics.Contracts;
+using System.Globalization;
+using Newtonsoft.Json;
+using System.Net;
+using System.Windows.Forms;
+using System.Net.NetworkInformation;
+using System.Data.SQLite;
 
 namespace HeartRateMonitor
 {
@@ -28,21 +31,33 @@ namespace HeartRateMonitor
     /// </summary>
     public partial class MainWindow : Window, BGAPIListener
     {
-        private static string portName;
-        public static string PortName
+        private SerialPort _port;
+
+        public SerialPort Port
         {
             get
             {
-                return portName;
+                return _port;
             }
             set
             {
                 if (value != null)
-                {
-                    portName = value;
-                }
+                    _port = value;
             }
         }
+
+        private DateTime startTime;
+
+        private List<ushort> RRsToSend;
+
+        private int create;
+
+        private BLEDevice connectedDevice;
+
+        private string dbConnection;
+
+        private string Username;
+        private string Password;
 
         protected BGAPI.BGAPI bgapi;
         protected internal BLEDeviceList devList = new BLEDeviceList();
@@ -51,29 +66,45 @@ namespace HeartRateMonitor
         {
             InitializeComponent();
             deviceList.ItemsSource = devList.Devices;
+            //if (Properties.Settings.Default.LastUserName != null)
+            //    usernameField.Text = Properties.Settings.Default.LastUserName;
+            usernameField.ItemsSource = Properties.Settings.Default.UserNames;
+            dbConnection = "Data Source=local.s3db";
+            if (IsConnectedToInternet)
+            {
+                SendSavedIntervals();
+            }
         }
 
         private void OpenPortButtonClick(object sender, RoutedEventArgs e)
         {
-            var window = new ChoosePortWindow();
-            window.Closed += ChoosePortWindowClosed;
-            window.Show();
-        }
-
-        public void ChoosePortWindowClosed(object sender, EventArgs e)
-        {
-            if (((ChoosePortWindow)sender).CloseArgument)
-                ConnectDongle();
+            //var window = new ChoosePortWindow();
+            //window.Closed += ChoosePortWindowClosed;
+            //window.Show();
         }
 
         private void ConnectDongle()
         {
-            SerialPort port = new SerialPort(PortName);
-            //BinaryWriter bw = new BinaryWriter(port.BaseStream);
-            //BinaryReader br = new BinaryReader(port.BaseStream);
-            bgapi = new BGAPI.BGAPI(new BGAPITransport(port));
-            bgapi.addListener(this);
-            bgapi.send_system_get_info();
+            string[] ports = SerialPort.GetPortNames();
+            foreach (string portName in ports)
+            {
+                try
+                {
+                    SerialPort port = new SerialPort(portName);
+                    bgapi = new BGAPI.BGAPI(new BGAPITransport(port));
+                    bgapi.addListener(this);
+                    bgapi.send_system_get_info();
+                    this.Port = port;
+                    startTime = DateTime.Now;
+                    RRsToSend = new List<ushort>();
+                    create = 1;
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
         }
 
         private const int IDLE = 0;
@@ -112,6 +143,9 @@ namespace HeartRateMonitor
         {
             string name = "BLED112:" + major + "." + minor + "." + patch + " (" + build + ") " + "ll=" + ll_version + " hw=" + hw;
             Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { dongleName.Content = name; });
+            devList.Clear();
+            bgapi.send_gap_set_scan_parameters(10, 250, 1);
+            bgapi.send_gap_discover(1);
         }
         public virtual void receive_system_endpoint_tx()
         {
@@ -222,7 +256,8 @@ namespace HeartRateMonitor
             {
                 bledevice = devList.GetFromAddress(address.ToString());
                 this.connection = conn;
-                Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { connectedSensor.Content = "[" + address.ToString() + "] Conn = " + conn + " Flags = " + flags; });
+                connectedDevice = bledevice;
+                Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { connectedSensor.Content = bledevice.Name; });
                 bgapi.send_attclient_read_by_handle(connection, 0x24);
             }
             else
@@ -434,6 +469,7 @@ namespace HeartRateMonitor
             string name = System.Text.Encoding.ASCII.GetString(data).Trim();
             name = name.Replace("\t", String.Empty);
             name = name.Replace("\n", String.Empty);
+            name = name.Substring(1);
             if (!name.Contains('\0'))
                 d.Name = name;
             d.Rssi = rssi;
@@ -527,11 +563,6 @@ namespace HeartRateMonitor
             bgapi.send_gap_discover(1);
         }
 
-        private void deviceList_SourceUpdated(object sender, DataTransferEventArgs e)
-        {
-
-        }
-
         private void StopDiscoverButtonPressed(object sender, RoutedEventArgs e)
         {
             bgapi.send_gap_end_procedure();
@@ -609,6 +640,308 @@ namespace HeartRateMonitor
                     rr = (ushort) ((BitConverter.ToUInt16(rrArray, 0) * 1000) / 1024);
                 }
                 rrs.Add(rr);
+                RRsToSend.AddRange(rrs);
+                if (RRsToSend.Count >= 10)
+                {
+                    if (IsConnectedToInternet)
+                    {
+                        string date = startTime.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
+                        SendJSON(MakeIntervalsJSON(RRsToSend, date, connectedDevice.Name, connectedDevice.Address, Username, Password, create), "http://reshaka.ru:8080/BaseProjectWeb/faces/input");
+                    }
+                    else
+                    {
+                        SaveIntervals(RRsToSend);
+                    }
+                    RRsToSend.Clear();
+                    startTime = DateTime.Now;
+                    create = 0;
+                }
+            }
+        }
+
+        private void SaveIntervals(List<ushort> intervals)
+        {
+            try
+            {
+                SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+                cnn.Open();
+                SQLiteCommand userId = new SQLiteCommand(cnn);
+                userId.CommandText = String.Format("select user_id from Users where user_name = \"{0}\"", Username);
+                object user_id = userId.ExecuteScalar();
+                if (user_id == null)
+                {
+                    userId = new SQLiteCommand(cnn);
+                    userId.CommandText = String.Format("insert into Users (user_name, password) values(\"{0}\", \"{1}\")", Username, Password);
+                    user_id = userId.ExecuteScalar();
+                    userId.CommandText = String.Format("select user_id from Users where user_name = \"{0}\"", Username);
+                    user_id = userId.ExecuteScalar();
+                }
+                SQLiteCommand sessionId = new SQLiteCommand(cnn);
+                object session_id;
+                if (create == 1)
+                {
+                    sessionId.CommandText = String.Format("insert into Sessions (user_id, device_name, device_id, start_time) values({0}, \"{1}\", \"{2}\", \"{3}\")", user_id, connectedDevice.Name, connectedDevice.Address, startTime);
+                    session_id = sessionId.ExecuteScalar();
+                }
+                sessionId.CommandText = String.Format("select session_id from Sessions where user_id = \"{0}\"", user_id);
+                session_id = sessionId.ExecuteScalar();
+                foreach (ushort rr in intervals)
+                {
+                    SQLiteCommand intervalId = new SQLiteCommand(cnn);
+                    intervalId.CommandText = String.Format("insert into Intervals (value, session_id) values({0}, {1})", rr, session_id);
+                    object interval_id = intervalId.ExecuteScalar();
+                }
+                cnn.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        private void SendSavedIntervals()
+        {
+            try
+            {
+                BackgroundWorker bw = new BackgroundWorker();
+                bw.DoWork += new DoWorkEventHandler(
+                delegate(object o, DoWorkEventArgs args)
+                {
+                    SQLiteConnection cnn = new SQLiteConnection(dbConnection);
+                    cnn.Open();
+                    SQLiteCommand users = new SQLiteCommand(cnn);
+                    users.CommandText = "select user_id from users";
+                    SQLiteDataReader user_ids = users.ExecuteReader();
+                    List<int> result = new List<int>();
+                    while (user_ids.Read())
+                    {
+                        result.Add(user_ids.GetInt32(user_ids.GetOrdinal("user_id")));
+                    }
+                    user_ids.Close();
+                    foreach (int user_id in result)
+                    {
+                        SQLiteCommand userId = new SQLiteCommand(cnn);
+                        userId.CommandText = String.Format("select session_id from Sessions where user_id = \"{0}\"", user_id);
+                        SQLiteDataReader session_ids = userId.ExecuteReader();
+                        List<int> sessions = new List<int>();
+                        while (session_ids.Read())
+                        {
+                            sessions.Add(session_ids.GetInt32(session_ids.GetOrdinal("session_id")));
+                        }
+                        session_ids.Close();
+                        foreach (int session_id in sessions)
+                        {
+                            SQLiteCommand sessionId = new SQLiteCommand(cnn);
+                            sessionId.CommandText = String.Format("select value from Intervals where session_id = \"{0}\"", session_id);
+                            SQLiteDataReader interval_values = sessionId.ExecuteReader();
+                            List<ushort> intervals = new List<ushort>();
+                            while (interval_values.Read())
+                            {
+                                intervals.Add((ushort)interval_values.GetInt32(interval_values.GetOrdinal("value")));
+                            }
+                            interval_values.Close();
+                            SQLiteCommand userName = new SQLiteCommand(cnn);
+                            userName.CommandText = String.Format("select user_name from users where user_id = \"{0}\"", user_id);
+                            string username = userName.ExecuteScalar().ToString();
+                            SQLiteCommand passWord = new SQLiteCommand(cnn);
+                            passWord.CommandText = String.Format("select password from users where user_id = \"{0}\"", user_id);
+                            string password = passWord.ExecuteScalar().ToString();
+                            SQLiteCommand deviceName = new SQLiteCommand(cnn);
+                            deviceName.CommandText = String.Format("select device_name from sessions where session_id = \"{0}\"", session_id);
+                            string devicename = deviceName.ExecuteScalar().ToString();
+                            SQLiteCommand deviceId = new SQLiteCommand(cnn);
+                            deviceId.CommandText = String.Format("select device_id from sessions where session_id = \"{0}\"", session_id);
+                            string deviceid = deviceId.ExecuteScalar().ToString();
+                            SQLiteCommand startTime = new SQLiteCommand(cnn);
+                            startTime.CommandText = String.Format("select start_time from sessions where session_id = \"{0}\"", session_id);
+                            string date = startTime.ExecuteScalar().ToString();
+                            if (UserExists(username) == 1 && CheckUser(username, password) == 1)
+                            {
+                                List<ushort>[] intervalPackets = new List<ushort>[intervals.Count / 10 + 1];
+                                for (int j = 0; j < intervalPackets.Length; j++)
+                                {
+                                    intervalPackets[j] = new List<ushort>();
+                                }
+                                int i = 0;
+                                while (i != intervals.Count)
+                                {
+                                    intervalPackets[i / 10].Add(intervals[i]);
+                                    i++;
+                                }
+                                foreach (List<ushort> intervalPacket in intervalPackets)
+                                {
+                                    SendJSON(MakeIntervalsJSON(intervalPacket, date, devicename, deviceid, username, password, 1), "http://reshaka.ru:8080/BaseProjectWeb/faces/input");
+                                    Thread.Sleep(100);
+                                }
+                            }
+                            else
+                            {
+                                Console.WriteLine("Something wrong");
+                            }
+                        }
+                    }
+
+                    SQLiteCommand delete = new SQLiteCommand(cnn);
+                    delete.CommandText = "delete from users";
+                    object deleted = delete.ExecuteNonQuery();
+
+                    delete.CommandText = "delete from sessions";
+                    deleted = delete.ExecuteNonQuery();
+
+                    delete.CommandText = "delete from intervals";
+                    deleted = delete.ExecuteNonQuery();
+                    cnn.Close();
+                });
+                bw.RunWorkerAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        private HttpWebResponse SendJSON(string json, string url)
+        {
+            byte[] data = Encoding.UTF8.GetBytes(json);
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.Method = "POST";
+            request.ContentType = "application/x-www-form-urlencoded";
+            request.ContentLength = data.Length;
+            request.KeepAlive = true;
+            ServicePointManager.UseNagleAlgorithm = true;
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.CheckCertificateRevocationList = true;
+            ServicePointManager.DefaultConnectionLimit = Int32.MaxValue;
+
+            try
+            {
+                using (Stream outputStream = request.GetRequestStream())
+                    outputStream.Write(data, 0, data.Length);
+                return request.GetResponse() as HttpWebResponse;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return null;
+        }
+
+        private string MakeIntervalsJSON(List<ushort> intervals, 
+            string date, 
+            string deviceName, 
+            string deviceId,
+            string username,
+            string password,
+            int cr)
+        {
+            Dictionary<string, object> jsonDict = new Dictionary<string, object>();
+            jsonDict.Add("start", date);
+            jsonDict.Add("device_id", deviceId);
+            jsonDict.Add("device_name", deviceName);
+            jsonDict.Add("rates", intervals.ToArray());
+            jsonDict.Add("email", username);
+            jsonDict.Add("password", password);
+            jsonDict.Add("create", cr);
+            return "json=" + JsonConvert.SerializeObject(jsonDict);
+        }
+
+        private void WindowClosed(object sender, EventArgs e)
+        {
+            try
+            {
+                bgapi.send_connection_disconnect(connection);
+                bgapi.send_gap_end_procedure();
+                bgapi.disconnect();
+                this.Port.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        private void SignInButtonPressed(object sender, RoutedEventArgs e)
+        {
+            this.Username = this.usernameField.Text;
+            this.Password = this.passwordField.Password;
+            int exists = 1;
+            int passwordIsCorrect = 1;
+            if (IsConnectedToInternet)
+            {
+                exists = UserExists(Username);
+                if (exists == 1)
+                    passwordIsCorrect = CheckUser(Username, Password);
+            }
+            if (Properties.Settings.Default.UserNames != null && !Properties.Settings.Default.UserNames.Contains(Username))
+                Properties.Settings.Default.UserNames.Add(Username);
+            else if (Properties.Settings.Default.UserNames == null)
+            {
+                Properties.Settings.Default.UserNames = new System.Collections.Specialized.StringCollection();
+                Properties.Settings.Default.UserNames.Add(Username);
+            }
+            Properties.Settings.Default.LastUserName = Username;
+            Properties.Settings.Default.Save();
+            usernameField.ItemsSource = Properties.Settings.Default.UserNames;
+            usernameField.UpdateLayout();
+            ConnectDongle();
+        }
+
+        private int UserExists(string username)
+        {
+            Dictionary<string, object> jsonDict = new Dictionary<string, object>();
+            jsonDict.Add("purpose", "CheckUserExistence");
+            jsonDict.Add("email", username);
+            jsonDict.Add("secret", "h7a7RaRtvAVwnMGq5BV6");
+            string json = "json=" + JsonConvert.SerializeObject(jsonDict);
+            HttpWebResponse resp = SendJSON(json, "http://reshaka.ru:8080/BaseProjectWeb/mobileauth");
+            Stream responseStream = resp.GetResponseStream();
+            StreamReader sr = new StreamReader(responseStream);
+            string response = sr.ReadToEnd();
+            responseStream.Close();
+            Dictionary<string, string> respDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(response);
+            
+            return Convert.ToInt32(respDict["response"]);
+        }
+
+        private int CheckUser(string username, string password)
+        {
+            Dictionary<string, object> jsonDict = new Dictionary<string, object>();
+            jsonDict.Add("purpose", "CheckAuthorisationData");
+            jsonDict.Add("email", username);
+            jsonDict.Add("password", password);
+            jsonDict.Add("secret", "h7a7RaRtvAVwnMGq5BV6");
+            string json = "json=" + JsonConvert.SerializeObject(jsonDict);
+            HttpWebResponse resp = SendJSON(json, "http://reshaka.ru:8080/BaseProjectWeb/mobileauth");
+            Stream responseStream = resp.GetResponseStream();
+            StreamReader sr = new StreamReader(responseStream);
+            string response = sr.ReadToEnd();
+            responseStream.Close();
+            Dictionary<string, string> respDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(response);
+
+            return Convert.ToInt32(respDict["response"]);
+        }
+
+        public static bool IsConnectedToInternet
+        {
+            get
+            {
+                Uri url = new Uri("http://www.reshaka.ru/");
+                string pingurl = string.Format("{0}", url.Host);
+                string host = pingurl;
+                bool result = false;
+                Ping p = new Ping();
+                try
+                {
+                    PingReply reply = p.Send(host, 3000);
+                    if (reply.Status == IPStatus.Success)
+                        return true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    return false;
+                }
+                return result;
             }
         }
     }

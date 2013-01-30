@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
 using System.IO;
 using System.IO.Ports;
@@ -38,8 +36,15 @@ namespace BGAPI
         {
             this.port = port;
             Thread thr = new Thread(new ThreadStart(Run));
-            port.Open();
-            thr.Start();
+            try
+            {
+                port.Open();
+                thr.Start();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
         public virtual void Run()
@@ -108,7 +113,14 @@ namespace BGAPI
             {
                 //e.printStackTrace();
             }
-            port.Close();
+            try
+            {
+                port.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
         public virtual void sendPacket(BGAPIPacket p)
