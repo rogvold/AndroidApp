@@ -645,8 +645,7 @@ namespace HeartRateMonitor
                 {
                     if (IsConnectedToInternet)
                     {
-                        string date = startTime.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
-                        SendJSON(MakeIntervalsJSON(RRsToSend, date, connectedDevice.Name, connectedDevice.Address, Username, Password, create), "http://reshaka.ru:8080/BaseProjectWeb/faces/input");
+                        SendJSON(MakeIntervalsJSON(RRsToSend), "http://reshaka.ru:8080/BaseProjectWeb/faces/input");
                     }
                     else
                     {
@@ -665,32 +664,9 @@ namespace HeartRateMonitor
             {
                 SQLiteConnection cnn = new SQLiteConnection(dbConnection);
                 cnn.Open();
-                SQLiteCommand userId = new SQLiteCommand(cnn);
-                userId.CommandText = String.Format("select user_id from Users where user_name = \"{0}\"", Username);
-                object user_id = userId.ExecuteScalar();
-                if (user_id == null)
-                {
-                    userId = new SQLiteCommand(cnn);
-                    userId.CommandText = String.Format("insert into Users (user_name, password) values(\"{0}\", \"{1}\")", Username, Password);
-                    user_id = userId.ExecuteScalar();
-                    userId.CommandText = String.Format("select user_id from Users where user_name = \"{0}\"", Username);
-                    user_id = userId.ExecuteScalar();
-                }
-                SQLiteCommand sessionId = new SQLiteCommand(cnn);
-                object session_id;
-                if (create == 1)
-                {
-                    sessionId.CommandText = String.Format("insert into Sessions (user_id, device_name, device_id, start_time) values({0}, \"{1}\", \"{2}\", \"{3}\")", user_id, connectedDevice.Name, connectedDevice.Address, startTime);
-                    session_id = sessionId.ExecuteScalar();
-                }
-                sessionId.CommandText = String.Format("select session_id from Sessions where user_id = \"{0}\"", user_id);
-                session_id = sessionId.ExecuteScalar();
-                foreach (ushort rr in intervals)
-                {
-                    SQLiteCommand intervalId = new SQLiteCommand(cnn);
-                    intervalId.CommandText = String.Format("insert into Intervals (value, session_id) values({0}, {1})", rr, session_id);
-                    object interval_id = intervalId.ExecuteScalar();
-                }
+                SQLiteCommand jsonInsert = new SQLiteCommand(cnn);
+                jsonInsert.CommandText = String.Format("insert into Jsons (json_string) values(\"{0}\")", ByteUtils.bytesToString(System.Text.Encoding.UTF8.GetBytes(MakeIntervalsJSON(intervals))));
+                object user_id = jsonInsert.ExecuteScalar();
                 cnn.Close();
             }
             catch (Exception ex)
@@ -709,87 +685,28 @@ namespace HeartRateMonitor
                 {
                     SQLiteConnection cnn = new SQLiteConnection(dbConnection);
                     cnn.Open();
-                    SQLiteCommand users = new SQLiteCommand(cnn);
-                    users.CommandText = "select user_id from users";
-                    SQLiteDataReader user_ids = users.ExecuteReader();
-                    List<int> result = new List<int>();
-                    while (user_ids.Read())
+                    SQLiteCommand jsons = new SQLiteCommand(cnn);
+                    jsons.CommandText = "select json_string from jsons";
+                    SQLiteDataReader json_strings = jsons.ExecuteReader();
+                    List<string> result = new List<string>();
+                    while (json_strings.Read())
                     {
-                        result.Add(user_ids.GetInt32(user_ids.GetOrdinal("user_id")));
+                        result.Add(json_strings.GetString(json_strings.GetOrdinal("json_string")));
                     }
-                    user_ids.Close();
-                    foreach (int user_id in result)
+                    json_strings.Close();
+                    foreach (string json in result)
                     {
-                        SQLiteCommand userId = new SQLiteCommand(cnn);
-                        userId.CommandText = String.Format("select session_id from Sessions where user_id = \"{0}\"", user_id);
-                        SQLiteDataReader session_ids = userId.ExecuteReader();
-                        List<int> sessions = new List<int>();
-                        while (session_ids.Read())
-                        {
-                            sessions.Add(session_ids.GetInt32(session_ids.GetOrdinal("session_id")));
-                        }
-                        session_ids.Close();
-                        foreach (int session_id in sessions)
-                        {
-                            SQLiteCommand sessionId = new SQLiteCommand(cnn);
-                            sessionId.CommandText = String.Format("select value from Intervals where session_id = \"{0}\"", session_id);
-                            SQLiteDataReader interval_values = sessionId.ExecuteReader();
-                            List<ushort> intervals = new List<ushort>();
-                            while (interval_values.Read())
-                            {
-                                intervals.Add((ushort)interval_values.GetInt32(interval_values.GetOrdinal("value")));
-                            }
-                            interval_values.Close();
-                            SQLiteCommand userName = new SQLiteCommand(cnn);
-                            userName.CommandText = String.Format("select user_name from users where user_id = \"{0}\"", user_id);
-                            string username = userName.ExecuteScalar().ToString();
-                            SQLiteCommand passWord = new SQLiteCommand(cnn);
-                            passWord.CommandText = String.Format("select password from users where user_id = \"{0}\"", user_id);
-                            string password = passWord.ExecuteScalar().ToString();
-                            SQLiteCommand deviceName = new SQLiteCommand(cnn);
-                            deviceName.CommandText = String.Format("select device_name from sessions where session_id = \"{0}\"", session_id);
-                            string devicename = deviceName.ExecuteScalar().ToString();
-                            SQLiteCommand deviceId = new SQLiteCommand(cnn);
-                            deviceId.CommandText = String.Format("select device_id from sessions where session_id = \"{0}\"", session_id);
-                            string deviceid = deviceId.ExecuteScalar().ToString();
-                            SQLiteCommand startTime = new SQLiteCommand(cnn);
-                            startTime.CommandText = String.Format("select start_time from sessions where session_id = \"{0}\"", session_id);
-                            string date = startTime.ExecuteScalar().ToString();
-                            if (UserExists(username) == 1 && CheckUser(username, password) == 1)
-                            {
-                                List<ushort>[] intervalPackets = new List<ushort>[intervals.Count / 10 + 1];
-                                for (int j = 0; j < intervalPackets.Length; j++)
-                                {
-                                    intervalPackets[j] = new List<ushort>();
-                                }
-                                int i = 0;
-                                while (i != intervals.Count)
-                                {
-                                    intervalPackets[i / 10].Add(intervals[i]);
-                                    i++;
-                                }
-                                foreach (List<ushort> intervalPacket in intervalPackets)
-                                {
-                                    SendJSON(MakeIntervalsJSON(intervalPacket, date, devicename, deviceid, username, password, 1), "http://reshaka.ru:8080/BaseProjectWeb/faces/input");
-                                    Thread.Sleep(100);
-                                }
-                            }
-                            else
-                            {
-                                Console.WriteLine("Something wrong");
-                            }
-                        }
+                        SendJSON(System.Text.Encoding.UTF8.GetString(ByteUtils.bytesFromString(json)), "http://reshaka.ru:8080/BaseProjectWeb/faces/input");
+                        Thread.Sleep(100);
                     }
 
                     SQLiteCommand delete = new SQLiteCommand(cnn);
-                    delete.CommandText = "delete from users";
+                    delete.CommandText = "delete from Jsons";
                     object deleted = delete.ExecuteNonQuery();
 
-                    delete.CommandText = "delete from sessions";
-                    deleted = delete.ExecuteNonQuery();
+                    if ((int)deleted != result.Count)
+                        throw new Exception("Something wrong");
 
-                    delete.CommandText = "delete from intervals";
-                    deleted = delete.ExecuteNonQuery();
                     cnn.Close();
                 });
                 bw.RunWorkerAsync();
@@ -826,22 +743,19 @@ namespace HeartRateMonitor
             return null;
         }
 
-        private string MakeIntervalsJSON(List<ushort> intervals, 
-            string date, 
-            string deviceName, 
-            string deviceId,
-            string username,
-            string password,
-            int cr)
+        private string MakeIntervalsJSON(List<ushort> intervals)
         {
+            string date = startTime.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
+            string deviceName = connectedDevice.Name;
+            string deviceId = connectedDevice.Address;
             Dictionary<string, object> jsonDict = new Dictionary<string, object>();
             jsonDict.Add("start", date);
             jsonDict.Add("device_id", deviceId);
             jsonDict.Add("device_name", deviceName);
             jsonDict.Add("rates", intervals.ToArray());
-            jsonDict.Add("email", username);
-            jsonDict.Add("password", password);
-            jsonDict.Add("create", cr);
+            jsonDict.Add("email", Username);
+            jsonDict.Add("password", Password);
+            jsonDict.Add("create", create == 0 ? "0" : "1");
             return "json=" + JsonConvert.SerializeObject(jsonDict);
         }
 

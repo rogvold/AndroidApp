@@ -12,9 +12,9 @@ namespace HeartRateMonitor
         {
             string[] bs = bytes.Split(' ');
             byte[] result = new byte[bs.Length];
-            for (int i = 0; i < bs.Length; i++)
+            for (int i = 0; i < bs.Length - 1; i++)
             {
-                int b = Convert.ToInt32(bs[i]);
+                int b = int.Parse(bs[i], System.Globalization.NumberStyles.HexNumber);
                 result[i] = (byte)b;
             }
             return result;
