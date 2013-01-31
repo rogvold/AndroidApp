@@ -54,8 +54,6 @@ namespace HeartRateMonitor
 
         private BLEDevice connectedDevice;
 
-        private string dbConnection;
-
         private string Username;
         private string Password;
 
@@ -69,18 +67,14 @@ namespace HeartRateMonitor
             //if (Properties.Settings.Default.LastUserName != null)
             //    usernameField.Text = Properties.Settings.Default.LastUserName;
             usernameField.ItemsSource = Properties.Settings.Default.UserNames;
-            dbConnection = "Data Source=local.s3db";
+            if (!File.Exists("local.s3db"))
+            {
+                BLEOffline.CreateDB();
+            }
             if (IsConnectedToInternet)
             {
-                SendSavedIntervals();
+                BLEOffline.SendSavedIntervals();
             }
-        }
-
-        private void OpenPortButtonClick(object sender, RoutedEventArgs e)
-        {
-            //var window = new ChoosePortWindow();
-            //window.Closed += ChoosePortWindowClosed;
-            //window.Show();
         }
 
         private void ConnectDongle()
@@ -213,7 +207,7 @@ namespace HeartRateMonitor
         }
         public virtual void receive_attributes_value(int connection, int reason, int handle, int offset, byte[] value)
         {
-            Console.WriteLine("Attribute Value att=" + handle.ToString("X") + " val = " + bytesToString(value));
+            Console.WriteLine("Attribute Value att=" + handle.ToString("X") + " val = " + ByteUtils.bytesToString(value));
         }
         public virtual void receive_attributes_user_request(int connection, int handle, int offset)
         {
@@ -372,7 +366,7 @@ namespace HeartRateMonitor
         }
         public virtual void receive_attclient_attribute_value(int connection, int atthandle, int type, byte[] value)
         {
-            Console.WriteLine("Attclient Value att=" + atthandle.ToString("X") + " val = " + bytesToString(value));
+            Console.WriteLine("Attclient Value att=" + atthandle.ToString("X") + " val = " + ByteUtils.bytesToString(value));
             if (atthandle.ToString("X").Equals("24"))
                 bgapi.send_attclient_attribute_write(connection, 18, new byte[] {1, 0});
             if (atthandle.ToString("X").Equals("11"))
@@ -546,16 +540,6 @@ namespace HeartRateMonitor
         {
         }
 
-        public virtual string bytesToString(byte[] bytes)
-        {
-            StringBuilder result = new StringBuilder();
-            result.Append("[ ");
-            foreach (byte b in bytes)
-                result.Append((b & 0xFF).ToString("X") + " ");
-            result.Append("]");
-            return result.ToString();
-        }
-
         private void DiscoverButtonPressed(object sender, RoutedEventArgs e)
         {
             devList.Clear();
@@ -601,8 +585,8 @@ namespace HeartRateMonitor
                 byte[] bytes = new byte[2];
                 bytes[0] = reportData[0];
                 bytes[1] = reportData[1];
-                /*if (BitConverter.IsLittleEndian)
-                    Array.Reverse(bytes);*/
+                if (!BitConverter.IsLittleEndian)
+                    Array.Reverse(bytes);
                 bpm = BitConverter.ToUInt16(bytes, 0);
                 rrByte++;
             }
@@ -624,8 +608,8 @@ namespace HeartRateMonitor
                 byte[] rrArray = new byte[2];
                 rrArray[0] = reportData[rrByte];
                 rrArray[1] = reportData[rrByte + 1];
-                /*if (BitConverter.IsLittleEndian)
-                    Array.Reverse(rrArray);*/
+                if (!BitConverter.IsLittleEndian)
+                    Array.Reverse(rrArray);
                 ushort rr = (ushort) ((BitConverter.ToUInt16(rrArray, 0) * 1000) / 1024);
                 while (rr != 0) {
                     Console.WriteLine("RR: " + rr);
@@ -635,8 +619,8 @@ namespace HeartRateMonitor
                         break;
                     rrArray[0] = reportData[rrByte];
                     rrArray[1] = reportData[rrByte + 1];
-                    /*if (BitConverter.IsLittleEndian)
-                        Array.Reverse(rrArray);*/
+                    if (!BitConverter.IsLittleEndian)
+                        Array.Reverse(rrArray);
                     rr = (ushort) ((BitConverter.ToUInt16(rrArray, 0) * 1000) / 1024);
                 }
                 rrs.Add(rr);
@@ -645,118 +629,18 @@ namespace HeartRateMonitor
                 {
                     if (IsConnectedToInternet)
                     {
-                        SendJSON(MakeIntervalsJSON(RRsToSend), "http://reshaka.ru:8080/BaseProjectWeb/faces/input");
+                        BLEJson.SendJSON(BLEJson.MakeIntervalsJSON(RRsToSend, connectedDevice, startTime, Username, Password, create),
+                            "http://reshaka.ru:8080/BaseProjectWeb/faces/input");
                     }
                     else
                     {
-                        SaveIntervals(RRsToSend);
+                        BLEOffline.SaveIntervals(RRsToSend, connectedDevice, startTime, Username, Password, create);
                     }
                     RRsToSend.Clear();
                     startTime = DateTime.Now;
                     create = 0;
                 }
             }
-        }
-
-        private void SaveIntervals(List<ushort> intervals)
-        {
-            try
-            {
-                SQLiteConnection cnn = new SQLiteConnection(dbConnection);
-                cnn.Open();
-                SQLiteCommand jsonInsert = new SQLiteCommand(cnn);
-                jsonInsert.CommandText = String.Format("insert into Jsons (json_string) values(\"{0}\")", ByteUtils.bytesToString(System.Text.Encoding.UTF8.GetBytes(MakeIntervalsJSON(intervals))));
-                object user_id = jsonInsert.ExecuteScalar();
-                cnn.Close();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
-
-        private void SendSavedIntervals()
-        {
-            try
-            {
-                BackgroundWorker bw = new BackgroundWorker();
-                bw.DoWork += new DoWorkEventHandler(
-                delegate(object o, DoWorkEventArgs args)
-                {
-                    SQLiteConnection cnn = new SQLiteConnection(dbConnection);
-                    cnn.Open();
-                    SQLiteCommand jsons = new SQLiteCommand(cnn);
-                    jsons.CommandText = "select json_string from jsons";
-                    SQLiteDataReader json_strings = jsons.ExecuteReader();
-                    List<string> result = new List<string>();
-                    while (json_strings.Read())
-                    {
-                        result.Add(json_strings.GetString(json_strings.GetOrdinal("json_string")));
-                    }
-                    json_strings.Close();
-                    foreach (string json in result)
-                    {
-                        SendJSON(System.Text.Encoding.UTF8.GetString(ByteUtils.bytesFromString(json)), "http://reshaka.ru:8080/BaseProjectWeb/faces/input");
-                        Thread.Sleep(100);
-                    }
-
-                    SQLiteCommand delete = new SQLiteCommand(cnn);
-                    delete.CommandText = "delete from Jsons";
-                    object deleted = delete.ExecuteNonQuery();
-
-                    if ((int)deleted != result.Count)
-                        throw new Exception("Something wrong");
-
-                    cnn.Close();
-                });
-                bw.RunWorkerAsync();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
-
-        private HttpWebResponse SendJSON(string json, string url)
-        {
-            byte[] data = Encoding.UTF8.GetBytes(json);
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.Method = "POST";
-            request.ContentType = "application/x-www-form-urlencoded";
-            request.ContentLength = data.Length;
-            request.KeepAlive = true;
-            ServicePointManager.UseNagleAlgorithm = true;
-            ServicePointManager.Expect100Continue = true;
-            ServicePointManager.CheckCertificateRevocationList = true;
-            ServicePointManager.DefaultConnectionLimit = Int32.MaxValue;
-
-            try
-            {
-                using (Stream outputStream = request.GetRequestStream())
-                    outputStream.Write(data, 0, data.Length);
-                return request.GetResponse() as HttpWebResponse;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            return null;
-        }
-
-        private string MakeIntervalsJSON(List<ushort> intervals)
-        {
-            string date = startTime.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
-            string deviceName = connectedDevice.Name;
-            string deviceId = connectedDevice.Address;
-            Dictionary<string, object> jsonDict = new Dictionary<string, object>();
-            jsonDict.Add("start", date);
-            jsonDict.Add("device_id", deviceId);
-            jsonDict.Add("device_name", deviceName);
-            jsonDict.Add("rates", intervals.ToArray());
-            jsonDict.Add("email", Username);
-            jsonDict.Add("password", Password);
-            jsonDict.Add("create", create == 0 ? "0" : "1");
-            return "json=" + JsonConvert.SerializeObject(jsonDict);
         }
 
         private void WindowClosed(object sender, EventArgs e)
@@ -807,7 +691,7 @@ namespace HeartRateMonitor
             jsonDict.Add("email", username);
             jsonDict.Add("secret", "h7a7RaRtvAVwnMGq5BV6");
             string json = "json=" + JsonConvert.SerializeObject(jsonDict);
-            HttpWebResponse resp = SendJSON(json, "http://reshaka.ru:8080/BaseProjectWeb/mobileauth");
+            HttpWebResponse resp = BLEJson.SendJSON(json, "http://reshaka.ru:8080/BaseProjectWeb/mobileauth");
             Stream responseStream = resp.GetResponseStream();
             StreamReader sr = new StreamReader(responseStream);
             string response = sr.ReadToEnd();
@@ -825,7 +709,7 @@ namespace HeartRateMonitor
             jsonDict.Add("password", password);
             jsonDict.Add("secret", "h7a7RaRtvAVwnMGq5BV6");
             string json = "json=" + JsonConvert.SerializeObject(jsonDict);
-            HttpWebResponse resp = SendJSON(json, "http://reshaka.ru:8080/BaseProjectWeb/mobileauth");
+            HttpWebResponse resp = BLEJson.SendJSON(json, "http://reshaka.ru:8080/BaseProjectWeb/mobileauth");
             Stream responseStream = resp.GetResponseStream();
             StreamReader sr = new StreamReader(responseStream);
             string response = sr.ReadToEnd();
