@@ -20,9 +20,9 @@ using System.Windows.Threading;
 using System.Globalization;
 using Newtonsoft.Json;
 using System.Net;
-using System.Windows.Forms;
 using System.Net.NetworkInformation;
 using System.Data.SQLite;
+using System.Windows.Forms;
 
 namespace HeartRateMonitor
 {
@@ -274,6 +274,13 @@ namespace HeartRateMonitor
         }
         public virtual void receive_connection_disconnected(int connection, int reason)
         {
+            Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { disconnectButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent)); });
+
+            devList.Clear();
+            Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { deviceList.Items.Refresh(); });
+            
+            bgapi.send_gap_set_scan_parameters(10, 250, 1);
+            bgapi.send_gap_discover(1);
         }
 
         // Callbacks for class attclient (index = 4)
@@ -467,7 +474,8 @@ namespace HeartRateMonitor
             if (!name.Contains('\0'))
                 d.Name = name;
             d.Rssi = rssi;
-            Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate{ deviceList.Items.Refresh(); });
+            Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { deviceList.Items.Refresh(); });
+            Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { connectButton.IsEnabled = true; });
         }
         public virtual void receive_gap_mode_changed(int discover, int connect)
         {
@@ -540,23 +548,13 @@ namespace HeartRateMonitor
         {
         }
 
-        private void DiscoverButtonPressed(object sender, RoutedEventArgs e)
-        {
-            devList.Clear();
-            bgapi.send_gap_set_scan_parameters(10, 250, 1);
-            bgapi.send_gap_discover(1);
-        }
-
-        private void StopDiscoverButtonPressed(object sender, RoutedEventArgs e)
-        {
-            bgapi.send_gap_end_procedure();
-        }
-
         private void ConnectButtonPressed(object sender, RoutedEventArgs e)
         {
             BLEDevice d = (BLEDevice) deviceList.SelectedItem;
             if (d == null) return;
             bgapi.send_gap_connect_direct(BDAddr.fromString(d.Address), 0, 0x3C, 0x3C, 0x64, 0);
+            Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { disconnectButton.IsEnabled = true; });
+            Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { connectButton.IsEnabled = false; });
         }
 
         private void DisconnectButtonPressed(object sender, RoutedEventArgs e)
@@ -566,7 +564,35 @@ namespace HeartRateMonitor
             {
                 bgapi.send_connection_disconnect(connection);
             }
+            if (RRsToSend.Count > 0)
+            {
+                if (IsConnectedToInternet)
+                {
+                    BLEJson.SendJSON(BLEJson.MakeIntervalsJSON(IntervalFilter(RRsToSend), 
+                        connectedDevice, 
+                        startTime, 
+                        Username, 
+                        Password, 
+                        create),
+                        "http://reshaka.ru:8080/BaseProjectWeb/faces/input");
+                }
+                else
+                {
+                    BLEOffline.SaveIntervals(IntervalFilter(RRsToSend), 
+                        connectedDevice, 
+                        startTime, 
+                        Username, 
+                        Password, 
+                        create);
+                }
+                RRsToSend.Clear();
+                startTime = DateTime.Now;
+                create = 0;
+            }
             Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { connectedSensor.Content = ""; });
+            Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { connectButton.IsEnabled = true; });
+            Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { disconnectButton.IsEnabled = false; });
+            Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { heartRate.Content = "0"; });
         }
 
         private void updateUI(byte[] reportData)
@@ -623,18 +649,27 @@ namespace HeartRateMonitor
                         Array.Reverse(rrArray);
                     rr = (ushort) ((BitConverter.ToUInt16(rrArray, 0) * 1000) / 1024);
                 }
-                rrs.Add(rr);
                 RRsToSend.AddRange(rrs);
-                if (RRsToSend.Count >= 10)
+                if (RRsToSend.Count >= 50)
                 {
                     if (IsConnectedToInternet)
                     {
-                        BLEJson.SendJSON(BLEJson.MakeIntervalsJSON(RRsToSend, connectedDevice, startTime, Username, Password, create),
+                        BLEJson.SendJSON(BLEJson.MakeIntervalsJSON(IntervalFilter(RRsToSend), 
+                            connectedDevice, 
+                            startTime, 
+                            Username, 
+                            Password, 
+                            create),
                             "http://reshaka.ru:8080/BaseProjectWeb/faces/input");
                     }
                     else
                     {
-                        BLEOffline.SaveIntervals(RRsToSend, connectedDevice, startTime, Username, Password, create);
+                        BLEOffline.SaveIntervals(IntervalFilter(RRsToSend), 
+                            connectedDevice, 
+                            startTime, 
+                            Username, 
+                            Password, 
+                            create);
                     }
                     RRsToSend.Clear();
                     startTime = DateTime.Now;
@@ -643,10 +678,37 @@ namespace HeartRateMonitor
             }
         }
 
+        private List<ushort> IntervalFilter(List<ushort> source)
+        {
+            ushort mean, std;
+            int sum = 0;
+            foreach (ushort interval in source)
+            {
+                sum += interval;
+            }
+            mean = (ushort)(sum / source.Count);
+            sum = 0;
+            foreach (ushort interval in source)
+            {
+                sum += (int)Math.Pow((interval - mean), 2);
+            }
+            std = (ushort)Math.Pow(sum / (double)source.Count, 0.5);
+            List<ushort> dest = new List<ushort>(source);
+            foreach (ushort interval in source)
+            {
+                if (Math.Abs(interval - mean) > 3 * std)
+                {
+                    dest.Remove(interval);
+                }
+            }
+            return dest;
+        }
+
         private void WindowClosed(object sender, EventArgs e)
         {
             try
             {
+                Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { disconnectButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent)); });
                 bgapi.send_connection_disconnect(connection);
                 bgapi.send_gap_end_procedure();
                 bgapi.disconnect();
@@ -679,8 +741,7 @@ namespace HeartRateMonitor
             }
             Properties.Settings.Default.LastUserName = Username;
             Properties.Settings.Default.Save();
-            usernameField.ItemsSource = Properties.Settings.Default.UserNames;
-            usernameField.UpdateLayout();
+            Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { signInButton.IsEnabled = false; });
             ConnectDongle();
         }
 
@@ -740,6 +801,25 @@ namespace HeartRateMonitor
                     return false;
                 }
                 return result;
+            }
+        }
+
+        private void PasswordFieldKeyUp(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            char val = (char)KeyInterop.VirtualKeyFromKey(e.Key);
+            if (e.Key == Key.Enter)
+            {
+                if (usernameField.Text != null && passwordField.Password != null)
+                {
+                    Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { signInButton.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent)); });
+                }
+            }
+            else if (char.IsLetterOrDigit((char)KeyInterop.VirtualKeyFromKey(e.Key)))
+            {
+                if (usernameField.Text != null && passwordField.Password != null)
+                {
+                    Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { signInButton.IsEnabled = true; });
+                }
             }
         }
     }
