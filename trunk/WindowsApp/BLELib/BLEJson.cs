@@ -3,13 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Text;
 
-namespace HeartRateMonitor
+namespace BLELib
 {
-    class BLEJson
+    public class BLEJson
     {
         public static string MakeIntervalsJSON(List<ushort> intervals, 
             BLEDevice connectedDevice, 
@@ -56,6 +55,43 @@ namespace HeartRateMonitor
                 Console.WriteLine(ex.Message);
             }
             return null;
+        }
+
+
+
+        public static int UserExists(string username)
+        {
+            Dictionary<string, object> jsonDict = new Dictionary<string, object>();
+            jsonDict.Add("purpose", "CheckUserExistence");
+            jsonDict.Add("email", username);
+            jsonDict.Add("secret", "h7a7RaRtvAVwnMGq5BV6");
+            string json = "json=" + JsonConvert.SerializeObject(jsonDict);
+            HttpWebResponse resp = SendJSON(json, "http://reshaka.ru:8080/BaseProjectWeb/mobileauth");
+            Stream responseStream = resp.GetResponseStream();
+            StreamReader sr = new StreamReader(responseStream);
+            string response = sr.ReadToEnd();
+            responseStream.Close();
+            Dictionary<string, string> respDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(response);
+
+            return Convert.ToInt32(respDict["response"]);
+        }
+
+        public static int CheckUser(string username, string password)
+        {
+            Dictionary<string, object> jsonDict = new Dictionary<string, object>();
+            jsonDict.Add("purpose", "CheckAuthorisationData");
+            jsonDict.Add("email", username);
+            jsonDict.Add("password", password);
+            jsonDict.Add("secret", "h7a7RaRtvAVwnMGq5BV6");
+            string json = "json=" + JsonConvert.SerializeObject(jsonDict);
+            HttpWebResponse resp = SendJSON(json, "http://reshaka.ru:8080/BaseProjectWeb/mobileauth");
+            Stream responseStream = resp.GetResponseStream();
+            StreamReader sr = new StreamReader(responseStream);
+            string response = sr.ReadToEnd();
+            responseStream.Close();
+            Dictionary<string, string> respDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(response);
+
+            return Convert.ToInt32(respDict["response"]);
         }
     }
 }

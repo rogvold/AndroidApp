@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 
-namespace HeartRateMonitor
+namespace BLELib
 {
     public class ByteUtils
     {
 
-        public static byte[] bytesFromString(string bytes)
+        public static byte[] BytesFromString(string bytes)
         {
             string[] bs = bytes.Split(' ');
             byte[] result = new byte[bs.Length];
@@ -20,7 +17,7 @@ namespace HeartRateMonitor
             return result;
         }
 
-        public static string bytesToString(byte[] bytes)
+        public static string BytesToString(byte[] bytes)
         {
             StringBuilder result = new StringBuilder();
             foreach (byte b in bytes)

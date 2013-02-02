@@ -5,6 +5,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeartRateMonitor", "HeartRa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BGAPI", "BGAPI\BGAPI.csproj", "{62946DDD-3041-453E-8F5C-5E5C9FA7A3AF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TeamHRM", "TeamHRM\TeamHRM.csproj", "{54B6B56D-9A32-4889-8E1B-ABC5F0AE0221}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BLELib", "BLELib\BLELib.csproj", "{ED48F070-DCF3-4AE2-B74C-8CE086C30488}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +23,14 @@ Global
 		{62946DDD-3041-453E-8F5C-5E5C9FA7A3AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62946DDD-3041-453E-8F5C-5E5C9FA7A3AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62946DDD-3041-453E-8F5C-5E5C9FA7A3AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54B6B56D-9A32-4889-8E1B-ABC5F0AE0221}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54B6B56D-9A32-4889-8E1B-ABC5F0AE0221}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54B6B56D-9A32-4889-8E1B-ABC5F0AE0221}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54B6B56D-9A32-4889-8E1B-ABC5F0AE0221}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED48F070-DCF3-4AE2-B74C-8CE086C30488}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED48F070-DCF3-4AE2-B74C-8CE086C30488}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED48F070-DCF3-4AE2-B74C-8CE086C30488}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED48F070-DCF3-4AE2-B74C-8CE086C30488}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

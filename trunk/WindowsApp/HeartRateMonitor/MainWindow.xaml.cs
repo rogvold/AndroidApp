@@ -1,34 +1,19 @@
 ﻿using BGAPI;
+using BLELib;
 using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Threading;
 using System.IO;
-using System.ComponentModel;
 using System.Windows.Threading;
-using System.Globalization;
-using Newtonsoft.Json;
-using System.Net;
-using System.Net.NetworkInformation;
-using System.Data.SQLite;
-using System.Windows.Forms;
 
 namespace HeartRateMonitor
 {
-    /// <summary>
-    /// Логика взаимодействия для MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window, BGAPIListener
     {
         private SerialPort _port;
@@ -64,17 +49,12 @@ namespace HeartRateMonitor
         {
             InitializeComponent();
             deviceList.ItemsSource = devList.Devices;
-            //if (Properties.Settings.Default.LastUserName != null)
-            //    usernameField.Text = Properties.Settings.Default.LastUserName;
             usernameField.ItemsSource = Properties.Settings.Default.UserNames;
             if (!File.Exists("local.s3db"))
             {
                 BLEOffline.CreateDB();
             }
-            if (IsConnectedToInternet)
-            {
-                BLEOffline.SendSavedIntervals();
-            }
+            BLEOffline.SendSavedIntervals();
         }
 
         private void ConnectDongle()
@@ -207,7 +187,7 @@ namespace HeartRateMonitor
         }
         public virtual void receive_attributes_value(int connection, int reason, int handle, int offset, byte[] value)
         {
-            Console.WriteLine("Attribute Value att=" + handle.ToString("X") + " val = " + ByteUtils.bytesToString(value));
+            Console.WriteLine("Attribute Value att=" + handle.ToString("X") + " val = " + ByteUtils.BytesToString(value));
         }
         public virtual void receive_attributes_user_request(int connection, int handle, int offset)
         {
@@ -259,8 +239,6 @@ namespace HeartRateMonitor
                 Console.WriteLine("Connection lost!");
                 connection = -1;
                 bledevice = null;
-                //jButtonConnect.Enabled = true;
-                //jButtonDisconnect.Enabled = false;
             }
         }
         public virtual void receive_connection_version_ind(int connection, int vers_nr, int comp_id, int sub_vers_nr)
@@ -373,7 +351,7 @@ namespace HeartRateMonitor
         }
         public virtual void receive_attclient_attribute_value(int connection, int atthandle, int type, byte[] value)
         {
-            Console.WriteLine("Attclient Value att=" + atthandle.ToString("X") + " val = " + ByteUtils.bytesToString(value));
+            Console.WriteLine("Attclient Value att=" + atthandle.ToString("X") + " val = " + ByteUtils.BytesToString(value));
             if (atthandle.ToString("X").Equals("24"))
                 bgapi.send_attclient_attribute_write(connection, 18, new byte[] {1, 0});
             if (atthandle.ToString("X").Equals("11"))
@@ -553,6 +531,7 @@ namespace HeartRateMonitor
             BLEDevice d = (BLEDevice) deviceList.SelectedItem;
             if (d == null) return;
             bgapi.send_gap_connect_direct(BDAddr.fromString(d.Address), 0, 0x3C, 0x3C, 0x64, 0);
+            create = 1;
             Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { disconnectButton.IsEnabled = true; });
             Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { connectButton.IsEnabled = false; });
         }
@@ -566,9 +545,9 @@ namespace HeartRateMonitor
             }
             if (RRsToSend.Count > 0)
             {
-                if (IsConnectedToInternet)
+                if (BLEOffline.IsConnectedToInternet)
                 {
-                    BLEJson.SendJSON(BLEJson.MakeIntervalsJSON(IntervalFilter(RRsToSend), 
+                    BLEJson.SendJSON(BLEJson.MakeIntervalsJSON(BLEFilter.IntervalFilter(RRsToSend), 
                         connectedDevice, 
                         startTime, 
                         Username, 
@@ -578,7 +557,7 @@ namespace HeartRateMonitor
                 }
                 else
                 {
-                    BLEOffline.SaveIntervals(IntervalFilter(RRsToSend), 
+                    BLEOffline.SaveIntervals(BLEFilter.IntervalFilter(RRsToSend), 
                         connectedDevice, 
                         startTime, 
                         Username, 
@@ -652,9 +631,9 @@ namespace HeartRateMonitor
                 RRsToSend.AddRange(rrs);
                 if (RRsToSend.Count >= 50)
                 {
-                    if (IsConnectedToInternet)
+                    if (BLEOffline.IsConnectedToInternet)
                     {
-                        BLEJson.SendJSON(BLEJson.MakeIntervalsJSON(IntervalFilter(RRsToSend), 
+                        BLEJson.SendJSON(BLEJson.MakeIntervalsJSON(BLEFilter.IntervalFilter(RRsToSend), 
                             connectedDevice, 
                             startTime, 
                             Username, 
@@ -664,7 +643,7 @@ namespace HeartRateMonitor
                     }
                     else
                     {
-                        BLEOffline.SaveIntervals(IntervalFilter(RRsToSend), 
+                        BLEOffline.SaveIntervals(BLEFilter.IntervalFilter(RRsToSend), 
                             connectedDevice, 
                             startTime, 
                             Username, 
@@ -676,32 +655,6 @@ namespace HeartRateMonitor
                     create = 0;
                 }
             }
-        }
-
-        private List<ushort> IntervalFilter(List<ushort> source)
-        {
-            ushort mean, std;
-            int sum = 0;
-            foreach (ushort interval in source)
-            {
-                sum += interval;
-            }
-            mean = (ushort)(sum / source.Count);
-            sum = 0;
-            foreach (ushort interval in source)
-            {
-                sum += (int)Math.Pow((interval - mean), 2);
-            }
-            std = (ushort)Math.Pow(sum / (double)source.Count, 0.5);
-            List<ushort> dest = new List<ushort>(source);
-            foreach (ushort interval in source)
-            {
-                if (Math.Abs(interval - mean) > 3 * std)
-                {
-                    dest.Remove(interval);
-                }
-            }
-            return dest;
         }
 
         private void WindowClosed(object sender, EventArgs e)
@@ -722,85 +675,53 @@ namespace HeartRateMonitor
 
         private void SignInButtonPressed(object sender, RoutedEventArgs e)
         {
-            this.Username = this.usernameField.Text;
-            this.Password = this.passwordField.Password;
-            int exists = 1;
-            int passwordIsCorrect = 1;
-            if (IsConnectedToInternet)
+            try
             {
-                exists = UserExists(Username);
-                if (exists == 1)
-                    passwordIsCorrect = CheckUser(Username, Password);
-            }
-            if (Properties.Settings.Default.UserNames != null && !Properties.Settings.Default.UserNames.Contains(Username))
-                Properties.Settings.Default.UserNames.Add(Username);
-            else if (Properties.Settings.Default.UserNames == null)
-            {
-                Properties.Settings.Default.UserNames = new System.Collections.Specialized.StringCollection();
-                Properties.Settings.Default.UserNames.Add(Username);
-            }
-            Properties.Settings.Default.LastUserName = Username;
-            Properties.Settings.Default.Save();
-            Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { signInButton.IsEnabled = false; });
-            ConnectDongle();
-        }
-
-        private int UserExists(string username)
-        {
-            Dictionary<string, object> jsonDict = new Dictionary<string, object>();
-            jsonDict.Add("purpose", "CheckUserExistence");
-            jsonDict.Add("email", username);
-            jsonDict.Add("secret", "h7a7RaRtvAVwnMGq5BV6");
-            string json = "json=" + JsonConvert.SerializeObject(jsonDict);
-            HttpWebResponse resp = BLEJson.SendJSON(json, "http://reshaka.ru:8080/BaseProjectWeb/mobileauth");
-            Stream responseStream = resp.GetResponseStream();
-            StreamReader sr = new StreamReader(responseStream);
-            string response = sr.ReadToEnd();
-            responseStream.Close();
-            Dictionary<string, string> respDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(response);
-            
-            return Convert.ToInt32(respDict["response"]);
-        }
-
-        private int CheckUser(string username, string password)
-        {
-            Dictionary<string, object> jsonDict = new Dictionary<string, object>();
-            jsonDict.Add("purpose", "CheckAuthorisationData");
-            jsonDict.Add("email", username);
-            jsonDict.Add("password", password);
-            jsonDict.Add("secret", "h7a7RaRtvAVwnMGq5BV6");
-            string json = "json=" + JsonConvert.SerializeObject(jsonDict);
-            HttpWebResponse resp = BLEJson.SendJSON(json, "http://reshaka.ru:8080/BaseProjectWeb/mobileauth");
-            Stream responseStream = resp.GetResponseStream();
-            StreamReader sr = new StreamReader(responseStream);
-            string response = sr.ReadToEnd();
-            responseStream.Close();
-            Dictionary<string, string> respDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(response);
-
-            return Convert.ToInt32(respDict["response"]);
-        }
-
-        public static bool IsConnectedToInternet
-        {
-            get
-            {
-                Uri url = new Uri("http://www.reshaka.ru/");
-                string pingurl = string.Format("{0}", url.Host);
-                string host = pingurl;
-                bool result = false;
-                Ping p = new Ping();
-                try
+                this.Username = this.usernameField.Text;
+                this.Password = this.passwordField.Password;
+                //Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { usernameField.BorderBrush = defaultUsernameBrush; });
+                //Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { passwordField.BorderBrush = defaultPasswordBrush; });
+                int exists = 1;
+                int passwordIsCorrect = 1;
+                if (BLEOffline.IsConnectedToInternet)
                 {
-                    PingReply reply = p.Send(host, 3000);
-                    if (reply.Status == IPStatus.Success)
-                        return true;
+                    exists = BLEJson.UserExists(Username);
+                    if (exists == 1)
+                    {
+                        passwordIsCorrect = BLEJson.CheckUser(Username, Password);
+                        if (passwordIsCorrect != 1)
+                        {
+                            Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { authStatus.Content = "Password is incorrect"; });
+                            Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { passwordField.BorderBrush = Brushes.Red; });
+                            throw new Exception("Incorrect password");
+                        }
+                    }
+                    else
+                    {
+                        Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { authStatus.Content = "Username is incorrect"; });
+
+                        Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { usernameField.BorderBrush = Brushes.Red; });
+                        throw new Exception("Incorrect username");
+                    }
                 }
-                catch (Exception ex)
+                ConnectDongle();
+                if (Properties.Settings.Default.UserNames != null && !Properties.Settings.Default.UserNames.Contains(Username))
+                    Properties.Settings.Default.UserNames.Add(Username);
+                else if (Properties.Settings.Default.UserNames == null)
                 {
-                    Console.WriteLine(ex.Message);
-                    return false;
+                    Properties.Settings.Default.UserNames = new System.Collections.Specialized.StringCollection();
+                    Properties.Settings.Default.UserNames.Add(Username);
                 }
-                return result;
+                Properties.Settings.Default.LastUserName = Username;
+                Properties.Settings.Default.Save();
+                Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { signInButton.IsEnabled = false; });
+                Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { authStatus.Content = "Success"; });
+                Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { usernameField.IsEnabled = false; });
+                Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate { passwordField.IsEnabled = false; });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
         }
 
