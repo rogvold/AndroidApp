@@ -1,68 +1,51 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BLELib
 {
     public class BLEDeviceList
     {
-
-        private List<BLEDevice> devices = new List<BLEDevice>();
+        private List<BLEDevice> _devices = new List<BLEDevice>();
 
         public List<BLEDevice> Devices
         {
-            get
-            {
-                return this.devices;
-            }
-            set
-            {
-                this.devices = value;
-            }
+            get { return _devices; }
+            set { _devices = value; }
+        }
+
+        public virtual int Count
+        {
+            get { return _devices.Count; }
+        }
+
+        public virtual Object this[int index]
+        {
+            get { return _devices[index]; }
         }
 
         public virtual void Clear()
         {
-            int idx = devices.Count - 1;
+            int idx = _devices.Count - 1;
             if (idx < 0)
                 return;
-            devices.Clear();
+            _devices.Clear();
         }
 
         public virtual void Add(BLEDevice d)
         {
-            devices.Add(d);
+            _devices.Add(d);
         }
 
         public virtual void Changed(BLEDevice d)
         {
-            if (devices.Count == 0)
+            if (_devices.Count == 0)
                 return;
         }
 
         public virtual BLEDevice GetFromAddress(string address)
         {
-            foreach (BLEDevice d in devices)
-            {
-                if (d.address.Equals(address))
-                    return d;
-            }
-            return null;
-        }
-
-        public virtual int Count
-        {
-            get
-            {
-                return devices.Count;
-            }
-        }
-
-        public virtual Object this[int index]
-        {
-            get
-            {
-                return devices[index];
-            }
+            return _devices.FirstOrDefault(d => d.address.Equals(address));
         }
     }
 }

@@ -1,11 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 namespace BGAPI
 {
     public class BDAddr
     {
+        protected internal byte[] byte_addr;
+
+        public BDAddr(byte[] addr)
+        {
+            byte_addr = addr;
+        }
+
+        public virtual byte[] ByteAddr
+        {
+            get { return byte_addr; }
+        }
+
         public static BDAddr fromString(string addr)
         {
             string[] bytes = addr.Split(':');
@@ -13,32 +24,17 @@ namespace BGAPI
             {
                 throw new Exception("Invalid Bluetooth address format.");
             }
-            byte[] byte_addr = new byte[6];
+            var byte_addr = new byte[6];
             for (int i = 0; i < 6; i++)
             {
-                byte_addr[5 - i] = (byte)Convert.ToInt32(bytes[i], 16);
+                byte_addr[5 - i] = (byte) Convert.ToInt32(bytes[i], 16);
             }
             return new BDAddr(byte_addr);
         }
 
-        protected internal byte[] byte_addr;
-
-        public virtual byte[] ByteAddr
-        {
-            get
-            {
-                return byte_addr;
-            }
-        }
-
-        public BDAddr(byte[] addr)
-        {
-            byte_addr = addr;
-        }
-
         public override string ToString()
         {
-            StringBuilder result = new StringBuilder();
+            var result = new StringBuilder();
             for (int i = 0; i < byte_addr.Length; i++)
             {
                 result.Append((byte_addr[5 - i] & 0xFF).ToString("X"));

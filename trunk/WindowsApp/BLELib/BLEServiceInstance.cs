@@ -6,78 +6,22 @@ namespace BLELib
 {
     public class BLEServiceInstance : BGAPIDefaultListener
     {
-
-        public List<BLEServiceValueListener> listeners = new List<BLEServiceValueListener>();
-
-        public virtual void addBLEServiceValueListener(BLEServiceValueListener l)
-        {
-            listeners.Add(l);
-        }
-
-        public virtual void removeBLEServiceValueListener(BLEServiceValueListener l)
-        {
-            listeners.Remove(l);
-        }
-
         protected internal BGAPI.BGAPI bgapi;
-        protected internal int connection;
-        protected internal int value_handle;
-        protected internal int interval_handle;
         protected internal int config_handle;
+        protected internal int connection;
+        protected internal int interval_handle;
+        public List<BLEServiceValueListener> listeners = new List<BLEServiceValueListener>();
+        protected internal int value_handle;
 
-        public virtual BGAPI.BGAPI Bgapi
-        {
-            get
-            {
-                return bgapi;
-            }
-        }
-
-        public virtual int Connection
-        {
-            get
-            {
-                return connection;
-            }
-        }
-
-        public virtual int Value_handle
-        {
-            get
-            {
-                return value_handle;
-            }
-        }
-
-        public virtual int Interval_handle
-        {
-            get
-            {
-                return interval_handle;
-            }
-        }
-
-        public virtual int Config_handle
-        {
-            get
-            {
-                return config_handle;
-            }
-        }
-
-        public BLEServiceInstance(BGAPI.BGAPI bgapi, int connection, int value_handle, int interval_handle, int config_handle)
+        public BLEServiceInstance(BGAPI.BGAPI bgapi, int connection, int valueHandle, int intervalHandle,
+                                  int configHandle)
         {
             this.bgapi = bgapi;
             this.connection = connection;
-            this.value_handle = value_handle;
-            this.interval_handle = interval_handle;
-            this.config_handle = config_handle;
+            value_handle = valueHandle;
+            interval_handle = intervalHandle;
+            config_handle = configHandle;
             bgapi.addListener(this);
-        }
-
-        public virtual void disconnect()
-        {
-            bgapi.removeListener(this);
         }
 
         public BLEServiceInstance(BGAPI.BGAPI bgapi, int connection, BLEService srv)
@@ -86,29 +30,70 @@ namespace BLELib
             throw new Exception("Not Implemented");
         }
 
-        public virtual void subscribeIndications()
+        public virtual BGAPI.BGAPI Bgapi
         {
-            bgapi.send_attclient_write_command(connection, config_handle, new byte[] { 0x02, 0x00 });
+            get { return bgapi; }
         }
 
-        public virtual void subscribeNotifications()
+        public virtual int Connection
         {
-            bgapi.send_attclient_write_command(connection, config_handle, new byte[] { 0x01, 0x00 });
-        }
-        public virtual void unsubscribe()
-        {
-            bgapi.send_attclient_write_command(connection, config_handle, new byte[] { 0x00, 0x00 });
+            get { return connection; }
         }
 
-        public virtual void writeInterval(int value)
+        public virtual int ValueHandle
         {
-            byte[] i = new byte[2];
-            i[0] = (byte)((value >> 8) & 0xFF);
-            i[1] = (byte)(value & 0xFF);
+            get { return value_handle; }
+        }
+
+        public virtual int IntervalHandle
+        {
+            get { return interval_handle; }
+        }
+
+        public virtual int ConfigHandle
+        {
+            get { return config_handle; }
+        }
+
+        public virtual void AddBLEServiceValueListener(BLEServiceValueListener l)
+        {
+            listeners.Add(l);
+        }
+
+        public virtual void RemoveBLEServiceValueListener(BLEServiceValueListener l)
+        {
+            listeners.Remove(l);
+        }
+
+        public virtual void Disconnect()
+        {
+            bgapi.removeListener(this);
+        }
+
+        public virtual void SubscribeIndications()
+        {
+            bgapi.send_attclient_write_command(connection, config_handle, new byte[] {0x02, 0x00});
+        }
+
+        public virtual void SubscribeNotifications()
+        {
+            bgapi.send_attclient_write_command(connection, config_handle, new byte[] {0x01, 0x00});
+        }
+
+        public virtual void Unsubscribe()
+        {
+            bgapi.send_attclient_write_command(connection, config_handle, new byte[] {0x00, 0x00});
+        }
+
+        public virtual void WriteInterval(int value)
+        {
+            var i = new byte[2];
+            i[0] = (byte) ((value >> 8) & 0xFF);
+            i[1] = (byte) (value & 0xFF);
             bgapi.send_attclient_write_command(connection, interval_handle, i);
         }
 
-        public virtual void readInterval()
+        public virtual void ReadInterval()
         {
             bgapi.send_attclient_read_by_handle(connection, interval_handle);
         }
@@ -122,14 +107,14 @@ namespace BLELib
                 {
                     foreach (BLEServiceValueListener l in listeners)
                     {
-                        l.receivedValue(this, value);
+                        l.ReceivedValue(this, value);
                     }
                 }
                 else if (atthandle == interval_handle)
                 {
                     foreach (BLEServiceValueListener l in listeners)
                     {
-                        l.receivedInterval(this, (value[0] << 8) + (value[1] & 0xFF));
+                        l.ReceivedInterval(this, (value[0] << 8) + (value[1] & 0xFF));
                     }
                 }
             }

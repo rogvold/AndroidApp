@@ -1,40 +1,38 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace BLELib
 {
     public class BLEJson
     {
-        public static string MakeIntervalsJSON(List<ushort> intervals, 
-            BLEDevice connectedDevice, 
-            DateTime startTime, 
-            string Username,
-            string Password,
-            int create)
+        public static string MakeIntervalsJson(BLESession session, DateTime packetTime, int create)
         {
-            string date = startTime.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
-            string deviceName = connectedDevice.Name;
-            string deviceId = connectedDevice.Address;
-            Dictionary<string, object> jsonDict = new Dictionary<string, object>();
-            jsonDict.Add("start", date);
-            jsonDict.Add("device_id", deviceId);
-            jsonDict.Add("device_name", deviceName);
-            jsonDict.Add("rates", intervals.ToArray());
-            jsonDict.Add("email", Username);
-            jsonDict.Add("password", Password);
-            jsonDict.Add("create", create == 0 ? "0" : "1");
+            string date = packetTime.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture);
+            string deviceName = session.ConnectedDevice.Name;
+            string deviceId = session.ConnectedDevice.Address;
+            var jsonDict = new Dictionary<string, object>
+                {
+                    {"start", date},
+                    {"device_id", deviceId},
+                    {"device_name", deviceName},
+                    {"rates", session.Intervals.ToArray()},
+                    {"email", session.User.Username},
+                    {"password", session.User.Password},
+                    {"create", create == 0 ? "0" : "1"}
+                };
+            session.Intervals.Clear();
             return "json=" + JsonConvert.SerializeObject(jsonDict);
         }
 
-        public static HttpWebResponse SendJSON(string json, string url)
+        public static HttpWebResponse SendJson(string json, string url)
         {
             byte[] data = Encoding.UTF8.GetBytes(json);
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            var request = (HttpWebRequest) WebRequest.Create(url);
             request.Method = "POST";
             request.ContentType = "application/x-www-form-urlencoded";
             request.ContentLength = data.Length;
@@ -58,40 +56,57 @@ namespace BLELib
         }
 
 
-
         public static int UserExists(string username)
         {
-            Dictionary<string, object> jsonDict = new Dictionary<string, object>();
-            jsonDict.Add("purpose", "CheckUserExistence");
-            jsonDict.Add("email", username);
-            jsonDict.Add("secret", "h7a7RaRtvAVwnMGq5BV6");
+            var jsonDict = new Dictionary<string, object>
+                {
+                    {"purpose", "CheckUserExistence"},
+                    {"email", username},
+                    {"secret", "h7a7RaRtvAVwnMGq5BV6"}
+                };
             string json = "json=" + JsonConvert.SerializeObject(jsonDict);
-            HttpWebResponse resp = SendJSON(json, "http://reshaka.ru:8080/BaseProjectWeb/mobileauth");
+            HttpWebResponse resp = SendJson(json, "http://reshaka.ru:8080/BaseProjectWeb/mobileauth");
             Stream responseStream = resp.GetResponseStream();
-            StreamReader sr = new StreamReader(responseStream);
-            string response = sr.ReadToEnd();
-            responseStream.Close();
-            Dictionary<string, string> respDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(response);
+            if (responseStream != null)
+            {
+                var sr = new StreamReader(responseStream);
+                string response = sr.ReadToEnd();
+                responseStream.Close();
+                var respDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(response);
 
-            return Convert.ToInt32(respDict["response"]);
+                return Convert.ToInt32(respDict["response"]);
+            }
+            else
+            {
+                return 0;
+            }
         }
 
         public static int CheckUser(string username, string password)
         {
-            Dictionary<string, object> jsonDict = new Dictionary<string, object>();
-            jsonDict.Add("purpose", "CheckAuthorisationData");
-            jsonDict.Add("email", username);
-            jsonDict.Add("password", password);
-            jsonDict.Add("secret", "h7a7RaRtvAVwnMGq5BV6");
+            var jsonDict = new Dictionary<string, object>
+                {
+                    {"purpose", "CheckAuthorisationData"},
+                    {"email", username},
+                    {"password", password},
+                    {"secret", "h7a7RaRtvAVwnMGq5BV6"}
+                };
             string json = "json=" + JsonConvert.SerializeObject(jsonDict);
-            HttpWebResponse resp = SendJSON(json, "http://reshaka.ru:8080/BaseProjectWeb/mobileauth");
+            HttpWebResponse resp = SendJson(json, "http://reshaka.ru:8080/BaseProjectWeb/mobileauth");
             Stream responseStream = resp.GetResponseStream();
-            StreamReader sr = new StreamReader(responseStream);
-            string response = sr.ReadToEnd();
-            responseStream.Close();
-            Dictionary<string, string> respDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(response);
+            if (responseStream != null)
+            {
+                var sr = new StreamReader(responseStream);
+                string response = sr.ReadToEnd();
+                responseStream.Close();
+                var respDict = JsonConvert.DeserializeObject<Dictionary<string, string>>(response);
 
-            return Convert.ToInt32(respDict["response"]);
+                return Convert.ToInt32(respDict["response"]);
+            }
+            else
+            {
+                return 0;
+            }
         }
     }
 }

@@ -1,41 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 using System.IO;
 using System.IO.Ports;
+using System.Threading;
 
 namespace BGAPI
 {
     public class BGAPITransport
     {
+        private const int WAITING = 0;
+        private const int HEADER = 1;
+        private const int PAYLOAD = 2;
 
-        protected internal List<BGAPITransportListener> listeners = new List<BGAPITransportListener>();
-        public virtual void addListener(BGAPITransportListener l)
-        {
-            listeners.Add(l);
-        }
-        public virtual void removeListener(BGAPITransportListener l)
-        {
-            listeners.Remove(l);
-        }
+        private const int HEADER_SIZE = 4;
+        protected internal List<IBGAPITransportListener> listeners = new List<IBGAPITransportListener>();
 
         protected internal SerialPort port;
 
-        private long receivedBytes = 0;
-
-        public virtual long ReceivedBytes
-        {
-            get
-            {
-                return receivedBytes;
-            }
-        }
+        private long receivedBytes;
+        private bool terminate;
 
         public BGAPITransport(SerialPort port)
         {
             this.port = port;
-            Thread thr = new Thread(new ThreadStart(Run));
+            var thr = new Thread(Run);
             try
             {
                 port.Open();
@@ -47,11 +35,25 @@ namespace BGAPI
             }
         }
 
+        public virtual long ReceivedBytes
+        {
+            get { return receivedBytes; }
+        }
+
+        public virtual void addListener(IBGAPITransportListener l)
+        {
+            listeners.Add(l);
+        }
+
+        public virtual void removeListener(IBGAPITransportListener l)
+        {
+            listeners.Remove(l);
+        }
+
         public virtual void Run()
         {
-
-            byte[] buffer = new byte[1024];
-            byte[] hdr = new byte[HEADER_SIZE];
+            var buffer = new byte[1024];
+            var hdr = new byte[HEADER_SIZE];
             int len = -1;
             int idx = 0;
             int state = WAITING;
@@ -88,21 +90,21 @@ namespace BGAPI
                                 else // There is no payload
                                 {
                                     state = WAITING;
-                                    foreach (BGAPITransportListener l in listeners)
-                                        l.packetReceived(p);
+                                    foreach (IBGAPITransportListener l in listeners)
+                                        l.PacketReceived(p);
                                     p = null;
                                 }
                             }
                         }
                         else if (state == PAYLOAD)
                         {
-                            p.PayloadData.WriteByte((byte)c);
+                            p.PayloadData.WriteByte(c);
                             idx++;
                             if (idx == p.PayloadLength) // We got a complete message
                             {
                                 state = WAITING;
-                                foreach (BGAPITransportListener l in listeners)
-                                    l.packetReceived(p);
+                                foreach (IBGAPITransportListener l in listeners)
+                                    l.PacketReceived(p);
                                 p = null;
                             }
                         }
@@ -129,8 +131,8 @@ namespace BGAPI
             {
                 //port.Open();
                 port.Write(p.PacketBytes, 0, p.PacketBytes.Length);
-                foreach (BGAPITransportListener l in listeners)
-                    l.packetSent(p);
+                foreach (IBGAPITransportListener l in listeners)
+                    l.PacketSent(p);
             }
             catch (IOException ex)
             {
@@ -139,23 +141,15 @@ namespace BGAPI
         }
 
 
-
-        ///    <summary> ************************************************************************
-        ///     * CODE OF THE RECEIVER THREAD </summary>
+        /// <summary>
         ///     ************************************************************************
-
+        ///     * CODE OF THE RECEIVER THREAD
+        /// </summary>
+        /// ************************************************************************
         public virtual void stop()
         {
             terminate = true;
-            this.port.Close();
+            port.Close();
         }
-
-        private bool terminate = false;
-
-        private const int WAITING = 0;
-        private const int HEADER = 1;
-        private const int PAYLOAD = 2;
-
-        private const int HEADER_SIZE = 4;
     }
 }

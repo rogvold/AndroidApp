@@ -1,10 +1,11 @@
-﻿
+﻿using System.Linq;
+
 namespace BLELib
 {
     public class BLEAttribute
     {
-        protected internal byte[] uuid;
         protected internal int handle;
+        protected internal byte[] uuid;
 
         public BLEAttribute(byte[] uuid, int handle)
         {
@@ -14,21 +15,14 @@ namespace BLELib
 
         public virtual byte[] Uuid
         {
-            get
-            {
-                return uuid;
-            }
+            get { return uuid; }
         }
 
         public virtual string UuidString
         {
             get
             {
-                string result = "";
-                for (int i = 0; i < uuid.Length; i++)
-                {
-                    result = string.Format("{0:X2}", uuid[i]) + result;
-                }
+                string result = uuid.Aggregate("", (current, t) => string.Format("{0:X2}", t) + current);
                 result = "0x" + result;
                 return result;
             }

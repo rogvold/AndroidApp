@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BGAPI
+﻿namespace BGAPI
 {
     public interface BGAPIListener
     {
@@ -15,12 +11,18 @@ namespace BGAPI
         void receive_system_get_counters(int txok, int txretry, int rxok, int rxfail);
         void receive_system_get_connections(int maxconn);
         void receive_system_read_memory(int address, byte[] data);
-        void receive_system_get_info(int major, int minor, int patch, int build, int ll_version, int protocol_version, int hw);
+
+        void receive_system_get_info(int major, int minor, int patch, int build, int ll_version, int protocol_version,
+                                     int hw);
+
         void receive_system_endpoint_tx();
         void receive_system_whitelist_append(int result);
         void receive_system_whitelist_remove(int result);
         void receive_system_whitelist_clear();
-        void receive_system_boot(int major, int minor, int patch, int build, int ll_version, int protocol_version, int hw);
+
+        void receive_system_boot(int major, int minor, int patch, int build, int ll_version, int protocol_version,
+                                 int hw);
+
         void receive_system_debug(byte[] data);
         void receive_system_endpoint_rx(int endpoint, byte[] data);
 
@@ -53,7 +55,10 @@ namespace BGAPI
         void receive_connection_features_get(int connection, int result);
         void receive_connection_get_status(int connection);
         void receive_connection_raw_tx(int connection);
-        void receive_connection_status(int connection, int flags, BDAddr address, int address_type, int conn_interval, int timeout, int latency, int bonding);
+
+        void receive_connection_status(int connection, int flags, BDAddr address, int address_type, int conn_interval,
+                                       int timeout, int latency, int bonding);
+
         void receive_connection_version_ind(int connection, int vers_nr, int comp_id, int sub_vers_nr);
         void receive_connection_feature_ind(int connection, byte[] features);
         void receive_connection_raw_rx(int connection, byte[] data);

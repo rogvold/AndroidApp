@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Web.UI.DataVisualization.Charting;
 
 namespace BLELib
@@ -10,52 +9,32 @@ namespace BLELib
     {
         private static bool TwoSideTest(List<ushort> source, double alpha)
         {
-            Chart ch = new Chart();
-            double avg;
-            double sum = 0;
-            foreach (ushort element in source)
-            {
-                sum += element;
-            }
-            avg = sum / (double)source.Count;
-            double std;
-            sum = 0;
-            foreach (ushort element in source)
-            {
-                sum += Math.Pow(element - avg, 2);
-            }
-            std = Math.Pow(sum / (double)(source.Count - 1), 0.5);
-            double max = 0;
-            foreach (ushort element in source)
-            {
-                if (Math.Abs(element - avg) > max)
-                {
-                    max = Math.Abs(element - avg);
-                }
-            }
-            double tValue = ((source.Count - 1) / Math.Pow(source.Count, 0.5)) * 
-                Math.Pow(Math.Pow(ch.DataManipulator.Statistics.InverseTDistribution(alpha / (double)(2 * source.Count), source.Count - 2), 2) / 
-                (source.Count - 2 + Math.Pow(ch.DataManipulator.Statistics.InverseTDistribution(alpha / (double)(2 * source.Count), source.Count - 2), 2)), 0.5);
-            return (max / std) < tValue;
+            if (source == null) throw new ArgumentNullException("source");
+            var ch = new Chart();
+            double sum = source.Aggregate<ushort, double>(0, (current, element) => current + element);
+            double avg = sum/source.Count;
+            sum = source.Sum(element => Math.Pow(element - avg, 2));
+            double std = Math.Pow(sum/(source.Count - 1), 0.5);
+            double max = source.Select(element => Math.Abs(element - avg)).Concat(new double[] {0}).Max();
+            double tValue = ((source.Count - 1)/Math.Pow(source.Count, 0.5))*
+                            Math.Pow(
+                                Math.Pow(
+                                    ch.DataManipulator.Statistics.InverseTDistribution(alpha/(2*source.Count),
+                                                                                       source.Count - 2), 2)/
+                                (source.Count - 2 +
+                                 Math.Pow(
+                                     ch.DataManipulator.Statistics.InverseTDistribution(alpha/(2*source.Count),
+                                                                                        source.Count - 2), 2)), 0.5);
+            return (max/std) < tValue;
         }
 
         private static bool MaxTest(List<ushort> source, double alpha)
         {
-            Chart ch = new Chart();
-            double avg;
-            double sum = 0;
-            foreach (ushort element in source)
-            {
-                sum += element;
-            }
-            avg = sum / (double)source.Count;
-            double std;
-            sum = 0;
-            foreach (ushort element in source)
-            {
-                sum += Math.Pow(element - avg, 2);
-            }
-            std = Math.Pow(sum / (double)(source.Count - 1), 0.5);
+            var ch = new Chart();
+            double sum = source.Aggregate<ushort, double>(0, (current, element) => current + element);
+            double avg = sum/source.Count;
+            sum = source.Sum(element => Math.Pow(element - avg, 2));
+            double std = Math.Pow(sum/(source.Count - 1), 0.5);
             double max = 0;
             foreach (ushort element in source)
             {
@@ -64,30 +43,26 @@ namespace BLELib
                     max = element;
                 }
             }
-            double tValue = ((source.Count - 1) / Math.Pow(source.Count, 0.5)) *
-                Math.Pow(Math.Pow(ch.DataManipulator.Statistics.InverseTDistribution(alpha / (double)(source.Count), source.Count - 2), 2) /
-                (source.Count - 2 + Math.Pow(ch.DataManipulator.Statistics.InverseTDistribution(alpha / (double)(source.Count), source.Count - 2), 2)), 0.5);
-            return ((max - avg)/ std) < tValue;
+            double tValue = ((source.Count - 1)/Math.Pow(source.Count, 0.5))*
+                            Math.Pow(
+                                Math.Pow(
+                                    ch.DataManipulator.Statistics.InverseTDistribution(alpha/(source.Count),
+                                                                                       source.Count - 2), 2)/
+                                (source.Count - 2 +
+                                 Math.Pow(
+                                     ch.DataManipulator.Statistics.InverseTDistribution(alpha/(source.Count),
+                                                                                        source.Count - 2), 2)), 0.5);
+            return ((max - avg)/std) < tValue;
         }
 
         private static bool MinTest(List<ushort> source, double alpha)
         {
-            Chart ch = new Chart();
-            double avg;
-            double sum = 0;
-            foreach (ushort element in source)
-            {
-                sum += element;
-            }
-            avg = sum / (double)source.Count;
-            double std;
-            sum = 0;
-            foreach (ushort element in source)
-            {
-                sum += Math.Pow(element - avg, 2);
-            }
-            std = Math.Pow(sum / (double)(source.Count - 1), 0.5);
-            double min = source[0];
+            var ch = new Chart();
+            double sum = source.Aggregate<ushort, double>(0, (current, element) => current + element);
+            double avg = sum/source.Count;
+            sum = source.Sum(element => Math.Pow(element - avg, 2));
+            double std = Math.Pow(sum/(source.Count - 1), 0.5);
+            ushort min = source[0];
             foreach (ushort element in source)
             {
                 if (element < min)
@@ -95,16 +70,26 @@ namespace BLELib
                     min = element;
                 }
             }
-            double tValue = ((source.Count - 1) / Math.Pow(source.Count, 0.5)) *
-                Math.Pow(Math.Pow(ch.DataManipulator.Statistics.InverseTDistribution(alpha / (double)(source.Count), source.Count - 2), 2) /
-                (source.Count - 2 + Math.Pow(ch.DataManipulator.Statistics.InverseTDistribution(alpha / (double)(source.Count), source.Count - 2), 2)), 0.5);
-            return ((avg - min) / std) < tValue;
+            double tValue = ((source.Count - 1)/Math.Pow(source.Count, 0.5))*
+                            Math.Pow(
+                                Math.Pow(
+                                    ch.DataManipulator.Statistics.InverseTDistribution(alpha/(source.Count),
+                                                                                       source.Count - 2), 2)/
+                                (source.Count - 2 +
+                                 Math.Pow(
+                                     ch.DataManipulator.Statistics.InverseTDistribution(alpha/(source.Count),
+                                                                                        source.Count - 2), 2)), 0.5);
+            return ((avg - min)/std) < tValue;
         }
 
 
         public static List<ushort> IntervalFilter(List<ushort> source)
         {
-            double alpha = 0.05;
+            if (source.Count < 10)
+            {
+                return source;
+            }
+            const double alpha = 0.05;
             while (!MaxTest(source, alpha))
             {
                 source.Remove(source.Max());

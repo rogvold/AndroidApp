@@ -59,6 +59,8 @@
     <Compile Include="BLEService.cs" />
     <Compile Include="BLEServiceInstance.cs" />
     <Compile Include="BLEServiceValueListener.cs" />
+    <Compile Include="BLESession.cs" />
+    <Compile Include="BLEUser.cs" />
     <Compile Include="ByteUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

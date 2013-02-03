@@ -4,18 +4,17 @@ namespace BLELib
 {
     public class BLEService
     {
-
         public static Dictionary<string, string> profiles = new Dictionary<string, string>();
+        protected internal List<BLEAttribute> attributes = new List<BLEAttribute>();
+
+        protected internal int end;
+        protected internal int start;
+        protected internal byte[] uuid;
+
         static BLEService()
         {
             profiles.Add("0x180A", "");
         }
-
-
-        protected internal int start, end;
-        protected internal byte[] uuid;
-
-        protected internal List<BLEAttribute> attributes = new List<BLEAttribute>();
 
         public BLEService(byte[] uuid, int start, int end)
         {
@@ -26,34 +25,22 @@ namespace BLELib
 
         public virtual int Start
         {
-            get
-            {
-                return start;
-            }
+            get { return start; }
         }
 
         public virtual int End
         {
-            get
-            {
-                return end;
-            }
+            get { return end; }
         }
 
         public virtual byte[] Uuid
         {
-            get
-            {
-                return uuid;
-            }
+            get { return uuid; }
         }
 
         public virtual List<BLEAttribute> Attributes
         {
-            get
-            {
-                return attributes;
-            }
+            get { return attributes; }
         }
 
         public virtual string UuidString
@@ -70,11 +57,6 @@ namespace BLELib
             }
         }
 
-        public override string ToString()
-        {
-            return "BLEService " + UuidString + " (" + start + ".." + end + ")";
-        }
-
         public virtual string Description
         {
             get
@@ -82,10 +64,15 @@ namespace BLELib
                 string result = ToString();
                 foreach (BLEAttribute a in attributes)
                 {
-                    result += "\n\t" + a.ToString();
+                    result += "\n\t" + a;
                 }
                 return result;
             }
+        }
+
+        public override string ToString()
+        {
+            return "BLEService " + UuidString + " (" + start + ".." + end + ")";
         }
     }
 }

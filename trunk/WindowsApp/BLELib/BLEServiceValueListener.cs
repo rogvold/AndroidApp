@@ -1,9 +1,8 @@
-﻿
-namespace BLELib
+﻿namespace BLELib
 {
     public interface BLEServiceValueListener
     {
-        void receivedValue(BLEServiceInstance srv, byte[] value);
-        void receivedInterval(BLEServiceInstance srv, int value);
+        void ReceivedValue(BLEServiceInstance srv, byte[] value);
+        void ReceivedInterval(BLEServiceInstance srv, int value);
     }
 }

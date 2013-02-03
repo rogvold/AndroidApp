@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BGAPI
+﻿namespace BGAPI
 {
-    public interface BGAPITransportListener
+    public interface IBGAPITransportListener
     {
-        void packetSent(BGAPIPacket packet);
-        void packetReceived(BGAPIPacket packet);
+        void PacketSent(BGAPIPacket packet);
+        void PacketReceived(BGAPIPacket packet);
     }
 }
