@@ -91,6 +91,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <Fakes Include="Fakes\BLELib.fakes" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -102,6 +103,10 @@
     <ProjectReference Include="..\BGAPI\BGAPI.csproj">
       <Project>{62946ddd-3041-453e-8f5c-5e5c9fa7a3af}</Project>
       <Name>BGAPI</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\BLELib\BLELib.csproj">
+      <Project>{ed48f070-dcf3-4ae2-b74c-8ce086c30488}</Project>
+      <Name>BLELib</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

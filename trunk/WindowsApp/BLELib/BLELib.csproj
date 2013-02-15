@@ -55,6 +55,7 @@
     <Compile Include="BLEDeviceList.cs" />
     <Compile Include="BLEFilter.cs" />
     <Compile Include="BLEJson.cs" />
+    <Compile Include="BLEListener.cs" />
     <Compile Include="BLEOffline.cs" />
     <Compile Include="BLEService.cs" />
     <Compile Include="BLEServiceInstance.cs" />

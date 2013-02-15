@@ -7,43 +7,22 @@ namespace BLELib
 {
     public class BLEFilter
     {
-        private static bool TwoSideTest(List<ushort> source, double alpha)
-        {
-            if (source == null) throw new ArgumentNullException("source");
-            var ch = new Chart();
-            double sum = source.Aggregate<ushort, double>(0, (current, element) => current + element);
-            double avg = sum/source.Count;
-            sum = source.Sum(element => Math.Pow(element - avg, 2));
-            double std = Math.Pow(sum/(source.Count - 1), 0.5);
-            double max = source.Select(element => Math.Abs(element - avg)).Concat(new double[] {0}).Max();
-            double tValue = ((source.Count - 1)/Math.Pow(source.Count, 0.5))*
-                            Math.Pow(
-                                Math.Pow(
-                                    ch.DataManipulator.Statistics.InverseTDistribution(alpha/(2*source.Count),
-                                                                                       source.Count - 2), 2)/
-                                (source.Count - 2 +
-                                 Math.Pow(
-                                     ch.DataManipulator.Statistics.InverseTDistribution(alpha/(2*source.Count),
-                                                                                        source.Count - 2), 2)), 0.5);
-            return (max/std) < tValue;
-        }
-
         private static bool MaxTest(List<ushort> source, double alpha)
         {
             var ch = new Chart();
-            double sum = source.Aggregate<ushort, double>(0, (current, element) => current + element);
-            double avg = sum/source.Count;
-            sum = source.Sum(element => Math.Pow(element - avg, 2));
-            double std = Math.Pow(sum/(source.Count - 1), 0.5);
-            double max = 0;
-            foreach (ushort element in source)
+            var avg = source.Aggregate<ushort, double>(0, (current, element) => current + element) / 
+                source.Count;
+            var std = Math.Pow(source.Sum(element => Math.Pow(element - avg, 2)) / 
+                (source.Count - 1), 0.5);
+            var max = 0;
+            foreach (var element in source)
             {
                 if (element > max)
                 {
                     max = element;
                 }
             }
-            double tValue = ((source.Count - 1)/Math.Pow(source.Count, 0.5))*
+            var tValue = ((source.Count - 1)/Math.Pow(source.Count, 0.5))*
                             Math.Pow(
                                 Math.Pow(
                                     ch.DataManipulator.Statistics.InverseTDistribution(alpha/(source.Count),
@@ -58,19 +37,19 @@ namespace BLELib
         private static bool MinTest(List<ushort> source, double alpha)
         {
             var ch = new Chart();
-            double sum = source.Aggregate<ushort, double>(0, (current, element) => current + element);
-            double avg = sum/source.Count;
-            sum = source.Sum(element => Math.Pow(element - avg, 2));
-            double std = Math.Pow(sum/(source.Count - 1), 0.5);
-            ushort min = source[0];
-            foreach (ushort element in source)
+            var avg = source.Aggregate<ushort, double>(0, (current, element) => current + element) /
+                source.Count;
+            var std = Math.Pow(source.Sum(element => Math.Pow(element - avg, 2)) /
+                (source.Count - 1), 0.5);
+            var min = source[0];
+            foreach (var element in source)
             {
                 if (element < min)
                 {
                     min = element;
                 }
             }
-            double tValue = ((source.Count - 1)/Math.Pow(source.Count, 0.5))*
+            var tValue = ((source.Count - 1)/Math.Pow(source.Count, 0.5))*
                             Math.Pow(
                                 Math.Pow(
                                     ch.DataManipulator.Statistics.InverseTDistribution(alpha/(source.Count),
