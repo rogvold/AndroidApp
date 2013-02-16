@@ -13,7 +13,7 @@ namespace PolarMath.Spectrum
         {
             double hf = training.evaluate( new HF() );
             double lf = training.evaluate( new LF() );
-            double vlf = training.evaluate( new LF() );
+            double vlf = training.evaluate( new VLF() );
 
             return (lf + vlf) / hf;
         }
