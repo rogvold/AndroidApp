@@ -4,46 +4,23 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PolarMath.Evaluation;
 
 namespace PolarMath.Data
 {
     public class Training
     {
-        private String idString;
-        private List<int> intervals;
+        public String IdString { get; set; }
+        public List<int> Intervals { get; set; }
 
-        private TrainingCache cache = new TrainingCache();
+        private readonly TrainingCache _cache = new TrainingCache();
 
-        public Training() {
-        }
-
-        Training(String idString, List<int> intervals) {
-            this.idString = idString;
-            this.intervals = intervals;
-        }
-
-        public String getIdString() {
-            return idString;
-        }
-
-        public void setIdString(String idString) {
-            this.idString = idString;
-        }
-
-        public List<int> getIntervals() {
-            return intervals;
-        }
-
-        public void setIntervals(List<int> intervals) {
-            this.intervals = intervals;
-        }
-
-        public T evaluate<T>(Evaluation<T> evaluation) {
-            if (cache.contains(evaluation)) {
-                return cache.get(evaluation);
+        public T Evaluate<T>(IEvaluation<T> evaluation) {
+            if (_cache.Contains(evaluation)) {
+                return _cache.Get(evaluation);
             } else {
-                T evaluationResult = evaluation.evaluate(this);
-                cache.add(evaluation, evaluationResult);
+                T evaluationResult = evaluation.Evaluate(this);
+                _cache.Add(evaluation, evaluationResult);
                 return evaluationResult;
             }
         }

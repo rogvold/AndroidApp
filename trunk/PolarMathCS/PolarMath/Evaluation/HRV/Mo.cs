@@ -4,22 +4,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using PolarMath.Evaluation.Util;
+using PolarMath.Util;
 
 namespace PolarMath.Evaluation.HRV
 {
-    public class Mo : Evaluation<double>
+    public class Mo : IEvaluation<double>
     {
-        public double evaluate(Training training) 
+        public double Evaluate(Training training) 
         {
-		    List<int> intervals = training.getIntervals();
+		    var intervals = training.Intervals;
 		
 		    //Histogram h = new Histogram(intervals.size()).init();
-		    Histogram h = new Histogram().init();
-		    foreach (int interval in intervals) {
-                h.addRRInterval(interval);
+		    var h = new Histogram().Init();
+		    foreach (var interval in intervals) {
+                h.AddRrInterval(interval);
             }
-		    return h.getMaxIntervalStart() / (double) 1000;
+		    return h.GetMaxIntervalStart() / (double) 1000;
 	    }
     }
 }

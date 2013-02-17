@@ -7,15 +7,14 @@ using System.Threading.Tasks;
 
 namespace PolarMath.Evaluation.Statistics
 {
-    public class SDNN : Evaluation<int>
+    public class SDNN : IEvaluation<int>
     {
-        public int evaluate(Training training) {
-        int average = training.evaluate(new Average());
-        long total = 0;
-        foreach (int integer in training.getIntervals()) {
-            total += (average - integer) * (average - integer);
+        public int Evaluate(Training training) 
+        {
+            var average = training.Evaluate(new Average());
+            var total = training.Intervals.Aggregate<int, long>(0, (current, integer) =>
+                current + (average - integer) * (average - integer));
+            return (int)Math.Sqrt(total / training.Intervals.Count);
         }
-        return (int) Math.Sqrt(total / training.getIntervals().Count);
-    }
     }
 }

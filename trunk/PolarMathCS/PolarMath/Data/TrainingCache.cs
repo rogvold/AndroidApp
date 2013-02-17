@@ -3,27 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PolarMath.Evaluation;
 
 namespace PolarMath.Data
 {
     public class TrainingCache
     {
-        private Dictionary<Type, Object> cache = new Dictionary<Type, Object>();
+        private readonly Dictionary<Type, Object> _cache = new Dictionary<Type, Object>();
 
-        public TrainingCache() {
+        public bool Contains<T>(IEvaluation<T> evaluation) {
+            return _cache.ContainsKey(evaluation.GetType());
         }
 
-        public bool contains<T>(Evaluation<T> evaluation) {
-            return cache.ContainsKey(evaluation.GetType());
+        public void Add<T>(IEvaluation<T> evaluation, T result) {
+            _cache.Add(evaluation.GetType(), result);
         }
 
-        public void add<T>(Evaluation<T> evaluation, T result) {
-            cache.Add(evaluation.GetType(), result);
-        }
-
-        public T get<T>(Evaluation<T> evaluation) {
+        public T Get<T>(IEvaluation<T> evaluation) {
             object value;
-            cache.TryGetValue(evaluation.GetType(), out value);
+            _cache.TryGetValue(evaluation.GetType(), out value);
             return (T) value;
         }
     }

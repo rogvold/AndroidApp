@@ -8,20 +8,20 @@ namespace PolarMath.Util
 {
     class Square
     {
-        private List<Periodogram> periodogram = new List<Periodogram>();
+        private readonly List<Periodogram> _periodogram = new List<Periodogram>();
 	
-	    private double left;
-	    private double right;
+	    private readonly double _left;
+	    private readonly double _right;
 	
 	    public Square(List<Periodogram> periodogram, double left, double right) {
-		    this.periodogram = periodogram;
-		    this.left = left;
-		    this.right = right;
+		    _periodogram = periodogram;
+		    _left = left;
+		    _right = right;
 	    }
 	
 	    public double Calculate(){
 		    double square = 0;
-            this.periodogram.Sort(new Square.FrequencyComparator());
+            _periodogram.Sort(new FrequencyComparator());
 		    /*for (int i = 0; i < this.periodogram.size() - 1; i++) {
 			    double value1 = this.periodogram.get(i).getValue();
 			    double value2 = this.periodogram.get(i + 1).getValue();
@@ -45,9 +45,9 @@ namespace PolarMath.Util
 			    double freq = freq2 - freq1;
 			    square += freq * avgValue * 1000000;
 		    }*/
-		    for (int i = 0, size = periodogram.Count; i < size; i++) {
-			    if (periodogram.ElementAt(i).getFrequency() >= left && periodogram.ElementAt(i).getFrequency() <= right) {
-				    square += periodogram.ElementAt(i).getValue();
+		    for (int i = 0, size = _periodogram.Count; i < size; i++) {
+			    if (_periodogram.ElementAt(i).Frequency >= _left && _periodogram.ElementAt(i).Frequency <= _right) {
+				    square += _periodogram.ElementAt(i).Value;
 			    }
 		    }
 		    return square;
@@ -56,14 +56,13 @@ namespace PolarMath.Util
 	    public sealed class FrequencyComparator : IComparer<Periodogram> 
 	    {
 		    public int Compare(Periodogram periodogram1, Periodogram periodogram2) {
-			    double freq1 = periodogram1.getFrequency();
-			    double freq2 = periodogram2.getFrequency();
+			    var freq1 = periodogram1.Frequency;
+			    var freq2 = periodogram2.Frequency;
 			    if(freq1 > freq2)
 	                return 1;
-	            else if(freq1 < freq2)
+	            if(freq1 < freq2)
 	                return -1;
-	            else
-	                return 0;    
+	            return 0;    
 		    }
         }
     }

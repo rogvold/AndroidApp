@@ -8,38 +8,18 @@ namespace PolarMath.Util
 {
     public class Periodogram
     {
-        private double frequency;
-        private double value;
+        public double Frequency;
+        public double Value;
 
         public Periodogram(double frequency, double value)
         {
-            this.frequency = frequency;
-            this.value = value;
+            Frequency = frequency;
+            Value = value;
         }
 
-        public double getFrequency()
+        public override String ToString()
         {
-            return frequency;
-        }
-
-        public void setFrequency(double frequency)
-        {
-            this.frequency = frequency;
-        }
-
-        public double getValue()
-        {
-            return value;
-        }
-
-        public void setValue(double value)
-        {
-            this.value = value;
-        }
-
-        public String toString()
-        {
-            return frequency + " " + value;
+            return Frequency + " " + Value;
         }
     }
 }

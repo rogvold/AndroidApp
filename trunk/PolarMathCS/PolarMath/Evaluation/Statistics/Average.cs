@@ -7,20 +7,17 @@ using System.Threading.Tasks;
 
 namespace PolarMath.Evaluation.Statistics
 {
-    public class Average : Evaluation<int>
+    public class Average : IEvaluation<int>
     {
-        public int evaluate(Training training)
+        public int Evaluate(Training training)
         {
-            return doEvaluate( training.getIntervals() );
+            return DoEvaluate( training.Intervals );
         }
 
-        private int doEvaluate(List<int> intervals) {
-        long intervalsTotal = 0;
-        
-        foreach (int interval in intervals) {
-            intervalsTotal += interval;
+        private static int DoEvaluate(ICollection<int> intervals) 
+        {
+            var intervalsTotal = intervals.Aggregate<int, long>(0, (current, interval) => current + interval);
+            return (int) (intervalsTotal / intervals.Count);
         }
-        return (int) (intervalsTotal / intervals.Count);
-    }
     }
 }

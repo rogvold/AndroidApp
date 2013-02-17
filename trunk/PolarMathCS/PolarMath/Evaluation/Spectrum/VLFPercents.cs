@@ -1,18 +1,14 @@
 ﻿using PolarMath.Data;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace PolarMath.Spectrum
+namespace PolarMath.Evaluation.Spectrum
 {
-    public class VLFPercents : Evaluation<double>
+    public class VLFPercents : IEvaluation<double>
     {
-        public Double evaluate(Training training)
+        public Double Evaluate(Training training)
         {
-            double vlf = training.evaluate( new VLF() );
-            double tp = training.evaluate( new TP() );
+            var vlf = training.Evaluate( new VLF() );
+            var tp = training.Evaluate( new TP() );
             return (vlf / tp) * 100;
         }
     }

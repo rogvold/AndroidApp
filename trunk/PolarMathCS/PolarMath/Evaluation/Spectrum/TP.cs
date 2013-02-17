@@ -1,19 +1,16 @@
 ﻿using PolarMath.Data;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using PolarMath.Util;
 
-namespace PolarMath.Spectrum
+namespace PolarMath.Evaluation.Spectrum
 {
-    public class TP : Evaluation<double>
+    public class TP : IEvaluation<double>
     {
-        public Double evaluate(Training training)
+        public Double Evaluate(Training training)
         {
             //List<Periodogram> periodogram = training.evaluate(new FFT());
-            List<Periodogram> periodogram1 = training.evaluate( new Lomb() );
+            var periodogram1 = training.Evaluate( new Lomb() );
             return new Square( periodogram1, 0, 0.4 ).Calculate();
         }
     }

@@ -1,99 +1,75 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace PolarMath.Evaluation.Util
+namespace PolarMath.Util
 {
     public class Histogram
     {
-        private LinkedList<HistogramInterval> intervals = new LinkedList<HistogramInterval>();
-    
-        private static int lowBorder = 400;
-	    private static int highBorder = 1300;
-	
-	    private int step;
+        private readonly LinkedList<HistogramInterval> _intervals = new LinkedList<HistogramInterval>();
+
+        private const int LowBorder = 400;
+        private const int HighBorder = 1300;
+
+        private readonly int _step;
 	
 	    public Histogram() {
-		    this.step = 50;
+		    _step = 50;
 	    }
 
         public Histogram(int dataSize) {
-    	    int k = (int)(1 + 3.322 * lg(dataSize));
-    	    this.step = (int)(highBorder - lowBorder) / k;
+    	    var k = (int)(1 + 3.322 * Lg(dataSize));
+    	    _step = (HighBorder - LowBorder) / k;
         }
 
-        private static double logb( double a, double b )
+        private static double Logb( double a, double b )
 	    {
 		    return Math.Log(a) / Math.Log(b);
 	    }
 
-	    private static double lg( double a )
+	    private static double Lg( double a )
 	    {
-		    return logb(a,2);
+		    return Logb(a,2);
 	    }
     
-        public Histogram init() {
-            for (int i = lowBorder; i < highBorder; i += step) {
-        	    if (i + step < highBorder) {
-        		    intervals.AddLast(new HistogramInterval(i, i + step));
-        	    }
-        	    else {
-                    intervals.AddLast( new HistogramInterval( i, highBorder ) );
-            	
-        	    }
+        public Histogram Init() {
+            for (var i = LowBorder; i < HighBorder; i += _step) {
+                _intervals.AddLast(i + _step < HighBorder
+                                       ? new HistogramInterval(i, i + _step)
+                                       : new HistogramInterval(i, HighBorder));
             }
             return this;
         }
 
-        public void addRRInterval(int length) {
-            if (length >= lowBorder && length <= highBorder) {
-        	    getIntervalForRR(length).add(length);
+        public void AddRrInterval(int length) {
+            if (length >= LowBorder && length <= HighBorder) {
+        	    GetIntervalForRr(length).Values.AddLast(length);
             }
         }
     
-        public int getMaxIntervalNumber() {
-    	    int maxValue = 0;
-    	    foreach (HistogramInterval interval in intervals) {
-    		    if (interval.getNumber() > maxValue) {
-    			    maxValue = interval.getNumber();
-    		    }
-    	    }
-    	    return maxValue;
-        }
-    
-       public int getTotalCount() {
-	       int total = 0;
-	       foreach (HistogramInterval interval in intervals) {
-		       total += interval.getNumber();
-	       }
-	       return total;
-       }
-   
-       public int getMaxIntervalStart() {
-	       int maxValue = getMaxIntervalNumber();
-	       int intervalStart = 0;
-	       foreach (HistogramInterval interval in intervals) {
-		       if (interval.getNumber() == maxValue) {
-			       intervalStart = interval.getStart();
-			       break;
-		       }
-	       }
-	       return intervalStart;
-       }
-
-        private HistogramInterval getIntervalForRR(int RR) {
-            foreach (HistogramInterval interval in intervals) {
-                if (interval.getStart() <= RR && interval.getEnd() > RR) {
-                    return interval;
-                }
-            }
-            return null;
+        public int GetMaxIntervalNumber()
+        {
+            return _intervals.Select(interval => interval.Values.Count).Max();
         }
 
-        protected LinkedList<HistogramInterval> getIntervals() {
-            return intervals;
+        public int GetTotalCount()
+        {
+            return _intervals.Sum(interval => interval.Values.Count);
+        }
+
+        public int GetMaxIntervalStart() {
+	        var maxValue = GetMaxIntervalNumber();
+            var intervalResult = _intervals.FirstOrDefault(interval => interval.Values.Count == maxValue);
+            return intervalResult == null ? 0 : intervalResult.Start;
+        }
+
+        private HistogramInterval GetIntervalForRr(int rr)
+        {
+            return _intervals.FirstOrDefault(interval => interval.Start <= rr && interval.End > rr);
+        }
+
+        protected LinkedList<HistogramInterval> GetIntervals() {
+            return _intervals;
         }
     }
 }

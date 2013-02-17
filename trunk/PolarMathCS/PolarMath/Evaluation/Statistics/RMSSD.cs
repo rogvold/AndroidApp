@@ -7,17 +7,17 @@ using System.Threading.Tasks;
 
 namespace PolarMath.Evaluation.Statistics
 {
-    public class RMSSD : Evaluation<int>
+    public class RMSSD : IEvaluation<int>
     {
-        public int evaluate(Training training) 
+        public int Evaluate(Training training) 
         {
-            List<int> intervals = training.getIntervals();
+            var intervals = training.Intervals;
             long total = 0;
 
-            for (int i = 1; i < intervals.Count; i++)
+            for (var i = 1; i < intervals.Count; i++)
             {
-                int now = intervals.ElementAt( i );
-                int before = intervals.ElementAt( i - 1 );
+                var now = intervals.ElementAt( i );
+                var before = intervals.ElementAt( i - 1 );
 
                 total += (now - before) * (now - before);
             }

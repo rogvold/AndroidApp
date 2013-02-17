@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using PolarMath.Data;
 
-using PolarMath.Data;
-
-namespace PolarMath
+namespace PolarMath.Evaluation
 {
-    public interface Evaluation<T>
+    public interface IEvaluation<out T>
     {
-        T evaluate(Training training);
+        T Evaluate(Training training);
     }
 }

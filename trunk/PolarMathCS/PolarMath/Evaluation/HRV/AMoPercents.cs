@@ -4,21 +4,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using PolarMath.Evaluation.Util;
+using PolarMath.Util;
 
 namespace PolarMath.Evaluation.HRV
 {
-    public class AMoPercents : Evaluation<int>
+    public class AMoPercents : IEvaluation<int>
     {
-        public int evaluate(Training training) {
-		List<int> intervals = training.getIntervals();
+        public int Evaluate(Training training) {
+		var intervals = training.Intervals;
 		//Histogram h = new Histogram(intervals.size()).init();
-		Histogram h = new Histogram().init();
-		foreach (int interval in intervals) {
-            h.addRRInterval(interval);
+		var h = new Histogram().Init();
+		foreach (var interval in intervals) {
+            h.AddRrInterval(interval);
         }
-		int maxRangeValue = h.getMaxIntervalNumber();
-		int totalCount = h.getTotalCount();
+		var maxRangeValue = h.GetMaxIntervalNumber();
+		var totalCount = h.GetTotalCount();
 		
 		return (int)((maxRangeValue /  (double) totalCount) * 100);
 	}

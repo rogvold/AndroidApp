@@ -7,17 +7,17 @@ using System.Threading.Tasks;
 
 namespace PolarMath.Evaluation.Time
 {
-    public class PNN50 : Evaluation<int>
+    public class PNN50 : IEvaluation<int>
     {
-        public int evaluate(Training training) 
+        public int Evaluate(Training training) 
         {
-            List<int> intervals = training.getIntervals();
-            int pnn = 0;
+            var intervals = training.Intervals;
+            var pnn = 0;
 
 
-            for (int i = 1; i < intervals.Count; i++) {
-                int now = intervals.ElementAt(i);
-                int before = intervals.ElementAt(i-1);
+            for (var i = 1; i < intervals.Count; i++) {
+                var now = intervals.ElementAt(i);
+                var before = intervals.ElementAt(i-1);
 
                 if (Math.Abs(now - before) >= 50) {
                     pnn++;

@@ -1,18 +1,13 @@
 ﻿using PolarMath.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace PolarMath.Spectrum
+namespace PolarMath.Evaluation.Spectrum
 {
-    public class LFPercents : Evaluation<double>
+    public class LFPercents : IEvaluation<double>
     {
-        public double evaluate(Training training)
+        public double Evaluate(Training training)
         {
-            double lf = training.evaluate( new LF() );
-            double tp = training.evaluate( new TP() );
+            var lf = training.Evaluate( new LF() );
+            var tp = training.Evaluate( new TP() );
             return (lf / tp) * 100;
         }
     }
