@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ClientServerInteraction;
 using PolarMath.Evaluation;
 
 namespace PolarMath.Data
@@ -13,11 +12,6 @@ namespace PolarMath.Data
     {
         public String IdString { get; set; }
         public List<int> Intervals { get; set; }
-
-        public SessionData(Session session)
-        {
-            Intervals = session.Rates;
-        }
 
         public readonly SessionDataCache Cache = new SessionDataCache();
 
