@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PolarMath.Evaluation;
+using PolarMath.Evaluation.Statistics;
 
 namespace PolarMath.Util
 {
@@ -58,8 +59,8 @@ namespace PolarMath.Util
                 freqTotal += 1 / (double) 1024;
             }
 
-            var var = StandardDeviation( intervalValues );
-            intervalValues = SubtractMean( intervalValues );
+            var sdnn = training.Evaluate(new SDNN());
+            intervalValues = SubtractMean( intervalValues , training.Evaluate(new Average()));
 
             var periodogram = new List<Periodogram>();
 
@@ -92,7 +93,7 @@ namespace PolarMath.Util
                     cosLow += Math.Pow( Math.Cos( w * (timeValues.ElementAt( j ) - tau) ), 2 );
                     sinLow += Math.Pow( Math.Sin( w * (timeValues.ElementAt( j ) - tau) ), 2 );
                 }
-                periodogram.Add( new Periodogram( freqValues.ElementAt( i ), (1 / (2 * var * var) *
+                periodogram.Add( new Periodogram( freqValues.ElementAt( i ), (1 /(double) (2 * sdnn * sdnn) *
                                                                               (sinHigh * sinHigh / sinLow + cosHigh * cosHigh / cosLow)) ) );
             }
 
@@ -106,37 +107,13 @@ namespace PolarMath.Util
             return periodogram;
         }
 
-        public double[] SubtractMean(double[] values)
+        public double[] SubtractMean(double[] values, int m/*expectedValue*/)
         {
             var n = values.Count();
-            var m = ExpectedValue(values);
             var valuesMinusExpectedValue = new double[n];
             for (var i = 0; i < n; i++)
                 valuesMinusExpectedValue[i] = values[i] - m;
             return valuesMinusExpectedValue;
-        }
-
-        public double StandardDeviation(double[] values)
-        {
-            double sigma = 0;
-            var m = ExpectedValue( values );
-            var n = values.Count();
-            for (var i = 0; i < n; i++)
-            {
-                sigma += Math.Pow(values[i] - m, 2);
-            }
-            return Math.Sqrt(sigma / (n - 1));
-        }
-
-        public double ExpectedValue(double[] values)
-        {
-            double m = 0;
-            var n = values.Count();
-            for (var i = 0; i < n; i++)
-            {
-                m += values[i];
-            }
-            return m / n;
         }
     }
 }
