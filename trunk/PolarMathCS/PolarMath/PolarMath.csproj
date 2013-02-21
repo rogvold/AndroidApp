@@ -44,8 +44,9 @@
     <Compile Include="Data\SessionDataCache.cs" />
     <Compile Include="Evaluation\Evaluation.cs" />
     <Compile Include="Evaluation\HRV\AMoPercents.cs" />
-    <Compile Include="Evaluation\HRV\BP.cs" />
-    <Compile Include="Evaluation\HRV\IN.cs" />
+    <Compile Include="Evaluation\HRV\MxDMn.cs" />
+    <Compile Include="Evaluation\HRV\CV.cs" />
+    <Compile Include="Evaluation\HRV\SI.cs" />
     <Compile Include="Evaluation\HRV\Mo.cs" />
     <Compile Include="Evaluation\HRV\RSAI.cs" />
     <Compile Include="Evaluation\Statistics\Average.cs" />

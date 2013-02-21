@@ -34,6 +34,8 @@ namespace PolarMath.Util
                         if (current.Next.Value / (double)current.Previous.Value > 1.2)
                         {
                             countOfPVC++;
+                            var nextnextValue = current.Next.Next == null ? current.Previous.Value : current.Next.Next.Value;
+                            current.Value = current.Next.Value = (current.Previous.Value + nextnextValue) / 2;
                         }
                 }
                 else

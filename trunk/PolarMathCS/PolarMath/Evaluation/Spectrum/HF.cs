@@ -10,7 +10,7 @@ namespace PolarMath.Evaluation.Spectrum
         {
             var periodogram = training.Evaluate( new Lomb() );
 
-            return new Square( periodogram, 0.15, 0.4 ).Calculate();
+            return new Square(periodogram, 0.1, 1).Calculate();//time period 2.5 : 6.67
         }
     }
 }

@@ -10,17 +10,19 @@ namespace PolarMath.Evaluation.HRV
 {
     public class AMoPercents : IEvaluation<int>
     {
-        public int Evaluate(SessionData training) {
-		var intervals = training.Intervals;
-		//Histogram h = new Histogram(intervals.size()).init();
-		var h = new Histogram().Init();
-		foreach (var interval in intervals) {
-            h.AddRrInterval(interval);
+        public int Evaluate(SessionData training)
+        {
+            var intervals = training.Intervals;
+            //Histogram h = new Histogram(intervals.size()).init();
+            var h = new Histogram().Init();
+            foreach (var interval in intervals)
+            {
+                h.AddRrInterval( interval );
+            }
+            var maxRangeValue = h.GetMaxIntervalNumber();
+            var totalCount = h.GetTotalCount();
+
+            return (int)((maxRangeValue / (double) totalCount) * 100);
         }
-		var maxRangeValue = h.GetMaxIntervalNumber();
-		var totalCount = h.GetTotalCount();
-		
-		return (int)((maxRangeValue /  (double) totalCount) * 100);
-	}
     }
 }
