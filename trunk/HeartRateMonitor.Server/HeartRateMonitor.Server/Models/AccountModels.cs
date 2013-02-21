@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Web.Mvc;
 using System.Web.Security;
+using HeartRateMonitor.Server.Attributes;
 
 namespace HeartRateMonitor.Server.Models
 {
@@ -29,16 +31,17 @@ namespace HeartRateMonitor.Server.Models
 
     public class LogOnModel
     {
+
         [Required]
-        [Display(Name = "User name")]
+        [LocalizedDisplayName("Email")]
         public string UserName { get; set; }
 
         [Required]
+        [LocalizedDisplayName("Password")]
         [DataType(DataType.Password)]
-        [Display(Name = "Password")]
         public string Password { get; set; }
 
-        [Display(Name = "Remember me?")]
+        [LocalizedDisplayName("RememberMe")]
         public bool RememberMe { get; set; }
     }
 

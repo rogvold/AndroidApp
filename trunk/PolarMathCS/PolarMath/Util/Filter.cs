@@ -14,7 +14,7 @@ namespace PolarMath.Util
         /// </summary>
         /// <param name="training"></param>
         /// <returns>Filtrated interval list(can contain less numbers)</returns>
-        public static List<int> Filtrate(Training training)
+        public static List<int> Filtrate(SessionData training)
         {
             var intervals = new LinkedList<int>(training.Intervals);
             var n = intervals.Count;
@@ -37,7 +37,7 @@ namespace PolarMath.Util
                         }
                 }
                 else
-                    if (Math.Abs(current.Value / (double) current.Previous.Value - 2) < 0.2))
+                    if (Math.Abs(current.Value / (double) current.Previous.Value - 2) < 0.2)
                     {
                         intervals.AddAfter(current, current.Value / 2);
                         current.Value /= 2;

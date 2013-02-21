@@ -6,7 +6,7 @@ namespace PolarMath.Evaluation.Spectrum
 {
     public class ULF : IEvaluation<double>
     {
-        public double Evaluate(Training training)
+        public double Evaluate(SessionData training)
         {
             var periodogram = training.Evaluate( new Lomb() );
             return new Square( periodogram, 0, 0.0033 ).Calculate();

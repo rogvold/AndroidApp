@@ -4,7 +4,7 @@ namespace PolarMath.Evaluation.Spectrum
 {
     public class LFPercents : IEvaluation<double>
     {
-        public double Evaluate(Training training)
+        public double Evaluate(SessionData training)
         {
             var lf = training.Evaluate( new LF() );
             var tp = training.Evaluate( new TP() );

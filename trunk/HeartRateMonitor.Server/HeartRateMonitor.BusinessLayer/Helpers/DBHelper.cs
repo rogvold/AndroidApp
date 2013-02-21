@@ -9,15 +9,15 @@ namespace HeartRateMonitor.BusinessLayer.Helpers
     {
         private static readonly MongoServer Server = MongoServer.Create();
         private static readonly MongoDatabase Db;
-        private static readonly MongoCollection<User> Users;
-        private static readonly MongoCollection<Session> Sessions;
+        private static readonly MongoCollection<UserDB> Users;
+        private static readonly MongoCollection<SessionDB> Sessions;
 
 
         static DBHelper()
         {
             Db = Server.GetDatabase("HeartRateMonitor");
-            Users = Db.GetCollection<User>("Users");
-            Sessions = Db.GetCollection<Session>("Sessions");
+            Users = Db.GetCollection<UserDB>("Users");
+            Sessions = Db.GetCollection<SessionDB>("Sessions");
         }
 
         public static void DropCollection(string collectionName)
@@ -25,42 +25,71 @@ namespace HeartRateMonitor.BusinessLayer.Helpers
             Db.DropCollection(collectionName);
         }
 
-        public static User AddUser(string username)
+        public static UserDB AddUser(string username)
         {
             if (string.IsNullOrEmpty(username))
                 return null;
-            var user = new User()
+            var user = new UserDB()
                 {
                     Username = username,
                     Sessions = new List<string>()
                 };
-            Users.Save(typeof(User), user);
+            Users.Save(typeof(UserDB), user);
             return user;
         }
 
-        public static User GetUser(string id)
+        public static bool AddUser(UserDB user)
         {
-            return Users.FindOneByIdAs<User>(new ObjectId(id));
+            var dbUser = GetUserByEmail(user.Email);
+            if (dbUser != null)
+                return false;
+            Users.Save(typeof (UserDB), user);
+            return true;
         }
 
-        public static Session GetSession(string id)
+        public static UserDB GetUserByEmail(string email)
         {
-            return Sessions.FindOneByIdAs<Session>(new ObjectId(id));
+            return Users.FindOne(Query.EQ("Email", email));
         }
 
-        public static string AddSession(string userId, Session session)
+        public static UserDB GetUser(string id)
         {
-            Sessions.Save(typeof (Session), session);
+            return Users.FindOneByIdAs<UserDB>(new ObjectId(id));
+        }
+
+        public static UserDB GetUser(string email, string password)
+        {
+            var user = Users.FindOne(Query.EQ("Email", email));
+            if (user == null || user.Password != password)
+                return null;
+            return user;
+
+        }
+
+        public static SessionDB GetSession(string id)
+        {
+            return Sessions.FindOneByIdAs<SessionDB>(new ObjectId(id));
+        }
+
+        public static string AddSession(string userId, SessionDB session)
+        {
+
+            Sessions.Save(typeof (SessionDB), session);
             var id = session.Id.ToString();
-            Users.Update(Query.EQ("_id", new ObjectId(userId)), Update<User>.Push(u => u.Sessions, id));
+            Users.Update(Query.EQ("_id", new ObjectId(userId)), Update<UserDB>.Push(u => u.Sessions, id));
             return id;
+        }
+
+        public static void AddSession(SessionDB session)
+        {
+            AddSession(session.UserId, session);
         }
        
         public static bool AddRateToSession(string sessionId, int rate)
         {
-            if (rate < 0 || Sessions.FindOneByIdAs<Session>(new ObjectId(sessionId)) == null)
+            if (rate < 0 || Sessions.FindOneByIdAs<SessionDB>(new ObjectId(sessionId)) == null)
                 return false;
-            Sessions.Update(Query.EQ("_id", new ObjectId(sessionId)), Update<Session>.Push(u => u.Rates, rate));
+            Sessions.Update(Query.EQ("_id", new ObjectId(sessionId)), Update<SessionDB>.Push(u => u.Rates, rate));
             return true;
         }
     }

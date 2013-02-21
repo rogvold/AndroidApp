@@ -9,7 +9,7 @@ namespace PolarMath.Evaluation.Statistics
 {
     public class SDNN : IEvaluation<int>
     {
-        public int Evaluate(Training training) 
+        public int Evaluate(SessionData training) 
         {
             var average = training.Evaluate(new Average());
             var total = training.Intervals.Aggregate<int, long>(0, (current, integer) =>

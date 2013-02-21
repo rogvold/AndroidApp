@@ -9,7 +9,7 @@ namespace PolarMath.Evaluation.Time
 {
     public class PNN50 : IEvaluation<int>
     {
-        public int Evaluate(Training training) 
+        public int Evaluate(SessionData training) 
         {
             var intervals = training.Intervals;
             var pnn = 0;

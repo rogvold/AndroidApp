@@ -2,181 +2,263 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Web.Mvc;
+using System.Web.Security;
 using HeartRateMonitor.BusinessLayer;
 using HeartRateMonitor.BusinessLayer.Helpers;
 using HeartRateMonitor.Server.Helpers;
+using HeartRateMonitor.Server.Models;
 
 namespace HeartRateMonitor.Server.Controllers
 {
     public class AccountController : Controller
     {
-        private static readonly string ErrorString = "Error executing request";
 
-       public JsonResult GetUserInfo()
-       {
-           try
-           {
-               var request = StreamHelper.ReadJsonFromStream(Request.InputStream);
-               var id = request.user_id;
-               var user = DBHelper.GetUser(id);
-               if (user == null)
-               {
-                   return Json(new
-                       {
-                           fail = "User does not exist and no username to create new user"
-                       });
-               }
-
-               return Json(new
-                   {
-                       id = user.Id.ToString(),
-                       name = user.Username,
-                       sessions = user.Sessions
-                   });
-
-           } catch( Exception e)
-           {
-               Trace.WriteLine(e.Message);
-               return Json(new
-                   {
-                       fail = ErrorString
-                   });
-           }
-        }
-
-
-        public JsonResult GetSessionInfo()
-        {
-            try
-            {
-                var request = StreamHelper.ReadJsonFromStream(Request.InputStream);
-                var id = request.session_id;
-                var session = DBHelper.GetSession(id);
-
-                if (session == null)
-                    return Json(new
-                        {
-                            fail = "Session does not exist"
-                        });
-
-                return Json(new
-                {
-                    id = session.Id.ToString(),
-                    start_time = session.StartTime,
-                    device_id = session.DeviceId,
-                    device_name = session.DeviceName,
-                    rates = session.Rates
-                });
-
-            }
-            catch (Exception e)
-            {
-                Trace.WriteLine(e.Message);
-                return Json(new
-                {
-                    fail = ErrorString
-                });
-            }
-        }
-
-        public JsonResult AddUser()
+        public JsonResult RegisterUser()
         {
             try
             {
                 var request = StreamHelper.ReadJsonFromStream(Request.InputStream);
 
-                var user = DBHelper.AddUser(request.username);
-                if (user == null)
-                    return Json(new
-                        {
-                            fail = "Error in request"
-                        });
-
-                return Json(new
+                var user = new UserDB()
                     {
-                        id = user.Id.ToString()
-                    });
-            }
-            catch (Exception e)
-            {
-                Trace.WriteLine(e.Message);
-                return Json(new
-                {
-                    fail = ErrorString
-                });
-            }
-        }
-
-        public JsonResult AddSession()
-        {
-            try
-            {
-                var request = StreamHelper.ReadJsonFromStream(Request.InputStream);
-
-                var userId = request.user_id;
-                var user = DBHelper.GetUser(userId);
-                
-                if (user == null)
-                    return Json(new
-                        {
-                            fail = "User does not exist"
-                        });
-
-                var session = new Session()
-                    {
-                        DeviceId = request.device_id,
-                        DeviceName = request.device_name,
-                        Rates = request.rates,
-                        StartTime = request.start_time // TODO: calculate timestamp from time or vice versa
+                        Email = request.Email,
+                        Username = request.Username,
+                        Password = request.Password,
+                        Sessions = new List<string>()
                     };
-                if (session.Rates == null)
-                    session.Rates = new List<int>();
 
-                var sessionId = DBHelper.AddSession(userId, session);
-
+                var success = DBHelper.AddUser(user) ? 1 : 0;
                 return Json(new
-                {
-                    session_id = sessionId
-                });
-
+                    {
+                        success
+                    });
             }
             catch (Exception e)
             {
-                Trace.WriteLine(e.Message);
                 return Json(new
                 {
-                    fail = ErrorString
+                    fail = "Error executing request: " + e.Message
                 });
             }
         }
 
-        public JsonResult AddRate()
+        public JsonResult AuthorizeUser()
         {
             try
             {
                 var request = StreamHelper.ReadJsonFromStream(Request.InputStream);
 
-                if (DBHelper.AddRateToSession(request.session_id, request.rate))
-                    return Json(new
-                    {
-                        success = "Rate successfully added"
-                    });
-                else
-                    return Json(new
-                        {
-                            fail = "Error in request"
-                        });
+                var user = DBHelper.GetUser(request.Email, request.Password);
 
+                return user != null ? Json(user) : Json("fail");
             }
             catch (Exception e)
             {
-                Trace.WriteLine(e.Message);
                 return Json(new
                 {
-                    fail = ErrorString
+                    fail = "Error executing request: " + e.Message
                 });
             }
         }
+
+        public JsonResult GetUserInfo()
+        {
+            try
+            {
+                var request = StreamHelper.ReadJsonFromStream(Request.InputStream);
+
+                var user = DBHelper.GetUser(request.UserId);
+
+                return user != null ? Json(user) : Json("fail");
+            }
+            catch (Exception e)
+            {
+                return Json(new
+                {
+                    fail = "Error executing request: " + e.Message
+                });
+            }
+        }
+
+
+
+        //
+        // GET: /Account/LogOn
+
+        public ActionResult LogOn()
+        {
+            return View();
+        }
+
+        //
+        // POST: /Account/LogOn
+
+        [HttpPost]
+        public ActionResult LogOn(LogOnModel model, string returnUrl)
+        {
+            if (ModelState.IsValid)
+            {
+                if (Membership.ValidateUser(model.UserName, model.Password))
+                {
+                    FormsAuthentication.SetAuthCookie(model.UserName, model.RememberMe);
+                    if (Url.IsLocalUrl(returnUrl) && returnUrl.Length > 1 && returnUrl.StartsWith("/")
+                        && !returnUrl.StartsWith("//") && !returnUrl.StartsWith("/\\"))
+                    {
+                        return Redirect(returnUrl);
+                    }
+                    else
+                    {
+                        return RedirectToAction("Index", "Home");
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError("", "The user name or password provided is incorrect.");
+                }
+            }
+
+            // If we got this far, something failed, redisplay form
+            return View(model);
+        }
+
+        //
+        // GET: /Account/LogOff
+
+        public ActionResult LogOff()
+        {
+            FormsAuthentication.SignOut();
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        //
+        // GET: /Account/Register
+
+        public ActionResult Register()
+        {
+            return View();
+        }
+
+        //
+        // POST: /Account/Register
+
+        [HttpPost]
+        public ActionResult Register(RegisterModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                // Attempt to register the user
+                MembershipCreateStatus createStatus;
+                Membership.CreateUser(model.UserName, model.Password, model.Email, null, null, true, null, out createStatus);
+
+                if (createStatus == MembershipCreateStatus.Success)
+                {
+                    FormsAuthentication.SetAuthCookie(model.UserName, false /* createPersistentCookie */);
+                    return RedirectToAction("Index", "Home");
+                }
+                else
+                {
+                    ModelState.AddModelError("", ErrorCodeToString(createStatus));
+                }
+            }
+
+            // If we got this far, something failed, redisplay form
+            return View(model);
+        }
+
+        //
+        // GET: /Account/ChangePassword
+
+        [Authorize]
+        public ActionResult ChangePassword()
+        {
+            return View();
+        }
+
+        //
+        // POST: /Account/ChangePassword
+
+        [Authorize]
+        [HttpPost]
+        public ActionResult ChangePassword(ChangePasswordModel model)
+        {
+            if (ModelState.IsValid)
+            {
+
+                // ChangePassword will throw an exception rather
+                // than return false in certain failure scenarios.
+                bool changePasswordSucceeded;
+                try
+                {
+                    MembershipUser currentUser = Membership.GetUser(User.Identity.Name, true /* userIsOnline */);
+                    changePasswordSucceeded = currentUser.ChangePassword(model.OldPassword, model.NewPassword);
+                }
+                catch (Exception)
+                {
+                    changePasswordSucceeded = false;
+                }
+
+                if (changePasswordSucceeded)
+                {
+                    return RedirectToAction("ChangePasswordSuccess");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "The current password is incorrect or the new password is invalid.");
+                }
+            }
+
+            // If we got this far, something failed, redisplay form
+            return View(model);
+        }
+
+        //
+        // GET: /Account/ChangePasswordSuccess
+
+        public ActionResult ChangePasswordSuccess()
+        {
+            return View();
+        }
+
+        #region Status Codes
+        private static string ErrorCodeToString(MembershipCreateStatus createStatus)
+        {
+            // See http://go.microsoft.com/fwlink/?LinkID=177550 for
+            // a full list of status codes.
+            switch (createStatus)
+            {
+                case MembershipCreateStatus.DuplicateUserName:
+                    return "User name already exists. Please enter a different user name.";
+
+                case MembershipCreateStatus.DuplicateEmail:
+                    return "A user name for that e-mail address already exists. Please enter a different e-mail address.";
+
+                case MembershipCreateStatus.InvalidPassword:
+                    return "The password provided is invalid. Please enter a valid password value.";
+
+                case MembershipCreateStatus.InvalidEmail:
+                    return "The e-mail address provided is invalid. Please check the value and try again.";
+
+                case MembershipCreateStatus.InvalidAnswer:
+                    return "The password retrieval answer provided is invalid. Please check the value and try again.";
+
+                case MembershipCreateStatus.InvalidQuestion:
+                    return "The password retrieval question provided is invalid. Please check the value and try again.";
+
+                case MembershipCreateStatus.InvalidUserName:
+                    return "The user name provided is invalid. Please check the value and try again.";
+
+                case MembershipCreateStatus.ProviderError:
+                    return "The authentication provider returned an error. Please verify your entry and try again. If the problem persists, please contact your system administrator.";
+
+                case MembershipCreateStatus.UserRejected:
+                    return "The user creation request has been canceled. Please verify your entry and try again. If the problem persists, please contact your system administrator.";
+
+                default:
+                    return "An unknown error occurred. Please verify your entry and try again. If the problem persists, please contact your system administrator.";
+            }
+        }
+        #endregion
 
 
     }

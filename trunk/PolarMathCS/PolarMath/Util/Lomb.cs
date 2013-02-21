@@ -12,7 +12,7 @@ namespace PolarMath.Util
     {
         private int _size;
 
-        public List<Periodogram> Evaluate(Training training)
+        public List<Periodogram> Evaluate(SessionData training)
         {
             var intervals = training.Intervals;
 

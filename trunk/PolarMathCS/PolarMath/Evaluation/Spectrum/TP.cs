@@ -7,7 +7,7 @@ namespace PolarMath.Evaluation.Spectrum
 {
     public class TP : IEvaluation<double>
     {
-        public Double Evaluate(Training training)
+        public Double Evaluate(SessionData training)
         {
             //List<Periodogram> periodogram = training.evaluate(new FFT());
             var periodogram1 = training.Evaluate( new Lomb() );

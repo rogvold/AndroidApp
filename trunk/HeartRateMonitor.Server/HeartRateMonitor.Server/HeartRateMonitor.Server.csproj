@@ -63,6 +63,7 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\LocalizedDisplayNameAttribute.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\EvaluationController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
@@ -150,10 +151,13 @@
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_LogOnPartial.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
-    <Content Include="Views\Web.config" />
+    <Content Include="Views\Web.config">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Views\Cabinet\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />
@@ -162,16 +166,25 @@
     <EmbeddedResource Include="Resource.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resource.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\ClientServerInteraction\ClientServerInteraction.csproj">
+      <Project>{5941ECB0-846D-4BDD-B20A-478A022E5357}</Project>
+      <Name>ClientServerInteraction</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\PolarMathCS\PolarMath\PolarMath.csproj">
+      <Project>{C9359793-5217-477C-8691-5F94AA884BC0}</Project>
+      <Name>PolarMath</Name>
+    </ProjectReference>
     <ProjectReference Include="..\HeartRateMonitor.BusinessLayer\HeartRateMonitor.BusinessLayer.csproj">
       <Project>{31F2F6FE-10D8-4510-AC61-CBE1962D3940}</Project>
       <Name>HeartRateMonitor.BusinessLayer</Name>
     </ProjectReference>
-    <ProjectReference Include="..\HeartRateMonitor.Math\HeartRateMonitor.Math.csproj">
-      <Project>{5CA4B4D3-4432-4CA0-9A74-02C2D5379ADE}</Project>
-      <Name>HeartRateMonitor.Math</Name>
+    <ProjectReference Include="..\MongoDBMembershipProvider\MongoDBMembershipProvider.csproj">
+      <Project>{41FAFD08-F104-4508-A571-FC93B491B747}</Project>
+      <Name>MongoDBMembershipProvider</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

@@ -40,8 +40,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Data\Training.cs" />
-    <Compile Include="Data\TrainingCache.cs" />
+    <Compile Include="Data\SessionData.cs" />
+    <Compile Include="Data\SessionDataCache.cs" />
+    <Compile Include="EvaluationHelper.cs" />
     <Compile Include="Evaluation\Evaluation.cs" />
     <Compile Include="Evaluation\HRV\AMoPercents.cs" />
     <Compile Include="Evaluation\HRV\BP.cs" />
@@ -69,6 +70,12 @@
     <Compile Include="Util\Lomb.cs" />
     <Compile Include="Util\Periodogram.cs" />
     <Compile Include="Util\Square.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\ClientServerInteraction\ClientServerInteraction.csproj">
+      <Project>{5941ECB0-846D-4BDD-B20A-478A022E5357}</Project>
+      <Name>ClientServerInteraction</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

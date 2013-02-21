@@ -3,51 +3,30 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using ClientServerInteraction;
+using HeartRateMonitor.BusinessLayer;
 using HeartRateMonitor.BusinessLayer.Helpers;
-using HeartRateMonitor.Math.Evaluation;
-using HeartRateMonitor.Math.Evaluation.Geometry;
 using HeartRateMonitor.Server.Helpers;
+using PolarMath;
+using PolarMath.Data;
+
 
 
 namespace HeartRateMonitor.Server.Controllers
 {
     public class EvaluationController : Controller
     {
-        public JsonResult EvaluateSession()
+        public JsonResult AddSession()
         {
             try
             {
-                var request = StreamHelper.ReadJsonFromStream(Request.InputStream);
-                var session = DBHelper.GetSession(request.session_id);
-                if (session == null)
-                {
-                    return Json(new
-                        {
-                            fail = "No such session in database"
-                        });
-                }
-                var intervals = session.Rates;
+                var session = new SessionDB(SerializationHelper.DeserializeSession(StreamHelper.ReadJsonToString(Request.InputStream)));
 
-                var sessionData = new Math.SessionData()
-                    {
-                        Intervals = intervals
-                    };
-                var average = sessionData.Evaluate(new Average());
-                var sdnn = sessionData.Evaluate(new SDNN());
-                var rmssd = sessionData.Evaluate(new RMSSD());
-                var pnn50 = sessionData.Evaluate(new PNN50());
-                var cv = sessionData.Evaluate(new CV());
-                var histogram = sessionData.Evaluate(new EvaluateBasicHistogram());
+                EvaluationHelper.Evaluate(session);
 
-                return Json(new
-                    {
-                        average,
-                        sdnn,
-                        rmssd,
-                        pnn50,
-                        cv,
-                        histogram
-                    });
+                DBHelper.AddSession(session);
+
+                return Json(session);
             }
             catch (Exception e)
             {
@@ -55,6 +34,32 @@ namespace HeartRateMonitor.Server.Controllers
                     {
                         fail = "Error executing request: " + e.Message
                     });
+            }
+        }
+
+        public JsonResult GetSessions()
+        {
+            try
+            {
+                var request = StreamHelper.ReadJsonFromStream(Request.InputStream);
+
+                var sessions = request.Sessions;
+
+                var sessionList = new List<Session>();
+
+                foreach (var sessionId in sessions)
+                {
+                    sessionList.Add(DBHelper.GetSession(sessionId));   
+                }
+
+                return Json(sessionList);
+            }
+            catch (Exception e)
+            {
+                return Json(new
+                {
+                    fail = "Error executing request: " + e.Message
+                });
             }
         }
 

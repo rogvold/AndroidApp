@@ -10,7 +10,7 @@ namespace PolarMath.Evaluation.HRV
 {
     public class Mo : IEvaluation<double>
     {
-        public double Evaluate(Training training) 
+        public double Evaluate(SessionData training) 
         {
 		    var intervals = training.Intervals;
 		

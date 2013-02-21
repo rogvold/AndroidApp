@@ -9,7 +9,7 @@ namespace PolarMath.Evaluation.HRV
 {
     public class IN : IEvaluation<int>
     {
-        public int Evaluate(Training training)
+        public int Evaluate(SessionData training)
         {
             var bp = training.Evaluate( new BP() );
             var amo = training.Evaluate( new AMoPercents() );

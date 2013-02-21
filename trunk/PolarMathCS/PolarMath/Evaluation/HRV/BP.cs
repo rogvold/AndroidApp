@@ -12,7 +12,7 @@ namespace PolarMath.Evaluation.HRV
         private const int LowBorder = 400;
         private const int HighBorder = 1300;
 
-        public Double Evaluate(Training training) {
+        public Double Evaluate(SessionData training) {
 		    var intervals = training.Intervals;
 		    var localIntervals = intervals.Where(interval => interval >= LowBorder && interval <= HighBorder).ToList();
 

@@ -9,7 +9,7 @@ namespace PolarMath.Evaluation.Statistics
 {
     public class RMSSD : IEvaluation<int>
     {
-        public int Evaluate(Training training) 
+        public int Evaluate(SessionData training) 
         {
             var intervals = training.Intervals;
             long total = 0;

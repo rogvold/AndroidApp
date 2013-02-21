@@ -9,7 +9,7 @@ namespace PolarMath.Evaluation.Statistics
 {
     public class Average : IEvaluation<int>
     {
-        public int Evaluate(Training training)
+        public int Evaluate(SessionData training)
         {
             return DoEvaluate( training.Intervals );
         }

@@ -4,23 +4,29 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ClientServerInteraction;
 using PolarMath.Evaluation;
 
 namespace PolarMath.Data
 {
-    public class Training
+    public class SessionData
     {
         public String IdString { get; set; }
         public List<int> Intervals { get; set; }
 
-        private readonly TrainingCache _cache = new TrainingCache();
+        public SessionData(Session session)
+        {
+            Intervals = session.Rates;
+        }
+
+        public readonly SessionDataCache Cache = new SessionDataCache();
 
         public T Evaluate<T>(IEvaluation<T> evaluation) {
-            if (_cache.Contains(evaluation)) {
-                return _cache.Get(evaluation);
+            if (Cache.Contains(evaluation)) {
+                return Cache.Get(evaluation);
             } else {
                 T evaluationResult = evaluation.Evaluate(this);
-                _cache.Add(evaluation, evaluationResult);
+                Cache.Add(evaluation, evaluationResult);
                 return evaluationResult;
             }
         }

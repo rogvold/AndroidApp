@@ -1,7 +1,7 @@
 ﻿using System;
 using HeartRateMonitor.BusinessLayer.Helpers;
 
-namespace DbTest
+namespace DbClean
 {
     class Program
     {

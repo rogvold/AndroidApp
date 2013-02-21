@@ -13,6 +13,11 @@ namespace HeartRateMonitor.Server.Helpers
     {
         public static dynamic ReadJsonFromStream(Stream stream)
         {
+            return ReadJsonToString(stream).ToDynamic();
+        }
+
+        public static string ReadJsonToString(Stream stream)
+        {
             var json = new StringBuilder();
 
             using (var reader = new StreamReader(stream))
@@ -23,7 +28,7 @@ namespace HeartRateMonitor.Server.Helpers
                 }
             }
 
-            return json.ToString().ToDynamic();
+            return json.ToString();
         }
     }
 }

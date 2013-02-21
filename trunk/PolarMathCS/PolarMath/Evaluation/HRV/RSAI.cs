@@ -8,9 +8,10 @@ namespace PolarMath.Evaluation.HRV
 {
     class RSAI : IEvaluation<double>
     {
-        public double Evaluate(Training training)
+        public double Evaluate(SessionData training)
         {
             var intervals = training.Intervals;
+            return 0d;
         }
     }
 }

@@ -61,11 +61,47 @@ namespace HeartRateMonitor.Server {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to C:\Wedrawal.Images\.
+        ///   Looks up a localized string similar to E-mail.
+        /// </summary>
+        internal static string Email {
+            get {
+                return ResourceManager.GetString("Email", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to C:\HeartRateMonitor.Images\.
         /// </summary>
         internal static string ImagesFolder {
             get {
                 return ResourceManager.GetString("ImagesFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sign in.
+        /// </summary>
+        internal static string LogOn {
+            get {
+                return ResourceManager.GetString("LogOn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password.
+        /// </summary>
+        internal static string Password {
+            get {
+                return ResourceManager.GetString("Password", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remember me?.
+        /// </summary>
+        internal static string RememberMe {
+            get {
+                return ResourceManager.GetString("RememberMe", resourceCulture);
             }
         }
     }

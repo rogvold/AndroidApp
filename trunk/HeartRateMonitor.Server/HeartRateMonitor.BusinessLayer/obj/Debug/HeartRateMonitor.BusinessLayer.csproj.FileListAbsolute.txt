@@ -5,3 +5,6 @@ C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateM
 C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.BusinessLayer\obj\Debug\ResolveAssemblyReference.cache
 C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.BusinessLayer\obj\Debug\HeartRateMonitor.BusinessLayer.dll
 C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.BusinessLayer\obj\Debug\HeartRateMonitor.BusinessLayer.pdb
+C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.BusinessLayer\bin\Debug\ClientServerInteraction.dll
+C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.BusinessLayer\bin\Debug\Newtonsoft.Json.dll
+C:\Users\Yuriy\Desktop\HeartRateMonitorServer\HeartRateMonitor.Server\HeartRateMonitor.BusinessLayer\bin\Debug\ClientServerInteraction.pdb

@@ -7,7 +7,7 @@ using PolarMath.Evaluation;
 
 namespace PolarMath.Data
 {
-    public class TrainingCache
+    public class SessionDataCache
     {
         private readonly Dictionary<Type, Object> _cache = new Dictionary<Type, Object>();
 

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
+using MongoDBMembershipProvider;
 
-namespace Wedrawal.Server.Controllers
+namespace HeartRateMonitor.Server.Controllers
 {
     public class HomeController : Controller
     {
