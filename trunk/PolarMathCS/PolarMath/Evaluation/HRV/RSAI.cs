@@ -13,9 +13,9 @@ namespace PolarMath.Evaluation.HRV
     /// It takes values from 0 to 10. The algorithm is taken from http://ntpo.com/patents_medicine/medicine_19/medicine_324.shtml \n
     /// Before evaluation RR-intervals must be filtered by Util.Filter.Filtrate();
     /// </summary>
-    class RSAI : IEvaluation<double>
+    class RSAI : IEvaluation<int[]>
     {
-        public double Evaluate(SessionData training)
+        public int[] Evaluate(SessionData training)
         {
             var intervals = training.Intervals;
             var average = training.Evaluate( new Average() );
@@ -102,9 +102,9 @@ namespace PolarMath.Evaluation.HRV
             var negatives = 0;
             for (int i = 0; i < 5; i++)
                 if (h[i] < 0)
-                    negatives += h[i];
-            var negPercents = Math.Abs( negatives / (double) rsai * 100 );
-            return rsai;
+                    negatives += Math.Abs(h[i]);
+            var negPercents = (int)(negatives / (double) rsai * 100);
+            return new int[]{rsai, negPercents};
         }
     }
 }
