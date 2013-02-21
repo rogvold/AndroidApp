@@ -53,10 +53,6 @@
       <Project>{5941ECB0-846D-4BDD-B20A-478A022E5357}</Project>
       <Name>ClientServerInteraction</Name>
     </ProjectReference>
-    <ProjectReference Include="..\HeartRateMonitor.BusinessLayer\HeartRateMonitor.BusinessLayer.csproj">
-      <Project>{31F2F6FE-10D8-4510-AC61-CBE1962D3940}</Project>
-      <Name>HeartRateMonitor.BusinessLayer</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

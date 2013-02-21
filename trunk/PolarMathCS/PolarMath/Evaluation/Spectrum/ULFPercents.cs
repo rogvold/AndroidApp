@@ -2,7 +2,7 @@
 
 namespace PolarMath.Evaluation.Spectrum
 {
-    class ULFPercents : IEvaluation<double>
+    public class ULFPercents : IEvaluation<double>
     {
         public double Evaluate(SessionData training)
         {

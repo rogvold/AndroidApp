@@ -6,7 +6,7 @@ using PolarMath.Data;
 
 namespace PolarMath.Evaluation.HRV
 {
-    class RSAI : IEvaluation<double>
+    public class RSAI : IEvaluation<double>
     {
         public double Evaluate(SessionData training)
         {

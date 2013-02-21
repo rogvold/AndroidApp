@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Web.Mvc;
 using System.Web.Security;
-using HeartRateMonitor.BusinessLayer;
-using HeartRateMonitor.BusinessLayer.Helpers;
+using ClientServerInteraction;
 using HeartRateMonitor.Server.Helpers;
 using HeartRateMonitor.Server.Models;
 
@@ -19,7 +18,7 @@ namespace HeartRateMonitor.Server.Controllers
             {
                 var request = StreamHelper.ReadJsonFromStream(Request.InputStream);
 
-                var user = new UserDB()
+                var user = new User()
                     {
                         Email = request.Email,
                         Username = request.Username,

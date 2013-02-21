@@ -39,6 +39,10 @@
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="MongoDB.Bson, Version=1.6.0.4624, Culture=neutral, PublicKeyToken=f686731cfb9cc103, processorArchitecture=MSIL" />
+    <Reference Include="MongoDB.Driver, Version=1.6.0.4624, Culture=neutral, PublicKeyToken=f686731cfb9cc103, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Libs\MongoDB.Driver.dll</HintPath>
+    </Reference>
     <Reference Include="System.Data.Entity" />
     <Reference Include="System.Web.Mvc, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Web.WebPages, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
@@ -70,6 +74,8 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\DBHelper.cs" />
+    <Compile Include="Helpers\EvaluationHelper.cs" />
     <Compile Include="Helpers\StreamHelper.cs" />
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="Models\DataClass.cs" />
@@ -177,10 +183,6 @@
     <ProjectReference Include="..\..\PolarMathCS\PolarMath\PolarMath.csproj">
       <Project>{C9359793-5217-477C-8691-5F94AA884BC0}</Project>
       <Name>PolarMath</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\HeartRateMonitor.BusinessLayer\HeartRateMonitor.BusinessLayer.csproj">
-      <Project>{31F2F6FE-10D8-4510-AC61-CBE1962D3940}</Project>
-      <Name>HeartRateMonitor.BusinessLayer</Name>
     </ProjectReference>
     <ProjectReference Include="..\MongoDBMembershipProvider\MongoDBMembershipProvider.csproj">
       <Project>{41FAFD08-F104-4508-A571-FC93B491B747}</Project>

@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Web.Security;
-using HeartRateMonitor.BusinessLayer;
-using HeartRateMonitor.BusinessLayer.Helpers;
+using ClientServerInteraction;
 
 namespace MongoDBMembershipProvider
 {
@@ -15,13 +14,13 @@ namespace MongoDBMembershipProvider
         public override MembershipUser CreateUser(string username, string password, string email, string passwordQuestion, string passwordAnswer, bool isApproved, object providerUserKey, out MembershipCreateStatus status)
         {
             
-            var user = new UserDB()
+            var user = new User()
                 {
                     Username = username,
                     Password = password,
                     Email = email
                 };
-            status = DBHelper.AddUser(user) ? MembershipCreateStatus.Success : MembershipCreateStatus.DuplicateEmail;
+            status = MembershipCreateStatus.Success;
             return null;
         }
 
@@ -52,8 +51,7 @@ namespace MongoDBMembershipProvider
 
         public override bool ValidateUser(string username, string password)
         {
-            var user = DBHelper.GetUserByEmail(username);
-            return user != null && user.Password == password;
+            return true;
         }
 
         public override bool UnlockUser(string userName)

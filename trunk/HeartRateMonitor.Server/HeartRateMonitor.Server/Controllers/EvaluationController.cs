@@ -4,8 +4,6 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using ClientServerInteraction;
-using HeartRateMonitor.BusinessLayer;
-using HeartRateMonitor.BusinessLayer.Helpers;
 using HeartRateMonitor.Server.Helpers;
 using PolarMath;
 using PolarMath.Data;
@@ -20,7 +18,7 @@ namespace HeartRateMonitor.Server.Controllers
         {
             try
             {
-                var session = new SessionDB(SerializationHelper.DeserializeSession(StreamHelper.ReadJsonToString(Request.InputStream)));
+                var session = SerializationHelper.DeserializeSession(StreamHelper.ReadJsonToString(Request.InputStream));
 
                 EvaluationHelper.Evaluate(session);
 
