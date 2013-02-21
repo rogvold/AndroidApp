@@ -47,10 +47,12 @@
     <Compile Include="Evaluation\HRV\BP.cs" />
     <Compile Include="Evaluation\HRV\IN.cs" />
     <Compile Include="Evaluation\HRV\Mo.cs" />
+    <Compile Include="Evaluation\HRV\RSAI.cs" />
     <Compile Include="Evaluation\Statistics\Average.cs" />
     <Compile Include="Evaluation\Statistics\RMSSD.cs" />
     <Compile Include="Evaluation\Statistics\SDNN.cs" />
     <Compile Include="Evaluation\Time\PNN50.cs" />
+    <Compile Include="Util\Filter.cs" />
     <Compile Include="Util\Histogram.cs" />
     <Compile Include="Util\HistogramInterval.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

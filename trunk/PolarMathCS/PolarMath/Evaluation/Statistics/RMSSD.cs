@@ -22,7 +22,7 @@ namespace PolarMath.Evaluation.Statistics
                 total += (now - before) * (now - before);
             }
 
-            return (int) Math.Sqrt( total / intervals.Count );
+            return (int) Math.Sqrt( total / (double)intervals.Count );
         }
     }
 }
