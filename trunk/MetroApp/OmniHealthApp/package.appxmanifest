@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/2010/manifest">
+  <Identity Name="2762AlexanderTaraymovich.OmniHealth" Version="1.0.0.0" Publisher="CN=FD0E917A-EE1C-4676-8C93-6B5328974AD4" />
+  <Properties>
+    <DisplayName>Omni Health</DisplayName>
+    <PublisherDisplayName>Alexander Taraymovich</PublisherDisplayName>
+    <Logo>images\storelogo.png</Logo>
+  </Properties>
+  <Prerequisites>
+    <OSMinVersion>6.2.1</OSMinVersion>
+    <OSMaxVersionTested>6.2.1</OSMaxVersionTested>
+  </Prerequisites>
+  <Resources>
+    <Resource Language="x-generate" />
+  </Resources>
+  <Applications>
+    <Application Id="OmniHealth.App" StartPage="default.html">
+      <VisualElements DisplayName="Omni Health" Logo="images\logo.png" SmallLogo="images\smalllogo.png" Description="OmniHealthApp" ForegroundText="light" BackgroundColor="#464646">
+        <DefaultTile ShowName="allLogos" />
+        <SplashScreen Image="images\splashscreen.png" />
+        <InitialRotationPreference>
+          <Rotation Preference="landscape" />
+          <Rotation Preference="landscapeFlipped" />
+        </InitialRotationPreference>
+      </VisualElements>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <Capability Name="internetClient" />
+    <DeviceCapability Name="0000180D-0000-1000-8000-00805f9b34fb" />
+  </Capabilities>
+</Package>

@@ -1,0 +1,9 @@
+﻿// Сведения о локализации приложений Windows см. по адресу: http://go.microsoft.com/fwlink/?LinkId=212836
+
+{
+    "username"              : "Имя пользователя:",
+    "password"              : "Пароль:",
+    "cancel"                : "Отмена",
+    "signIn"                : "Войти",
+    "welcome"               : "Добро пожаловать!"
+}
