@@ -9,7 +9,7 @@
                 //TODO: notify user about authorization fail
                 return;
             }
-            //TODO: save user info - idString
+            AuthData.user = user;
             WinJS.Navigation.navigate("/pages/sessions/sessions.html");
         });
         
@@ -40,11 +40,18 @@
             //var tmp = new HrmMath.Data.SessionData();
             //var tmp1 = tmp.evaluate(new HrmMath.Evaluation.HRV.RSAI());
             //TODO: check if user idString already exist and redirect to the next page  
-                var output = document.getElementById('page');
-                WinJS.Resources.processAll(output);
-                document.getElementById('signInButton').onclick = authSubmit;
-                document.getElementById('cancelButton').onclick = authReset;
-            
+            var output = document.getElementById('page');
+            WinJS.Resources.processAll(output);
+            try {
+                var passwordVault = new Windows.Security.Credentials.PasswordVault();
+                var credential = passwordVault.retrieve(appKey, passwordVault.findAllByResource(appKey).getAt(0).userName);
+                authorization(credential.userName, credential.password);
+            }
+            catch (ex) {
+
+            }
+            document.getElementById('signInButton').onclick = authSubmit;
+            document.getElementById('cancelButton').onclick = authReset;
         }
     });
 })();
