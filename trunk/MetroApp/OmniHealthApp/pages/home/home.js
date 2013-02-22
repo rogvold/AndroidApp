@@ -3,6 +3,11 @@
 
     function authorization() {
         document.getElementById("progressRing").style.visibility = "visible";
+
+        ClientServerInteraction.WinRT.ServerHelper.authorizeUser("pogr.yu@gmail.com", "02034242").done(function (user) {
+            var tmp = user.idString;
+            var temp = user.username;
+        });
         WinJS.Navigation.navigate("/pages/sessions/sessions.html");
     }
 
