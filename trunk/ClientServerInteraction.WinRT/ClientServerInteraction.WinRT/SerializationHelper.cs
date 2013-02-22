@@ -23,7 +23,13 @@ namespace ClientServerInteraction.WinRT
 
         public static User DeserializeUser(string json)
         {
-            return JsonConvert.DeserializeObject<User>(json);
+            try
+            {
+                return JsonConvert.DeserializeObject<User>(json);
+            } catch (Exception)
+            {
+                return null;
+            }
         }
 
         public static string SerializeSessionIds(IList<string> strings)

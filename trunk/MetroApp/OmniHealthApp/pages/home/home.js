@@ -2,23 +2,28 @@
     "use strict";
 
     var appKey = "OmniHealthApp";
-    var username;
-    var password;
 
-    function authorization() {
-        ClientServerInteraction.WinRT.ServerHelper.authorizeUser("pogr.yuo@gmail.com", "02034242").done(function (user) {
-            var tmp = 0;
+    function authorization(email, password) {
+        ClientServerInteraction.WinRT.ServerHelper.authorizeUser(email, password).done(function (user) {
+            if (user == null) {
+                //TODO: notify user about authorization fail
+                return;
+            }
+            //TODO: save user info - idString
+            WinJS.Navigation.navigate("/pages/sessions/sessions.html");
         });
-        WinJS.Navigation.navigate("/pages/sessions/sessions.html");
+        
     }
 
     function authSubmit() {
         document.getElementById("progressRing").style.visibility = "visible";
-        username = document.getElementById("loginField").value;
-        password = document.getElementById("passwordField").value;
+        var email = document.getElementById("loginField").value;
+        var password = document.getElementById("passwordField").value;
         var passwordVault = new Windows.Security.Credentials.PasswordVault();
-        passwordVault.add(new Windows.Security.Credentials.PasswordCredential(appKey, username, password));
-        authorization();
+        if (password != null && password != "" && email != null && email != "") { //TODO: bad syntax in "if" body. Notify user about empty fields
+            passwordVault.add(new Windows.Security.Credentials.PasswordCredential(appKey, email, password));
+            authorization(email, password);
+        }
     }
 
     function authReset() {
@@ -34,19 +39,12 @@
             // TODO: Инициализируйте страницу здесь.
             //var tmp = new HrmMath.Data.SessionData();
             //var tmp1 = tmp.evaluate(new HrmMath.Evaluation.HRV.RSAI());
-            var passwordVault = new Windows.Security.Credentials.PasswordVault();
-            try {
-                var credential = passwordVault.retrieve(appKey, passwordVault.findAllByResource(appKey).getAt(0).userName);
-                username = credential.userName;
-                password = credential.password;
-                authorization();
-            }
-            catch (ex) {
+            //TODO: check if user idString already exist and redirect to the next page  
                 var output = document.getElementById('page');
                 WinJS.Resources.processAll(output);
                 document.getElementById('signInButton').onclick = authSubmit;
                 document.getElementById('cancelButton').onclick = authReset;
-            }
+            
         }
     });
 })();
