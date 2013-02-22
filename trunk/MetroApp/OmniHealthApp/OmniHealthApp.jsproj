@@ -88,7 +88,8 @@
     <PRIResource Include="strings\ru-RU\resources.resjson" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\HrmMath\HrmMath.csproj" />
+    <ProjectReference Include="..\..\ClientServerInteraction.WinRT\ClientServerInteraction.WinRT\ClientServerInteraction.WinRT.csproj" />
+    <ProjectReference Include="..\..\PolarMathCS\PolarMath\PolarMath.csproj" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).targets" />
   <!-- To modify your build process, add your task inside one of the targets below then uncomment
