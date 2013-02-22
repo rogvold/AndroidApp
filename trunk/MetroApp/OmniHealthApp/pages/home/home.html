@@ -4,7 +4,7 @@
     <title>homePage</title>
 
     <!-- Ссылки WinJS -->
-    <link href="//Microsoft.WinJS.1.0/css/ui-dark.css" rel="stylesheet" />
+    <link href="//Microsoft.WinJS.1.0/css/ui-light.css" rel="stylesheet" />
     <script src="//Microsoft.WinJS.1.0/js/base.js"></script>
     <script src="//Microsoft.WinJS.1.0/js/ui.js"></script>
 
@@ -25,29 +25,29 @@
         </header>
         <section id="mainContent" aria-label="Main content" role="main">
             <div style="width: 750px">
-                <div style="margin-top: 150px; font-size: 24pt">
-                    <span data-win-res="{textContent: 'username'}" style="width: 300px; height: 50px; position: absolute;"></span>
-                    <span style="margin-left: 300px; height: 50px; width: 450px; margin-bottom: 0px">
+                <div style="margin-top: 150px; height: 50px; font-size: 24pt">
+                    <div data-win-res="{textContent: 'username'}" style="width: 300px; position: absolute; float: left"></div>
+                    <div style="margin-left: 300px; width: 450px; margin-bottom: 0px; float: right">
                         <input id="loginField" type="email" autocomplete="on" autofocus="" style="margin-left: 0px; margin-top: 0px; width: 450px; font-size: 24pt; text-align: left; line-height: 40px;">
-                    </span>
+                    </div>
                 </div>
-                <div style="margin-top: 50px; font-size: 24pt">
-                    <span style="width: 300px; height: 50px; position: absolute" data-win-res="{textContent: 'password'}"></span>
-                    <span style="margin-left: 300px; height: 50px; width: 450px; margin-bottom: 0px">
+                <div style="margin-top: 50px; height: 50px; font-size: 24pt">
+                    <div style="width: 300px; position: absolute; float: left" data-win-res="{textContent: 'password'}"></div>
+                    <div style="margin-left: 300px; width: 450px; margin-bottom: 0px; float: right">
                         <input id="passwordField" type="password" autocomplete="on" autofocus="" style="margin-left: 0px; margin-top: 0px; width: 450px; font-size: 24pt; text-align: left; line-height: 40px;">
-                    </span>
+                    </div>
                 </div>
-				<div style="margin-top: 50px; margin-left: 305px; margin-right: 0px; width: 450px; height: 60px;">
-					<span>
-						<progress id="progressRing" class="win-ring win-medium" style="visibility: hidden"></progress>
-					</span>
-					<span style="width: 150px; margin-right: 0px; margin-left: 50px">
-						<button id="cancelButton" type="reset" style="margin-left: 0px; width: 150px; height: 60px; font-size: 24pt; margin-right: 0px" data-win-res="{textContent: 'cancel'}"></button>
-					</span>
-					<span style="width: 150px; margin-left: 50px; margin-right: 0px">
-						<button id="signInButton" type="submit" style="margin-left: 0px; width: 150px; height: 60px; font-size: 24pt; margin-right: 0px" data-win-res="{textContent: 'signIn'}"></button>
-					</span>
-				</div>
+                <div style="margin-top: 50px; width: 500px; height: 60px; float: left">
+                    <div style="float: left">
+                        <progress id="progressRing" class="win-ring win-medium" style="visibility: hidden"></progress>
+                    </div>
+                    <div style="width: 150px; margin-right: 150px; float: right; position: absolute">
+                        <button id="cancelButton" type="reset" style="margin-left: 0px; width: 150px; height: 60px; font-size: 24pt; margin-right: 0px" data-win-res="{textContent: 'cancel'}"></button>
+                    </div>
+                    <div style="width: 150px; margin-right: 0px; float: right">
+                        <button id="signInButton" type="submit" style="margin-left: 0px; width: 150px; height: 60px; font-size: 24pt; margin-right: 0px" data-win-res="{textContent: 'signIn'}"></button>
+                    </div>
+                </div>
             </div>
         </section>
     </div>

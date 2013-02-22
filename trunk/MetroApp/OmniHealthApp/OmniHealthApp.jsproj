@@ -60,10 +60,14 @@
     <Content Include="images\smalllogo.png" />
     <Content Include="images\splashscreen.png" />
     <Content Include="images\storelogo.png" />
+    <Content Include="js\chart.js" />
     <Content Include="js\default.js" />
     <Content Include="js\measurement.js" />
     <Content Include="js\measurementData.js" />
     <Content Include="js\navigator.js" />
+    <Content Include="pages\new\new.css" />
+    <Content Include="pages\new\new.html" />
+    <Content Include="pages\new\new.js" />
     <Content Include="pages\sessions\sessions.css" />
     <Content Include="pages\sessions\sessions.html" />
     <Content Include="pages\sessions\sessions.js" />

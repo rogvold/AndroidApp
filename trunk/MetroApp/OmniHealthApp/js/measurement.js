@@ -5,6 +5,9 @@
     var uiVisible = false;
     var hrmInitialized = false;
     var hrmRequested = false;
+    var startTime = null;
+    var currentTime = null;
+    var endTime = null;
 
     function getDeviceReadingsAsync() {
         try {
@@ -13,7 +16,7 @@
             // handler, set to retrievedReading below
             hrmService.ReadHeartRateMeasurement();
         } catch (ex) {
-            
+
         }
     }
 
@@ -25,30 +28,55 @@
                 intervals.push((result.Intervals[2 * i - 1] & 0xFF) << 8 | result.Intervals[2 * i - 2])
             }
 
-            var measuredValue = {
-                // Create a Date object from the numerical timestamp provided to us by the driver
-                timestamp: new Date(result.TimeStamp * 1000),
-                value: result.Rate,
-                intervals: intervals,
+            if (result.timestamp * 1000 > startTime && result.timestamp * 1000 < endTime) {
+                // Dispatch the retrieved measurement to update the application data and the associated view
+                for (var key in intervals) {
+                    var interval = intervals[key];
+                    var measuredValue = {
+                        // Create a Date object from the numerical timestamp provided to us by the driver
+                        timestamp: new Date(currentTime),
+                        value: interval,
+                        rate: result.Rate,
 
-                // Override the default toString function
-                toString: function () {
-                    return this.value + ' bpm @ ' + this.intervals.join() + ' ' +this.timestamp;
+                        // Override the default toString function
+                        toString: function () {
+                            return this.value + ' bpm @ ' + this.intervals.join() + ' ' + this.timestamp;
+                        }
+                    };
+                    currentTime += interval;
+                    MeasurementData.addValue(
+                        0,
+                        measuredValue);
                 }
-            };
-
-            // Dispatch the retrieved measurement to update the application data and the associated view
-            MeasurementData.addValue(
-                0,
-                measuredValue);
-
-            // Query the driver for more data
-            getDeviceReadingsAsync();
-            var devs = MeasurementData.getDevices();
-            document.getElementById("Hrm").textContent = devs[0].data[devs[0].data.length - 1];
+                // Query the driver for more data
+                getDeviceReadingsAsync();
+                var devs = MeasurementData.getDevices();
+                var dataChart = new Chart.renderer();
+                dataChart.plot("chartCanvasHRM", devs[0].data);
+                //document.getElementById("Hrm").textContent = devs[0].data[devs[0].data.length - 1];
+            }
+            else if (result.timestamp * 1000 < startTime) {
+                getDeviceReadingsAsync();
+            }
         } catch (exception) {
-            
+
         }
+    }
+
+    function startSession() {
+        // Rather than setting the handler for the complete method every time
+        // by using the traditional Promise based Async pattern
+        // we use a Wpd Automation feature to set the complete function only once
+        var devs = MeasurementData.getDevices();
+
+        startTime = new Date().getTime();
+        endTime = startTime + 120000;
+        var dataChart = new Chart.renderer();
+        dataChart.plot("chartCanvasHRM", devs[0].data);
+        hrmService.onReadHeartRateMeasurementComplete = retrievedReading;
+        hrmInitialized = true;
+        currentTime = startTime;
+        getDeviceReadingsAsync();
     }
 
     function initializeHeartRateDevicesAsync(id) {
@@ -57,50 +85,35 @@
         Windows.UI.WebUI.WebUIApplication.addEventListener('resuming', applicationActivated);
 
         // Initialize Heart Rate Devices
-        Windows.Devices.Enumeration.DeviceInformation.findAllAsync("System.Devices.InterfaceClassGuid:=\"{0000180D-0000-1000-8000-00805f9b34fb}\"", null).
-            done(function (devices) {
-                // If devices were found, proceed with initialization
-                if (devices.length > 0) {
-                    try {
-                        // Use WPD Automation to initialize the device objects
-                        var deviceFactory = new ActiveXObject("PortableDeviceAutomation.Factory");
+        try {
+            // Use WPD Automation to initialize the device objects
+            var deviceFactory = new ActiveXObject("PortableDeviceAutomation.Factory");
 
-                        // For the purpose of this sample we will initialize the first device
-                        deviceFactory.getDeviceFromIdAsync(devices[id * 2].id, function (device) {
+            // For the purpose of this sample we will initialize the first device
+            deviceFactory.getDeviceFromIdAsync(id, function (device) {
 
-                            // Initialize the Heart Rate Monitor service
-                            hrmService = device.services[0];
+                // Initialize the Heart Rate Monitor service
+                hrmService = device.services[0];
 
-                            hrmService.onApplicationActivatedComplete = function () { };
+                hrmService.onApplicationActivatedComplete = function () { };
 
-                            hrmService.onApplicationSuspendedComplete = function () { };
+                hrmService.onApplicationSuspendedComplete = function () { };
 
-                            var devs = MeasurementData.getDevices();
-                            var devId = 0;
-                            devs[devId] = {
-                                devId: devId,
-                                name: devices[id * 2].name,
-                                description: devices[id * 2].id,
-                                data: []
-                            };
+                var devs = MeasurementData.getDevices();
+                var devId = 0;
+                devs[devId] = {
+                    devId: devId,
+                    description: id,
+                    data: []
+                };
+                startSession();
+            }, function (errorCode) {
 
-                            // Rather than setting the handler for the complete method every time
-                            // by using the traditional Promise based Async pattern
-                            // we use a Wpd Automation feature to set the complete function only once
-                            hrmService.onReadHeartRateMeasurementComplete = retrievedReading;
-                            hrmInitialized = true;
-                            getDeviceReadingsAsync();
-                        }, function (errorCode) {
-                            
-                        });
-
-                    } catch (exception) {
-                        
-                    }
-                } else {
-                    
-                }
             });
+
+        } catch (exception) {
+
+        }
     }
 
     function applicationActivated() {
@@ -111,7 +124,7 @@
                 hrmService.ApplicationActivated();
             }
         } catch (exception) {
-            
+
         }
     }
 
@@ -123,7 +136,7 @@
                 hrmService.ApplicationSuspended();
             }
         } catch (exception) {
-            
+
         }
     }
 
@@ -131,5 +144,6 @@
     {
         initializeHeartRateDevicesAsync: initializeHeartRateDevicesAsync,
         hrmInitialized: hrmInitialized,
+        startSession: startSession,
     });
 })();
