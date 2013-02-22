@@ -37,13 +37,9 @@ namespace ClientServerInteraction
 
         public int AMoPercents { get; set; }
 
-        public double BP { get; set; }
-
-        public int IN { get; set; }
-
         public double Mo { get; set; }
 
-        public double RSAI { get; set; }
+        public int[] RSAI { get; set; }
 
         public double HF { get; set; }
 

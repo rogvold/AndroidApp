@@ -20,8 +20,6 @@ namespace HeartRateMonitor.Server.Helpers
                     Intervals = session.Rates
                 };
             session.AMoPercents = sessionData.Evaluate(new AMoPercents());
-            session.BP = sessionData.Evaluate(new BP());
-            session.IN = sessionData.Evaluate(new IN());
             session.Mo = sessionData.Evaluate(new Mo());
             session.RSAI = sessionData.Evaluate(new RSAI());
             session.HF = sessionData.Evaluate(new HF());

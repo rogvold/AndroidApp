@@ -13,7 +13,7 @@ namespace PolarMath.Evaluation.HRV
     /// It takes values from 0 to 10. The algorithm is taken from http://ntpo.com/patents_medicine/medicine_19/medicine_324.shtml \n
     /// Before evaluation RR-intervals must be filtered by Util.Filter.Filtrate();
     /// </summary>
-    class RSAI : IEvaluation<int[]>
+    public class RSAI : IEvaluation<int[]>
     {
         public int[] Evaluate(SessionData training)
         {

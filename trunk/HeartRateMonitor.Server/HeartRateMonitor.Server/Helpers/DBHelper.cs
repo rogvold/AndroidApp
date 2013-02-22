@@ -8,7 +8,8 @@ namespace HeartRateMonitor.Server.Helpers
 {
     public class DBHelper
     {
-        private static readonly MongoServer Server = MongoServer.Create();
+        private const string DBServerUrl = @"http://omnihealth.cloudapp.net:27017";
+        private static readonly MongoServer Server = MongoServer.Create(DBServerUrl);
         private static readonly MongoDatabase Db;
         private static readonly MongoCollection<User> Users;
         private static readonly MongoCollection<Session> Sessions;
