@@ -10,7 +10,7 @@ namespace ClientServerInteraction
     public class ServerHelper
     {
         // hardcoded server url
-        private const string ServerBase = @"http://93.175.5.211/HeartRate/";
+        private const string ServerBase = @"http://omnihealth.azurewebsites.net/";
         private const string Account = @"Account/";
         private const string Evaluation = @"Evaluation/";
 

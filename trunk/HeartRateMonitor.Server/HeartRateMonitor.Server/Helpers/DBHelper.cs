@@ -8,8 +8,8 @@ namespace HeartRateMonitor.Server.Helpers
 {
     public class DBHelper
     {
-        private const string DBServerUrl = @"http://omnihealth.cloudapp.net:27017";
-        private static readonly MongoServer Server = MongoServer.Create(DBServerUrl);
+        private const string DBServerUrl = @"mongodb://omnihealth.cloudapp.net:27017";
+        private static readonly MongoServer Server; 
         private static readonly MongoDatabase Db;
         private static readonly MongoCollection<User> Users;
         private static readonly MongoCollection<Session> Sessions;
@@ -17,6 +17,7 @@ namespace HeartRateMonitor.Server.Helpers
 
         static DBHelper()
         {
+            Server = MongoServer.Create(DBServerUrl);
             Db = Server.GetDatabase("HeartRateMonitor");
             Users = Db.GetCollection<User>("Users");
             Sessions = Db.GetCollection<Session>("Sessions");
