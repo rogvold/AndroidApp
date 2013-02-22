@@ -8,7 +8,7 @@ using HrmMath.Util;
 
 namespace HrmMath.Evaluation.HRV
 {
-    internal sealed class AMoPercents : IEvaluation
+    public sealed class AMoPercents : IEvaluation
     {
         public Index Name
         {

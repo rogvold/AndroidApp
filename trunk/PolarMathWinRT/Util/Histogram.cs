@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace HrmMath.Util
 {
-    internal sealed class Histogram
+    public sealed class Histogram
     {
         private readonly LinkedList<HistogramInterval> _intervals = new LinkedList<HistogramInterval>();
 
@@ -68,7 +68,7 @@ namespace HrmMath.Util
             return _intervals.FirstOrDefault(interval => interval.Start <= rr && interval.End > rr);
         }
 
-        public LinkedList<HistogramInterval> GetIntervals() {
+        internal LinkedList<HistogramInterval> GetIntervals() {
             return _intervals;
         }
     }

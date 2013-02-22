@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HrmMath.Evaluation.Time
 {
-    internal sealed class PNN50 : IEvaluation
+    public sealed class PNN50 : IEvaluation
     {
         public Index Name
         {

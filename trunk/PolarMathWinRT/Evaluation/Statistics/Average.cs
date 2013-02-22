@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HrmMath.Evaluation.Statistics
 {
-    internal sealed class Average : IEvaluation
+    public sealed class Average : IEvaluation
     {
         public Index Name
         {

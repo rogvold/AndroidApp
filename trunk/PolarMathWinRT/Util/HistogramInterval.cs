@@ -5,11 +5,11 @@ using System.Text;
 
 namespace HrmMath.Util
 {
-    internal sealed class HistogramInterval
+    public sealed class HistogramInterval
     {
         public int Start { get; private set; }
         public int End { get; private set; }
-        public LinkedList<int> Values { get; set; }
+        internal LinkedList<int> Values { get; set; }
 
         public HistogramInterval(int start, int end)
         {

@@ -9,7 +9,7 @@ using HrmMath.Evaluation.Statistics;
 
 namespace HrmMath.Util
 {
-    internal sealed class Lomb : IEvaluation
+    public sealed class Lomb : IEvaluation
     {
         private int _size;
 
@@ -113,7 +113,7 @@ namespace HrmMath.Util
             return periodogram;
         }
 
-        public double[] SubtractMean(double[] values, int m/*expectedValue*/)
+        internal double[] SubtractMean(double[] values, int m/*expectedValue*/)
         {
             var n = values.Count();
             var valuesMinusExpectedValue = new double[n];

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace HrmMath.Evaluation.Spectrum
 {
-    internal sealed class ULF : IEvaluation
+    public sealed class ULF : IEvaluation
     {
         public Index Name
         {

@@ -2,7 +2,7 @@
 
 namespace HrmMath.Evaluation.Spectrum
 {
-    internal sealed class IC : IEvaluation
+    public sealed class IC : IEvaluation
     {
         public Index Name
         {

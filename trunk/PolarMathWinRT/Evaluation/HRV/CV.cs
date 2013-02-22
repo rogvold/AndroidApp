@@ -7,7 +7,7 @@ using HrmMath.Evaluation.Statistics;
 
 namespace HrmMath.Evaluation.HRV
 {
-    internal sealed class CV : IEvaluation
+    public sealed class CV : IEvaluation
     {
         public Index Name
         {

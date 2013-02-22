@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HrmMath.Evaluation.Statistics
 {
-    internal sealed class RMSSD : IEvaluation
+    public sealed class RMSSD : IEvaluation
     {
         public Index Name
         {

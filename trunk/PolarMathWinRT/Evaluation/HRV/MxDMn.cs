@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HrmMath.Evaluation.HRV
 {
-    internal sealed class MxDMn : IEvaluation
+    public sealed class MxDMn : IEvaluation
     {
         private const int LowBorder = 400;
         private const int HighBorder = 1300;

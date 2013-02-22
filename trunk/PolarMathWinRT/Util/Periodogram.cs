@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace HrmMath.Util
 {
-    internal sealed class Periodogram
+    public sealed class Periodogram
     {
-        public double Frequency;
-        public double Value;
+        internal double Frequency;
+        internal double Value;
 
-        public Periodogram(double frequency, double value)
+        public Periodogram(double frequency, double val)
         {
             Frequency = frequency;
-            Value = value;
+            Value = val;
         }
     }
 }

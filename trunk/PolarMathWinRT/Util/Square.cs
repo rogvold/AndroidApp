@@ -53,7 +53,7 @@ namespace HrmMath.Util
 		    return square;
 	    }
 	
-	    internal sealed class FrequencyComparator : IComparer<Periodogram> 
+	    public sealed class FrequencyComparator : IComparer<Periodogram> 
 	    {
 		    public int Compare(Periodogram periodogram1, Periodogram periodogram2) {
 			    var freq1 = periodogram1.Frequency;

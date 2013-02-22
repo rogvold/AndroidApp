@@ -7,7 +7,7 @@ using HrmMath.Evaluation;
 
 namespace HrmMath.Data
 {
-    internal sealed class SessionDataCache
+    public sealed class SessionDataCache
     {
         private readonly Dictionary<Index, object> _cache = new Dictionary<Index, object>();
 

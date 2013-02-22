@@ -33,12 +33,12 @@ namespace HrmMath.Data
         Lomb,       //20
     };
 
-    internal sealed class SessionData
+    public sealed class SessionData
     {
         public String IdString { get; set; }
         public IList<int> Intervals { get; set; }
 
-        internal readonly SessionDataCache Cache = new SessionDataCache();
+        private readonly SessionDataCache _cache = new SessionDataCache();
 
         internal SessionData() {}
 
@@ -49,11 +49,11 @@ namespace HrmMath.Data
         }
 
         internal object Evaluate(IEvaluation evaluation) {
-            if (Cache.Contains(evaluation)) {
-                return Cache.Get(evaluation);
+            if (_cache.Contains(evaluation)) {
+                return _cache.Get(evaluation);
             } else {
                 object evaluationResult = evaluation.Evaluate(this);
-                Cache.Add(evaluation, evaluationResult);
+                _cache.Add(evaluation, evaluationResult);
                 return evaluationResult;
             }
         }

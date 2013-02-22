@@ -2,7 +2,7 @@
 
 namespace HrmMath.Evaluation.Spectrum
 {
-    internal sealed class LFPercents : IEvaluation
+    public sealed class LFPercents : IEvaluation
     {
         public Index Name
         {

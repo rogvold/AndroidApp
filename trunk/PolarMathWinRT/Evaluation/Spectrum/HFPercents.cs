@@ -3,7 +3,7 @@ using System;
 
 namespace HrmMath.Evaluation.Spectrum
 {
-    internal sealed class HFPercents : IEvaluation
+    public sealed class HFPercents : IEvaluation
     {
         public Index Name
         {

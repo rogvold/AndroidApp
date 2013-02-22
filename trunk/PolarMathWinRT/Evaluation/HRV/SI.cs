@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace HrmMath.Evaluation.HRV
 {
-    internal sealed class SI : IEvaluation
+    public sealed class SI : IEvaluation
     {
         public Index Name
         {

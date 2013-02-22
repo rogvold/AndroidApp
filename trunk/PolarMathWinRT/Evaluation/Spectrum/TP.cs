@@ -5,7 +5,7 @@ using HrmMath.Util;
 
 namespace HrmMath.Evaluation.Spectrum
 {
-    internal sealed class TP : IEvaluation
+    public sealed class TP : IEvaluation
     {
         public Index Name
         {
