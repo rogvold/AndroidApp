@@ -23,8 +23,16 @@
                 <span class="pagetitle" data-win-res="{textContent: 'welcome'}"></span>
             </h1>
         </header>
+        <div class="itemtemplate" data-win-control="WinJS.Binding.Template">
+            <div class="item">
+                <div class="item-overlay" style="height: 50px;">
+                    <h4 class="item-title" data-win-bind="textContent: name"></h4>
+                </div>
+            </div>
+        </div>
         <section id="mainContent" aria-label="Main content" role="main">
             <div style="width: 750px">
+                <div class="itemslist win-selectionstylefilled" aria-label="List of sessions"height: 500px;" data-win-control="WinJS.UI.ListView" data-win-options="{ selectionMode: 'none' }"></div>
                 <button id="newSessionButton" type="submit">New</button>
             </div>
         </section>
