@@ -40,6 +40,14 @@ namespace HrmMath.Data
 
         internal readonly SessionDataCache Cache = new SessionDataCache();
 
+        internal SessionData() {}
+
+        private SessionData(String idString, List<int> intervals)
+        {
+            this.IdString = idString;
+            this.Intervals = intervals;
+        }
+
         internal object Evaluate(IEvaluation evaluation) {
             if (Cache.Contains(evaluation)) {
                 return Cache.Get(evaluation);
