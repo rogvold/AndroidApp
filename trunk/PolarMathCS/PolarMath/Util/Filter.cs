@@ -6,7 +6,7 @@ using PolarMath.Data;
 
 namespace PolarMath.Util
 {
-    class Filter
+    public class Filter
     {
         /// <summary>
         /// Used for deleting artifacts from the intervals list.\n

@@ -59,8 +59,9 @@ namespace ClientServerInteraction.WinRT
         }
 
         // returns evaluated session
-        public static IAsyncOperation<Session> AddSession(Session session)
+        public static IAsyncOperation<Session> AddSession(Session session, string userId)
         {
+			session.UserId = userId;
             return AddSessionInternal(session).AsAsyncOperation();
         }
 

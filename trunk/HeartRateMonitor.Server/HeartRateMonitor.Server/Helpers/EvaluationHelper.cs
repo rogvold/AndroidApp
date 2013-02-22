@@ -8,6 +8,7 @@ using PolarMath.Evaluation.HRV;
 using PolarMath.Evaluation.Spectrum;
 using PolarMath.Evaluation.Statistics;
 using PolarMath.Evaluation.Time;
+using PolarMath.Util;
 
 namespace HeartRateMonitor.Server.Helpers
 {
@@ -19,6 +20,7 @@ namespace HeartRateMonitor.Server.Helpers
                 {
                     Intervals = session.Rates
                 };
+            sessionData.Intervals = Filter.Filtrate(sessionData);
             session.AMoPercents = sessionData.Evaluate(new AMoPercents());
             session.Mo = sessionData.Evaluate(new Mo());
             session.RSAI = sessionData.Evaluate(new RSAI());
