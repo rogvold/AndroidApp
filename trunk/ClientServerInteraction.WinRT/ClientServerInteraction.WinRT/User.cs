@@ -8,7 +8,7 @@ namespace ClientServerInteraction.WinRT
 {
     public sealed class User
     {
-        public string IdString { get; private set; }
+        public string IdString { get; set; }
 
         public IList<string> Sessions { get; set; }
 

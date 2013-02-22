@@ -8,6 +8,7 @@
     var startTime = null;
     var currentTime = null;
     var endTime = null;
+    var user = null;
 
     function getDeviceReadingsAsync() {
         try {
@@ -58,6 +59,10 @@
             else if (result.timestamp * 1000 < startTime) {
                 getDeviceReadingsAsync();
             }
+            if (currentTime > startTime) {
+                endSession();
+            }
+            
         } catch (exception) {
 
         }
@@ -145,5 +150,6 @@
         initializeHeartRateDevicesAsync: initializeHeartRateDevicesAsync,
         hrmInitialized: hrmInitialized,
         startSession: startSession,
+        user: user,
     });
 })();
