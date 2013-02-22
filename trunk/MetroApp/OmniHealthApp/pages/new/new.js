@@ -44,6 +44,7 @@
         _itemInvoked: function (args) {
             HeartRateMeasurement.initializeHeartRateDevicesAsync(availableDevices.getAt(args.detail.itemIndex).id);
             //HeartRateMeasurement.startSession();
+            var tmp = new HrmMath.Data.SessionDataCache();
         }
     });
 })();
