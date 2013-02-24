@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta charset="utf-8" />
+    <title>auth</title>
+
+    <!-- Ссылки WinJS -->
+    <link href="//Microsoft.WinJS.1.0/css/ui-light.css" rel="stylesheet" />
+    <script src="//Microsoft.WinJS.1.0/js/base.js"></script>
+    <script src="//Microsoft.WinJS.1.0/js/ui.js"></script>
+
+    <link href="/pages/auth/auth.css" rel="stylesheet" />
+    <script src="/pages/auth/auth.js"></script>
+    <script src="/js/measurement.js"></script>
+    <script src="/js/measurementData.js"></script>
+    <script src="/js/authData.js"></script>
+</head>
+<body>
+    <div class="auth fragment">
+        <header id="header" aria-label="Header content" role="banner">
+            <button class="win-backbutton" aria-label="Back" disabled type="button"></button>
+            <h1 class="titlearea win-type-ellipsis">
+                <span class="pagetitle" data-win-res="{textContent: 'welcome'}"></span>
+            </h1>
+        </header>
+        <section id="mainContent" aria-label="Main content" role="main">
+            <div style="width: 750px">
+                <div style="margin-top: 150px; height: 50px; font-size: 24pt">
+                    <div data-win-res="{textContent: 'username'}" style="width: 300px; position: absolute; float: left"></div>
+                    <div style="margin-left: 300px; width: 450px; margin-bottom: 0px; float: right">
+                        <input id="loginField" type="email" autocomplete="on" autofocus="" style="margin-left: 0px; margin-top: 0px; width: 450px; font-size: 24pt; text-align: left; line-height: 40px;">
+                    </div>
+                </div>
+                <div style="margin-top: 50px; height: 50px; font-size: 24pt">
+                    <div style="width: 300px; position: absolute; float: left" data-win-res="{textContent: 'password'}"></div>
+                    <div style="margin-left: 300px; width: 450px; margin-bottom: 0px; float: right">
+                        <input id="passwordField" type="password" autocomplete="on" autofocus="" style="margin-left: 0px; margin-top: 0px; width: 450px; font-size: 24pt; text-align: left; line-height: 40px;">
+                    </div>
+                </div>
+                <div style="margin-top: 50px; width: 500px; height: 60px; float: left">
+                    <div style="float: left">
+                        <progress id="progressRing" class="win-ring win-medium" style="visibility: hidden"></progress>
+                    </div>
+                    <div style="width: 150px; margin-right: 150px; float: right; position: absolute">
+                        <button id="cancelButton" type="reset" style="margin-left: 0px; width: 150px; height: 60px; font-size: 24pt; margin-right: 0px" data-win-res="{textContent: 'cancel'}"></button>
+                    </div>
+                    <div style="width: 150px; margin-right: 0px; float: right">
+                        <button  id="signInButton" type="submit" style="margin-left: 0px; width: 150px; height: 60px; font-size: 24pt; margin-right: 0px" data-win-res="{textContent: 'signIn'}"></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

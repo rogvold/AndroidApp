@@ -23,17 +23,17 @@ namespace HrmMath.Evaluation.HRV
 
         public object Evaluate(SessionData training)
         {
-            var intervals = (List<int>)training.Intervals;
-            var average = (double)training.Evaluate( new Average() );
-            var sdnn = (double)training.Evaluate( new SDNN() );
-            var cv = (double)training.Evaluate( new CV() );
-            var mo = (double)training.Evaluate( new Mo() );
-            var amo = (double)training.Evaluate( new AMoPercents() );
-            var mxdmn = (double)training.Evaluate( new MxDMn() );
-            var si = (double)training.Evaluate( new SI() );
-            var lfPercents = (double)training.Evaluate( new LFPercents() );
-            var hfPercents = (double)training.Evaluate( new HFPercents() );
-            var vlfPercents = (double)training.Evaluate( new VLFPercents() ) + (double)training.Evaluate( new ULFPercents() );
+            var intervals = (IList<int>)training.Intervals;
+            var average = Convert.ToDouble(training.Evaluate( new Average() ));
+            var sdnn = Convert.ToDouble(training.Evaluate( new SDNN() ));
+            var cv = Convert.ToDouble(training.Evaluate( new CV() ));
+            var mo = Convert.ToDouble(training.Evaluate( new Mo() ));
+            var amo = Convert.ToDouble(training.Evaluate( new AMoPercents() ));
+            var mxdmn = Convert.ToDouble(training.Evaluate( new MxDMn() ));
+            var si = Convert.ToDouble(training.Evaluate( new SI() ));
+            var lfPercents = Convert.ToDouble(training.Evaluate( new LFPercents() ));
+            var hfPercents = Convert.ToDouble(training.Evaluate( new HFPercents() ));
+            var vlfPercents = Convert.ToDouble(training.Evaluate( new VLFPercents() )) + Convert.ToDouble(training.Evaluate( new ULFPercents() ));
             var totalFPercents = lfPercents + vlfPercents + hfPercents;
 
             short[] h = new short[5] { 0, 0, 0, 0, 0 };
@@ -42,33 +42,33 @@ namespace HrmMath.Evaluation.HRV
 
             //h[0]
             //Cumulative effect of regulation
-            if (average <= 0.66)
+            if (average <= 660)
                 h[0] = 2;
             else
-                if (average <= 0.80)
+                if (average <= 800)
                     h[0] = 1;
                 else
-                    if (average >= 0.80 && average <= 1.00)
+                    if (average >= 800 && average <= 1000)
                         h[0] = 0;
                     else
-                        if (average >= 1.00)
+                        if (average >= 1000)
                             h[0] = -1;
                         else
-                            if (average >= 1.20)
+                            if (average >= 1200)
                                 h[0] = -2;
 
             //h[1]
             //function of automatism
-            if (sdnn <= 0.02 && mxdmn <= 0.1 && cv <= 2.0)
+            if (sdnn <= 20 && mxdmn <= 0.1 && cv <= 2.0)
                 h[1] = 2;
             else
-                if (sdnn >= 0.10 && mxdmn >= 0.3 && cv >= 8.0)
+                if (sdnn >= 100 && mxdmn >= 0.3 && cv >= 8.0)
                     h[1] = 1;
                 else
                     if (mxdmn >= 0.45)
                         h[1] = -1;
                     else
-                        if (sdnn <= 0.10 && mxdmn >= 0.6 && cv <= 8.0)
+                        if (sdnn <= 100 && mxdmn >= 0.6 && cv <= 8.0)
                             h[1] = -2;
 
             //h[2]

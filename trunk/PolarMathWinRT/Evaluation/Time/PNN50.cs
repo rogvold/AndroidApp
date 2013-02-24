@@ -30,7 +30,7 @@ namespace HrmMath.Evaluation.Time
                 }
             }
 
-            return (int)(((double) pnn) / (intervals.Count - 1) * 100);
+            return (int)(pnn / (double)((intervals.Count - 1) * 100));
         }
     }
 }

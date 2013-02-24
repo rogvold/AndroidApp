@@ -17,7 +17,7 @@ namespace HrmMath.Evaluation.Spectrum
         {
             //List<Periodogram> periodogram = training.evaluate(new FFT());
             var periodogram1 = (List<Periodogram>)training.Evaluate( new Lomb() );
-            return new Square( periodogram1, 0, 0.4 ).Calculate();
+            return new Square( periodogram1, 0, 1 ).Calculate();
         }
     }
 }

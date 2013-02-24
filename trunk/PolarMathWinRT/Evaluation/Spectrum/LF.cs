@@ -1,6 +1,7 @@
 ﻿using HrmMath.Data;
 using HrmMath.Util;
 using System.Collections.Generic;
+using System;
 
 namespace HrmMath.Evaluation.Spectrum
 {

@@ -17,9 +17,9 @@ namespace HrmMath.Evaluation.HRV
 
         public object Evaluate(SessionData training)
         {
-            var mxdmn = (double)training.Evaluate( new MxDMn() );
-            var amo = (double)training.Evaluate( new AMoPercents() );
-            var mo = (double)training.Evaluate( new Mo() );
+            var mxdmn = Convert.ToDouble(training.Evaluate( new MxDMn() ));
+            var amo = Convert.ToDouble(training.Evaluate( new AMoPercents() ));
+            var mo = Convert.ToDouble(training.Evaluate( new Mo() ));
 
             return (int) (amo / (2 * mxdmn * mo));
         }

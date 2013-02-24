@@ -1,4 +1,5 @@
 ﻿using HrmMath.Data;
+using System;
 
 namespace HrmMath.Evaluation.Spectrum
 {
@@ -12,9 +13,9 @@ namespace HrmMath.Evaluation.Spectrum
 
         public object Evaluate(SessionData training)
         {
-            var hf = (double)training.Evaluate( new HF() );
-            var lf = (double)training.Evaluate( new LF() );
-            var vlf = (double)training.Evaluate( new VLF() );
+            var hf = Convert.ToDouble(training.Evaluate( new HF() ));
+            var lf = Convert.ToDouble(training.Evaluate( new LF() ));
+            var vlf = Convert.ToDouble(training.Evaluate( new VLF() ));
 
             return (lf + vlf) / hf;
         }

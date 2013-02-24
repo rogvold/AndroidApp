@@ -3,9 +3,14 @@
 
     // The data format for the devices array will be : {name: , description: , datapoints: [] }
     var devices = [];
+    var indexes = [];
 
     function getDevices() {
         return devices;
+    }
+
+    function getIndexes() {
+        return indexes;
     }
 
     function addValue(deviceIndex, newValue) {
@@ -14,6 +19,7 @@
 
     WinJS.Namespace.define('MeasurementData', {
         getDevices: getDevices,
-        addValue: addValue
+        addValue: addValue,
+        getIndexes: getIndexes
     });
 })();

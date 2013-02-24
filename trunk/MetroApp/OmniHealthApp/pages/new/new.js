@@ -34,7 +34,6 @@
             });
             var listView = element.querySelector(".itemslist").winControl;
             listView.itemDataSource = availableDevices.dataSource;
-            var tmp = availableDevices.dataSource;
             listView.itemTemplate = element.querySelector(".itemtemplate");
             listView.layout = new WinJS.UI.ListLayout();
             listView.oniteminvoked = this._itemInvoked.bind(this);
@@ -42,8 +41,8 @@
         },
 
         _itemInvoked: function (args) {
-            HeartRateMeasurement.initializeHeartRateDevicesAsync(availableDevices.getAt(args.detail.itemIndex).id);
-            //HeartRateMeasurement.startSession();
+            var id = availableDevices.getAt(args.detail.itemIndex).id;
+            HeartRateMeasurement.initializeHeartRateDevicesAsync(id);
         }
     });
 })();

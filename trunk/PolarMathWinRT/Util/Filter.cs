@@ -6,7 +6,7 @@ using HrmMath.Data;
 
 namespace HrmMath.Util
 {
-    class Filter
+    public sealed class Filter
     {
         /// <summary>
         /// Used for deleting artifacts from the intervals list.\n
@@ -14,7 +14,7 @@ namespace HrmMath.Util
         /// </summary>
         /// <param name="training"></param>
         /// <returns>Filtrated interval list(can contain less numbers)</returns>
-        public static List<int> Filtrate(SessionData training)
+        public static IList<int> Filtrate(SessionData training)
         {
             var intervals = new LinkedList<int>(training.Intervals);
             var n = intervals.Count;
@@ -39,11 +39,12 @@ namespace HrmMath.Util
                         }
                 }
                 else
-                    if (Math.Abs(current.Value / (double) current.Previous.Value - 2) < 0.2)
+                    if (Math.Abs(current.Value / (double)current.Previous.Value - 2) < 0.2)
                     {
                         intervals.AddAfter(current, current.Value / 2);
                         current.Value /= 2;
                     }
+                current = current.Next;
             }
             return new List<int>(intervals);
         }

@@ -29,7 +29,7 @@
                 intervals.push((result.Intervals[2 * i - 1] & 0xFF) << 8 | result.Intervals[2 * i - 2])
             }
 
-            if (result.timestamp * 1000 > startTime && result.timestamp * 1000 < endTime) {
+            if (result.timestamp * 1000 > startTime && currentTime < endTime) {
                 // Dispatch the retrieved measurement to update the application data and the associated view
                 for (var key in intervals) {
                     var interval = intervals[key];
@@ -59,8 +59,8 @@
             else if (result.timestamp * 1000 < startTime) {
                 getDeviceReadingsAsync();
             }
-            if (currentTime > startTime) {
-                endSession();
+            else if (currentTime > endTime) {
+                finishSession();
             }
             
         } catch (exception) {
@@ -72,14 +72,8 @@
         // Rather than setting the handler for the complete method every time
         // by using the traditional Promise based Async pattern
         // we use a Wpd Automation feature to set the complete function only once
-        var devs = MeasurementData.getDevices();
-
         startTime = new Date().getTime();
         endTime = startTime + 120000;
-        var dataChart = new Chart.renderer();
-        dataChart.plot("chartCanvasHRM", devs[0].data);
-        hrmService.onReadHeartRateMeasurementComplete = retrievedReading;
-        hrmInitialized = true;
         currentTime = startTime;
         getDeviceReadingsAsync();
     }
@@ -111,6 +105,10 @@
                     description: id,
                     data: []
                 };
+                var dataChart = new Chart.renderer();
+                dataChart.plot("chartCanvasHRM", devs[0].data);
+                hrmService.onReadHeartRateMeasurementComplete = retrievedReading;
+                hrmInitialized = true;
                 startSession();
             }, function (errorCode) {
 
@@ -119,6 +117,21 @@
         } catch (exception) {
 
         }
+    }
+
+    function finishSession() {
+        var intervalsList = [];
+        var devs = MeasurementData.getDevices();
+        for (var key in MeasurementData.getDevices()[0].data) {
+            var interval = MeasurementData.getDevices()[0].data[key].value;
+            intervalsList.push(interval);
+        }
+        var sessionData = new HrmMath.Data.SessionData(MeasurementData.getDevices()[0].description, intervalsList);
+        var filteredList = HrmMath.Util.Filter.filtrate(sessionData);
+        var filteredSessionData = new HrmMath.Data.SessionData(MeasurementData.getDevices()[0].description, filteredList);
+
+        var rsai = filteredSessionData.evaluate(new HrmMath.Evaluation.HRV.RSAI());
+        document.getElementById('rsai').textContent = rsai[0] + ' ' + rsai[1];
     }
 
     function applicationActivated() {

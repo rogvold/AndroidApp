@@ -66,18 +66,18 @@
     <Content Include="js\measurement.js" />
     <Content Include="js\measurementData.js" />
     <Content Include="js\navigator.js" />
-    <Content Include="pages\new\new.css" />
-    <Content Include="pages\new\new.html" />
-    <Content Include="pages\new\new.js" />
-    <Content Include="pages\sessions\sessions.css" />
-    <Content Include="pages\sessions\sessions.html" />
-    <Content Include="pages\sessions\sessions.js" />
-    <Content Include="StoreManifest.xml" />
-    <None Include="Package.StoreAssociation.xml" />
-    <None Include="OmniHealthApp_StoreKey.pfx" />
+    <Content Include="pages\auth\auth.css" />
+    <Content Include="pages\auth\auth.html" />
+    <Content Include="pages\auth\auth.js" />
     <Content Include="pages\home\home.css" />
     <Content Include="pages\home\home.html" />
     <Content Include="pages\home\home.js" />
+    <Content Include="pages\new\new.css" />
+    <Content Include="pages\new\new.html" />
+    <Content Include="pages\new\new.js" />
+    <Content Include="StoreManifest.xml" />
+    <None Include="Package.StoreAssociation.xml" />
+    <None Include="OmniHealthApp_StoreKey.pfx" />
     <Content Include="default.html" />
     <None Include="OmniHealthApp_TemporaryKey.pfx" />
   </ItemGroup>

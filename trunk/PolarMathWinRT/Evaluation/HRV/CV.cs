@@ -17,8 +17,8 @@ namespace HrmMath.Evaluation.HRV
 
         public object Evaluate(SessionData training)
         {
-            var sdnn = (double)training.Evaluate(new SDNN());
-            var average = (double)training.Evaluate(new Average());
+            var sdnn = Convert.ToDouble(training.Evaluate(new SDNN()));
+            var average = Convert.ToDouble(training.Evaluate(new Average()));
             return sdnn / average * 100;
         }
     }

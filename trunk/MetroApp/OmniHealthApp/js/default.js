@@ -27,7 +27,22 @@
                     nav.history.current.initialPlaceholder = true;
                     return nav.navigate(nav.location, nav.state);
                 } else {
-                    return nav.navigate(Application.navigator.home);
+                    try {
+                        var passwordVault = new Windows.Security.Credentials.PasswordVault();
+                        var appKey = "OmniHealthApp";
+                        var credential = passwordVault.retrieve(appKey, passwordVault.findAllByResource(appKey).getAt(0).userName);
+                        ClientServerInteraction.WinRT.ServerHelper.authorizeUser(credential.userName, credential.password).done(function (user) {
+                            if (user == null) {
+                                //TODO: notify user about authorization fail
+                                return;
+                            }
+                            AuthData.user = user;
+                        });
+                        return nav.navigate(Application.navigator.home);
+                    }
+                    catch (ex) {
+                        return nav.navigate("/pages/auth/auth.html");
+                    }
                 }
             }));
         }

@@ -13,8 +13,8 @@ namespace HrmMath.Evaluation.Spectrum
 
         public object Evaluate(SessionData training)
         {
-            var hf = (double)training.Evaluate(new HF());
-            var tp = (double)training.Evaluate(new TP());
+            var hf = Convert.ToDouble(training.Evaluate(new HF()));
+            var tp = Convert.ToDouble(training.Evaluate(new TP()));
             return (hf / tp) * 100;
         }
     }
