@@ -6,6 +6,11 @@ namespace ClientServerInteraction
 {
     public class Session
     {
+        private const int Sleep = 1;
+        private const int Rest = 2;
+        private const int Work = 3;
+        private const int Training = 4;
+
         private ObjectId _id;
 
         [BsonId]
@@ -30,6 +35,10 @@ namespace ClientServerInteraction
         public string /* int */ DeviceId { get; set; }
 
         public string DeviceName { get; set; }
+
+        public int Activity { get; set; }
+
+        public int HealthState { get; set; }
 
         public List<int> Rates { get; set; }
 
