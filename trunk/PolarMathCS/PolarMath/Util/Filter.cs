@@ -22,28 +22,38 @@ namespace PolarMath.Util
             var current = intervals.First.Next;
             while (current.Next != null)
             {
-                if (current.Value / (double)current.Previous.Value < 0.8)
+                if (current.Value / (double) current.Previous.Value < 0.8)
                 {
-                    if (current.Next.Value / (double)current.Previous.Value > 0.8 &&
-                        current.Next.Value / (double)current.Previous.Value < 1.2)
+                    if (current.Next.Value / (double) current.Previous.Value > 0.8 &&
+                        current.Next.Value / (double) current.Previous.Value < 1.2)
                     {
                         current = current.Next;
                         intervals.Remove(current.Previous);
                     }
-                    else
-                        if (current.Next.Value / (double)current.Previous.Value > 1.2)
-                        {
-                            countOfPVC++;
-                            var nextnextValue = current.Next.Next == null ? current.Previous.Value : current.Next.Next.Value;
-                            current.Value = current.Next.Value = (current.Previous.Value + nextnextValue) / 2;
-                        }
+                    else if (current.Next.Value / (double) current.Previous.Value > 1.2)
+                    {
+                        countOfPVC++;
+                        var nextnextValue = current.Next.Next == null ? current.Previous.Value : current.Next.Next.Value;
+                        current.Value = current.Next.Value = (current.Previous.Value + nextnextValue) / 2;
+                    }
                 }
                 else
-                    if (Math.Abs(current.Value / (double) current.Previous.Value - 2) < 0.2)
-                    {
-                        intervals.AddAfter(current, current.Value / 2);
-                        current.Value /= 2;
-                    }
+                {
+                    var val1 = current.Value / (double) current.Previous.Value;
+                    var val2 = Math.Truncate(val1);
+                    if (val1 >= 1.9) 
+                       if (Math.Abs(val1 - val2) < 0.2)
+                        {
+                            for (int j = 0; j < val2 - 1; j++)
+                                intervals.AddAfter(current, (int) (current.Value / val2));
+                            current.Value = (int) (current.Value / val2);
+                        }
+                       else
+                       {
+                           current = current.Previous;
+                           intervals.Remove(current.Next);
+                       }
+                }
                 current = current.Next;
             }
             return new List<int>(intervals);
