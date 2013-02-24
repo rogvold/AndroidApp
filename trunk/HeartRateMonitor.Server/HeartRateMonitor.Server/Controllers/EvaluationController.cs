@@ -20,8 +20,10 @@ namespace HeartRateMonitor.Server.Controllers
             {
                 var session = SerializationHelper.DeserializeSession(StreamHelper.ReadJsonToString(Request.InputStream));
 
+                // calculating all possible evaluations
                 EvaluationHelper.Evaluate(session);
 
+                // save evaluated session to DB
                 DBHelper.AddSession(session);
 
                 return Json(session);
