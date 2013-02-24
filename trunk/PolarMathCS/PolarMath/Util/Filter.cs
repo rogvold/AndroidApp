@@ -44,6 +44,7 @@ namespace PolarMath.Util
                         intervals.AddAfter(current, current.Value / 2);
                         current.Value /= 2;
                     }
+                current = current.Next;
             }
             return new List<int>(intervals);
         }
