@@ -36,33 +36,33 @@ namespace PolarMath.Evaluation.HRV
 
             //h[0]
             //Cumulative effect of regulation
-            if (average <= 0.66)
+            if (average <= 660)
                 h[0] = 2;
             else
-                if (average <= 0.80)
+                if (average <= 800)
                     h[0] = 1;
                 else
-                    if (average >= 0.80 && average <= 1.00)
+                    if (average >= 800 && average <= 1000)
                         h[0] = 0;
                     else
-                        if (average >= 1.00)
+                        if (average >= 1000)
                             h[0] = -1;
                         else
-                            if (average >= 1.20)
+                            if (average >= 1200)
                                 h[0] = -2;
 
             //h[1]
             //function of automatism
-            if (sdnn <= 0.02 && mxdmn <= 0.1 && cv <= 2.0)
+            if (sdnn <= 20 && mxdmn <= 0.1 && cv <= 2.0)
                 h[1] = 2;
             else
-                if (sdnn >= 0.10 && mxdmn >= 0.3 && cv >= 8.0)
+                if (sdnn >= 100 && mxdmn >= 0.3 && cv >= 8.0)
                     h[1] = 1;
                 else
                     if (mxdmn >= 0.45)
                         h[1] = -1;
                     else
-                        if (sdnn <= 0.10 && mxdmn >= 0.6 && cv <= 8.0)
+                        if (sdnn <= 100 && mxdmn >= 0.6 && cv <= 8.0)
                             h[1] = -2;
 
             //h[2]
