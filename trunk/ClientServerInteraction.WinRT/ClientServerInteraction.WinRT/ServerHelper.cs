@@ -18,7 +18,7 @@ namespace ClientServerInteraction.WinRT
         // returns true on successful registration
         public static IAsyncOperation<bool> RegisterUser(string email, string password, string username)
         {
-            return RegisterUserInternal(email, password, username).AsAsyncOperation();
+                return RegisterUserInternal(email, password, username).AsAsyncOperation();
         }
 
         internal static async Task<bool> RegisterUserInternal(string email, string password, string username)
