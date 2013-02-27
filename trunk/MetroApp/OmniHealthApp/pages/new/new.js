@@ -10,6 +10,16 @@
         else
             return -1;
     });
+    
+    function sendSession(session) {
+        ClientServerInteraction.WinRT.ServerHelper.addSession(session, AuthData.user.userId).done(function(evaluatedSession) {
+            AuthData.user.sessions.push(evaluatedSession.idString);
+        });
+    }
+    
+    function getCurrentTimestamp() {
+        return new Date().getTime();
+    }
 
     WinJS.UI.Pages.define("/pages/new/new.html", {
         // Эта функция вызывается каждый раз, когда пользователь переходит на данную страницу. Она

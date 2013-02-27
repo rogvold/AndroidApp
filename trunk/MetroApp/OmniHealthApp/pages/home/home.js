@@ -26,13 +26,11 @@
             for (var i = 0; i < sessions.length; i++) {
                 var session = sessions[i];
                 var newSession = [];
-                session["deviceId"] = "id";
-                session["deviceName"] = "name";
-                session["info"] = "info";
                 for (var key in session) {
                     if (session[key] != null)
                         newSession[key] = session[key];
                 }
+                newSession["date"] = timestampToDateString(newSession["startTimestamp"]);
                 previousSessions.push(newSession);
             }
             var listView = elem.querySelector(".itemslist").winControl;
@@ -41,6 +39,11 @@
             listView.layout = new WinJS.UI.GridLayout();
             listView.element.focus();
         });
+    }
+    
+    function timestampToDateString(timestamp) {
+        var date = new Date(timestamp);
+        return date.toLocaleDateString() + " " + date.toLocaleTimeString();
     }
 
     WinJS.UI.Pages.define("/pages/home/home.html", {
