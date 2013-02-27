@@ -39,7 +39,7 @@ namespace ClientServerInteraction.WinRT
             }
         }
 
-        public static string SerializeSessionIds(IList<string> strings)
+        public static string SerializeSessionIds(object strings)
         {
             return JsonConvert.SerializeObject(new
             {

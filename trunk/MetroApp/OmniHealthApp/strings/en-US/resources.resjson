@@ -4,5 +4,8 @@
     "password"              : "Password:",
     "cancel"                : "Cancel",
     "signIn"                : "Sign in",
-    "welcome"               : "Welcome!"
+    "welcome"               : "Welcome!",
+    "new"                   : "New record",
+    "homePage"              : "Your home page",
+    "error"                 : "Error"
 }

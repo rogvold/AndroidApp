@@ -31,14 +31,15 @@
                         var passwordVault = new Windows.Security.Credentials.PasswordVault();
                         var appKey = "OmniHealthApp";
                         var credential = passwordVault.retrieve(appKey, passwordVault.findAllByResource(appKey).getAt(0).userName);
-                        ClientServerInteraction.WinRT.ServerHelper.authorizeUser(credential.userName, credential.password).done(function (user) {
+                        var username = credential.userName;
+                        var password = credential.password;
+                        ClientServerInteraction.WinRT.ServerHelper.authorizeUser(username, password).done(function (user) {
                             if (user == null) {
-                                //TODO: notify user about authorization fail
-                                return;
+                                return nav.navigate("/pages/error/error.html", { sender: WinJS.Navigation.location, error: Errors.exist });
                             }
                             AuthData.user = user;
+                            return nav.navigate(Application.navigator.home);
                         });
-                        return nav.navigate(Application.navigator.home);
                     }
                     catch (ex) {
                         return nav.navigate("/pages/auth/auth.html");

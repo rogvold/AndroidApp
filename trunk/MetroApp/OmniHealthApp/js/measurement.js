@@ -9,6 +9,7 @@
     var currentTime = null;
     var endTime = null;
     var user = null;
+    var deviceId = null;
 
     function getDeviceReadingsAsync() {
         try {
@@ -19,6 +20,12 @@
         } catch (ex) {
 
         }
+    }
+
+    function idToName(id) {
+        var pattern = /&([^_&]*)[^&]*&([^_&]*).*d0(\d+)\D/g;
+        var match = pattern.exec(id);
+        return match[1] + " " + match[2] + " " + match[3];
     }
 
     function retrievedReading(result) {
@@ -82,6 +89,7 @@
 
         Windows.UI.WebUI.WebUIApplication.addEventListener('suspending', applicationSuspended);
         Windows.UI.WebUI.WebUIApplication.addEventListener('resuming', applicationActivated);
+        deviceId = id;
 
         // Initialize Heart Rate Devices
         try {
@@ -126,12 +134,21 @@
             var interval = MeasurementData.getDevices()[0].data[key].value;
             intervalsList.push(interval);
         }
-        var sessionData = new HrmMath.Data.SessionData(MeasurementData.getDevices()[0].description, intervalsList);
-        var filteredList = HrmMath.Util.Filter.filtrate(sessionData);
-        var filteredSessionData = new HrmMath.Data.SessionData(MeasurementData.getDevices()[0].description, filteredList);
+        //var sessionData = new HrmMath.Data.SessionData(MeasurementData.getDevices()[0].description, intervalsList);
+        //var filteredList = HrmMath.Util.Filter.filtrate(sessionData);
+        //var filteredSessionData = new HrmMath.Data.SessionData(MeasurementData.getDevices()[0].description, filteredList);
 
-        var rsai = filteredSessionData.evaluate(new HrmMath.Evaluation.HRV.RSAI());
-        document.getElementById('rsai').textContent = rsai[0] + ' ' + rsai[1];
+        //var rsai = filteredSessionData.evaluate(new HrmMath.Evaluation.HRV.RSAI());
+        //document.getElementById('rsai').textContent = rsai[0] + ' ' + rsai[1];
+        var newSession = new ClientServerInteraction.WinRT.Session();
+        newSession.startTimestamp = startTime;
+        newSession.deviceId = deviceId;
+        newSession.deviceName = idToName(deviceId);
+        newSession.rates = intervalsList;
+        ClientServerInteraction.WinRT.ServerHelper.addSession(newSession, AuthData.user.idString).done(function (session) {
+
+            WinJS.Navigation.navigate("/pages/save/save.html");
+        });
     }
 
     function applicationActivated() {
@@ -164,5 +181,6 @@
         hrmInitialized: hrmInitialized,
         startSession: startSession,
         user: user,
+        idToName: idToName,
     });
 })();

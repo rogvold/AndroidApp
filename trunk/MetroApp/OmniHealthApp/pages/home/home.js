@@ -1,6 +1,9 @@
 ﻿(function () {
     "use strict";
 
+    var elem;
+    var sessionsCount = 10;
+
     var list = new WinJS.Binding.List();
     var previousSessions = list.createSorted(function descendingCompare(first, second) {
         if (first == second)
@@ -15,18 +18,37 @@
         WinJS.Navigation.navigate("/pages/new/new.html");
     }
 
-    WinJS.UI.Pages.define("/pages/home/home.html", {
-        // Эта функция вызывается каждый раз, когда пользователь переходит на данную страницу. Она
-        // заполняет элементы страницы данными приложения.
+    function initializeListView() {
+        var user = AuthData.user;
+        var sessionIds = AuthData.user.sessions;
 
-        ready: function (element, options) {
-            // TODO: Инициализируйте страницу здесь.
-            document.getElementById('newSessionButton').onclick = createNewSession;
-            var listView = element.querySelector(".itemslist").winControl;
+        ClientServerInteraction.WinRT.ServerHelper.getSessions(sessionIds.slice(0, sessionsCount + 1)).done(function (sessions) {
+            for (var i = 0; i < sessions.length; i++) {
+                var session = sessions[i];
+                var newSession = [];
+                session["deviceId"] = "id";
+                session["deviceName"] = "name";
+                session["info"] = "info";
+                for (var key in session) {
+                    if (session[key] != null)
+                        newSession[key] = session[key];
+                }
+                previousSessions.push(newSession);
+            }
+            var listView = elem.querySelector(".itemslist").winControl;
             listView.itemDataSource = previousSessions.dataSource;
-            listView.itemTemplate = element.querySelector(".itemtemplate");
+            listView.itemTemplate = elem.querySelector(".itemtemplate");
             listView.layout = new WinJS.UI.GridLayout();
             listView.element.focus();
+        });
+    }
+
+    WinJS.UI.Pages.define("/pages/home/home.html", {
+        ready: function (element, options) {
+            WinJS.Resources.processAll();
+            document.getElementById('newSessionButton').onclick = createNewSession;
+            elem = element;
+            initializeListView();
         }
     });
 })();

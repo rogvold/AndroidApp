@@ -72,12 +72,12 @@ namespace ClientServerInteraction.WinRT
             return SerializationHelper.DeserializeSession(response);
         }
 
-        public static IAsyncOperation<IList<Session>> GetSessions(IList<string> sessionIds)
+        public static IAsyncOperation<IList<Session>> GetSessions(object sessionIds)
         {
             return GetSessionsInternal(sessionIds).AsAsyncOperation();
         }
 
-        internal static async Task<IList<Session>> GetSessionsInternal(IList<string> sessionIds)
+        internal static async Task<IList<Session>> GetSessionsInternal(object sessionIds)
         {
             var response = await JSONRequestHelper.SendRequest(ServerBase + Evaluation + @"GetSessions",
                                                          SerializationHelper.SerializeSessionIds(sessionIds));

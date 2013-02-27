@@ -7,7 +7,7 @@
         ClientServerInteraction.WinRT.ServerHelper.authorizeUser(email, password).done(function (user) {
             if (user == null) {
                 //TODO: notify user about authorization fail
-                return;
+                return WinJS.Navigation.navigate("/pages/error/error.html", {sender: WinJS.Navigation.location, error: Errors.exist});
             }
             AuthData.user = user;
             WinJS.Navigation.navigate(Application.navigator.home);
@@ -40,8 +40,7 @@
             //var tmp = new HrmMath.Data.SessionData();
             //var tmp1 = tmp.evaluate(new HrmMath.Evaluation.HRV.RSAI());
             //TODO: check if user idString already exist and redirect to the next page  
-            var output = document.getElementById('page');
-            WinJS.Resources.processAll(output);
+            WinJS.Resources.processAll();
             document.getElementById('signInButton').onclick = authSubmit;
             document.getElementById('cancelButton').onclick = authReset;
         }

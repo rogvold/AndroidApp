@@ -22,11 +22,8 @@
             done(function (devices) {
                 for (var i = 0; i < devices.length; i++) {
                     if (i % 2 == 0) {
-                        var pattern = /&([^_&]*)[^&]*&([^_&]*).*d0(\d+)\D/g;
-                        var match = pattern.exec(devices[i].id);
-                        var result = match[1] + " " + match[2] + " " + match[3];
                         availableDevices.push({
-                            name: result,
+                            name: HeartRateMeasurement.idToName(devices[i].id),
                             id: devices[i].id
                         });
                     }
