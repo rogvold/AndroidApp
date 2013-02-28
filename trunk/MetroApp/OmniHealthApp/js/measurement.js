@@ -80,16 +80,17 @@
         // by using the traditional Promise based Async pattern
         // we use a Wpd Automation feature to set the complete function only once
         startTime = new Date().getTime();
-        endTime = startTime + 120000;
+        MeasurementData.startTime = startTime;
+        endTime = startTime + 10000;
         currentTime = startTime;
         getDeviceReadingsAsync();
     }
 
     function initializeHeartRateDevicesAsync(id) {
-
         Windows.UI.WebUI.WebUIApplication.addEventListener('suspending', applicationSuspended);
         Windows.UI.WebUI.WebUIApplication.addEventListener('resuming', applicationActivated);
         deviceId = id;
+        MeasurementData.deviceId = deviceId;
 
         // Initialize Heart Rate Devices
         try {
@@ -128,27 +129,8 @@
     }
 
     function finishSession() {
-        var intervalsList = [];
-        var devs = MeasurementData.getDevices();
-        for (var key in MeasurementData.getDevices()[0].data) {
-            var interval = MeasurementData.getDevices()[0].data[key].value;
-            intervalsList.push(interval);
-        }
-        //var sessionData = new HrmMath.Data.SessionData(MeasurementData.getDevices()[0].description, intervalsList);
-        //var filteredList = HrmMath.Util.Filter.filtrate(sessionData);
-        //var filteredSessionData = new HrmMath.Data.SessionData(MeasurementData.getDevices()[0].description, filteredList);
-
-        //var rsai = filteredSessionData.evaluate(new HrmMath.Evaluation.HRV.RSAI());
-        //document.getElementById('rsai').textContent = rsai[0] + ' ' + rsai[1];
-        var newSession = new ClientServerInteraction.WinRT.Session();
-        newSession.startTimestamp = startTime;
-        newSession.deviceId = deviceId;
-        newSession.deviceName = idToName(deviceId);
-        newSession.rates = intervalsList;
-        ClientServerInteraction.WinRT.ServerHelper.addSession(newSession, AuthData.user.idString).done(function (session) {
-
-            WinJS.Navigation.navigate("/pages/save/save.html");
-        });
+        var flyout = document.getElementById('saveSession').winControl;
+        flyout.show(saveSession, "right");
     }
 
     function applicationActivated() {

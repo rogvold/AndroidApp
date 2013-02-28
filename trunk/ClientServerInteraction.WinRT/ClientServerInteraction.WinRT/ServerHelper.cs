@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Windows.Foundation;
+using System.Collections;
 
 namespace ClientServerInteraction.WinRT
 {
@@ -62,6 +63,7 @@ namespace ClientServerInteraction.WinRT
         public static IAsyncOperation<Session> AddSession(Session session, string userId)
         {
 			session.UserId = userId;
+            session.Rates = ((IEnumerable)session.Rates).Cast<int>().ToList(); 
             return AddSessionInternal(session).AsAsyncOperation();
         }
 

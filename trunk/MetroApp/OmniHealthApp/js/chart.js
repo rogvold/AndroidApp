@@ -34,7 +34,7 @@
         options: {},
         offsetMap: [],
         yaxisCount: 5,      // Number of guidance lines for the chart background
-        nPoints: 30,     // Number of data points to draw on the chart at a time
+        nPoints: 300,     // Number of data points to draw on the chart at a time
 
         plot: function (canvasId, data) {
             /// <summary>
@@ -117,11 +117,11 @@
             /// </summary>
 
             if (this.offsetMap.length > 0) {
-                this.canvasContext.lineWidth = 3;
+                this.canvasContext.lineWidth = 2;
                 this.canvasContext.lineCap = 'round';
                 this.canvasContext.lineJoin = 'round';
-                this.canvasContext.shadowOffsetX = 0.5;
-                this.canvasContext.shadowOffsetY = 0.5;
+                this.canvasContext.shadowOffsetX = 0.2;
+                this.canvasContext.shadowOffsetY = 0.2;
                 this.canvasContext.shadowBlur = 0;
                 this.canvasContext.shadowColor = 'rgba(0, 0, 0, .6)';
                 this.canvasContext.strokeStyle = strokeStyle;
@@ -139,14 +139,14 @@
             /// <summary>
             /// Function that refreshes the chart background
             /// </summary>
-            var colors = ['#9FF', '#8EF', '#7DF', '#6CF', '#5BF'];
-            var tickOffset_y = this.canvasElement.height / this.yaxisCount;
-            var offset_y = 0;
-            for (var i = 0; i <= this.yaxisCount; i++) {
-                this.canvasContext.fillStyle = colors[i];
-                this.canvasContext.fillRect(0, offset_y, this.canvasElement.width, tickOffset_y);
-                offset_y += tickOffset_y;
-            }
+            var lingrad = this.canvasContext.createLinearGradient(0, 0, 0, this.canvasElement.height);
+            lingrad.addColorStop(0, '#FFF');
+            lingrad.addColorStop(1, '#5BF');
+
+            // assign gradients to fill and stroke styles
+            this.canvasContext.fillStyle = lingrad;
+            // draw shapes
+            this.canvasContext.fillRect(0, 0, this.canvasElement.width, this.canvasElement.height);
         },
 
         drawYaxis: function () {
@@ -156,7 +156,7 @@
 
             if ((this.canvasContext !== null) && (this.canvasContext !== undefined)) {
                 this.canvasContext.font = '18px "Segoe UI"';
-                this.canvasContext.fillStyle = 'rgba(255, 255, 255, 0.9)';
+                this.canvasContext.fillStyle = 'rgba(0, 0, 0, 0.9)';
                 this.canvasContext.textBaseline = 'top';
                 this.canvasContext.textAlign = 'right';
 

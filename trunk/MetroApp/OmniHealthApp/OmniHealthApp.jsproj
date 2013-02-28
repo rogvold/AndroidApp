@@ -79,9 +79,9 @@
     <Content Include="pages\new\new.css" />
     <Content Include="pages\new\new.html" />
     <Content Include="pages\new\new.js" />
-    <Content Include="pages\save\save.css" />
-    <Content Include="pages\save\save.html" />
-    <Content Include="pages\save\save.js" />
+    <Content Include="pages\session\session.css" />
+    <Content Include="pages\session\session.html" />
+    <Content Include="pages\session\session.js" />
     <Content Include="StoreManifest.xml" />
     <None Include="Package.StoreAssociation.xml" />
     <None Include="OmniHealthApp_StoreKey.pfx" />

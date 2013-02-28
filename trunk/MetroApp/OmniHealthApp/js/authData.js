@@ -7,5 +7,6 @@
     WinJS.Namespace.define('AuthData',
     {
         user: user,
+        sessions: sessions,
     });
 })();
