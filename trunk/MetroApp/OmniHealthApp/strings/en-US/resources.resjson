@@ -7,5 +7,6 @@
     "welcome"               : "Welcome!",
     "new"                   : "New record",
     "homePage"              : "Your home page",
-    "error"                 : "Error"
+    "error"                 : "Error",
+    "signUp"                : "Not registered yet?"
 }

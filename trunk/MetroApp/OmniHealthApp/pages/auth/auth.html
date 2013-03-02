@@ -10,7 +10,9 @@
     <script src="//Microsoft.WinJS.1.0/js/base.js"></script>
     <script src="//Microsoft.WinJS.1.0/js/ui.js"></script>
 
+    <link href="../../css/default.css" rel="stylesheet" />
     <link href="/pages/auth/auth.css" rel="stylesheet" />
+    
     <script src="/pages/auth/auth.js"></script>
     <script src="/js/measurement.js"></script>
     <script src="/js/measurementData.js"></script>
@@ -18,37 +20,33 @@
     <script src="/js/errorConstants.js"></script>
 </head>
 <body>
-    <div class="auth fragment">
-        <header id="header" aria-label="Header content" role="banner">
-            <button class="win-backbutton" aria-label="Back" disabled type="button"></button>
-            <h1 class="titlearea win-type-ellipsis">
-                <span class="pagetitle" data-win-res="{textContent: 'welcome'}"></span>
-            </h1>
-        </header>
-        <section id="mainContent" aria-label="Main content" role="main">
-            <div style="width: 750px">
-                <div style="margin-top: 150px; height: 50px; font-size: 24pt">
-                    <div data-win-res="{textContent: 'username'}" style="width: 300px; position: absolute; float: left"></div>
-                    <div style="margin-left: 300px; width: 450px; margin-bottom: 0px; float: right">
-                        <input id="loginField" type="email" autocomplete="on" autofocus="" style="margin-left: 0px; margin-top: 0px; width: 450px; font-size: 24pt; text-align: left; line-height: 40px;">
+    <div class="frame fragment">
+        <div>
+            <button class="win-backbutton my-back-button" aria-label="Back" type="button"></button>
+            <header id="header" aria-label="Header content">
+                <h1 class="titlearea win-type-ellipsis">
+                    <span class="pagetitle" data-win-res="{textContent: 'welcome'}"></span>
+                </h1>
+            </header>
+        </div>
+        <section id="mainContent" aria-label="Main content">
+            <div class="login-pwd">
+                <div class="login">
+                    <div style="float: left;" data-win-res="{textContent: 'username'}"></div>
+                    <div class="login-text-area">
+                        <input id="loginField" type="email" autocomplete="on" autofocus="" style="font-size: 24pt; text-align: left; line-height: 40px; width: 100%;">
                     </div>
                 </div>
-                <div style="margin-top: 50px; height: 50px; font-size: 24pt">
-                    <div style="width: 300px; position: absolute; float: left" data-win-res="{textContent: 'password'}"></div>
-                    <div style="margin-left: 300px; width: 450px; margin-bottom: 0px; float: right">
-                        <input id="passwordField" type="password" autocomplete="on" autofocus="" style="margin-left: 0px; margin-top: 0px; width: 450px; font-size: 24pt; text-align: left; line-height: 40px;">
+                <div class="pwd">
+                    <div style="float: left" data-win-res="{textContent: 'password'}"></div>
+                    <div class="pwd-text-area">
+                        <input id="passwordField" type="password" autofocus="" style="font-size: 24pt; text-align: left; line-height: 40px; width: 100%">
                     </div>
                 </div>
-                <div style="margin-top: 50px; width: 500px; height: 60px; float: left">
-                    <div style="float: left">
-                        <progress id="progressRing" class="win-ring win-medium" style="visibility: hidden"></progress>
-                    </div>
-                    <div style="width: 150px; margin-right: 150px; float: right; position: absolute">
-                        <button id="cancelButton" type="reset" style="margin-left: 0px; width: 150px; height: 60px; font-size: 24pt; margin-right: 0px" data-win-res="{textContent: 'cancel'}"></button>
-                    </div>
-                    <div style="width: 150px; margin-right: 0px; float: right">
-                        <button  id="signInButton" type="submit" style="margin-left: 0px; width: 150px; height: 60px; font-size: 24pt; margin-right: 0px" data-win-res="{textContent: 'signIn'}"></button>
-                    </div>
+                <div class="button-ring">
+                    <button id="signInButton" class="signin-button" type="submit" data-win-res="{textContent: 'signIn'}"></button>                
+                    <progress id="progressRing" class="win-ring win-medium progress-ring"></progress>
+                    <a href="signup.html" class="signup-link" data-win-res="{textContent: 'signUp'}"></a>
                 </div>
             </div>
         </section>
