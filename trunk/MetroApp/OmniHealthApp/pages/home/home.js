@@ -13,15 +13,15 @@
     function initializeListView() {
         var user = AuthData.user;
         var sessionIds = AuthData.user.sessions;
+        var ses = [];
+        ses["date"] = "New session";
+        ses["image"] = "/images/add.png";
+        AuthData.sessions.push(ses);
 
-        if (AuthData.sessions.length == 0) {
+        if (AuthData.sessions.length == 1) {
             ClientServerInteraction.WinRT.ServerHelper.getSessions(sessionIds.slice(sessionIds.length - sessionsCount, sessionIds.length)).done(function (sessions) {
                 if (previousSessions)
                     previousSessions.splice(0, previousSessions.length);
-                var ses = [];
-                ses["date"] = "New session";
-                ses["image"] = "/images/add.png";
-                AuthData.sessions.push(ses);
                 for (var i = sessions.length - 1; i >= 0; i--) {
                     var session = sessions[i];
                     var newSession = [];
