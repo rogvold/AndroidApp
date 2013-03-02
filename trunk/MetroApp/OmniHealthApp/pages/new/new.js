@@ -13,12 +13,6 @@
 
 
     function sendSession() {
-        var intervalsList = [];
-        var devs = MeasurementData.getDevices();
-        for (var key in MeasurementData.getDevices()[0].data) {
-            var interval = MeasurementData.getDevices()[0].data[key].value;
-            intervalsList.push(interval);
-        }
         //var sessionData = new HrmMath.Data.SessionData(MeasurementData.getDevices()[0].description, intervalsList);
         //var filteredList = HrmMath.Util.Filter.filtrate(sessionData);
         //var filteredSessionData = new HrmMath.Data.SessionData(MeasurementData.getDevices()[0].description, filteredList);
@@ -29,8 +23,29 @@
         newSession.startTimestamp = MeasurementData.startTime;
         newSession.deviceId = MeasurementData.deviceId;
         newSession.deviceName = HeartRateMeasurement.idToName(MeasurementData.deviceId);
-        newSession.rates = intervalsList;
+        newSession.rates = MeasurementData.getMeasurements();
         newSession.userId = AuthData.user.idString;
+        var inputs = document.getElementsByTagName('input');
+
+        for (var i = 0; i < inputs.length; i++) {
+
+            if (inputs[i].getAttribute('name') == 'activity') {
+                if (inputs[i].checked) {
+                    if (inputs[i].getAttribute('id') == 'sleep') {
+                        newSession.activity = 1;
+                    }
+                    if (inputs[i].getAttribute('id') == 'rest') {
+                        newSession.activity = 2;
+                    }
+                    if (inputs[i].getAttribute('id') == 'work') {
+                        newSession.activity = 3;
+                    }
+                    if (inputs[i].getAttribute('id') == 'training') {
+                        newSession.activity = 4;
+                    }
+                }
+            }
+        }
         ClientServerInteraction.WinRT.ServerHelper.addSession(newSession, AuthData.user.idString).done(function (session) {
             AuthData.user.sessions.push(session.idString);
             var newArray = [];
@@ -41,9 +56,22 @@
                     newSession[key] = session[key];
             }
             newSession["date"] = timestampToDateString(newSession["startTimestamp"]);
+            if (session["activity"] == 1) {
+                newSession["image"] = "/images/sleep.png";
+            }
+            if (session["activity"] == 2) {
+                newSession["image"] = "/images/rest.png";
+            }
+            if (session["activity"] == 3) {
+                newSession["image"] = "/images/work.png";
+            }
+            if (session["activity"] == 4) {
+                newSession["image"] = "/images/training.png";
+            }
+            newArray.push(AuthData.sessions[0]);
             newArray.push(newSession);
             AuthData.sessions.pop();
-            for (var i = 0; i < AuthData.sessions.length; i++) {
+            for (var i = 1; i < AuthData.sessions.length; i++) {
                 newArray.push(AuthData.sessions[i]);
             }
             AuthData.sessions = newArray;
@@ -85,13 +113,11 @@
             listView.layout = new WinJS.UI.ListLayout();
             listView.oniteminvoked = this._itemInvoked.bind(this);
             listView.element.focus();
-            var dataChart = new Chart.renderer();
-            dataChart.plot("chartCanvasHRM", null);
         },
 
         _itemInvoked: function (args) {
             var id = availableDevices.getAt(args.detail.itemIndex).id;
-            document.getElementById('saveSession').addEventListener('click', sendSession);
+            document.getElementById('saveButton').addEventListener('click', sendSession);
             HeartRateMeasurement.initializeHeartRateDevicesAsync(id);
         }
     });

@@ -4,15 +4,7 @@
     var elem;
     var sessionsCount = 10;
 
-    var list = new WinJS.Binding.List();
-    var previousSessions = list.createSorted(function descendingCompare(first, second) {
-        if (first == second)
-            return 0;
-        else if (first < second)
-            return 1;
-        else
-            return -1;
-    });
+    var previousSessions = null;
 
     function createNewSession() {
         WinJS.Navigation.navigate("/pages/new/new.html");
@@ -24,7 +16,12 @@
 
         if (AuthData.sessions.length == 0) {
             ClientServerInteraction.WinRT.ServerHelper.getSessions(sessionIds.slice(sessionIds.length - sessionsCount, sessionIds.length)).done(function (sessions) {
-                previousSessions.splice(0, previousSessions.length);
+                if (previousSessions)
+                    previousSessions.splice(0, previousSessions.length);
+                var ses = [];
+                ses["date"] = "New session";
+                ses["image"] = "/images/add.png";
+                AuthData.sessions.push(ses);
                 for (var i = sessions.length - 1; i >= 0; i--) {
                     var session = sessions[i];
                     var newSession = [];
@@ -33,10 +30,22 @@
                         if (session[key] != null)
                             newSession[key] = session[key];
                     }
+                    if (session["activity"] == 1) {
+                        newSession["image"] = "/images/sleep.png";
+                    }
+                    if (session["activity"] == 2) {
+                        newSession["image"] = "/images/rest.png";
+                    }
+                    if (session["activity"] == 3) {
+                        newSession["image"] = "/images/work.png";
+                    }
+                    if (session["activity"] == 4) {
+                        newSession["image"] = "/images/training.png";
+                    }
                     newSession["date"] = timestampToDateString(newSession["startTimestamp"]);
-                    previousSessions.push(newSession);
                     AuthData.sessions.push(newSession);
                 }
+                previousSessions = new WinJS.Binding.List(AuthData.sessions);
                 var listView = elem.querySelector(".itemslist").winControl;
                 listView.itemDataSource = previousSessions.dataSource;
                 listView.itemTemplate = elem.querySelector(".itemtemplate");
@@ -45,10 +54,9 @@
                 listView.element.focus();
             });
         } else {
-            previousSessions.splice(0, previousSessions.length);
-            for (var i = 0; i < AuthData.sessions.length; i++) {
-                previousSessions.push(AuthData.sessions[i]);
-            }
+            if (previousSessions)
+                previousSessions.splice(0, previousSessions.length);
+            previousSessions = new WinJS.Binding.List(AuthData.sessions);
             var listView = elem.querySelector(".itemslist").winControl;
             listView.itemDataSource = previousSessions.dataSource;
             listView.itemTemplate = elem.querySelector(".itemtemplate");
@@ -59,8 +67,14 @@
     }
 
     function itemInvoked(args) {
-        var session = previousSessions.getAt(args.detail.itemIndex);
-        WinJS.Navigation.navigate("/pages/session/session.html", { session: session });
+        if (args.detail.itemIndex != 0) {
+            var session = previousSessions.getAt(args.detail.itemIndex);
+            WinJS.Navigation.navigate("/pages/session/session.html", { session: session });
+        }
+        else {
+            createNewSession();
+        }
+
     }
     
     function timestampToDateString(timestamp) {
@@ -71,7 +85,6 @@
     WinJS.UI.Pages.define("/pages/home/home.html", {
         ready: function (element, options) {
             WinJS.Resources.processAll();
-            document.getElementById('newSessionButton').onclick = createNewSession;
             elem = element;
             initializeListView();
         }

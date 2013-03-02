@@ -25,15 +25,15 @@
         </header>
         <div class="itemtemplate" data-win-control="WinJS.Binding.Template">
             <div class="item">
+                <img src="#" class="smallListIconTextItem-Image" data-win-bind="src: image" style="width: 200px; height: 200px"/>
                 <div class="item-overlay" style="height: 50px;">
                     <h4 class="item-title" data-win-bind="textContent: date"></h4>
                 </div>
             </div>
         </div>
         <section id="mainContent" aria-label="Main content" role="main">
-            <div style="width: 750px">
-                <div class="itemslist win-selectionstylefilled" aria-label="List of sessions"height: 500px;" data-win-control="WinJS.UI.ListView" data-win-options="{ selectionMode: 'none' }"></div>
-                <button id="newSessionButton" type="submit" data-win-res="{textContent: 'new'}"></button>
+            <div style="width: 1000px; height: 100%">
+                <div class="itemslist win-selectionstylefilled" style="height: 100%; position: relative; width: 100%; z-index: 0;" aria-label="List of sessions" data-win-control="WinJS.UI.ListView" data-win-options="{ selectionMode: 'none' }"></div>
             </div>
         </section>
     </div>

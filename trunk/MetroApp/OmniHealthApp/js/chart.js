@@ -19,10 +19,12 @@
         options.maxValue = Number.MIN_VALUE;
 
         if ((data !== null) && (data !== undefined)) {
-            for (var i in data) {
-                options.minValue = min(data[i].value, options.minValue);
-                options.maxValue = max(data[i].value, options.maxValue);
+            for (var i = 0; i < data.length; i++) {
+                options.minValue = min(data[i], options.minValue);
+                options.maxValue = max(data[i], options.maxValue);
             }
+            options.minValue = (options.minValue / 50 >> 0) * 50;
+            options.maxValue = ((options.maxValue / 50 >> 0) + 1) * 50;
         }
     };
 
@@ -98,11 +100,11 @@
                 var currentOffset = bufferWidth;
 
                 for (var i = data.length - pointsDisplayed, len = data.length; i < len; i++) {
-                    var currentDiff = this.options.maxValueBuffered - data[i].value;
+                    var currentDiff = this.options.maxValueBuffered - data[i];
                     var dataObj = {
                         offset_x: currentOffset,
                         offset_y: (currentDiff / valueDiff) * this.canvasElement.height,
-                        value: data[i].value
+                        value: data[i]
                     };
 
                     this.offsetMap.push(dataObj);
@@ -147,6 +149,8 @@
             this.canvasContext.fillStyle = lingrad;
             // draw shapes
             this.canvasContext.fillRect(0, 0, this.canvasElement.width, this.canvasElement.height);
+            this.canvasContext.strokeStyle = '#000000';
+            this.canvasContext.strokeRect(0, 0, this.canvasElement.width, this.canvasElement.height);
         },
 
         drawYaxis: function () {

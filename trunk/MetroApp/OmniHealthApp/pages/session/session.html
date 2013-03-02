@@ -12,6 +12,7 @@
 
     <link href="session.css" rel="stylesheet" />
     <script src="session.js"></script>
+    <script src="/js/chart.js"></script>
 </head>
 <body>
     <div class="session fragment">
@@ -22,7 +23,12 @@
             </h1>
         </header>
         <section aria-label="Main content" role="main">
-            
+            <div>
+				<canvas id="canvasRsai" style="width: 50px; height: 300px; border: 3px"></canvas>
+			</div>
+            <div>
+                <canvas id="chartCanvas" style="width: 750px; height: 300px; border: 3px"></canvas>
+            </div>
         </section>
     </div>
 </body>

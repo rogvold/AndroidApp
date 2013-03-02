@@ -10,6 +10,7 @@
     var endTime = null;
     var user = null;
     var deviceId = null;
+    var sessionTime = 5000;
 
     function getDeviceReadingsAsync() {
         try {
@@ -40,28 +41,13 @@
                 // Dispatch the retrieved measurement to update the application data and the associated view
                 for (var key in intervals) {
                     var interval = intervals[key];
-                    var measuredValue = {
-                        // Create a Date object from the numerical timestamp provided to us by the driver
-                        timestamp: new Date(currentTime),
-                        value: interval,
-                        rate: result.Rate,
-
-                        // Override the default toString function
-                        toString: function () {
-                            return this.value + ' bpm @ ' + this.intervals.join() + ' ' + this.timestamp;
-                        }
-                    };
                     currentTime += interval;
-                    MeasurementData.addValue(
-                        0,
-                        measuredValue);
+                    MeasurementData.addValue(interval);
                 }
                 // Query the driver for more data
                 getDeviceReadingsAsync();
-                var devs = MeasurementData.getDevices();
                 var dataChart = new Chart.renderer();
-                dataChart.plot("chartCanvasHRM", devs[0].data);
-                //document.getElementById("Hrm").textContent = devs[0].data[devs[0].data.length - 1];
+                dataChart.plot("chartCanvasHRM", MeasurementData.measurements);
             }
             else if (result.timestamp * 1000 < startTime) {
                 getDeviceReadingsAsync();
@@ -81,7 +67,7 @@
         // we use a Wpd Automation feature to set the complete function only once
         startTime = new Date().getTime();
         MeasurementData.startTime = startTime;
-        endTime = startTime + 10000;
+        endTime = startTime + sessionTime;
         currentTime = startTime;
         getDeviceReadingsAsync();
     }
@@ -91,6 +77,7 @@
         Windows.UI.WebUI.WebUIApplication.addEventListener('resuming', applicationActivated);
         deviceId = id;
         MeasurementData.deviceId = deviceId;
+        MeasurementData.measurements = [];
 
         // Initialize Heart Rate Devices
         try {
@@ -107,15 +94,8 @@
 
                 hrmService.onApplicationSuspendedComplete = function () { };
 
-                var devs = MeasurementData.getDevices();
-                var devId = 0;
-                devs[devId] = {
-                    devId: devId,
-                    description: id,
-                    data: []
-                };
                 var dataChart = new Chart.renderer();
-                dataChart.plot("chartCanvasHRM", devs[0].data);
+                dataChart.plot("chartCanvasHRM", null);
                 hrmService.onReadHeartRateMeasurementComplete = retrievedReading;
                 hrmInitialized = true;
                 startSession();
