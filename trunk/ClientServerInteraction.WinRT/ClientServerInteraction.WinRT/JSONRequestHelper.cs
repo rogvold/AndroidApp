@@ -11,7 +11,11 @@ namespace ClientServerInteraction.WinRT
 {
     public sealed class JSONRequestHelper
     {
-        private static readonly HttpClient Client = new HttpClient();
+        private static readonly HttpClient Client = new HttpClient()
+                                                        {
+                                                            Timeout = new TimeSpan(0, 0, 0, 5)
+                                                        };
+
 
         public static IAsyncOperation<string> SendRequest(string url, string json)
         {
