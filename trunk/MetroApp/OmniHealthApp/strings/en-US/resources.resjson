@@ -12,5 +12,6 @@
     "chooseDevice"          : "Choose device:",
     "tryAgain"              : "Try again",
     "notConnected"          : "No internet connection or server does not respond.",
-    "notExist"              : "User with specified e-mail and password does not exist."
+    "notExist"              : "User with specified e-mail and password does not exist.",
+    "enterEmail"            : "Enter your email"
 }
