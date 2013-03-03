@@ -5,12 +5,14 @@
 
     function authorization(email, password) {
         ClientServerInteraction.WinRT.ServerHelper.authorizeUser(email, password).done(function (user) {
-            if (user == null) {
-                //TODO: notify user about authorization fail
-                return WinJS.Navigation.navigate("/pages/error/error.html", {sender: WinJS.Navigation.location, error: Errors.exist});
+            if (user[0] == null && user[1] == null) {
+                return WinJS.Navigation.navigate("/pages/error/error.html", { sender: WinJS.Navigation.location, error: Errors.notExist });
             }
-            AuthData.user = user;
-            WinJS.Navigation.navigate(Application.navigator.home);
+            else if (user[0] == null && user[1] != null) {
+                return WinJS.Navigation.navigate("/pages/error/error.html", { sender: WinJS.Navigation.location, error: Errors.notConnected });
+            }
+            AuthData.user = user[0];
+            return WinJS.Navigation.navigate(Application.navigator.home);
         });
 
     }

@@ -10,7 +10,7 @@
     var endTime = null;
     var user = null;
     var deviceId = null;
-    var sessionTime = 5000;
+    var sessionTime = 120000;
 
     function getDeviceReadingsAsync() {
         try {
@@ -47,7 +47,7 @@
                 // Query the driver for more data
                 getDeviceReadingsAsync();
                 var dataChart = new Chart.renderer();
-                dataChart.plot("chartCanvasHRM", MeasurementData.measurements);
+                dataChart.plot("chartCanvasHRM", MeasurementData.getMeasurements());
             }
             else if (result.timestamp * 1000 < startTime) {
                 getDeviceReadingsAsync();

@@ -27,23 +27,7 @@
                     nav.history.current.initialPlaceholder = true;
                     return nav.navigate(nav.location, nav.state);
                 } else {
-                    try {
-                        var passwordVault = new Windows.Security.Credentials.PasswordVault();
-                        var appKey = "OmniHealthApp";
-                        var credential = passwordVault.retrieve(appKey, passwordVault.findAllByResource(appKey).getAt(0).userName);
-                        var username = credential.userName;
-                        var password = credential.password;
-                        ClientServerInteraction.WinRT.ServerHelper.authorizeUser(username, password).done(function (user) {
-                            if (user == null) {
-                                return nav.navigate("/pages/error/error.html", { sender: WinJS.Navigation.location, error: Errors.exist });
-                            }
-                            AuthData.user = user;
-                            return nav.navigate(Application.navigator.home);
-                        });
-                    }
-                    catch (ex) {
-                        return nav.navigate("/pages/auth/auth.html");
-                    }
+                    return nav.navigate(Application.navigator.home);
                 }
             }));
         }

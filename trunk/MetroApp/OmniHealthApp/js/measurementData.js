@@ -10,8 +10,13 @@
         measurements[measurements.length] = newValue;
     }
 
+    function getMeasurements() {
+        return measurements;
+    }
+
     WinJS.Namespace.define('MeasurementData', {
         measurements: measurements,
+        getMeasurements: getMeasurements,
         addValue: addValue,
         session: session,
         startTime: startTime,

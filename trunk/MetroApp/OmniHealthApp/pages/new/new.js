@@ -46,6 +46,7 @@
                 }
             }
         }
+        newSession.healthState = document.getElementsById('stateRating').userRating;
         ClientServerInteraction.WinRT.ServerHelper.addSession(newSession, AuthData.user.idString).done(function (session) {
             AuthData.user.sessions.push(session.idString);
             var newArray = [];
@@ -70,12 +71,11 @@
             }
             newArray.push(AuthData.sessions[0]);
             newArray.push(newSession);
-            AuthData.sessions.pop();
             for (var i = 1; i < AuthData.sessions.length; i++) {
                 newArray.push(AuthData.sessions[i]);
             }
             AuthData.sessions = newArray;
-            WinJS.Navigation.navigate("/pages/session/session.html", { session: newSession });
+            WinJS.Navigation.navigate("/pages/session/session.html", { sessionIndex: 1 });
         });
     }
 

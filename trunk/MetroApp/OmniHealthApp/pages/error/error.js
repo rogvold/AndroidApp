@@ -9,6 +9,10 @@
         ready: function (element, options) {
             // TODO: Инициализируйте страницу здесь.
             WinJS.Resources.processAll();
+            document.getElementById('errorText').textContent = WinJS.Resources.getString(options.error).value;
+            document.getElementById('tryAgain').addEventListener('click', function () {
+                WinJS.Navigation.navigate(options.sender);
+            });
         },
 
         unload: function () {

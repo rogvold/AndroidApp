@@ -20,13 +20,20 @@ namespace ClientServerInteraction.WinRT
 
         internal static async Task<string> SendRequestInternal(string url, string json)
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, url);
-            var array = Encoding.UTF8.GetBytes(json);
+            try
+            {
+                var request = new HttpRequestMessage(HttpMethod.Post, url);
+                var array = Encoding.UTF8.GetBytes(json);
 
-            var httpContent = new ByteArrayContent(array);
-            httpContent.Headers.ContentType = MediaTypeHeaderValue.Parse("text/json");
-            var response = await Client.PostAsync(request.RequestUri, httpContent);
-            return await response.Content.ReadAsStringAsync();
+                var httpContent = new ByteArrayContent(array);
+                httpContent.Headers.ContentType = MediaTypeHeaderValue.Parse("text/json");
+                var response = await Client.PostAsync(request.RequestUri, httpContent);
+                return await response.Content.ReadAsStringAsync();
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
     }
 }

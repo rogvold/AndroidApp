@@ -28,14 +28,19 @@ namespace ClientServerInteraction.WinRT
             }
         }
 
-        public static User DeserializeUser(string json)
+        public static IList<object> DeserializeUser(string json)
         {
             try
             {
-                return JsonConvert.DeserializeObject<User>(json);
-            } catch (Exception)
+                if (json == "\"fail\"")
+                {
+                    return new List<object> { null, null };
+                }
+                return new List<object> { JsonConvert.DeserializeObject<User>(json), null };
+            } 
+            catch (Exception e)
             {
-                return null;
+                return new List<object> {null, e};
             }
         }
 
@@ -49,13 +54,7 @@ namespace ClientServerInteraction.WinRT
 
         public static IList<Session> DeserializeSessionList(string json)
         {
-            try {
-                return JsonConvert.DeserializeObject<List<Session>>(json);
-            }
-            catch (Exception)
-            {
-                return null;
-            }
+            return JsonConvert.DeserializeObject<List<Session>>(json);
         }
 
         public static string SerializeRegistrationInfo(string email, string password, string username)

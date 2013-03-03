@@ -26,10 +26,10 @@
         // Эта функция вызывается каждый раз, когда пользователь переходит на данную страницу. Она
         // заполняет элементы страницы данными приложения.
         ready: function (element, options) {
-            session = options.session;
             document.getElementById('backButton').addEventListener('click', function (args) {
                 WinJS.Navigation.navigate("/pages/home/home.html");
             });
+            var session = AuthData.sessions[options.sessionIndex];
             drawRsai(session.rsai[0]);
             var dataChart = new Chart.renderer();
             dataChart.plot("chartCanvas", session.rates);

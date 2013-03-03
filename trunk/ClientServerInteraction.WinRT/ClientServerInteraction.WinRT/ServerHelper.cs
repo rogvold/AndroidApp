@@ -30,12 +30,12 @@ namespace ClientServerInteraction.WinRT
             return SerializationHelper.DeserializeRegistrationResponse(response);
         }
 
-        public static IAsyncOperation<User> AuthorizeUser(string email, string password)
+        public static IAsyncOperation<IList<object>> AuthorizeUser(string email, string password)
         {
             return AuthorizeUserInternal(email, password).AsAsyncOperation();
         }
 
-        internal static async Task<User> AuthorizeUserInternal(string email, string password)
+        internal static async Task<IList<object>> AuthorizeUserInternal(string email, string password)
         {
             var response = await JSONRequestHelper.SendRequest(ServerBase + Account + @"AuthorizeUser",
                                             SerializationHelper.SerializeAuthorizationInfo(email, password));
@@ -43,12 +43,12 @@ namespace ClientServerInteraction.WinRT
             return SerializationHelper.DeserializeUser(response);
         }
 
-        public static IAsyncOperation<User> GetUserInfo(string userId)
+        public static IAsyncOperation<IList<object>> GetUserInfo(string userId)
         {
             return GetUserInfoInternal(userId).AsAsyncOperation();
         }
 
-        internal static async Task<User> GetUserInfoInternal(string userId)
+        internal static async Task<IList<object>> GetUserInfoInternal(string userId)
         {
             var json = JsonConvert.SerializeObject(new
             {

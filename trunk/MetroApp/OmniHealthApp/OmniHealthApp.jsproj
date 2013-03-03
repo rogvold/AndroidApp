@@ -74,6 +74,9 @@
     <Content Include="pages\auth\auth.css" />
     <Content Include="pages\auth\auth.html" />
     <Content Include="pages\auth\auth.js" />
+    <Content Include="pages\blank\blank.css" />
+    <Content Include="pages\blank\blank.html" />
+    <Content Include="pages\blank\blank.js" />
     <Content Include="pages\error\error.css" />
     <Content Include="pages\error\error.html" />
     <Content Include="pages\error\error.js" />

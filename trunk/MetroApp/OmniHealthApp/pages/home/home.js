@@ -13,15 +13,21 @@
     function initializeListView() {
         var user = AuthData.user;
         var sessionIds = AuthData.user.sessions;
-        var ses = [];
-        ses["date"] = "New session";
-        ses["image"] = "/images/add.png";
-        AuthData.sessions.push(ses);
 
-        if (AuthData.sessions.length == 1) {
-            ClientServerInteraction.WinRT.ServerHelper.getSessions(sessionIds.slice(sessionIds.length - sessionsCount, sessionIds.length)).done(function (sessions) {
+        if (AuthData.sessions.length == 0) {
+            var request;
+            if (sessionIds.length < sessionsCount) {
+                request = sessionIds;
+            } else {
+                request = sessionIds.slice(sessionIds.length - sessionsCount, sessionIds.length);
+            }
+            ClientServerInteraction.WinRT.ServerHelper.getSessions(request).done(function (sessions) {
                 if (previousSessions)
                     previousSessions.splice(0, previousSessions.length);
+                var ses = [];
+                ses["date"] = "New session";
+                ses["image"] = "/images/add.png";
+                AuthData.sessions.push(ses);
                 for (var i = sessions.length - 1; i >= 0; i--) {
                     var session = sessions[i];
                     var newSession = [];
@@ -69,7 +75,7 @@
     function itemInvoked(args) {
         if (args.detail.itemIndex != 0) {
             var session = previousSessions.getAt(args.detail.itemIndex);
-            WinJS.Navigation.navigate("/pages/session/session.html", { session: session });
+            WinJS.Navigation.navigate("/pages/session/session.html", { sessionIndex: args.detail.itemIndex });
         }
         else {
             createNewSession();
