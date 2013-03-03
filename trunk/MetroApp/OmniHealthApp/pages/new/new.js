@@ -95,6 +95,7 @@
         ready: function (element, options) {
             // TODO: Инициализируйте страницу здесь.
             WinJS.UI.processAll();
+            WinJS.Resources.processAll();
             availableDevices.splice(0, availableDevices.length);
             Windows.Devices.Enumeration.DeviceInformation.findAllAsync("System.Devices.InterfaceClassGuid:=\"{0000180D-0000-1000-8000-00805f9b34fb}\"", null).
             done(function (devices) {

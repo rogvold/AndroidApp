@@ -1,3 +1,29 @@
-﻿.new section[role=main] {
-    margin-left: 120px;
+﻿.select-device-area{
+    width: 400px; 
+    height: 250px
+}
+
+.select-device-string{
+    width: 145px; 
+    height: 50px; 
+    float: left;
+}
+
+.itemslist{
+    width: 250px; 
+    border: solid 2px rgba(0, 0, 0, 0.13); 
+    height: 250px; 
+    float: right;
+}
+
+div#rsai{
+    width: 145px; 
+    height: 50px; 
+    float: left; 
+    margin-top: 150px;
+}
+
+canvas#chartCanvasHRM{
+    width: 750px;
+    height: 350px;
 }

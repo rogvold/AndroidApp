@@ -9,6 +9,7 @@
     "homePage"              : "Your home page",
     "error"                 : "Error",
     "signUp"                : "Not registered yet?",
+    "chooseDevice"          : "Choose device:",
     "tryAgain"              : "Try again",
     "notConnected"          : "No internet connection or server does not respond.",
     "notExist"              : "User with specified e-mail and password does not exist."

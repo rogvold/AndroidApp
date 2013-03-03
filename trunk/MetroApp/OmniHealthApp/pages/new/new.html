@@ -10,6 +10,7 @@
     <script src="//Microsoft.WinJS.1.0/js/base.js"></script>
     <script src="//Microsoft.WinJS.1.0/js/ui.js"></script>
 
+    <link href="../../css/default.css" rel="stylesheet">
     <link href="new.css" rel="stylesheet" />
     <script src="new.js"></script>
     <script src="/js/measurement.js"></script>
@@ -18,13 +19,20 @@
     <script src="/js/chart.js"></script>
 </head>
 <body>
-    <div class="new fragment">
-        <header id="header" aria-label="Header content" role="banner">
-            <button class="win-backbutton" aria-label="Back" disabled type="button"></button>
-            <h1 class="titlearea win-type-ellipsis" style="margin-left: 0px; margin-right: 120px;">
-                <span class="pagetitle" data-win-res="{textContent: 'welcome'}"></span>
-            </h1>
-        </header>
+    <div class="fragment frame">
+        <div class="header">
+            <div class="left-button-div">
+                <button class="win-backbutton" aria-label="Back" type="button"></button>
+            </div>
+            <header id="header" aria-label="Header content">
+                <h1 class="titlearea win-type-ellipsis">
+                    <span data-win-res="{textContent: 'new'}"></span>
+                </h1>
+            </header>
+            <div class="right-button-div">
+                <button class="win-backbutton" aria-label="Back" disabled type="button"></button>
+            </div>
+        </div>
         <div class="itemtemplate" data-win-control="WinJS.Binding.Template">
             <div class="item">
                 <div class="item-overlay" style="height: 50px;">
@@ -32,20 +40,16 @@
                 </div>
             </div>
         </div>
-        <section id="mainContent" aria-label="Main content" role="main">
-            <div style="width: 750px">
-                <div style="width: 400px; height: 250px">
-                    <div style="width: 145px; height: 50px; float: left;">
-                        <span data-win-res="{textContent: 'chooseDevice'}">Choose device:</span>
-                    </div>
-                    <div class="itemslist win-selectionstylefilled" aria-label="List of devices" style="width: 250px; border: solid 2px rgba(0, 0, 0, 0.13); height: 250px; float: right" data-win-control="WinJS.UI.ListView" data-win-options="{ selectionMode: 'none' }"></div>
-                	<div id="rsai" style="width: 145px; height: 50px; float: left; margin-top: 150px"><span id="connectedDeviceName"></span></div>
+        <section id="mainContent" aria-label="Main content">
+            <div class="select-device-area">
+                <div class="select-device-string">
+                    <span data-win-res="{textContent: 'chooseDevice'}"></span>
                 </div>
-                <div style="width: 750px; height: 350px">
-                    <canvas id="chartCanvasHRM" style="width: 750px; height: 350px;">
-                    </canvas>
-                </div>
+                <div class="itemslist win-selectionstylefilled" aria-label="List of devices" data-win-control="WinJS.UI.ListView" data-win-options="{ selectionMode: 'none' }"></div>
+                <div id="rsai"><span id="connectedDeviceName"></span></div>
             </div>
+            <canvas id="chartCanvasHRM">
+            </canvas>
         </section>
     </div>
     <div id="saveSession" data-win-control="WinJS.UI.SettingsFlyout" aria-label="New session Flyout"

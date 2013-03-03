@@ -3,7 +3,7 @@
     border-top:0px solid;
 }
 
-.header{ height: 10%; }
+.header{ height: 10%; width: 100%;}
 
 header{	
     width: 80%;
@@ -17,6 +17,11 @@ div.left-button-div{
     float: left;
 }
 
+.win-backbutton{
+    margin-left: 35%;
+    margin-top: 16%;
+}
+
 div.right-button-div{
     width: 10%;
     height: 100%;
@@ -26,7 +31,7 @@ div.right-button-div{
 section{  
     float: left;
     width: 100%;
-    height: 86%;
+    height: 90%;
 }
 
 .my-back-button{
@@ -37,7 +42,7 @@ section{
 
 .frame{
     width: 100%;
-    height: 100%;
+    height: 96%;
     border-top:1px solid;
     padding-top: 2%;
 }
@@ -46,4 +51,12 @@ section{
     width: auto; 
     float: left;
     height: 100%;
+}
+
+.my-cross-button::before {
+    font-family: "Segoe UI Symbol";
+    font-weight: normal;
+    content: "\E10A";
+    vertical-align: 50%;
+    font-size: 20pt;
 }
