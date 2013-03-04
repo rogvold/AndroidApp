@@ -66,7 +66,6 @@
                 listView.itemTemplate = elem.querySelector(".itemtemplate");
                 listView.oniteminvoked = itemInvoked;;
                 listView.layout = new WinJS.UI.GridLayout();
-                listView.element.focus();
             });
         } else {
             if (previousSessions)
@@ -77,7 +76,6 @@
             listView.itemTemplate = elem.querySelector(".itemtemplate");
             listView.oniteminvoked = itemInvoked;;
             listView.layout = new WinJS.UI.GridLayout();
-            listView.element.focus();
         }
     }
 

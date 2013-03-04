@@ -108,6 +108,9 @@
 
         ready: function (element, options) {
             // TODO: Инициализируйте страницу здесь.
+            document.getElementById('backButton').addEventListener('click', function (args) {
+                WinJS.Navigation.navigate("/pages/home/home.html");
+            });
             WinJS.Resources.processAll();
             Windows.Devices.Enumeration.DeviceInformation.findAllAsync("System.Devices.InterfaceClassGuid:=\"{0000180D-0000-1000-8000-00805f9b34fb}\"", null).
             done(function (devices) {
@@ -121,12 +124,11 @@
                     }
                 }
                 availableDevices = new WinJS.Binding.List(devs);
-                var listView = element.querySelector(".itemslist").winControl;
+                var listView = element.querySelector(".devicelist").winControl;
                 listView.itemDataSource = availableDevices.dataSource;
                 listView.itemTemplate = element.querySelector(".itemtemplate");
                 listView.layout = new WinJS.UI.ListLayout();
                 listView.oniteminvoked = deviceSelected;
-                listView.element.focus();
             });
         }
     });

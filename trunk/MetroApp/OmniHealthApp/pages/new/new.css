@@ -1,4 +1,4 @@
-﻿.select-device-area{
+﻿select-device-area{
     width: 400px; 
     height: 250px
 }
@@ -9,7 +9,7 @@
     float: left;
 }
 
-.itemslist{
+.devicelist{
     width: 250px; 
     border: solid 2px rgba(0, 0, 0, 0.13); 
     height: 250px; 
