@@ -1,60 +1,20 @@
-﻿.session section[role=main] {
-    margin-left: 120px;
+﻿div.rsai-area{
+    width: auto;
+    height: 50%;
+}
+div.chart-area{
+    width: auto;
+    height: 50%;
 }
 
-.DivChart
-{
-        margin-top:10px;	
-	margin-left: 10px; 
-	width: 550px; 
-        overflow:hidden;
-}
-.ChartDetail{
-       height:300px;
-       width:550px;
-       display:inline-block;
-       overflow:hidden;
-}
-.DivPlotArea{
-	width: 0px;
-	height: 0px;
-	top: 320px;
-	left: 52px;
-	position: absolute;
-	padding: 0px; 
+canvas#rsaiCanvas{
+    width: auto; 
+    height: 100%; 
+    border: 3px;
 }
 
-.DivChartWhole{
-	height: 150px; 
-        width: 550px; 
-        display: inline-block;
-}
-
-.handleDivDrag{
-	background-image: url(../sampleImages/divbg.png);
-	width: 0px;
-	height: 0px;
-	top: 0px;
-	left: 0px;
-	position: absolute;
-	margin: 0px;
-
-}
-
-.handleBarOffRight{
-	background-image: url(../sampleImages/handle.png);
-	background-position: center;
-	background-repeat: no-repeat;
-	margin: 0 -6px;
-}
-
-.handleBarOffLeft{
-	background-image: url(../sampleImages/handle.png);
-	background-position: center;
-	background-repeat: no-repeat;
-	margin: 0 -6px;
-}
-
-@media screen and (-webkit-min-device-pixel-ratio:0) {
-.ui-resizable-handle {background-image:none !important;}
+canvas#chartCanvas{
+    width: 750px; 
+    height: 100%; 
+    border: 3px
 }

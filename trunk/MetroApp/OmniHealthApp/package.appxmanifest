@@ -17,7 +17,7 @@
     <Application Id="OmniHealth.App" StartPage="default.html">
       <VisualElements DisplayName="Omni Health" Logo="images\logo.png" SmallLogo="images\smalllogo.png" Description="OmniHealthApp" ForegroundText="light" BackgroundColor="#48D1CC">
         <DefaultTile ShowName="allLogos" />
-        <SplashScreen Image="images\splashscreen.png" />
+        <SplashScreen Image="images\splashscreen2.png" BackgroundColor="#48D1CC" />
         <InitialRotationPreference>
           <Rotation Preference="landscape" />
           <Rotation Preference="landscapeFlipped" />

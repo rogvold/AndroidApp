@@ -28,6 +28,13 @@ div.right-button-div{
     float: left;
 }
 
+.my-logout-button {
+    float: right;
+    margin-right: 50%;
+    margin-top: 13%;
+}
+
+
 section{  
     float: left;
     width: 100%;

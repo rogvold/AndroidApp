@@ -118,6 +118,7 @@
     <Content Include="amcharts\thirdPartySoftwareList.txt" />
     <Content Include="css\default.css" />
     <Content Include="images\add.png" />
+    <Content Include="images\splashscreen2.png" />
     <Content Include="images\logo.png" />
     <Content Include="images\rest.png" />
     <Content Include="images\sleep.png" />
