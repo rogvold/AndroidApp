@@ -21,7 +21,7 @@
         canvasContext.strokeStyle = '#000000';
         canvasContext.strokeRect(0, 0, canvasElement.width, canvasElement.height);*/
         var opts = {
-            lines: 11, // The number of lines to draw
+            lines: 12, // The number of lines to draw
             angle: 0.09, // The length of each line
             lineWidth: 0.33, // The line thickness
             pointer: {
