@@ -2,14 +2,7 @@
     "use strict";
 
     var list = new WinJS.Binding.List();
-    var availableDevices = list.createSorted(function descendingCompare(first, second) {
-        if (first == second)
-            return 0;
-        else if (first < second)
-            return 1;
-        else
-            return -1;
-    });
+    var availableDevices = null;
 
 
     function sendSession() {
@@ -23,7 +16,9 @@
         newSession.startTimestamp = MeasurementData.startTime;
         newSession.deviceId = MeasurementData.deviceId;
         newSession.deviceName = HeartRateMeasurement.idToName(MeasurementData.deviceId);
-        newSession.rates = MeasurementData.getMeasurements();
+        var measurements = MeasurementData.getMeasurements();
+        newSession.rates = measurements.rates;
+        newSession.intervals = measurements.intervals;
         newSession.userId = AuthData.user.idString;
         var inputs = document.getElementsByTagName('input');
 
@@ -46,7 +41,7 @@
                 }
             }
         }
-        newSession.healthState = document.getElementsById('stateRating').userRating;
+        newSession.healthState = document.getElementById('stateRating').userRating;
         ClientServerInteraction.WinRT.ServerHelper.addSession(newSession, AuthData.user.idString).done(function (session) {
             AuthData.user.sessions.push(session.idString);
             var newArray = [];
@@ -69,6 +64,19 @@
             if (session["activity"] == 4) {
                 newSession["image"] = "/images/training.png";
             }
+            var timestamps = [];
+            var intervals = [];
+            var rates = [];
+            var startTimestamp = session["startTimestamp"];
+            for (var j = 0; j < session.intervals.length; j++) {
+                timestamps.push(startTimestamp);
+                intervals.push(session.intervals[j]);
+                rates.push(session.rates[j]);
+                startTimestamp += session.intervals[j];
+            }
+            newSession["timestamps"] = timestamps;
+            newSession["intervals"] = intervals;
+            newSession["rates"] = rates;
             newArray.push(AuthData.sessions[0]);
             newArray.push(newSession);
             for (var i = 1; i < AuthData.sessions.length; i++) {
@@ -88,38 +96,38 @@
         return new Date().getTime();
     }
 
+    function deviceSelected (args) {
+        var id = availableDevices.getAt(args.detail.itemIndex).id;
+        document.getElementById('saveButton').addEventListener('click', sendSession);
+        HeartRateMeasurement.initializeHeartRateDevicesAsync(id);
+    }
+
     WinJS.UI.Pages.define("/pages/new/new.html", {
         // Эта функция вызывается каждый раз, когда пользователь переходит на данную страницу. Она
         // заполняет элементы страницы данными приложения.
 
         ready: function (element, options) {
             // TODO: Инициализируйте страницу здесь.
-            WinJS.UI.processAll();
             WinJS.Resources.processAll();
-            availableDevices.splice(0, availableDevices.length);
             Windows.Devices.Enumeration.DeviceInformation.findAllAsync("System.Devices.InterfaceClassGuid:=\"{0000180D-0000-1000-8000-00805f9b34fb}\"", null).
             done(function (devices) {
+                var devs = [];
                 for (var i = 0; i < devices.length; i++) {
                     if (i % 2 == 0) {
-                        availableDevices.push({
+                        devs.push({
                             name: HeartRateMeasurement.idToName(devices[i].id),
                             id: devices[i].id
                         });
                     }
                 }
+                availableDevices = new WinJS.Binding.List(devs);
+                var listView = element.querySelector(".itemslist").winControl;
+                listView.itemDataSource = availableDevices.dataSource;
+                listView.itemTemplate = element.querySelector(".itemtemplate");
+                listView.layout = new WinJS.UI.ListLayout();
+                listView.oniteminvoked = deviceSelected;
+                listView.element.focus();
             });
-            var listView = element.querySelector(".itemslist").winControl;
-            listView.itemDataSource = availableDevices.dataSource;
-            listView.itemTemplate = element.querySelector(".itemtemplate");
-            listView.layout = new WinJS.UI.ListLayout();
-            listView.oniteminvoked = this._itemInvoked.bind(this);
-            listView.element.focus();
-        },
-
-        _itemInvoked: function (args) {
-            var id = availableDevices.getAt(args.detail.itemIndex).id;
-            document.getElementById('saveButton').addEventListener('click', sendSession);
-            HeartRateMeasurement.initializeHeartRateDevicesAsync(id);
         }
     });
 })();

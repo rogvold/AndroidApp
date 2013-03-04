@@ -17,6 +17,7 @@
     <script src="/js/measurementData.js"></script>
     <script src="/js/authData.js"></script>
     <script src="/js/chart.js"></script>
+    <script src="/amcharts/amcharts/amcharts.js"></script>
 </head>
 <body>
     <div class="fragment frame">
@@ -48,8 +49,8 @@
                 <div class="itemslist win-selectionstylefilled" aria-label="List of devices" data-win-control="WinJS.UI.ListView" data-win-options="{ selectionMode: 'none' }"></div>
                 <div id="rsai"><span id="connectedDeviceName"></span></div>
             </div>
-            <canvas id="chartCanvasHRM">
-            </canvas>
+            <div id="chartCanvasHRM" style="width: 100%; height: 340px;">
+            </div>
         </section>
     </div>
     <div id="saveSession" data-win-control="WinJS.UI.SettingsFlyout" aria-label="New session Flyout"
@@ -73,7 +74,7 @@
                     <div id="stateRating" data-win-control="WinJS.UI.Rating"></div>
                 </div>
                 <div>
-                    <button id="saveButton" data-win-res="{textContent: save}" type="submit">Save</button>
+                    <button id="saveButton" data-win-res="{textContent: 'save'}" type="submit">Save</button>
                 </div>
             </div>
         </div>

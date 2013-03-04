@@ -10,7 +10,8 @@
     var endTime = null;
     var user = null;
     var deviceId = null;
-    var sessionTime = 120000;
+    var sessionTime = 5000;
+    var chart;
 
     function getDeviceReadingsAsync() {
         try {
@@ -41,13 +42,19 @@
                 // Dispatch the retrieved measurement to update the application data and the associated view
                 for (var key in intervals) {
                     var interval = intervals[key];
+                    MeasurementData.addValue({
+                        interval: interval,
+                        rate: result.Rate,
+                        timestamp: currentTime
+                    });
+
+                    chart.updateChartData({ timestamps: [currentTime], intervals: [interval] });
                     currentTime += interval;
-                    MeasurementData.addValue(interval);
                 }
                 // Query the driver for more data
                 getDeviceReadingsAsync();
-                var dataChart = new Chart.renderer();
-                dataChart.plot("chartCanvasHRM", MeasurementData.getMeasurements());
+                /*var dataChart = new Chart.renderer();
+                dataChart.plot("chartCanvasHRM", MeasurementData.getMeasurements());*/
             }
             else if (result.timestamp * 1000 < startTime) {
                 getDeviceReadingsAsync();
@@ -55,7 +62,7 @@
             else if (currentTime > endTime) {
                 finishSession();
             }
-            
+
         } catch (exception) {
 
         }
@@ -94,10 +101,12 @@
 
                 hrmService.onApplicationSuspendedComplete = function () { };
 
-                var dataChart = new Chart.renderer();
-                dataChart.plot("chartCanvasHRM", null);
+                /*var dataChart = new Chart.renderer();
+                dataChart.plot("chartCanvasHRM", null);*/
                 hrmService.onReadHeartRateMeasurementComplete = retrievedReading;
                 hrmInitialized = true;
+                chart = new Chart.renderer();
+                chart.draw('chartCanvasHRM');
                 startSession();
             }, function (errorCode) {
 

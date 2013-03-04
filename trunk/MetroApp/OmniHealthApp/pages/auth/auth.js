@@ -28,11 +28,6 @@
         }
     }
 
-    function authReset() {
-        document.getElementById("loginField").value = "";
-        document.getElementById("passwordField").value = "";
-    }
-
     WinJS.UI.Pages.define("/pages/auth/auth.html", {
         // Эта функция вызывается каждый раз, когда пользователь переходит на данную страницу. Она
         // заполняет элементы страницы данными приложения.
@@ -43,8 +38,9 @@
             //var tmp1 = tmp.evaluate(new HrmMath.Evaluation.HRV.RSAI());
             //TODO: check if user idString already exist and redirect to the next page  
             WinJS.Resources.processAll();
+            document.getElementById('backButton').disabled = true;
+            document.getElementById("progressRing").style.visibility = "hidden";
             document.getElementById('signInButton').onclick = authSubmit;
-            document.getElementById('cancelButton').onclick = authReset;
         }
     });
 })();

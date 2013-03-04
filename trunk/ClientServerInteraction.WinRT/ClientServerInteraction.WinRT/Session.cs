@@ -49,6 +49,8 @@ namespace ClientServerInteraction.WinRT
 
         public string DeviceName { get; set; }
 
+        public IList<int> Intervals { get; set; }
+
         public IList<int> Rates { get; set; }
 
         public int Activity { get; set; }

@@ -14,5 +14,6 @@
     "notConnected"          : "No internet connection or server does not respond.",
     "notExist"              : "User with specified e-mail and password does not exist.",
     "placeholderEmail"      : "Enter your email",
-    "placeholderPwd"        : "Enter your password" 
+    "placeholderPwd"        : "Enter your password",
+    "save"                  : "Save"
 }

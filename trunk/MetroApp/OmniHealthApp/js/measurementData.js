@@ -1,13 +1,15 @@
 ﻿(function () {
     'use strict';
 
-    var measurements = [];
+    var measurements = { intervals: [], rates: [], timestamps: [] };
     var session = null;
     var startTime;
     var deviceId;
 
     function addValue(newValue) {
-        measurements[measurements.length] = newValue;
+        measurements.intervals[measurements.intervals.length] = newValue.interval;
+        measurements.rates[measurements.rates.length] = newValue.rate;
+        measurements.timestamps[measurements.timestamps.length] = newValue.timestamp;
     }
 
     function getMeasurements() {
@@ -15,7 +17,6 @@
     }
 
     WinJS.Namespace.define('MeasurementData', {
-        measurements: measurements,
         getMeasurements: getMeasurements,
         addValue: addValue,
         session: session,

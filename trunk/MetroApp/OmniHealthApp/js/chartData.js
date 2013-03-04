@@ -1,0 +1,1 @@
+﻿var sessionData = { rates: [0, 1, 2, 3], intervals: [0, 1, 2, 3], timestamps: [0, 1, 2, 3]};

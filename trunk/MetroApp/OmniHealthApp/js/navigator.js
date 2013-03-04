@@ -23,7 +23,7 @@
 
                 Application.navigator = this;
             }, {
-                home: "",
+                home: "/pages/blank/blank.html",
                 /// <field domElement="true" />
                 _element: null,
                 _lastNavigationPromise: WinJS.Promise.as(),

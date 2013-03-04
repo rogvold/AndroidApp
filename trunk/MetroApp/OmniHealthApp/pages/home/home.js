@@ -6,10 +6,6 @@
 
     var previousSessions = null;
 
-    function createNewSession() {
-        WinJS.Navigation.navigate("/pages/new/new.html");
-    }
-
     function initializeListView() {
         var user = AuthData.user;
         var sessionIds = AuthData.user.sessions;
@@ -49,6 +45,19 @@
                         newSession["image"] = "/images/training.png";
                     }
                     newSession["date"] = timestampToDateString(newSession["startTimestamp"]);
+                    var timestamps = [];
+                    var intervals = [];
+                    var rates = [];
+                    var startTimestamp = session["startTimestamp"];
+                    for (var j = 0; j < session.intervals.length; j++) {
+                        timestamps.push(startTimestamp);
+                        intervals.push(session.intervals[j]);
+                        rates.push(session.rates[j]);
+                        startTimestamp += session.intervals[j];
+                    }
+                    newSession["timestamps"] = timestamps;
+                    newSession["intervals"] = intervals;
+                    newSession["rates"] = rates;
                     AuthData.sessions.push(newSession);
                 }
                 previousSessions = new WinJS.Binding.List(AuthData.sessions);
@@ -78,7 +87,7 @@
             WinJS.Navigation.navigate("/pages/session/session.html", { sessionIndex: args.detail.itemIndex });
         }
         else {
-            createNewSession();
+            WinJS.Navigation.navigate("/pages/new/new.html");
         }
 
     }
@@ -88,9 +97,18 @@
         return date.toLocaleDateString() + " " + date.toLocaleTimeString();
     }
 
+    function logout() {
+        var passwordVault = new Windows.Security.Credentials.PasswordVault();
+        var appKey = "OmniHealthApp";
+        var credential = passwordVault.retrieve(appKey, passwordVault.findAllByResource(appKey).getAt(0).userName);
+        passwordVault.remove(credential);
+        WinJS.Navigation.navigate("/pages/auth/auth.html")
+    }
+
     WinJS.UI.Pages.define("/pages/home/home.html", {
         ready: function (element, options) {
             WinJS.Resources.processAll();
+            document.getElementById("logoutButton").onclick = logout;
             elem = element;
             initializeListView();
         }

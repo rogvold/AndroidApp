@@ -10,6 +10,7 @@
             try {
                 var passwordVault = new Windows.Security.Credentials.PasswordVault();
                 var appKey = "OmniHealthApp";
+                //passwordVault.add(new Windows.Security.Credentials.PasswordCredential(appKey, "pogr.yuo@gmail.com", "02034242"));
                 var credential = passwordVault.retrieve(appKey, passwordVault.findAllByResource(appKey).getAt(0).userName);
                 var username = credential.userName;
                 var password = credential.password;
@@ -21,11 +22,17 @@
                         return WinJS.Navigation.navigate("/pages/error/error.html", { sender: WinJS.Navigation.location, error: Errors.notConnected });
                     }
                     AuthData.user = user[0];
-                    return WinJS.Navigation.navigate("/pages/home/home.html");
+                    return setTimeout(function () {
+
+                        WinJS.Navigation.navigate("/pages/home/home.html", null);
+                    }, 0);
                 });
             }
             catch (ex) {
-                return WinJS.Navigation.navigate("/pages/auth/auth.html");
+                return setTimeout(function () {
+
+                    WinJS.Navigation.navigate("/pages/auth/auth.html", null);
+                }, 0);
             }
         },
 
