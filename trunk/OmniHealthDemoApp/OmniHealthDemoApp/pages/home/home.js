@@ -186,7 +186,9 @@
     WinJS.UI.Pages.define("/pages/home/home.html", {
         ready: function (element, options) {
             WinJS.Resources.processAll();
+            WinJS.UI.processAll();
             document.getElementById("logoutButton").onclick = logout;
+            var tmp = document.getElementById("session-unit");
             elem = element;
             var listView = document.getElementById("session-list").winControl;
             var tmpData = new WinJS.Binding.List(data);
