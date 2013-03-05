@@ -134,6 +134,7 @@
     <Content Include="js\measurement.js" />
     <Content Include="js\measurementData.js" />
     <Content Include="js\navigator.js" />
+    <Content Include="js\tempData.js" />
     <Content Include="pages\auth\auth.css" />
     <Content Include="pages\auth\auth.html" />
     <Content Include="pages\auth\auth.js" />

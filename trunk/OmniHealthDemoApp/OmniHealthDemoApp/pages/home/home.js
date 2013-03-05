@@ -75,7 +75,7 @@
                 var listView = elem.querySelector(".itemslist").winControl;
                 listView.itemDataSource = previousSessions.dataSource;
                 listView.itemTemplate = elem.querySelector(".itemtemplate");
-                listView.oniteminvoked = itemInvoked;;
+                listView.oniteminvoked = itemInvoked;
                 listView.layout = new WinJS.UI.GridLayout();
             });
         } else {
@@ -85,7 +85,7 @@
             var listView = elem.querySelector(".itemslist").winControl;
             listView.itemDataSource = previousSessions.dataSource;
             listView.itemTemplate = elem.querySelector(".itemtemplate");
-            listView.oniteminvoked = itemInvoked;;
+            listView.oniteminvoked = itemInvoked;
             listView.layout = new WinJS.UI.GridLayout();
         }
     }
@@ -188,7 +188,13 @@
             WinJS.Resources.processAll();
             document.getElementById("logoutButton").onclick = logout;
             elem = element;
-            initializeListView();
+            var listView = elem.querySelector(".itemslist").winControl;
+            var tmpData = new WinJS.Binding.List(data);
+            listView.itemDataSource = tmpData.dataSource;
+            listView.itemTemplate = elem.querySelector(".itemtemplate");
+            listView.oniteminvoked = itemInvoked;;
+            listView.layout = new WinJS.UI.GridLayout();
+            //initializeListView();
         }
     });
 })();
