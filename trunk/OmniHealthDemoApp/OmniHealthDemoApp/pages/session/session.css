@@ -1,0 +1,20 @@
+﻿div.rsai-area{
+    width: auto;
+    height: 50%;
+}
+div.chart-area{
+    width: auto;
+    height: 50%;
+}
+
+canvas#rsaiCanvas{
+    width: auto; 
+    height: 100%; 
+    border: 3px;
+}
+
+canvas#chartCanvas{
+    width: 750px; 
+    height: 100%; 
+    border: 3px
+}

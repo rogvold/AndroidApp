@@ -64,10 +64,12 @@
                     newSession["rates"] = rates;
                     AuthData.sessions.push(newSession);
                 }
-                var moreSes = [];
-                moreSes["date"] = "Load more...";
-                moreSes["image"] = "/images/add.png";
-                AuthData.sessions.push(moreSes);
+                if (canLoadMore) {
+                    var moreSes = [];
+                    moreSes["date"] = "Load more...";
+                    moreSes["image"] = "/images/add.png";
+                    AuthData.sessions.push(moreSes);
+                }
 
                 previousSessions = new WinJS.Binding.List(AuthData.sessions);
                 var listView = elem.querySelector(".itemslist").winControl;
@@ -89,15 +91,15 @@
     }
 
     function itemInvoked(args) {
-        if (args.detail.itemIndex != 0 && args.detail.itemIndex != AuthData.sessions.length - 1) {
-            var session = previousSessions.getAt(args.detail.itemIndex);
-            WinJS.Navigation.navigate("/pages/session/session.html", { sessionIndex: args.detail.itemIndex });
-        }
-        else if (args.detail.itemIndex == AuthData.sessions.length - 1) {
+        if (AuthData.sessions[args.detail.itemIndex].date == "Load more...") {
             loadMoreSessions();
         }
-        else if (args.detail.itemIndex == 0) {
+        else if (AuthData.sessions[args.detail.itemIndex].date == "New session") {
             WinJS.Navigation.navigate("/pages/new/new.html");
+        }
+        else {
+            var session = previousSessions.getAt(args.detail.itemIndex);
+            WinJS.Navigation.navigate("/pages/session/session.html", { sessionIndex: args.detail.itemIndex });
         }
     }
 

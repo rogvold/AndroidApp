@@ -1,0 +1,19 @@
+﻿
+{
+    "username"              : "Username:",
+    "password"              : "Password:",
+    "cancel"                : "Cancel",
+    "signIn"                : "Sign in",
+    "welcome"               : "Welcome!",
+    "new"                   : "New record",
+    "homePage"              : "Your home page",
+    "error"                 : "Error",
+    "signUp"                : "Not registered yet?",
+    "chooseDevice"          : "Choose device:",
+    "tryAgain"              : "Try again",
+    "notConnected"          : "No internet connection or server does not respond.",
+    "notExist"              : "User with specified e-mail and password does not exist.",
+    "placeholderEmail"      : "Enter your email",
+    "placeholderPwd"        : "Enter your password",
+    "save"                  : "Save"
+}

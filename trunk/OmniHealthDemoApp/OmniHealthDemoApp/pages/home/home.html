@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <title>home</title>
+
+    <!-- Ссылки WinJS -->
+    <link href="//Microsoft.WinJS.1.0/css/ui-light.css" rel="stylesheet" />
+    <script src="//Microsoft.WinJS.1.0/js/base.js"></script>
+    <script src="//Microsoft.WinJS.1.0/js/ui.js"></script>
+
+    <link href="../../css/default.css" rel="stylesheet" />
+    <link href="home.css" rel="stylesheet" />
+
+    <script src="home.js"></script>
+    <script src="/js/measurement.js"></script>
+    <script src="/js/measurementData.js"></script>
+    <script src="/js/authData.js"></script>
+</head>
+<body>
+    <div class="itemtemplate" data-win-control="WinJS.Binding.Template">
+        <div class="item">
+            <img src="#" class="smallListIconTextItem-Image" data-win-bind="src: image" style="width: 100%; height: 100%" />
+            <div class="item-overlay" style="height: 50px;">
+                <h4 class="item-title" data-win-bind="textContent: date"></h4>
+            </div>
+        </div>
+    </div>
+    <div class="frame fragment">
+        <div class="header">
+            <div class="left-button-div">
+                <button class="win-backbutton my-back-button" disabled aria-label="Back" type="button"></button>
+            </div>
+            <header id="header" aria-label="Header content">
+                <h1 class="titlearea win-type-ellipsis">
+                    <span class="" data-win-res="{textContent: 'homePage'}"></span>
+                </h1>
+            </header>
+            <div class="right-button-div">
+                <button id="logoutButton" class="win-backbutton my-cross-button" aria-label="Back" type="button"></button>
+            </div>
+        </div>
+        <section id="mainContent" aria-label="Main content">
+            <div class="itemslist win-selectionstylefilled" aria-label="List of sessions" data-win-control="WinJS.UI.ListView" data-win-options="{ selectionMode: 'none' }">
+            </div>
+        </section>
+    </div>
+</body>
+</html>
