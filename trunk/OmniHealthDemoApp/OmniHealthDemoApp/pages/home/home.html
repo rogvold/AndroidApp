@@ -12,6 +12,7 @@
 
     <link href="../../css/metrouicssmaster/modern.css" rel="stylesheet">
     <link href="../../css/metrouicssmaster/modern-responsive.css" rel="stylesheet">
+    <!--<link href="../../css/metrouicssmaster/theme-dark.css" rel="stylesheet">-->
 
     <link href="../../css/default.css" rel="stylesheet" />
     <link href="home.css" rel="stylesheet" />
@@ -28,20 +29,19 @@
     -->
 </head>
 <body class="metrouicss">
-    <div class="itemtemplate tile-group" data-win-control="WinJS.Binding.Template">
-        <div class="tile bg-color-blueDark outline-color-lightBlue">
-            <b class="check"></b>
+    <div id="session-unit" data-win-control="WinJS.Binding.Template">
+        <div class="tile bg-color-blue outline-color-yellow">
             <div class="tile-content">
-                <img src="#" class="smallListIconTextItem-Image" data-win-bind="src: image" style="width: 100%; height: 100%" />
-                
+                <img src="#" data-win-bind="src: image" style="width: 100%; height: 100%" />
+
             </div>
             <div class="brand">
-                <span class="name" data-win-bind="textContent: date"></span>
+                <span class="name" data-win-bind="textContent: title"></span>
             </div>
         </div>
     </div>
     <div class="frame fragment">
-        <div class="header">
+        <div class="my-header">
             <div class="left-button-div">
                 <button class="win-backbutton my-back-button" disabled aria-label="Back" type="button"></button>
             </div>
@@ -55,7 +55,7 @@
             </div>
         </div>
         <section id="mainContent" aria-label="Main content">
-            <div class="itemslist win-selectionstylefilled" aria-label="List of sessions" data-win-control="WinJS.UI.ListView" data-win-options="{ selectionMode: 'none' }">
+            <div id="session-list" aria-label="List of sessions" data-win-control="WinJS.UI.ListView" data-win-options="{ selectionMode: 'none' }">
             </div>
         </section>
     </div>

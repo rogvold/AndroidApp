@@ -167,12 +167,6 @@
     <Content Include="pages\new\new.css" />
     <Content Include="pages\new\new.html" />
     <Content Include="pages\new\new.js" />
-    <Content Include="pages\save\save.css" />
-    <Content Include="pages\save\save.html" />
-    <Content Include="pages\save\save.js" />
-    <Content Include="pages\sessions\sessions.css" />
-    <Content Include="pages\sessions\sessions.html" />
-    <Content Include="pages\sessions\sessions.js" />
     <Content Include="pages\session\session.css" />
     <Content Include="pages\session\session.html" />
     <Content Include="pages\session\session.js" />

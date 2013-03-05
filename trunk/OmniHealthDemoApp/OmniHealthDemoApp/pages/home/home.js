@@ -188,11 +188,11 @@
             WinJS.Resources.processAll();
             document.getElementById("logoutButton").onclick = logout;
             elem = element;
-            var listView = elem.querySelector(".itemslist").winControl;
+            var listView = document.getElementById("session-list").winControl;
             var tmpData = new WinJS.Binding.List(data);
             listView.itemDataSource = tmpData.dataSource;
-            listView.itemTemplate = elem.querySelector(".itemtemplate");
-            listView.oniteminvoked = itemInvoked;;
+            listView.itemTemplate = document.getElementById("session-unit");
+            listView.oniteminvoked = itemInvoked;
             listView.layout = new WinJS.UI.GridLayout();
             //initializeListView();
         }
