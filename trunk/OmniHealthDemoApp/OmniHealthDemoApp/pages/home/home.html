@@ -10,6 +10,9 @@
     <script src="//Microsoft.WinJS.1.0/js/base.js"></script>
     <script src="//Microsoft.WinJS.1.0/js/ui.js"></script>
 
+    <link href="../../css/metrouicssmaster/modern.css" rel="stylesheet">
+    <link href="../../css/metrouicssmaster/modern-responsive.css" rel="stylesheet">
+
     <link href="../../css/default.css" rel="stylesheet" />
     <link href="home.css" rel="stylesheet" />
 
@@ -18,13 +21,22 @@
     <script src="/js/measurementData.js"></script>
     <script src="/js/authData.js"></script>
     <script src="/js/tempData.js"></script>
+
+    <!--<script src="../../js/metrouicssmaster/tile-slider.js"></script>
+    <script src="../../js/metrouicssmaster/start-menu.js"></script>
+    <script src="../../js/metrouicssmaster/tile-drag.js"></script>
+    -->
 </head>
-<body>
-    <div class="itemtemplate" data-win-control="WinJS.Binding.Template">
-        <div class="item">
-            <img src="#" class="smallListIconTextItem-Image" data-win-bind="src: image" style="width: 100%; height: 100%" />
-            <div class="item-overlay" style="height: 50px;">
-                <h4 class="item-title" data-win-bind="textContent: date"></h4>
+<body class="metrouicss">
+    <div class="itemtemplate tile-group" data-win-control="WinJS.Binding.Template">
+        <div class="tile bg-color-blueDark outline-color-lightBlue">
+            <b class="check"></b>
+            <div class="tile-content">
+                <img src="#" class="smallListIconTextItem-Image" data-win-bind="src: image" style="width: 100%; height: 100%" />
+                
+            </div>
+            <div class="brand">
+                <span class="name" data-win-bind="textContent: date"></span>
             </div>
         </div>
     </div>
