@@ -10,7 +10,7 @@
     var endTime = null;
     var user = null;
     var deviceId = null;
-    var sessionTime = 120000;
+    var sessionTime = 5000;
     var chart;
     var timer;
 
@@ -44,8 +44,14 @@
         }, 1000);
     }
 
-    function initializeHeartRateDevicesAsync(id) {
-        deviceId = id;
+    function initializeHeartRateDevicesAsync(device) {
+        document.getElementById('backButton').style.visibility = "hidden";
+        document.getElementById('chooseDeviceLabel').style.visibility = "hidden";
+        document.getElementById('deviceNameLabel').style.visibility = "visible";
+        document.getElementById('deviceNameLabel').textContent = WinJS.Resources.getString('connected').value + " " + device.name + "!";
+        //document.getElementById('saveButton').disabled = true;
+        document.getElementById('deviceList').style.visibility = "hidden";
+        deviceId = device.id;
         MeasurementData.deviceId = deviceId;
         MeasurementData.measurements = [];
         chart = new Chart.renderer();

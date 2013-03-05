@@ -22,6 +22,7 @@
                 this.chartData = [];
             }
             this.chart = new AmCharts.AmSerialChart();
+            this.chart.fontFamily = "Segoe UI";
             this.chart.pathToImages = "/amcharts/amcharts/images/";
             this.chart.autoMarginOffset = 3;
             this.chart.marginRight = 15;
@@ -64,7 +65,7 @@
             // CURSOR
             var chartCursor = new AmCharts.ChartCursor();
             chartCursor.cursorPosition = "mouse";
-            chartCursor.categoryBalloonDateFormat = "JJ:NN, DD MMMM";
+            chartCursor.categoryBalloonDateFormat = "JJ:NN:SS, DD MMMM";
             this.chart.addChartCursor(chartCursor);
 
             // SCROLLBAR

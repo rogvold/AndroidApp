@@ -44,9 +44,12 @@
         <section id="mainContent" aria-label="Main content">
             <div class="select-device-area">
                 <div class="select-device-string">
-                    <span data-win-res="{textContent: 'chooseDevice'}"></span>
+                    <span id="chooseDeviceLabel" data-win-res="{textContent: 'chooseDevice'}"></span>
                 </div>
-                <div class="devicelist win-selectionstylefilled" aria-label="List of devices" data-win-control="WinJS.UI.ListView" data-win-options="{ selectionMode: 'none' }"></div>
+                <div>
+                    <span id="deviceNameLabel"></span>
+                </div>
+                <div id="deviceList" class="devicelist win-selectionstylefilled" aria-label="List of devices" data-win-control="WinJS.UI.ListView" data-win-options="{ selectionMode: 'none' }"></div>
             </div>
             <div id="chartCanvasHRM" style="width: 100%; height: 340px;">
             </div>

@@ -1,6 +1,4 @@
-﻿// Основные сведения о шаблоне навигации см. в следующей документации:
-// http://go.microsoft.com/fwlink/?LinkId=232506
-(function () {
+﻿(function () {
     "use strict";
 
     WinJS.Binding.optimizeBindingReferences = true;
@@ -12,11 +10,9 @@
     app.addEventListener("activated", function (args) {
         if (args.detail.kind === activation.ActivationKind.launch) {
             if (args.detail.previousExecutionState !== activation.ApplicationExecutionState.terminated) {
-                // TODO: Это приложение было вновь запущено. Инициализируйте
-                // приложение здесь.
+                
             } else {
-                // TODO: Это приложение вновь активировано после приостановки.
-                // Восстановите состояние приложения здесь.
+                
             }
 
             if (app.sessionState.history) {
@@ -34,10 +30,6 @@
     });
 
     app.oncheckpoint = function (args) {
-        // TODO: Это приложение будет приостановлено. Сохраните все состояния,
-        // которые должны сохраняться во время приостановки. Если необходимо 
-        // завершить асинхронную операцию, прежде чем приложение 
-        // будет приостановлено, вызовите args.setPromise().
         app.sessionState.history = nav.history;
     };
 

@@ -4,14 +4,7 @@
     var list = new WinJS.Binding.List();
     var availableDevices = null;
 
-
     function sendSession() {
-        //var sessionData = new HrmMath.Data.SessionData(MeasurementData.getDevices()[0].description, intervalsList);
-        //var filteredList = HrmMath.Util.Filter.filtrate(sessionData);
-        //var filteredSessionData = new HrmMath.Data.SessionData(MeasurementData.getDevices()[0].description, filteredList);
-
-        //var rsai = filteredSessionData.evaluate(new HrmMath.Evaluation.HRV.RSAI());
-        //document.getElementById('rsai').textContent = rsai[0] + ' ' + rsai[1];
         var newSession = new ClientServerInteraction.WinRT.Session();
         newSession.startTimestamp = MeasurementData.startTime;
         newSession.deviceId = MeasurementData.deviceId;
@@ -41,7 +34,7 @@
                 }
             }
         }
-        newSession.healthState = document.getElementById('stateRating').userRating;
+        newSession.healthState = document.getElementById('stateRating').winControl.userRating;
         ClientServerInteraction.WinRT.ServerHelper.addSession(newSession, AuthData.user.idString).done(function (session) {
             AuthData.user.sessions.push(session.idString);
             var newArray = [];
@@ -97,9 +90,27 @@
     }
 
     function deviceSelected(args) {
-        var id = availableDevices.getAt(args.detail.itemIndex).id;
         document.getElementById('saveButton').addEventListener('click', sendSession);
-        HeartRateMeasurement.initializeHeartRateDevicesAsync(id);
+        HeartRateMeasurement.initializeHeartRateDevicesAsync(availableDevices.getAt(args.detail.itemIndex));
+    }
+
+    function selectionChanged () {
+        var stateSelected = false;
+        var activitySelected = false;
+        var activities = document.getElementsByName('activity');
+
+        for (var i = 0; i < activities.length; i++) {
+            if (activities.item(i).checked) {
+                activitySelected = true;
+            }
+        }
+
+        if (document.getElementById('stateRating').winControl.userRating > 0) {
+            stateSelected = true;
+        }
+        if (stateSelected && activitySelected) {
+            document.getElementById('saveButton').disabled = false;
+        }
     }
 
     WinJS.UI.Pages.define("/pages/new/new.html", {
@@ -108,6 +119,42 @@
 
         ready: function (element, options) {
             // TODO: Инициализируйте страницу здесь.
+            document.getElementById('backButton').style.visibility = "visible";
+            document.getElementById('chooseDeviceLabel').style.visibility = "visible";
+            document.getElementById('deviceNameLabel').style.visibility = "hidden";
+            document.getElementById('saveButton').addEventListener('click', sendSession);
+            document.getElementById('saveButton').disabled = true;
+            document.getElementById('deviceList').style.visibility = "visible";
+
+            //var inputs = document.getElementsByTagName('input');
+            var activities = document.getElementsByName('activity');
+
+            for (var i = 0; i < activities.length; i++) {
+                activities.item(i).addEventListener('change', selectionChanged);
+            }
+
+            document.getElementById('stateRating').addEventListener('change', selectionChanged);
+
+            /*for (var i = 0; i < inputs.length; i++) {
+
+                if (inputs[i].getAttribute('name') == 'activity') {
+                    if (inputs[i].checked) {
+                        if (inputs[i].getAttribute('id') == 'sleep') {
+                            newSession.activity = 1;
+                        }
+                        if (inputs[i].getAttribute('id') == 'rest') {
+                            newSession.activity = 2;
+                        }
+                        if (inputs[i].getAttribute('id') == 'work') {
+                            newSession.activity = 3;
+                        }
+                        if (inputs[i].getAttribute('id') == 'training') {
+                            newSession.activity = 4;
+                        }
+                    }
+                }
+            }*/
+
             document.getElementById('backButton').addEventListener('click', function (args) {
                 WinJS.Navigation.navigate("/pages/home/home.html");
             });

@@ -1,6 +1,4 @@
-﻿// Сведения о локализации приложений Windows см. по адресу: http://go.microsoft.com/fwlink/?LinkId=212836
-
-{
+﻿{
     "username"              : "Имя пользователя:",
     "password"              : "Пароль:",
     "cancel"                : "Отмена",
@@ -16,5 +14,6 @@
     "notExist"              : "Пользователь с указанными e-mail и паролем не существует.",
     "placeholderEmail"      : "Введите Ваш email",
     "placeholderPwd"        : "Введите Ваш пароль",
-    "save"                  : "Сохранить"
+    "save"                  : "Сохранить",
+    "connected"             : "Успешно подключено к"
 }

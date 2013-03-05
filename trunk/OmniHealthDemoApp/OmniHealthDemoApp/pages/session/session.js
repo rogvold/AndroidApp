@@ -19,9 +19,9 @@
         };
         var target = document.getElementById('rsaiCanvas'); // your canvas element
         var gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
-        gauge.maxValue = 10; // set max gauge value
+        gauge.maxValue = 11; // set max gauge value
         gauge.animationSpeed = 32; // set animation speed (32 is default value)
-        gauge.set(value); // set actual value
+        gauge.set(value + 1); // set actual value
     }
 
     WinJS.UI.Pages.define("/pages/session/session.html", {
