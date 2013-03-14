@@ -12,6 +12,8 @@
                 return WinJS.Navigation.navigate("/pages/error/error.html", { sender: WinJS.Navigation.location, error: Errors.notConnected });
             }
             AuthData.user = user[0];
+            var passwordVault = new Windows.Security.Credentials.PasswordVault();
+            passwordVault.add(new Windows.Security.Credentials.PasswordCredential(appKey, email, password));
             return WinJS.Navigation.navigate(Application.navigator.home);
         });
 
@@ -21,25 +23,28 @@
         document.getElementById("progressRing").style.visibility = "visible";
         var email = document.getElementById("loginField").value;
         var password = document.getElementById("passwordField").value;
-        var passwordVault = new Windows.Security.Credentials.PasswordVault();
-        if (password != null && password != "" && email != null && email != "") { //TODO: bad syntax in "if" body. Notify user about empty fields
-            passwordVault.add(new Windows.Security.Credentials.PasswordCredential(appKey, email, password));
-            authorization(email, password);
+        authorization(email, password);
+    }
+
+    function checkData(args) {
+        var email = document.getElementById("loginField").value;
+        var password = document.getElementById("passwordField").value;
+        if (password != null && password != "" && email != null && email != "") {
+            document.getElementById("signInButton").disabled = false;
+        }
+        else {
+            document.getElementById("signInButton").disabled = true;
         }
     }
 
     WinJS.UI.Pages.define("/pages/auth/auth.html", {
-        // Эта функция вызывается каждый раз, когда пользователь переходит на данную страницу. Она
-        // заполняет элементы страницы данными приложения.
-
         ready: function (element, options) {
-            // TODO: Инициализируйте страницу здесь.
-            //var tmp = new HrmMath.Data.SessionData();
-            //var tmp1 = tmp.evaluate(new HrmMath.Evaluation.HRV.RSAI());
-            //TODO: check if user idString already exist and redirect to the next page  
             WinJS.Resources.processAll();
             document.getElementById('backButton').disabled = true;
+            document.getElementById("signInButton").disabled = true;
             document.getElementById("progressRing").style.visibility = "hidden";
+            document.getElementById("loginField").onkeyup = checkData;
+            document.getElementById("passwordField").onkeyup = checkData;
             document.getElementById('signInButton').onclick = authSubmit;
         }
     });

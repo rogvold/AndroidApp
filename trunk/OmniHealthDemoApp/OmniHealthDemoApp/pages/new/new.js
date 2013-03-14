@@ -37,46 +37,7 @@
         newSession.healthState = document.getElementById('stateRating').winControl.userRating;
         ClientServerInteraction.WinRT.ServerHelper.addSession(newSession, AuthData.user.idString).done(function (session) {
             AuthData.user.sessions.push(session.idString);
-            var newArray = [];
-            var newSession = [];
-            session.info = "info";
-            for (var key in session) {
-                if (session[key] != null)
-                    newSession[key] = session[key];
-            }
-            newSession["date"] = timestampToDateString(newSession["startTimestamp"]);
-            if (session["activity"] == 1) {
-                newSession["image"] = "/images/sleep.png";
-            }
-            if (session["activity"] == 2) {
-                newSession["image"] = "/images/rest.png";
-            }
-            if (session["activity"] == 3) {
-                newSession["image"] = "/images/work.png";
-            }
-            if (session["activity"] == 4) {
-                newSession["image"] = "/images/training.png";
-            }
-            var timestamps = [];
-            var intervals = [];
-            var rates = [];
-            var startTimestamp = session["startTimestamp"];
-            for (var j = 0; j < session.intervals.length; j++) {
-                timestamps.push(startTimestamp);
-                intervals.push(session.intervals[j]);
-                rates.push(session.rates[j]);
-                startTimestamp += session.intervals[j];
-            }
-            newSession["timestamps"] = timestamps;
-            newSession["intervals"] = intervals;
-            newSession["rates"] = rates;
-            newArray.push(AuthData.sessions[0]);
-            newArray.push(newSession);
-            for (var i = 1; i < AuthData.sessions.length; i++) {
-                newArray.push(AuthData.sessions[i]);
-            }
-            AuthData.sessions = newArray;
-            WinJS.Navigation.navigate("/pages/session/session.html", { sessionIndex: 1 });
+            WinJS.Navigation.navigate("/pages/session/session.html", { session: session });
         });
     }
 

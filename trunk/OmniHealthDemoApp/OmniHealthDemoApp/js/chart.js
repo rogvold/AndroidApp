@@ -7,9 +7,20 @@
 
         // generate some random data, quite different range
         updateChartData: function (data) {
-            for (var i = 0; i < data.timestamps.length; i++) {
+            var timestamps;
+            if (data.timestamps) {
+                timestamps = data.timestamps;
+            } else {
+                timestamps = [];
+                var startTimestamp = data.startTimestamp;
+                for (var j = 0; j < data.intervals.length; j++) {
+                    timestamps.push(startTimestamp);
+                    startTimestamp += data.intervals[j];
+                }
+            }
+            for (var i = 0; i < timestamps.length; i++) {
                 this.chartData.push({
-                    date: data.timestamps[i],
+                    date: timestamps[i],
                     visits: data.intervals[i]
                 });
             }

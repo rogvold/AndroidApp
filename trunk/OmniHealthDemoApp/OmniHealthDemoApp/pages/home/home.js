@@ -1,105 +1,66 @@
 ﻿(function () {
     "use strict";
 
-    var elem;
-    var sessionsCount = 10;
+    var sessionsCount = 20;
     var loadedSessionsCount;
     var canLoadMore = false;
 
     var previousSessions = null;
 
-    function initializeListView() {
+    function initializeList() {
         var user = AuthData.user;
         var sessionIds = AuthData.user.sessions;
 
-        if (AuthData.sessions.length == 0) {
-            var request;
-            if (sessionIds.length < sessionsCount) {
-                request = sessionIds;
-            } else {
-                request = sessionIds.slice(sessionIds.length - sessionsCount, sessionIds.length);
-                canLoadMore = true;
-            }
-            ClientServerInteraction.WinRT.ServerHelper.getSessions(request).done(function (sessions) {
-                loadedSessionsCount = sessions.length;
-                if (previousSessions)
-                    previousSessions.splice(0, previousSessions.length);
-                var newSes = [];
-                newSes["date"] = "New session";
-                newSes["image"] = "/images/add.png";
-                AuthData.sessions.push(newSes);
-                for (var i = sessions.length - 1; i >= 0; i--) {
-                    var session = sessions[i];
-                    var newSession = [];
-                    session['info'] = "info";
-                    for (var key in session) {
-                        if (session[key] != null)
-                            newSession[key] = session[key];
-                    }
-                    if (session["activity"] == 1) {
-                        newSession["image"] = "/images/sleep.png";
-                    }
-                    if (session["activity"] == 2) {
-                        newSession["image"] = "/images/rest.png";
-                    }
-                    if (session["activity"] == 3) {
-                        newSession["image"] = "/images/work.png";
-                    }
-                    if (session["activity"] == 4) {
-                        newSession["image"] = "/images/training.png";
-                    }
-                    newSession["date"] = timestampToDateString(newSession["startTimestamp"]);
-                    var timestamps = [];
-                    var intervals = [];
-                    var rates = [];
-                    var startTimestamp = session["startTimestamp"];
-                    for (var j = 0; j < session.intervals.length; j++) {
-                        timestamps.push(startTimestamp);
-                        intervals.push(session.intervals[j]);
-                        rates.push(session.rates[j]);
-                        startTimestamp += session.intervals[j];
-                    }
-                    newSession["timestamps"] = timestamps;
-                    newSession["intervals"] = intervals;
-                    newSession["rates"] = rates;
-                    AuthData.sessions.push(newSession);
-                }
-                if (canLoadMore) {
-                    var moreSes = [];
-                    moreSes["date"] = "Load more...";
-                    moreSes["image"] = "/images/add.png";
-                    AuthData.sessions.push(moreSes);
-                }
-
-                previousSessions = new WinJS.Binding.List(AuthData.sessions);
-                var listView = document.getElementById("session-list").winControl;
-                listView.itemDataSource = previousSessions.dataSource;
-                listView.itemTemplate = document.getElementById("session-unit");
-                listView.oniteminvoked = itemInvoked;
-                listView.layout = new WinJS.UI.GridLayout();
-            });
+        var request;
+        if (sessionIds.length < sessionsCount) {
+            request = sessionIds;
         } else {
+            request = sessionIds.slice(sessionIds.length - sessionsCount, sessionIds.length);
+            canLoadMore = true;
+        }
+        ClientServerInteraction.WinRT.ServerHelper.getSessions(request).done(function (sessions) {
+            loadedSessionsCount = sessions.length;
             if (previousSessions)
                 previousSessions.splice(0, previousSessions.length);
-            previousSessions = new WinJS.Binding.List(AuthData.sessions);
-            var listView = elem.querySelector(".itemslist").winControl;
-            listView.itemDataSource = previousSessions.dataSource;
-            listView.itemTemplate = elem.querySelector(".itemtemplate");
-            listView.oniteminvoked = itemInvoked;
-            listView.layout = new WinJS.UI.GridLayout();
-        }
+            Homepage.pushChild({ image: "/images/add.png", text: "New session", id: "new" });
+            for (var i = sessions.length - 1; i >= 0; i--) {
+                var image;
+                if (sessions[i]["activity"] == 1) {
+                    image = "/images/sleep.png";
+                }
+                if (sessions[i]["activity"] == 2) {
+                    image = "/images/rest.png";
+                }
+                if (sessions[i]["activity"] == 3) {
+                    image = "/images/work.png";
+                }
+                if (sessions[i]["activity"] == 4) {
+                    image = "/images/training.png";
+                }
+                Homepage.pushChild({ image: image, text: timestampToDateString(sessions[i].startTimestamp), id: sessions[i].idString });
+                AuthData.sessions.push(sessions[i]);
+            }
+            if (canLoadMore) {
+                Homepage.pushChild({ image: "/images/add.png", text: "Load more...", id: "load" });
+            }
+        });
     }
 
     function itemInvoked(args) {
-        if (AuthData.sessions[args.detail.itemIndex].date == "Load more...") {
+        if (args.currentTarget.id == "load") {
             loadMoreSessions();
         }
-        else if (AuthData.sessions[args.detail.itemIndex].date == "New session") {
+        else if (args.currentTarget.id == "new") {
             WinJS.Navigation.navigate("/pages/new/new.html");
         }
         else {
-            var session = previousSessions.getAt(args.detail.itemIndex);
-            WinJS.Navigation.navigate("/pages/session/session.html", { sessionIndex: args.detail.itemIndex });
+            var sessionId = args.currentTarget.id;
+            var session;
+            for (var key in AuthData.sessions) {
+                if (AuthData.sessions[key].idString = sessionId)
+                    session = AuthData.sessions[key];
+            }
+            WinJS.Navigation.navigate("/pages/session/session.html", { session: session });
         }
     }
 
@@ -113,63 +74,32 @@
             canLoadMore = true;
             request = sessionIds.slice(sessionIds.length - sessionsCount, sessionIds.length);
         }
-        AuthData.sessions.pop();
-        previousSessions.pop();
         ClientServerInteraction.WinRT.ServerHelper.getSessions(request).done(function (sessions) {
+            Homepage.popChild();
             loadedSessionsCount += sessions.length;
             for (var i = sessions.length - 1; i >= 0; i--) {
-                var session = sessions[i];
-                var newSession = [];
-                session['info'] = "info";
-                for (var key in session) {
-                    if (session[key] != null)
-                        newSession[key] = session[key];
+                var image;
+                if (sessions[i]["activity"] == 1) {
+                    image = "/images/sleep.png";
                 }
-                if (session["activity"] == 1) {
-                    newSession["image"] = "/images/sleep.png";
+                if (sessions[i]["activity"] == 2) {
+                    image = "/images/rest.png";
                 }
-                if (session["activity"] == 2) {
-                    newSession["image"] = "/images/rest.png";
+                if (sessions[i]["activity"] == 3) {
+                    image = "/images/work.png";
                 }
-                if (session["activity"] == 3) {
-                    newSession["image"] = "/images/work.png";
+                if (sessions[i]["activity"] == 4) {
+                    image = "/images/training.png";
                 }
-                if (session["activity"] == 4) {
-                    newSession["image"] = "/images/training.png";
-                }
-                newSession["date"] = timestampToDateString(newSession["startTimestamp"]);
-                var timestamps = [];
-                var intervals = [];
-                var rates = [];
-                var startTimestamp = session["startTimestamp"];
-                for (var j = 0; j < session.intervals.length; j++) {
-                    timestamps.push(startTimestamp);
-                    intervals.push(session.intervals[j]);
-                    rates.push(session.rates[j]);
-                    startTimestamp += session.intervals[j];
-                }
-                newSession["timestamps"] = timestamps;
-                newSession["intervals"] = intervals;
-                newSession["rates"] = rates;
-                previousSessions.push(newSession);
-                AuthData.sessions.push(newSession);
+                Homepage.pushChild({ image: image, text: timestampToDateString(sessions[i].startTimestamp), id: sessions[i].idString });
+                AuthData.sessions.push(sessions[i]);
             }
             if (canLoadMore) {
-                var moreSes = [];
-                moreSes["date"] = "Load more...";
-                moreSes["image"] = "/images/add.png";
-                previousSessions.push(moreSes);
-                AuthData.sessions.push(moreSes);
+                Homepage.pushChild({ image: "/images/add.png", text: "Load more...", id: "load" });
             }
-
-            var listView = elem.querySelector(".itemslist").winControl;
-            listView.itemDataSource = previousSessions.dataSource;
-            listView.itemTemplate = elem.querySelector(".itemtemplate");
-            listView.oniteminvoked = itemInvoked;;
-            listView.layout = new WinJS.UI.GridLayout();
         });
     }
-    
+
     function timestampToDateString(timestamp) {
         var date = new Date(timestamp);
         return date.toLocaleDateString() + " " + date.toLocaleTimeString();
@@ -182,35 +112,41 @@
         passwordVault.remove(credential);
         WinJS.Navigation.navigate("/pages/auth/auth.html");
     }
-    
-    function createChild() {
-        var sessionsList = document.getElementById("session-list");
-        var newItem = document.createElement('div');
-        newItem.className = "tile double image bg-color-blue outline-color-yellow";
-        var content = document.createElement('div');
-        content.className = "tile-content";
-        var image = document.createElement('img');
-        image.src = "/images/splashscreen2.png";
-        content.appendChild(image);
-        var brand = document.createElement('div');
-        brand.className = "brand";
-        var name = document.createElement('span');
-        name.className = "name";
-        name.textContent = "24.08.1992 15:05";
-        name.id = "bla";
-        brand.appendChild(name);
-        newItem.appendChild(content);
-        newItem.appendChild(brand);
-        sessionsList.appendChild(newItem);
-    }
+
+    WinJS.Namespace.define("Homepage", {
+        pushChild: function (args) {
+            var sessionsList = document.getElementById("session-list");
+            var newItem = document.createElement('div');
+            newItem.className = "tile double image bg-color-blue outline-color-yellow";
+            var content = document.createElement('div');
+            content.className = "tile-content";
+            var image = document.createElement('img');
+            image.src = args.image;
+            content.appendChild(image);
+            var brand = document.createElement('div');
+            brand.className = "brand";
+            var name = document.createElement('span');
+            name.className = "name";
+            name.textContent = args.text;
+            brand.appendChild(name);
+            newItem.appendChild(content);
+            newItem.appendChild(brand);
+            newItem.id = args.id;
+            newItem.onclick = itemInvoked;
+            sessionsList.appendChild(newItem);
+        },
+        popChild: function () {
+            var sessionsList = document.getElementById("session-list");
+            sessionsList.removeChild(sessionsList.lastChild);
+        }
+    });
 
     WinJS.UI.Pages.define("/pages/home/home.html", {
         ready: function (element, options) {
             WinJS.Resources.processAll();
             WinJS.UI.processAll();
             document.getElementById("logoutButton").onclick = logout;
-            for (var j = 0; j < 40; j++)
-                createChild();
+            initializeList();
         }
     });
 })();
