@@ -4869,11 +4869,14 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
 .metrouicss .tile-group {
   margin: 0;
   margin-right: 80px;
+  margin-left:80px;
   float: left;
+  height: 700px;
   width: auto;
-  height: 350px;
   min-height: 1px;
-  width: auto;
+  display: -ms-flexbox;
+  -ms-flex-flow: row wrap;
+  -ms-writing-mode: tb-lr;
 }
 .metrouicss .tile {
   display: block;
@@ -4894,6 +4897,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-smooth: always;
   margin: 0 10px 10px 0;
   overflow: hidden;
+  -ms-writing-mode: lr-bt;
 }
 .metrouicss .tile * {
   color: #ffffff;
