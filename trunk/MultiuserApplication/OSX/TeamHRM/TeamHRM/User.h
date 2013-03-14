@@ -13,7 +13,12 @@
 
 @property (strong) NSString *password;
 @property (strong) NSString *username;
+
+@property NSInteger *userId;
+@property NSInteger *currentSessionId;
 @property (strong) CBPeripheral *connectedPeripheral;
+@property (strong) NSString *deviceName;
+@property (strong) NSString *deviceId;
 @property (strong) NSString *heartRate;
 // RR intervals
 @property (strong) NSMutableArray *RRs;

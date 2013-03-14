@@ -7,6 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FA65400716F0A90E009FF002 /* DataBaseInteraction.m in Sources */ = {isa = PBXBuildFile; fileRef = FA65400616F0A90E009FF002 /* DataBaseInteraction.m */; };
+		FAD02E2F16F081C7009FC45B /* libsqlite3.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = FAD02E2E16F081C7009FC45B /* libsqlite3.0.dylib */; };
+		FAD02E3116F0838D009FC45B /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAD02E3016F0838C009FC45B /* AVFoundation.framework */; };
+		FAD02E3316F083AE009FC45B /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAD02E3216F083AE009FC45B /* QuartzCore.framework */; };
+		FAD02E3516F083BB009FC45B /* libiconv.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = FAD02E3416F083BB009FC45B /* libiconv.dylib */; };
+		FAD02E3716F083CB009FC45B /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAD02E3616F083CB009FC45B /* CoreVideo.framework */; };
+		FAD02E3916F083D3009FC45B /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAD02E3816F083D3009FC45B /* CoreMedia.framework */; };
+		FAD02E3B16F083E0009FC45B /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAD02E3A16F083E0009FC45B /* AudioToolbox.framework */; };
+		FAD02E6616F085AD009FC45B /* ScanViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FAD02E6416F085AD009FC45B /* ScanViewController.m */; };
+		FAD02E6716F085AD009FC45B /* ScanViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = FAD02E6516F085AD009FC45B /* ScanViewController.xib */; };
 		FAF9023716809066006F7E6D /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAF9023616809066006F7E6D /* SystemConfiguration.framework */; };
 		FAF902621680A933006F7E6D /* JSONKit.m in Sources */ = {isa = PBXBuildFile; fileRef = FAF902611680A932006F7E6D /* JSONKit.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		FAFAD73A167E57DB005C8FE6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAFAD739167E57DB005C8FE6 /* Cocoa.framework */; };
@@ -22,6 +32,18 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		FA65400516F0A90E009FF002 /* DataBaseInteraction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataBaseInteraction.h; sourceTree = "<group>"; };
+		FA65400616F0A90E009FF002 /* DataBaseInteraction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataBaseInteraction.m; sourceTree = "<group>"; };
+		FAD02E2E16F081C7009FC45B /* libsqlite3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.0.dylib; path = usr/lib/libsqlite3.0.dylib; sourceTree = SDKROOT; };
+		FAD02E3016F0838C009FC45B /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		FAD02E3216F083AE009FC45B /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		FAD02E3416F083BB009FC45B /* libiconv.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libiconv.dylib; path = usr/lib/libiconv.dylib; sourceTree = SDKROOT; };
+		FAD02E3616F083CB009FC45B /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
+		FAD02E3816F083D3009FC45B /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
+		FAD02E3A16F083E0009FC45B /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
+		FAD02E6316F085AD009FC45B /* ScanViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScanViewController.h; sourceTree = "<group>"; };
+		FAD02E6416F085AD009FC45B /* ScanViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScanViewController.m; sourceTree = "<group>"; };
+		FAD02E6516F085AD009FC45B /* ScanViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ScanViewController.xib; sourceTree = "<group>"; };
 		FAF9023616809066006F7E6D /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		FAF902601680A932006F7E6D /* JSONKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSONKit.h; sourceTree = "<group>"; };
 		FAF902611680A932006F7E6D /* JSONKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSONKit.m; sourceTree = "<group>"; };
@@ -51,6 +73,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FAD02E3B16F083E0009FC45B /* AudioToolbox.framework in Frameworks */,
+				FAD02E3916F083D3009FC45B /* CoreMedia.framework in Frameworks */,
+				FAD02E3716F083CB009FC45B /* CoreVideo.framework in Frameworks */,
+				FAD02E3516F083BB009FC45B /* libiconv.dylib in Frameworks */,
+				FAD02E3316F083AE009FC45B /* QuartzCore.framework in Frameworks */,
+				FAD02E3116F0838D009FC45B /* AVFoundation.framework in Frameworks */,
+				FAD02E2F16F081C7009FC45B /* libsqlite3.0.dylib in Frameworks */,
 				FAF9023716809066006F7E6D /* SystemConfiguration.framework in Frameworks */,
 				FAFAD76C167EF67F005C8FE6 /* IOBluetooth.framework in Frameworks */,
 				FAFAD73A167E57DB005C8FE6 /* Cocoa.framework in Frameworks */,
@@ -80,6 +109,13 @@
 		FAFAD738167E57DB005C8FE6 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FAD02E3A16F083E0009FC45B /* AudioToolbox.framework */,
+				FAD02E3816F083D3009FC45B /* CoreMedia.framework */,
+				FAD02E3616F083CB009FC45B /* CoreVideo.framework */,
+				FAD02E3416F083BB009FC45B /* libiconv.dylib */,
+				FAD02E3216F083AE009FC45B /* QuartzCore.framework */,
+				FAD02E3016F0838C009FC45B /* AVFoundation.framework */,
+				FAD02E2E16F081C7009FC45B /* libsqlite3.0.dylib */,
 				FAF9023616809066006F7E6D /* SystemConfiguration.framework */,
 				FAFAD76B167EF67F005C8FE6 /* IOBluetooth.framework */,
 				FAFAD739167E57DB005C8FE6 /* Cocoa.framework */,
@@ -112,6 +148,11 @@
 				FAFAD798167F2C3F005C8FE6 /* MainViewController.h */,
 				FAFAD799167F2C3F005C8FE6 /* MainViewController.m */,
 				FAFAD79A167F2C3F005C8FE6 /* MainViewController.xib */,
+				FAD02E6316F085AD009FC45B /* ScanViewController.h */,
+				FAD02E6416F085AD009FC45B /* ScanViewController.m */,
+				FAD02E6516F085AD009FC45B /* ScanViewController.xib */,
+				FA65400516F0A90E009FF002 /* DataBaseInteraction.h */,
+				FA65400616F0A90E009FF002 /* DataBaseInteraction.m */,
 			);
 			path = TeamHRM;
 			sourceTree = "<group>";
@@ -183,6 +224,7 @@
 				FAFAD74A167E57DB005C8FE6 /* Credits.rtf in Resources */,
 				FAFAD797167F2BE6005C8FE6 /* MainWindow.xib in Resources */,
 				FAFAD79C167F2C3F005C8FE6 /* MainViewController.xib in Resources */,
+				FAD02E6716F085AD009FC45B /* ScanViewController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -198,6 +240,8 @@
 				FAFAD766167E6B2D005C8FE6 /* User.m in Sources */,
 				FAFAD79B167F2C3F005C8FE6 /* MainViewController.m in Sources */,
 				FAF902621680A933006F7E6D /* JSONKit.m in Sources */,
+				FAD02E6616F085AD009FC45B /* ScanViewController.m in Sources */,
+				FA65400716F0A90E009FF002 /* DataBaseInteraction.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -247,7 +291,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 			};
@@ -271,7 +315,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -287,6 +331,11 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TeamHRM/TeamHRM-Prefix.pch";
 				INFOPLIST_FILE = "TeamHRM/TeamHRM-Info.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/TeamHRM\"",
+					"\"$(SRCROOT)/TeamHRM/ZBarSDK\"",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};
@@ -303,6 +352,11 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "TeamHRM/TeamHRM-Prefix.pch";
 				INFOPLIST_FILE = "TeamHRM/TeamHRM-Info.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/TeamHRM\"",
+					"\"$(SRCROOT)/TeamHRM/ZBarSDK\"",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
 			};

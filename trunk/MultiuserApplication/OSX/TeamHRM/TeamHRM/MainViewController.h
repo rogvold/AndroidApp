@@ -8,6 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <IOBluetooth/IOBluetooth.h>
+#import "DataBaseInteraction.h"
 
 @interface MainViewController : NSViewController <CBPeripheralDelegate, CBCentralManagerDelegate, NSTableViewDelegate, NSTextFieldDelegate>
 {
@@ -36,6 +37,8 @@
 @property (strong) IBOutlet NSTextField *heartRateFieldValue;
 @property (strong) NSString *heartRate;
 
+@property (strong) DataBaseInteraction *dataBase;
+
 @property (strong) IBOutlet NSTextField *nameField;
 @property (strong) IBOutlet NSTextField *surnameField;
 @property (strong) IBOutlet NSTextField *weightField;
@@ -45,6 +48,8 @@
 @property (strong) IBOutlet NSWindow *removeConfirmationWindow;
 
 @property (strong) IBOutlet NSButton *addButton;
+@property (strong) IBOutlet NSButton *addUserButton;
+@property (strong) IBOutlet NSButton *removeUserButton;
 @property (strong) IBOutlet NSTableView *sensorsView;
 @property (strong) IBOutlet NSButton *connectButton;
 @property (strong) IBOutlet NSScrollView *sensorsScrollView;
@@ -66,5 +71,7 @@
 - (IBAction)openRegisterUserSheet:(id)sender;
 - (IBAction)closeRegisterUserSheet:(id)sender;
 - (IBAction)cancelRegisterUserSheet:(id)sender;
+
+- (IBAction)syncData:(id)sender;
 
 @end
