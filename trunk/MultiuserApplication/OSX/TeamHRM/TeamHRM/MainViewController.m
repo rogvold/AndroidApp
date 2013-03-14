@@ -30,15 +30,28 @@
         self.users = [NSMutableArray array];
         manager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
         [self isLECapableHardware];
-        self.dataBase = [[DataBaseInteraction alloc] initWithPath:@"local.sqlite"];
-        //NSArray *result = [self.dataBase performQuery:@"create table users(user_id integer primary key, username text, password text)"];
-        /*NSArray *result = [self.dataBase performQuery:@"select * from users"];
-        for (NSArray *row in result) {
-            int userID = [[row objectAtIndex:0] intValue];
-            NSString *username = [row objectAtIndex:1];
-            NSString *password = [row objectAtIndex:2];
-            NSLog(@"%d -- %@ %@", userID, username, password);
-        }*/
+        NSString *applicationSupportPath = [NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+        NSString *applicationPath = [applicationSupportPath stringByAppendingPathComponent:@"TeamHRM"];
+        BOOL isDirectory = NO;
+        BOOL exists = [[NSFileManager defaultManager] fileExistsAtPath:applicationPath isDirectory:&isDirectory];
+        NSError *error;
+        if (!exists)
+        {
+            BOOL create =[[NSFileManager defaultManager] createDirectoryAtPath:applicationPath withIntermediateDirectories:YES attributes:nil error:&error];
+            if (!create)
+            {
+                NSLog(@"%@", error);
+            }
+        }
+        NSString *databasePath = [applicationPath stringByAppendingPathComponent:@"local.sqlite"];
+        self.dataBase = [[DataBaseInteraction alloc] initWithPath:databasePath];
+        NSArray *result = [self.dataBase performQuery:@"select count(*) from users"];
+        if (!result)
+        {
+            [self.dataBase performQuery:@"create table users(user_id integer primary key, username text, password text)"];
+            [self.dataBase performQuery:@"create table intervals(intervals_id integer primary key, session_id numeric, value text)"];
+            [self.dataBase performQuery:@"create table sessions(session_id integer primary key, user_id numeric, start_time text, device_name text, device_id text)"];
+        }
         //BOOL isConnected = [self hasConnectivity];
         [self resetDetailInfo];
     }
@@ -956,7 +969,18 @@
 
 - (IBAction) syncData:(id)sender
 {
-    [self performSelectorInBackground:@selector(sync) withObject:nil];
+    if ([self hasConnectivity])
+    {
+        [self performSelectorInBackground:@selector(sync) withObject:nil];
+    }
+    else
+    {
+        NSAlert *alert = [[NSAlert alloc] init];
+        [alert setMessageText:@"No internet connection"];
+        [alert addButtonWithTitle:@"OK"];
+        [alert setIcon:[[NSImage alloc] initWithContentsOfFile:@"AppIcon"]];
+        [alert beginSheetModalForWindow:[[self view] window] modalDelegate:self didEndSelector:nil contextInfo:nil];
+    }
 }
 
 -(void) sync
