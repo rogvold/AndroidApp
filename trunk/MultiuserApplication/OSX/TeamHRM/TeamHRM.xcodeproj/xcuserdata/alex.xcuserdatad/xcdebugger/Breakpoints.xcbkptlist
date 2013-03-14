@@ -544,19 +544,6 @@
          timestampString = "384939618.063998"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "960"
-         endingLineNumber = "960"
-         landmarkName = "-syncData:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384939618.063998"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
          startingLineNumber = "954"
          endingLineNumber = "954"
          landmarkName = "-saveIntervals:withUser:"
@@ -619,51 +606,12 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384939618.063998"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "971"
-         endingLineNumber = "971"
-         landmarkName = "-syncData:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384939618.063998"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "969"
-         endingLineNumber = "969"
-         landmarkName = "-syncData:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "TeamHRM/MainViewController.m"
          timestampString = "384938287.279497"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "714"
          endingLineNumber = "714"
          landmarkName = "-centralManager:didConnectPeripheral:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384939809.241402"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "984"
-         endingLineNumber = "984"
-         landmarkName = "-syncData:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -703,6 +651,19 @@
          startingLineNumber = "922"
          endingLineNumber = "922"
          landmarkName = "-sendRRs:withUser:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "TeamHRM/MainViewController.m"
+         timestampString = "384940360.504046"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "964"
+         endingLineNumber = "964"
+         landmarkName = "-sync"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

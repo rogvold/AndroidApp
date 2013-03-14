@@ -956,6 +956,11 @@
 
 - (IBAction) syncData:(id)sender
 {
+    [self performSelectorInBackground:@selector(sync) withObject:nil];
+}
+
+-(void) sync
+{
     NSArray *users = [self.dataBase performQuery:@"select * from users"];
     for (NSArray *user in users)
     {
