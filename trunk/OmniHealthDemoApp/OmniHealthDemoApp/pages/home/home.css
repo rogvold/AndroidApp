@@ -1,18 +1,4 @@
-﻿
-#session-list {
-    width: 100%;
-    position: relative;
-    padding-left: 5%;
-    padding-top: 5%;
-}
-/*
-#session-list{
-    -ms-grid-columns: 1fr;
-    -ms-grid-rows: 1fr;
-    display: -ms-grid;
-}*/
-
-@media (device-height: 768px) {
+﻿/*@media (device-height: 768px) {
     #session-list {
         height: 664px;
     }
@@ -47,3 +33,4 @@
         height: 1557px;
     }
 }
+*/

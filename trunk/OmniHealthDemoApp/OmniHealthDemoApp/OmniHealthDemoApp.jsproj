@@ -135,6 +135,7 @@
     <Content Include="js\default.js" />
     <Content Include="js\errorConstants.js" />
     <Content Include="js\gauge.js" />
+    <Content Include="js\jquery.js" />
     <Content Include="js\measurement.js" />
     <Content Include="js\measurementData.js" />
     <Content Include="js\metrouicssmaster\accordion.js" />

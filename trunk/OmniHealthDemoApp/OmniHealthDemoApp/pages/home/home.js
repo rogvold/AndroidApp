@@ -72,9 +72,9 @@
                 }
 
                 previousSessions = new WinJS.Binding.List(AuthData.sessions);
-                var listView = elem.querySelector(".itemslist").winControl;
+                var listView = document.getElementById("session-list").winControl;
                 listView.itemDataSource = previousSessions.dataSource;
-                listView.itemTemplate = elem.querySelector(".itemtemplate");
+                listView.itemTemplate = document.getElementById("session-unit");
                 listView.oniteminvoked = itemInvoked;
                 listView.layout = new WinJS.UI.GridLayout();
             });
@@ -177,10 +177,31 @@
 
     function logout() {
         var passwordVault = new Windows.Security.Credentials.PasswordVault();
-        var appKey = "OmniHealthApp";
+        var appKey = "OmniHealthDemoApp";
         var credential = passwordVault.retrieve(appKey, passwordVault.findAllByResource(appKey).getAt(0).userName);
         passwordVault.remove(credential);
         WinJS.Navigation.navigate("/pages/auth/auth.html");
+    }
+    
+    function createChild() {
+        var sessionsList = document.getElementById("session-list");
+        var newItem = document.createElement('div');
+        newItem.className = "tile double image bg-color-blue outline-color-yellow";
+        var content = document.createElement('div');
+        content.className = "tile-content";
+        var image = document.createElement('img');
+        image.src = "/images/splashscreen2.png";
+        content.appendChild(image);
+        var brand = document.createElement('div');
+        brand.className = "brand";
+        var name = document.createElement('span');
+        name.className = "name";
+        name.textContent = "24.08.1992 15:05";
+        name.id = "bla";
+        brand.appendChild(name);
+        newItem.appendChild(content);
+        newItem.appendChild(brand);
+        sessionsList.appendChild(newItem);
     }
 
     WinJS.UI.Pages.define("/pages/home/home.html", {
@@ -188,15 +209,8 @@
             WinJS.Resources.processAll();
             WinJS.UI.processAll();
             document.getElementById("logoutButton").onclick = logout;
-            var tmp = document.getElementById("session-unit");
-            elem = element;
-            var listView = document.getElementById("session-list").winControl;
-            var tmpData = new WinJS.Binding.List(data);
-            listView.itemDataSource = tmpData.dataSource;
-            listView.itemTemplate = document.getElementById("session-unit");
-            listView.oniteminvoked = itemInvoked;
-            listView.layout = new WinJS.UI.GridLayout();
-            //initializeListView();
+            for (var j = 0; j < 40; j++)
+                createChild();
         }
     });
 })();

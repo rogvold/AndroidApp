@@ -5,10 +5,11 @@
     <meta charset="utf-8" />
     <title>home</title>
 
-    <!-- Ссылки WinJS -->
-    <link href="//Microsoft.WinJS.1.0/css/ui-light.css" rel="stylesheet" />
+    <!-- Ссылки WinJS
+    <link href="//Microsoft.WinJS.1.0/css/ui-light.css" rel="stylesheet" /> -->
     <script src="//Microsoft.WinJS.1.0/js/base.js"></script>
     <script src="//Microsoft.WinJS.1.0/js/ui.js"></script>
+
 
     <link href="/css/metrouicssmaster/modern.css" rel="stylesheet">
     <link href="/css/metrouicssmaster/modern-responsive.css" rel="stylesheet">
@@ -22,42 +23,44 @@
     <script src="/js/measurementData.js"></script>
     <script src="/js/authData.js"></script>
     <script src="/js/tempData.js"></script>
-
-    <!--<script src="../../js/metrouicssmaster/tile-slider.js"></script>
-    <script src="../../js/metrouicssmaster/start-menu.js"></script>
-    <script src="../../js/metrouicssmaster/tile-drag.js"></script>
-    -->
+    
+    <!--<script src="/js/jquery.js"></script>
+    <script src="/js/metrouicssmaster/tile-slider.js"></script>
+    <script src="/js/metrouicssmaster/start-menu.js"></script>
+    <script src="/js/metrouicssmaster/tile-drag.js"></script>-->
+    
 </head>
 <body class="metrouicss">
-    <div id="session-unit" class="metrouicss" data-win-control="WinJS.Binding.Template">
-        <div class="tile bg-color-blue outline-color-yellow" style="height: 150px; width:150px">
-            <div class="tile-content">
-                <img src="#" data-win-bind="src: image" style="width: 100%; height: 100%" />
-
-            </div>
-            <div class="brand">
-                <span class="name" data-win-bind="textContent: title"></span>
-            </div>
-        </div>
-    </div>
-    <div class="frame fragment">
-        <div class="my-header">
-            <div class="left-button-div">
-                <button class="win-backbutton my-back-button" disabled aria-label="Back" type="button"></button>
-            </div>
-            <header id="header" aria-label="Header content">
-                <h1 class="titlearea win-type-ellipsis">
-                    <span class="" data-win-res="{textContent: 'homePage'}"></span>
-                </h1>
-            </header>
-            <div class="right-button-div">
-                <button id="logoutButton" class="win-backbutton my-cross-button" aria-label="Back" type="button"></button>
+    <div class="page secondary fixed-header">
+        <div class="page-header">
+            <div class="page-header-content">
+                <div class="left-button-div">
+                    <button class="win-backbutton my-back-button" aria-label="Back" type="button"></button>
+                </div>
+                <header id="header" aria-label="Header content">
+                    <h1 class="fg-color-white">
+                        <span data-win-res="{textContent: 'homePage'}"></span>
+                    </h1>
+                </header>
+                <div class="right-button-div">
+                    <button id="logoutButton" class="win-backbutton my-cross-button" aria-label="Back" type="button"></button>
+                </div>
             </div>
         </div>
-        <section id="mainContent" aria-label="Main content">
-            <div id="session-list" aria-label="List of sessions" data-win-control="WinJS.UI.ListView" data-win-options="{ selectionMode: 'none' }">
+        <div class="page-region">
+            <div class="page-region-content tiles metrouicss">
+                <div id="session-list" style="overflow-x: scroll;" class="tile-group tile-drag">
+                    <div class="tile double image bg-color-blue outline-color-yellow">
+                        <div class="tile-content">
+                            <img src="/images/splashscreen2.png"/>
+                        </div>
+                        <div class="brand">
+                            <span class="name">24.08.1992 15:05</span>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </section>
+        </div>
     </div>
 </body>
 </html>
