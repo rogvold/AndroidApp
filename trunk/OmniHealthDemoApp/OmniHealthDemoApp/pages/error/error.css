@@ -1,3 +1,5 @@
-﻿.error section[role=main] {
+﻿.errmessage{
+    height: 100%;
     margin-left: 120px;
+    padding-top: 10%;
 }

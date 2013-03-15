@@ -56,7 +56,7 @@ html {
   font-size: 100%;
   /* 1 */
 
-  -webkit-text-size-adjust: 100%;
+   
   -ms-text-size-adjust: 100%;
   /* 2 */
 
@@ -64,12 +64,13 @@ html {
 /*
  * Addresses font-family inconsistency between 'textarea' and other form elements.
  */
+/*button,*/
 html,
-button,
 input,
 select,
 textarea {
-  font-family: sans-serif;
+  font-family: Segoe UI;
+  height: 100%;
 }
 /*
  * Addresses margins handled incorrectly in IE6/7
@@ -102,6 +103,7 @@ a:active {
  * Addresses font sizes within 'section' and 'article' in FF4+, Chrome, S5
  */
 h1 {
+  font-family: 'Segoe UI';
   font-size: 2em;
   margin: 0.67em 0;
 }
@@ -170,7 +172,7 @@ code,
 kbd,
 samp {
   font-family: monospace, serif;
-  _font-family: 'courier new', monospace;
+   
   font-size: 1em;
 }
 /*
@@ -316,7 +318,7 @@ legend {
  * 2. Addresses margins set differently in IE6/7, FF3+, S5, Chrome
  * 3. Improves appearance and consistency in all browsers
  */
-button,
+/*button,*/
 input,
 select,
 textarea {
@@ -334,7 +336,7 @@ textarea {
 /*
  * Addresses FF3/4 setting line-height on 'input' using !important in the UA stylesheet
  */
-button,
+/*button,*/
 input {
   line-height: normal;
   /* 1 */
@@ -346,14 +348,14 @@ input {
  * 3. Removes inner spacing in IE7 without affecting normal text inputs
  *    Known issue: inner spacing remains in IE6
  */
-button,
+/*button,*/
 input[type="button"],
 input[type="reset"],
 input[type="submit"] {
   cursor: pointer;
   /* 1 */
 
-  -webkit-appearance: button;
+   
   /* 2 */
 
   *overflow: visible;
@@ -386,36 +388,7 @@ input[type="radio"] {
   /* 3 */
 
 }
-/*
- * 1. Addresses appearance set to searchfield in S5, Chrome
- * 2. Addresses box-sizing set to border-box in S5, Chrome (include -moz to future-proof)
- */
-input[type="search"] {
-  -webkit-appearance: textfield;
-  /* 1 */
 
-  -moz-box-sizing: content-box;
-  -webkit-box-sizing: content-box;
-  /* 2 */
-
-  box-sizing: content-box;
-}
-/*
- * Removes inner padding and search cancel button in S5, Chrome on OS X
- */
-input[type="search"]::-webkit-search-decoration,
-input[type="search"]::-webkit-search-cancel-button {
-  -webkit-appearance: none;
-}
-/*
- * Removes inner padding and border in FF3+
- * www.sitepen.com/blog/2008/05/14/the-devils-in-the-details-fixing-dojos-toolbar-buttons/
- */
-button::-moz-focus-inner,
-input::-moz-focus-inner {
-  border: 0;
-  padding: 0;
-}
 /*
  * 1. Removes default vertical scrollbar in IE6/7/8/9
  * 2. Improves readability and alignment in all browsers
@@ -820,24 +793,20 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
 .metrouicss [data-icon]:before {
   font-family: 'iconFont';
   content: attr(data-icon);
-  speak: none;
   font-weight: normal;
   font-style: normal;
   display: inline-block;
   text-decoration: inherit;
-  -webkit-font-smoothing: antialiased;
   border: 1px transparent solid;
 }
 .metrouicss [class^="icon-"]:before,
 .metrouicss [class*=" icon-"]:before {
   font-family: 'iconFont';
   font-style: normal;
-  speak: none;
   font-weight: normal;
   display: inline-block;
   text-decoration: inherit;
   margin: 0 2px;
-  -webkit-font-smoothing: antialiased;
   border: 1px transparent solid;
 }
 .metrouicss .icon-large:before {
@@ -2278,7 +2247,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 42pt;
   letter-spacing: 0.00em;
   line-height: 44pt;
-  font-smooth: always;
+   
 }
 .metrouicss #font .subheader,
 .metrouicss #font .subheader-secondary {
@@ -2287,7 +2256,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 20pt;
   letter-spacing: 0.01em;
   line-height: 24pt;
-  font-smooth: always;
+   
 }
 .metrouicss #font .subheader-smaller,
 .metrouicss #font .subheader-secondary-smaller {
@@ -2296,7 +2265,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   letter-spacing: 0.01em;
   line-height: 24pt;
   font-size: 16pt;
-  font-smooth: always;
+   
 }
 .metrouicss #font .small-subheader,
 .metrouicss #font .small-subheader-secondary {
@@ -2305,7 +2274,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 11pt;
   letter-spacing: 0.01em;
   line-height: 14pt;
-  font-smooth: always;
+   
 }
 .metrouicss #font .navigation {
   font-family: 'Segoe UI', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
@@ -2313,7 +2282,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 11pt;
   letter-spacing: 0.01em;
   line-height: 14pt;
-  font-smooth: always;
+   
 }
 .metrouicss #font .body,
 .metrouicss #font .body-secondary,
@@ -2323,32 +2292,32 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 11pt;
   letter-spacing: 0.02em;
   line-height: 20px;
-  font-smooth: always;
+   
 }
 .metrouicss #font .link {
   font-family: 'Segoe UI', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 400;
   font-size: 11pt;
-  font-smooth: always;
+   
 }
 .metrouicss #font .tertiary,
 .metrouicss #font .tertiary-secondary {
   font-family: 'Segoe UI', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 400;
   font-size: 9pt;
-  font-smooth: always;
+   
 }
 .metrouicss #font .control {
   font-family: 'Segoe UI', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 400;
   font-size: 9pt;
-  font-smooth: always;
+   
 }
 .metrouicss #font .small {
   font-family: 'Segoe UI', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 300;
   font-size: 8pt;
-  font-smooth: always;
+   
 }
 .metrouicss #font .long-text {
   font-family: 'PT Serif Caption', sans-serif, serif !important;
@@ -2356,7 +2325,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 10pt;
   letter-spacing: 0.02em;
   line-height: 20px;
-  font-smooth: always;
+   
 }
 .metrouicss #font .long-text-smaller {
   font-family: 'PT Serif Caption', sans-serif, serif !important;
@@ -2364,7 +2333,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 10pt;
   letter-spacing: 0.02em;
   line-height: 20px;
-  font-smooth: always;
+   
   font-size: 9pt;
 }
 .metrouicss #font .long-text-lead {
@@ -2373,7 +2342,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 10pt;
   letter-spacing: 0.02em;
   line-height: 20px;
-  font-smooth: always;
+   
   font-size: 20pt;
 }
 .metrouicss #state .header,
@@ -2438,7 +2407,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-family: 'Segoe UI', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 400;
   font-size: 11pt;
-  font-smooth: always;
+   
   color: #2e92cf;
   text-decoration: none;
 }
@@ -2460,12 +2429,11 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   padding: 0;
 }
 .metrouicss h1 {
-  font-family: 'Segoe UI Light', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 200;
-  font-size: 42pt;
+  font-size: 36pt;
   letter-spacing: 0.00em;
   line-height: 44pt;
-  font-smooth: always;
+   
   color: #000000;
 }
 .metrouicss h1:hover {
@@ -2475,12 +2443,11 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   color: rgba(0, 0, 0, 0.4);
 }
 .metrouicss h2 {
-  font-family: 'Segoe UI Light', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
-  font-weight: 200;
+  font-weight: 400;
   font-size: 20pt;
   letter-spacing: 0.01em;
   line-height: 24pt;
-  font-smooth: always;
+   
   color: #000000;
 }
 .metrouicss h2:hover {
@@ -2490,12 +2457,11 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   color: rgba(0, 0, 0, 0.4);
 }
 .metrouicss h3 {
-  font-family: 'Segoe UI Light', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 200;
   font-size: 20pt;
   letter-spacing: 0.01em;
   line-height: 24pt;
-  font-smooth: always;
+   
   color: rgba(0, 0, 0, 0.6);
   font-size: 16pt;
   line-height: 24px;
@@ -2512,7 +2478,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 11pt;
   letter-spacing: 0.01em;
   line-height: 14pt;
-  font-smooth: always;
+   
   color: #000000;
   color: rgba(0, 0, 0, 0.6);
 }
@@ -2534,7 +2500,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 11pt;
   letter-spacing: 0.01em;
   line-height: 14pt;
-  font-smooth: always;
+   
   color: rgba(0, 0, 0, 0.6);
   font-size: 90%;
 }
@@ -2550,7 +2516,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 11pt;
   letter-spacing: 0.01em;
   line-height: 14pt;
-  font-smooth: always;
+   
   color: rgba(0, 0, 0, 0.6);
   font-size: 80%;
 }
@@ -2567,7 +2533,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 11pt;
   letter-spacing: 0.02em;
   line-height: 20px;
-  font-smooth: always;
+   
 }
 .metrouicss p.long-text {
   font-family: 'PT Serif Caption', sans-serif, serif !important;
@@ -2575,7 +2541,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 10pt;
   letter-spacing: 0.02em;
   line-height: 20px;
-  font-smooth: always;
+   
 }
 .metrouicss p {
   margin: 0 0 10px;
@@ -2592,7 +2558,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-family: 'Segoe UI', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 400;
   font-size: 9pt;
-  font-smooth: always;
+   
   color: #000000;
 }
 .metrouicss .tertiary-info-text:hover,
@@ -2608,7 +2574,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-family: 'Segoe UI', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 400;
   font-size: 9pt;
-  font-smooth: always;
+   
   color: rgba(0, 0, 0, 0.6);
 }
 .metrouicss .tertiary-info-secondary-text:hover,
@@ -2633,7 +2599,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-weight: 300;
   font-size: 11pt;
   letter-spacing: 0.02em;
-  font-smooth: always;
+   
   line-height: 20px;
   font-style: normal;
 }
@@ -2713,54 +2679,50 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
 .metrouicss *,
 .metrouicss *:after,
 .metrouicss *:before {
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
+   
+   
   box-sizing: border-box;
 }
 .metrouicss .one-column {
-  -moz-columns: 1;
-  -webkit-columns: 1;
+   
+   
   columns: 1;
-  -moz-column-gap: 20px;
-  -webkit-column-gap: 20px;
+   
+   
   column-gap: 20px;
 }
 .metrouicss .two-columns {
-  -moz-columns: 2;
-  -webkit-columns: 2;
+   
+   
   columns: 2;
-  -moz-column-gap: 20px;
-  -webkit-column-gap: 20px;
+   
+   
   column-gap: 20px;
 }
 .metrouicss .three-columns {
-  -moz-columns: 3;
-  -webkit-columns: 3;
+   
+  
   columns: 3;
-  -moz-column-gap: 20px;
-  -webkit-column-gap: 20px;
+   
+   
   column-gap: 20px;
 }
 .metrouicss .four-columns {
-  -moz-columns: 4;
-  -webkit-columns: 4;
   columns: 4;
-  -moz-column-gap: 20px;
-  -webkit-column-gap: 20px;
+   
+   
   column-gap: 20px;
 }
 .metrouicss .five-columns {
-  -moz-columns: 5;
-  -webkit-columns: 5;
   columns: 5;
-  -moz-column-gap: 20px;
-  -webkit-column-gap: 20px;
+   
+   
   column-gap: 20px;
 }
 .metrouicss .page {
   position: relative;
   height: 100%;
-  min-height: 100%;
+  /*min-height: 100%;*/
   width: 100%;
   *zoom: 1;
 }
@@ -2789,8 +2751,8 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
 .metrouicss .page .page-header .page-header-content h3,
 .metrouicss .page .page-header .page-header-content h4,
 .metrouicss .page .page-header .page-header-content h5 {
-  position: absolute;
-  margin: 0;
+  position: relative;
+  margin: 20px;
   padding: 0;
   left: 20px;
   bottom: 0;
@@ -2809,10 +2771,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 10pt;
   bottom: -5px;
   right: -15px;
-  -webkit-transform: rotate(90deg);
-  -moz-transform: rotate(90deg);
   -ms-transform: rotate(90deg);
-  -o-transform: rotate(90deg);
   transform: rotate(90deg);
 }
 .metrouicss .page .page-header .page-header-content > .page-back {
@@ -2856,12 +2815,9 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   display: block;
 }
 .metrouicss .page .page-region .page-region-content {
-  padding-top: 10px;
-  padding-left: 0;
-  padding-right: 0;
-  padding-bottom: 20px;
+	padding: 0px 0 20px;
   display: block;
-  height: 100%;
+  height: auto;
   position: relative;
 }
 .metrouicss .page.secondary .page-header .page-header-content h1,
@@ -2869,11 +2825,11 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
 .metrouicss .page.secondary .page-header .page-header-content h3,
 .metrouicss .page.secondary .page-header .page-header-content h4,
 .metrouicss .page.secondary .page-header .page-header-content h5 {
-  position: absolute;
+  position: relative;
   margin: 0;
-  padding: 0;
-  left: 120px;
-  bottom: 0;
+  padding: 0; 
+  bottom: 20px;
+  top: 20px;
 }
 .metrouicss .page.secondary .page-region .page-region-content {
   padding-left: 120px;
@@ -2907,7 +2863,8 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   right: 0;
 }
 .metrouicss .page.fixed-header .page-region {
-  padding-top: 140px;
+  padding-top: 100px;
+  height: calc(100% - 110px);
 }
 .metrouicss .page.with-sidebar .page-region {
   margin-left: 220px;
@@ -2981,19 +2938,19 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   width: 28px;
   display: block;
   background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGESURBVFhH7ZevTsNQFIfbZgKxB9gjIHgABAIcS0CSQIJE4LEIEgQCyQNMIiHhIRAgEAgECWKIySUTCEjLd3t/Cyml3em6DtMvOTn33PM3XdvbBU2SJMmKlssnjuNtZIisa2t50HQNmXAFEvQHsi9X89CzR8M31/wXZwppDpp0aX7v++XBd41q7r5Qg1I0YE8pQYixqbWFpzAMx1pnoPA5vlOZpdDzHdWPoujZGVX4c1iaH8pvhpwJshOpxtxQawM18JYdrlYXdbKIAa4o1pFphrxX8g5qD0CRPsUeZZogfkzeLjJaxAAjZIuit9oqhbgv4veQl+lGFQqfGHwdbqpLH1YMMUdK8WjfysxHlgbHyKfiM7B/obAf5LNiemfQyB1E6VkwBfsGlb9ZvduM+aVFQ3cgDV0S+gHlHrs8LqAC5gEcxLuD6c5pbeVJy9qpNECLCV1aK+lPwO86kD0TF5s2KqD2m7Au7QDtAO0A7QD/PsBcf0zIWWVdfMRmcd+M/vsvRxB8A6+/IU2N93KYAAAAAElFTkSuQmCC);
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
+   
+   
+   
   background-size: cover;
 }
-.metrouicss .back-button {
+/*.metrouicss .back-button {
   height: 32px;
   width: 32px;
   display: block;
   background-image: url(data:image/png;base64,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);
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
+   
+   
+   
   background-size: cover;
 }
 .metrouicss .back-button.big {
@@ -3010,7 +2967,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-family: 'Segoe UI', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 400;
   font-size: 9pt;
-  font-smooth: always;
+   
   min-width: 90px;
   min-height: 32px;
   height: 32px;
@@ -3019,7 +2976,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   color: #353535;
   margin-right: 10px;
   margin-bottom: 10px;
-  border-raduis: 0;
+  border-radius: 0;
   display: inline-block;
   text-align: center;
   vertical-align: middle;
@@ -3056,7 +3013,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
 .metrouicss .button:focus {
   outline: 0;
   border: 1px #353535 dotted;
-}
+}*/
 .metrouicss a.button:hover,
 .metrouicss a.button:active {
   color: inherit;
@@ -3099,7 +3056,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 11pt;
   letter-spacing: 0.02em;
   line-height: 20px;
-  font-smooth: always;
+   
 }
 .metrouicss .command-button > small {
   display: block;
@@ -3108,7 +3065,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 11pt;
   letter-spacing: 0.02em;
   line-height: 20px;
-  font-smooth: always;
+   
   font-size: 10pt;
   color: #505050;
 }
@@ -3119,14 +3076,14 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-family: 'Segoe UI', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 400;
   font-size: 9pt;
-  font-smooth: always;
+   
   min-width: 90px;
   background-color: #ccc;
   border: 1px transparent solid;
   color: #353535;
   margin-right: 10px;
   margin-bottom: 10px;
-  border-raduis: 0;
+  border-radius: 0;
   display: inline-block;
   vertical-align: middle;
   cursor: pointer;
@@ -3191,14 +3148,14 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-family: 'Segoe UI', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 400;
   font-size: 9pt;
-  font-smooth: always;
+   
   min-width: 90px;
   background-color: #ccc;
   border: 1px transparent solid;
   color: #353535;
   margin-right: 10px;
   margin-bottom: 10px;
-  border-raduis: 0;
+  border-radius: 0;
   display: inline-block;
   vertical-align: middle;
   cursor: pointer;
@@ -3317,14 +3274,14 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-family: 'Segoe UI', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 400;
   font-size: 9pt;
-  font-smooth: always;
+   
   min-width: 90px;
   background-color: #ccc;
   border: 1px transparent solid;
   color: #353535;
   margin-right: 10px;
   margin-bottom: 10px;
-  border-raduis: 0;
+  border-radius: 0;
   display: inline-block;
   vertical-align: middle;
   cursor: pointer;
@@ -3536,14 +3493,14 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-family: 'Segoe UI', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 400;
   font-size: 9pt;
-  font-smooth: always;
+   
   min-width: 90px;
   background-color: #ccc;
   border: 1px transparent solid;
   color: #353535;
   margin-right: 10px;
   margin-bottom: 10px;
-  border-raduis: 0;
+  border-radius: 0;
   display: inline-block;
   padding: 4px 10px;
   min-height: 32px;
@@ -3706,7 +3663,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 11pt;
   letter-spacing: 0.01em;
   line-height: 14pt;
-  font-smooth: always;
+   
   color: rgba(0, 0, 0, 0.6);
   text-align: left;
 }
@@ -3732,7 +3689,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 11pt;
   letter-spacing: 0.02em;
   line-height: 20px;
-  font-smooth: always;
+   
   padding: 3px 10px;
   border-right: 1px #ddd solid;
   border-bottom: 1px #ddd solid;
@@ -4035,7 +3992,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 11pt;
   letter-spacing: 0.01em;
   line-height: 14pt;
-  font-smooth: always;
+   
   color: #000000;
   display: block;
   width: 100%;
@@ -4205,10 +4162,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   left: 100%;
   margin-left: 3px;
   top: 8px;
-  -webkit-transform: rotate(90deg);
-  -moz-transform: rotate(90deg);
   -ms-transform: rotate(90deg);
-  -o-transform: rotate(90deg);
   transform: rotate(90deg);
 }
 .metrouicss .nav-bar .nav-bar-inner .pull-menu {
@@ -4381,7 +4335,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 11pt;
   letter-spacing: 0.01em;
   line-height: 14pt;
-  font-smooth: always;
+   
   color: #000000;
   display: block;
   width: 100%;
@@ -4536,7 +4490,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 11pt;
   letter-spacing: 0.02em;
   line-height: 20px;
-  font-smooth: always;
+   
   height: auto;
   min-height: 70px;
   padding: 10px;
@@ -4550,7 +4504,6 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   display: table-cell;
   vertical-align: middle !important;
   background: #6e6e6e;
-  box-shadow-bottom: inset 0px 0px 3px #fff;
 }
 .metrouicss .replies > div .avatar img,
 .metrouicss .replies > li .avatar img,
@@ -4584,7 +4537,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-family: 'Segoe UI', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 400;
   font-size: 9pt;
-  font-smooth: always;
+   
   color: #000000;
   color: #ffffff;
   line-height: 16px;
@@ -4757,7 +4710,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 20pt;
   letter-spacing: 0.01em;
   line-height: 24pt;
-  font-smooth: always;
+   
   font-size: 12pt;
   margin-top: 5px;
   margin-left: 10px;
@@ -4777,7 +4730,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-family: 'Segoe UI', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 300;
   font-size: 8pt;
-  font-smooth: always;
+   
   margin-top: -5px;
   line-height: 16px;
 }
@@ -4867,15 +4820,13 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   height: 88px;
 }
 .metrouicss .tile-group {
-  margin: 0;
-  margin-right: 80px;
-  margin-left:80px;
+  margin: 0 0px 0 0px;
   float: left;
-  height: 700px;
+  height: 100%;
   width: auto;
   min-height: 1px;
   display: -ms-flexbox;
-  -ms-flex-flow: row wrap;
+  -ms-flex-flow: wrap;
   -ms-writing-mode: tb-lr;
 }
 .metrouicss .tile {
@@ -4894,8 +4845,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 11pt;
   letter-spacing: 0.02em;
   line-height: 20px;
-  font-smooth: always;
-  margin: 0 10px 10px 0;
+  margin: 15px;
   overflow: hidden;
   -ms-writing-mode: lr-bt;
 }
@@ -4915,7 +4865,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-family: 'Segoe UI', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 400;
   font-size: 9pt;
-  font-smooth: always;
+   
   color: #000000;
   color: #ffffff;
   line-height: 16px;
@@ -4953,7 +4903,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-family: 'Segoe UI', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 400;
   font-size: 9pt;
-  font-smooth: always;
+   
   color: #000000;
   color: #ffffff;
   line-height: 16px;
@@ -5076,7 +5026,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 11pt;
   letter-spacing: 0.01em;
   line-height: 14pt;
-  font-smooth: always;
+   
   padding-top: 3px;
 }
 .metrouicss .tile .brand > .badge.activity,
@@ -5133,7 +5083,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-family: 'Segoe UI', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 400;
   font-size: 9pt;
-  font-smooth: always;
+   
   color: #ffffff;
 }
 .metrouicss .tile .brand > .name:hover,
@@ -5174,7 +5124,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-family: 'Segoe UI', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 400;
   font-size: 9pt;
-  font-smooth: always;
+   
   color: #000000;
   color: #ffffff;
   line-height: 14px;
@@ -5227,7 +5177,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   display: block;
   content: "\e08a";
   font-size: 10pt;
-  heigth: 14px;
+  height: 14px;
   width: 14px;
   line-height: 14px;
   z-index: 2;
@@ -5538,7 +5488,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 11pt;
   letter-spacing: 0.02em;
   line-height: 20px;
-  font-smooth: always;
+   
 }
 .metrouicss .input-control.text .helper:hover,
 .metrouicss .input-control.password .helper:hover,
@@ -5584,7 +5534,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 11pt;
   letter-spacing: 0.02em;
   line-height: 20px;
-  font-smooth: always;
+   
   margin-right: 10px;
   margin-bottom: 10px;
 }
@@ -5602,7 +5552,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 11pt;
   letter-spacing: 0.02em;
   line-height: 20px;
-  font-smooth: always;
+   
   color: #cfcfcf;
   position: absolute;
   top: -25px;
@@ -5614,7 +5564,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-family: 'Segoe UI', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 400;
   font-size: 9pt;
-  font-smooth: always;
+   
   min-width: 90px;
   min-height: 32px;
   height: 32px;
@@ -5623,14 +5573,14 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   color: #353535;
   margin-right: 10px;
   margin-bottom: 10px;
-  border-raduis: 0;
+  border-radius: 0;
   display: inline-block;
   text-align: center;
   vertical-align: middle;
   cursor: pointer;
   padding: 4px 10px;
   position: relative;
-  border-radius: 0;
+   
 }
 .metrouicss input[type=button].mini,
 .metrouicss input[type=reset].mini,
@@ -5746,16 +5696,9 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
 }
 .metrouicss .image-collection > div:hover .overlay,
 .metrouicss .image-collection > li:hover .overlay {
-  -webkit-transform: translate(0, -55px);
   -ms-transform: translate(0, -55px);
-  -o-transform: translate(0, -55px);
-  -moz-transform: translate(0, -55px);
   transform: translate(0, -55px);
-  -webkit-transition: all 0.3s ease;
-  -moz-transition: all 0.3s ease;
-  -o-transition: all 0.3s ease;
   -ms-transition: all 0.3s ease;
-  transition: all 0.3s easet;
 }
 .metrouicss .image-collection.p16x9 > div {
   width: 220px;
@@ -5813,7 +5756,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 20pt;
   letter-spacing: 0.01em;
   line-height: 24pt;
-  font-smooth: always;
+   
   font-family: Tahoma, Arial, sans-serif;
   line-height: 18pt;
 }
@@ -5891,11 +5834,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
 }
 .metrouicss .card.back {
   background-color: #b91d47;
-  background-image: -webkit-gradient(linear, 0 100%, 100% 0, color-stop(0.25, rgba(255, 255, 255, 0.15)), color-stop(0.25, transparent), color-stop(0.5, transparent), color-stop(0.5, rgba(255, 255, 255, 0.15)), color-stop(0.75, rgba(255, 255, 255, 0.15)), color-stop(0.75, transparent), to(transparent));
-  background-image: -webkit-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
-  background-image: -moz-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
   background-image: -ms-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
-  background-image: -o-linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
   background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
 }
 .metrouicss .card.spades .small-suit:after {
@@ -5950,7 +5889,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 11pt;
   letter-spacing: 0.02em;
   line-height: 20px;
-  font-smooth: always;
+   
   font-size: 10pt;
   color: #525252;
 }
@@ -5959,7 +5898,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-family: 'Segoe UI', 'Open Sans', Verdana, Arial, Helvetica, sans-serif;
   font-weight: 400;
   font-size: 9pt;
-  font-smooth: always;
+   
   color: #d14;
   background-color: #f7f7f9;
   border: 1px #e1e1e8 solid;
@@ -6051,7 +5990,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 11pt;
   letter-spacing: 0.01em;
   line-height: 14pt;
-  font-smooth: always;
+   
   cursor: pointer;
   outline: 0;
 }
@@ -6113,7 +6052,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 11pt;
   letter-spacing: 0.01em;
   line-height: 14pt;
-  font-smooth: always;
+   
 }
 .metrouicss .accordion > li > div {
   border: 1px #ccc dotted;
@@ -6508,7 +6447,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 20pt;
   letter-spacing: 0.01em;
   line-height: 24pt;
-  font-smooth: always;
+   
   width: auto;
   height: 35px;
   padding: 0px 35px 5px 5px;
@@ -6547,7 +6486,7 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   font-size: 11pt;
   letter-spacing: 0.02em;
   line-height: 20px;
-  font-smooth: always;
+   
 }
 .metrouicss .dialog .action {
   position: relative;

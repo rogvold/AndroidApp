@@ -10,21 +10,42 @@
     <script src="//Microsoft.WinJS.1.0/js/base.js"></script>
     <script src="//Microsoft.WinJS.1.0/js/ui.js"></script>
 
+    <link href="/css/metrouicssmaster/modern.css" rel="stylesheet">
+    <link href="/css/metrouicssmaster/modern-responsive.css" rel="stylesheet">
     <link href="/css/default.css" rel="stylesheet">
     <link href="error.css" rel="stylesheet" />
     <script src="error.js"></script>
 </head>
 <body>
-    <div class="error fragment">
-        <header aria-label="Header content" role="banner">
-            <h1 class="titlearea win-type-ellipsis">
-                <span class="pagetitle" data-win-res="{textContent: 'error'}"></span>
-            </h1>
-        </header>
-        <section aria-label="Main content" role="main">
-            <span id="errorText"></span>
-            <button id="tryAgain" type="submit" data-win-res="{textContent: 'tryAgain'}"></button>
-        </section>
+    <div class="metrouicss">
+        <div class="page secondary fixed-header">
+            <div class="page-header">
+                <div class="page-header-content">
+                    <div class="left-button-div">
+                        <button disabled class="win-roundbutton win-backbutton" aria-label="Back" type="button"></button>
+                    </div>
+                    <header id="header" aria-label="Header content">
+                        <h1 class="fg-color-white" data-win-res="{textContent: 'error'}">
+                        </h1>
+                    </header>
+                    <div class="right-button-div">
+                        <button id="logoutButton" disabled class="win-roundbutton win-cancelbutton" aria-label="Back" type="button"></button>
+                    </div>
+                </div>
+            </div>
+            <div class="page-region">
+                <div class="page-region-content">
+                    <div class="errmessage">
+                        <h2 class="fg-color-white" id="errorText">
+                        </h2>
+                    </div>
+                    <div style="text-align:center;">
+                        <span id="errorText"></span>
+                        <button id="tryAgain" class="rectangle-button" type="submit" data-win-res="{textContent: 'tryAgain'}"></button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

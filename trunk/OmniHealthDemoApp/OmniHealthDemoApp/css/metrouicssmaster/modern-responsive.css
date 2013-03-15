@@ -402,10 +402,10 @@
     left: 100%;
     margin-left: -10px;
     top: 8px;
-    -webkit-transform: rotate(90deg);
-    -moz-transform: rotate(90deg);
+     
+     
     -ms-transform: rotate(90deg);
-    -o-transform: rotate(90deg);
+     
     transform: rotate(90deg);
   }
 }
@@ -631,10 +631,10 @@
     left: 100%;
     margin-left: -10px;
     top: 8px;
-    -webkit-transform: rotate(90deg);
-    -moz-transform: rotate(90deg);
+     
+     
     -ms-transform: rotate(90deg);
-    -o-transform: rotate(90deg);
+     
     transform: rotate(90deg);
   }
   .metrouicss .page-control {

@@ -112,6 +112,52 @@
         passwordVault.remove(credential);
         WinJS.Navigation.navigate("/pages/auth/auth.html");
     }
+    
+    var cTimeout;
+
+    function handle(delta) {
+        if (delta < 0)
+            ScrollSmoothly(10, 10, 'right');
+        else if (delta > 0)
+            ScrollSmoothly(10, 10, 'left');
+        else
+            ;
+    }
+
+    function wheel(event) {
+        var delta = 0;
+        if (!event)
+            event = window.event;
+        if (event.wheelDelta) {
+            delta = event.wheelDelta / 120;
+            if (window.opera)
+                delta = -delta;
+        } else if (event.detail) {
+            delta = -event.detail / 3;
+        }
+        if (delta)
+            handle(delta);
+        if (event.preventDefault)
+            event.preventDefault();
+        event.returnValue = false;
+    }
+
+    var repeatCount = 0;
+
+    function ScrollSmoothly(scrollPos, repeatTimes, direction) {
+        if (repeatCount < repeatTimes)
+            if (direction == 'right')
+                window.scrollBy(20, 0);
+            else
+                window.scrollBy(-20, 0);
+        else {
+            repeatCount = 0;
+            clearTimeout(cTimeout);
+            return;
+        }
+        repeatCount++;
+        cTimeout = setTimeout(ScrollSmoothly(scrollPos, repeatTimes, direction), 10);
+    }
 
     WinJS.Namespace.define("Homepage", {
         pushChild: function (args) {
@@ -147,6 +193,10 @@
             WinJS.UI.processAll();
             document.getElementById("logoutButton").onclick = logout;
             initializeList();
+            
+            if (window.addEventListener)
+                window.addEventListener('DOMMouseScroll', wheel, false);
+            window.onmousewheel = document.onmousewheel = wheel;
         }
     });
 })();

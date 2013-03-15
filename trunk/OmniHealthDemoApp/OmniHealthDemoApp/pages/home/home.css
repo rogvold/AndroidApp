@@ -1,4 +1,4 @@
-﻿@media (device-height: 768px) {
+﻿/*@media (device-height: 768px) {
     #session-list {
         height: 664px;
     }
@@ -32,4 +32,9 @@
     #session-list {
         height: 1557px;
     }
+}*/
+
+#session-list{
+    height: calc(100% - 110px);
+    padding: 50px;
 }
