@@ -60,37 +60,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
+         timestampString = "385199574.685187"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "366"
-         endingLineNumber = "366"
-         landmarkName = "@implementation MainViewController"
-         landmarkType = "3">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "411"
-         endingLineNumber = "411"
-         landmarkName = "-sheetDidEnd:returnCode:contextInfo:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "333"
-         endingLineNumber = "333"
+         startingLineNumber = "334"
+         endingLineNumber = "334"
          landmarkName = "-resetDetailInfo"
          landmarkType = "5">
       </FileBreakpoint>
@@ -99,11 +73,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
+         timestampString = "385199574.685187"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "756"
-         endingLineNumber = "756"
+         startingLineNumber = "759"
+         endingLineNumber = "759"
          landmarkName = "@implementation MainViewController"
          landmarkType = "3">
       </FileBreakpoint>
@@ -112,20 +86,7 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "867"
-         endingLineNumber = "867"
-         landmarkName = "-peripheral:didUpdateValueForCharacteristic:error:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
+         timestampString = "385199574.685187"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "870"
@@ -138,11 +99,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
+         timestampString = "385199574.685187"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "869"
-         endingLineNumber = "869"
+         startingLineNumber = "873"
+         endingLineNumber = "873"
          landmarkName = "-peripheral:didUpdateValueForCharacteristic:error:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -151,11 +112,24 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
+         timestampString = "385199574.685187"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "815"
-         endingLineNumber = "815"
+         startingLineNumber = "872"
+         endingLineNumber = "872"
+         landmarkName = "-peripheral:didUpdateValueForCharacteristic:error:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "TeamHRM/MainViewController.m"
+         timestampString = "385199574.685187"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "818"
+         endingLineNumber = "818"
          landmarkName = "-peripheral:didDiscoverCharacteristicsForService:error:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -164,11 +138,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
+         timestampString = "385199574.685187"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "784"
-         endingLineNumber = "784"
+         startingLineNumber = "787"
+         endingLineNumber = "787"
          landmarkName = "-peripheral:didDiscoverServices:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -177,11 +151,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
+         timestampString = "385199574.685187"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "328"
-         endingLineNumber = "328"
+         startingLineNumber = "329"
+         endingLineNumber = "329"
          landmarkName = "-resetDetailInfo"
          landmarkType = "5">
       </FileBreakpoint>
@@ -190,13 +164,13 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
+         timestampString = "385199574.685187"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "520"
-         endingLineNumber = "520"
-         landmarkName = "@implementation MainViewController"
-         landmarkType = "3">
+         startingLineNumber = "523"
+         endingLineNumber = "523"
+         landmarkName = "-closeRemoveUserSheet:"
+         landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -216,11 +190,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
+         timestampString = "385199574.685187"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "580"
-         endingLineNumber = "580"
+         startingLineNumber = "583"
+         endingLineNumber = "583"
          landmarkName = "-updateHRMData:withData:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -229,25 +203,12 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
+         timestampString = "385199574.685187"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "446"
-         endingLineNumber = "446"
+         startingLineNumber = "449"
+         endingLineNumber = "449"
          landmarkName = "-connectButtonPressed:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "374"
-         endingLineNumber = "374"
-         landmarkName = "-closeAddUserSheet:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -294,11 +255,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
+         timestampString = "385199574.685187"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "469"
-         endingLineNumber = "469"
+         startingLineNumber = "472"
+         endingLineNumber = "472"
          landmarkName = "-closeRegisterUserSheet:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -307,11 +268,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
+         timestampString = "385199574.685187"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "497"
-         endingLineNumber = "497"
+         startingLineNumber = "500"
+         endingLineNumber = "500"
          landmarkName = "-registerSheetDidEnd:returnCode:contextInfo:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -320,11 +281,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
+         timestampString = "385199574.685187"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "491"
-         endingLineNumber = "491"
+         startingLineNumber = "494"
+         endingLineNumber = "494"
          landmarkName = "-cancelRegisterUserSheet:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -333,13 +294,13 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
+         timestampString = "385199574.685187"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "506"
-         endingLineNumber = "506"
-         landmarkName = "-registerSheetDidEnd:returnCode:contextInfo:"
-         landmarkType = "5">
+         startingLineNumber = "509"
+         endingLineNumber = "509"
+         landmarkName = "@implementation MainViewController"
+         landmarkType = "3">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -372,24 +333,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
+         timestampString = "385199574.685187"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "369"
-         endingLineNumber = "369"
-         landmarkName = "-closeAddUserSheet:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "471"
-         endingLineNumber = "471"
+         startingLineNumber = "474"
+         endingLineNumber = "474"
          landmarkName = "-closeRegisterUserSheet:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -411,11 +359,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
+         timestampString = "385199574.685187"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "640"
-         endingLineNumber = "640"
+         startingLineNumber = "643"
+         endingLineNumber = "643"
          landmarkName = "-isLECapableHardware"
          landmarkType = "5">
       </FileBreakpoint>
@@ -437,25 +385,12 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
+         timestampString = "385199574.685187"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "641"
-         endingLineNumber = "641"
+         startingLineNumber = "644"
+         endingLineNumber = "644"
          landmarkName = "-isLECapableHardware"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "361"
-         endingLineNumber = "361"
-         landmarkName = "-openAddUserSheet:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
@@ -476,76 +411,24 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
+         timestampString = "385199574.685187"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "421"
-         endingLineNumber = "421"
-         landmarkName = "-sheetDidEnd:returnCode:contextInfo:"
-         landmarkType = "5">
+         startingLineNumber = "970"
+         endingLineNumber = "970"
+         landmarkName = "@implementation MainViewController"
+         landmarkType = "3">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
+         timestampString = "385199574.685187"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "416"
-         endingLineNumber = "416"
-         landmarkName = "-sheetDidEnd:returnCode:contextInfo:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "419"
-         endingLineNumber = "419"
-         landmarkName = "-sheetDidEnd:returnCode:contextInfo:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "420"
-         endingLineNumber = "420"
-         landmarkName = "-sheetDidEnd:returnCode:contextInfo:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "967"
-         endingLineNumber = "967"
-         landmarkName = "-saveIntervals:withUser:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "966"
-         endingLineNumber = "966"
+         startingLineNumber = "969"
+         endingLineNumber = "969"
          landmarkName = "-saveIntervals:withUser:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -593,11 +476,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
+         timestampString = "385199574.685187"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "727"
-         endingLineNumber = "727"
+         startingLineNumber = "730"
+         endingLineNumber = "730"
          landmarkName = "-centralManager:didConnectPeripheral:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -606,11 +489,37 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
+         timestampString = "385199574.685187"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "937"
-         endingLineNumber = "937"
+         startingLineNumber = "940"
+         endingLineNumber = "940"
+         landmarkName = "@implementation MainViewController"
+         landmarkType = "3">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "TeamHRM/MainViewController.m"
+         timestampString = "385199574.685187"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "940"
+         endingLineNumber = "940"
+         landmarkName = "@implementation MainViewController"
+         landmarkType = "3">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "TeamHRM/MainViewController.m"
+         timestampString = "385199574.685187"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "938"
+         endingLineNumber = "938"
          landmarkName = "-sendRRs:withUser:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -619,37 +528,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
+         timestampString = "385199574.685187"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "937"
-         endingLineNumber = "937"
-         landmarkName = "-sendRRs:withUser:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "935"
-         endingLineNumber = "935"
-         landmarkName = "-sendRRs:withUser:"
-         landmarkType = "5">
-      </FileBreakpoint>
-      <FileBreakpoint
-         shouldBeEnabled = "No"
-         ignoreCount = "0"
-         continueAfterRunningActions = "No"
-         filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
-         startingColumnNumber = "9223372036854775807"
-         endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "988"
-         endingLineNumber = "988"
+         startingLineNumber = "991"
+         endingLineNumber = "991"
          landmarkName = "-sync"
          landmarkType = "5">
       </FileBreakpoint>
@@ -658,11 +541,11 @@
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "TeamHRM/MainViewController.m"
-         timestampString = "384947256.384358"
+         timestampString = "385199574.685187"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "972"
-         endingLineNumber = "972"
+         startingLineNumber = "975"
+         endingLineNumber = "975"
          landmarkName = "-syncData:"
          landmarkType = "5">
       </FileBreakpoint>
@@ -716,6 +599,19 @@
          startingLineNumber = "47"
          endingLineNumber = "47"
          landmarkName = "-initWithNibName:bundle:"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "TeamHRM/MainViewController.m"
+         timestampString = "385200321.512817"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "1031"
+         endingLineNumber = "1031"
+         landmarkName = "-scanSheetDidEnd:returnCode:contextInfo:"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

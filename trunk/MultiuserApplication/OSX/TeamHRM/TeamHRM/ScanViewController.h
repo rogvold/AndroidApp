@@ -14,4 +14,6 @@
     
 }
 
+-(IBAction)closeSheet:(id)sender;
+
 @end

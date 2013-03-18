@@ -315,7 +315,8 @@
 
 - (IBAction)addUserButtonPressed:(id)sender
 {
-    [self openAddUserSheet:nil];
+    //[self openAddUserSheet:nil];
+    [self openScanWindow:nil];
 }
 
 - (IBAction)removeUserButtonPressed:(id)sender
@@ -1018,5 +1019,17 @@
         }
     }
 }
+
+- (IBAction)openScanWindow:(id)sender
+{
+    self.scanSheet = [[ScanViewController alloc] initWithNibName:@"ScanViewController" bundle:nil];
+    [NSApp beginSheet:self.scanSheet.view.window modalForWindow:self.view.window modalDelegate:self didEndSelector:@selector(scanSheetDidEnd:returnCode:contextInfo:) contextInfo:nil];
+}
+
+-(void)scanSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
+{
+    NSLog(@"Fuck yeah!");
+}
+
 
 @end

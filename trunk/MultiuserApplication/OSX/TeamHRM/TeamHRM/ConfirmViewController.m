@@ -1,18 +1,18 @@
 //
-//  ScanViewController.m
+//  ConfirmViewController.m
 //  TeamHRM
 //
-//  Created by Alexander O. Taraymovich on 13.03.13.
+//  Created by Alexander O. Taraymovich on 15.03.13.
 //  Copyright (c) 2013 Alexander O. Taraymovich. All rights reserved.
 //
 
-#import "ScanViewController.h"
+#import "ConfirmViewController.h"
 
-@interface ScanViewController ()
+@interface ConfirmViewController ()
 
 @end
 
-@implementation ScanViewController
+@implementation ConfirmViewController
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -22,12 +22,6 @@
     }
     
     return self;
-}
-
--(IBAction)closeSheet:(id)sender
-{
-    [NSApp endSheet:self.view.window returnCode:NSAlertDefaultReturn];
-    [self.view.window orderOut:self];
 }
 
 @end

@@ -8,6 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <IOBluetooth/IOBluetooth.h>
+#import "ScanViewController.h"
 #import "DataBaseInteraction.h"
 
 @interface MainViewController : NSViewController <CBPeripheralDelegate, CBCentralManagerDelegate, NSTableViewDelegate, NSTextFieldDelegate>
@@ -38,6 +39,7 @@
 @property (strong) NSString *heartRate;
 
 @property (strong) DataBaseInteraction *dataBase;
+@property (strong, nonatomic) ScanViewController *scanSheet;
 
 @property (strong) IBOutlet NSTextField *nameField;
 @property (strong) IBOutlet NSTextField *surnameField;
