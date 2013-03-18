@@ -8,10 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		5B9A7C6B16F75ECB006DE99F /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B9A7C6A16F75ECB006DE99F /* QTKit.framework */; };
-		5B9A7C7B16F76D46006DE99F /* ScanWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B9A7C7916F76D46006DE99F /* ScanWindowController.m */; };
-		5B9A7C7C16F76D46006DE99F /* ScanWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5B9A7C7A16F76D46006DE99F /* ScanWindowController.xib */; };
 		5BAB627916F72EF300A6F17C /* zxing-objc-framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BDEF8FD16F264BB00AE37CB /* zxing-objc-framework.framework */; };
 		5BAB627B16F72FA400A6F17C /* zxing-objc-framework.framework in Copy Files (1 item) */ = {isa = PBXBuildFile; fileRef = 5BDEF8FD16F264BB00AE37CB /* zxing-objc-framework.framework */; };
+		5BB6691016F7AAF20044EF88 /* ScanWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5BB6690E16F7AAF20044EF88 /* ScanWindowController.m */; };
+		5BB6691116F7AAF20044EF88 /* ScanWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5BB6690F16F7AAF20044EF88 /* ScanWindowController.xib */; };
 		FA65400716F0A90E009FF002 /* DataBaseInteraction.m in Sources */ = {isa = PBXBuildFile; fileRef = FA65400616F0A90E009FF002 /* DataBaseInteraction.m */; };
 		FAD02E2F16F081C7009FC45B /* libsqlite3.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = FAD02E2E16F081C7009FC45B /* libsqlite3.0.dylib */; };
 		FAD02E3116F0838D009FC45B /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAD02E3016F0838C009FC45B /* AVFoundation.framework */; };
@@ -67,9 +67,9 @@
 
 /* Begin PBXFileReference section */
 		5B9A7C6A16F75ECB006DE99F /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = System/Library/Frameworks/QTKit.framework; sourceTree = SDKROOT; };
-		5B9A7C7816F76D46006DE99F /* ScanWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScanWindowController.h; path = ../ScanWindowController.h; sourceTree = "<group>"; };
-		5B9A7C7916F76D46006DE99F /* ScanWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ScanWindowController.m; path = ../ScanWindowController.m; sourceTree = "<group>"; };
-		5B9A7C7A16F76D46006DE99F /* ScanWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ScanWindowController.xib; path = ../ScanWindowController.xib; sourceTree = "<group>"; };
+		5BB6690D16F7AAF20044EF88 /* ScanWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScanWindowController.h; sourceTree = "<group>"; };
+		5BB6690E16F7AAF20044EF88 /* ScanWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScanWindowController.m; sourceTree = "<group>"; };
+		5BB6690F16F7AAF20044EF88 /* ScanWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ScanWindowController.xib; sourceTree = "<group>"; };
 		5BDEF8F416F264BB00AE37CB /* zxing-objc.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "zxing-objc.xcodeproj"; path = "zxing/objc/zxing-objc.xcodeproj"; sourceTree = "<group>"; };
 		FA65400516F0A90E009FF002 /* DataBaseInteraction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataBaseInteraction.h; sourceTree = "<group>"; };
 		FA65400616F0A90E009FF002 /* DataBaseInteraction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataBaseInteraction.m; sourceTree = "<group>"; };
@@ -186,9 +186,9 @@
 		FAFAD73F167E57DB005C8FE6 /* TeamHRM */ = {
 			isa = PBXGroup;
 			children = (
-				5B9A7C7816F76D46006DE99F /* ScanWindowController.h */,
-				5B9A7C7916F76D46006DE99F /* ScanWindowController.m */,
-				5B9A7C7A16F76D46006DE99F /* ScanWindowController.xib */,
+				5BB6690D16F7AAF20044EF88 /* ScanWindowController.h */,
+				5BB6690E16F7AAF20044EF88 /* ScanWindowController.m */,
+				5BB6690F16F7AAF20044EF88 /* ScanWindowController.xib */,
 				FAF902601680A932006F7E6D /* JSONKit.h */,
 				FAF902611680A932006F7E6D /* JSONKit.m */,
 				FAFAD74B167E57DB005C8FE6 /* AppDelegate.h */,
@@ -297,7 +297,7 @@
 				FAFAD74A167E57DB005C8FE6 /* Credits.rtf in Resources */,
 				FAFAD797167F2BE6005C8FE6 /* MainWindow.xib in Resources */,
 				FAFAD79C167F2C3F005C8FE6 /* MainViewController.xib in Resources */,
-				5B9A7C7C16F76D46006DE99F /* ScanWindowController.xib in Resources */,
+				5BB6691116F7AAF20044EF88 /* ScanWindowController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -314,7 +314,7 @@
 				FAFAD79B167F2C3F005C8FE6 /* MainViewController.m in Sources */,
 				FAF902621680A933006F7E6D /* JSONKit.m in Sources */,
 				FA65400716F0A90E009FF002 /* DataBaseInteraction.m in Sources */,
-				5B9A7C7B16F76D46006DE99F /* ScanWindowController.m in Sources */,
+				5BB6691016F7AAF20044EF88 /* ScanWindowController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
