@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5B9A7C6B16F75ECB006DE99F /* QTKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5B9A7C6A16F75ECB006DE99F /* QTKit.framework */; };
+		5B9A7C7B16F76D46006DE99F /* ScanWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B9A7C7916F76D46006DE99F /* ScanWindowController.m */; };
+		5B9A7C7C16F76D46006DE99F /* ScanWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5B9A7C7A16F76D46006DE99F /* ScanWindowController.xib */; };
+		5BAB627916F72EF300A6F17C /* zxing-objc-framework.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5BDEF8FD16F264BB00AE37CB /* zxing-objc-framework.framework */; };
+		5BAB627B16F72FA400A6F17C /* zxing-objc-framework.framework in Copy Files (1 item) */ = {isa = PBXBuildFile; fileRef = 5BDEF8FD16F264BB00AE37CB /* zxing-objc-framework.framework */; };
 		FA65400716F0A90E009FF002 /* DataBaseInteraction.m in Sources */ = {isa = PBXBuildFile; fileRef = FA65400616F0A90E009FF002 /* DataBaseInteraction.m */; };
 		FAD02E2F16F081C7009FC45B /* libsqlite3.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = FAD02E2E16F081C7009FC45B /* libsqlite3.0.dylib */; };
 		FAD02E3116F0838D009FC45B /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAD02E3016F0838C009FC45B /* AVFoundation.framework */; };
@@ -15,8 +20,6 @@
 		FAD02E3716F083CB009FC45B /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAD02E3616F083CB009FC45B /* CoreVideo.framework */; };
 		FAD02E3916F083D3009FC45B /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAD02E3816F083D3009FC45B /* CoreMedia.framework */; };
 		FAD02E3B16F083E0009FC45B /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAD02E3A16F083E0009FC45B /* AudioToolbox.framework */; };
-		FAD02E6616F085AD009FC45B /* ScanViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FAD02E6416F085AD009FC45B /* ScanViewController.m */; };
-		FAD02E6716F085AD009FC45B /* ScanViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = FAD02E6516F085AD009FC45B /* ScanViewController.xib */; };
 		FAF9023716809066006F7E6D /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAF9023616809066006F7E6D /* SystemConfiguration.framework */; };
 		FAF902621680A933006F7E6D /* JSONKit.m in Sources */ = {isa = PBXBuildFile; fileRef = FAF902611680A932006F7E6D /* JSONKit.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		FAFAD73A167E57DB005C8FE6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAFAD739167E57DB005C8FE6 /* Cocoa.framework */; };
@@ -31,7 +34,43 @@
 		FAFAD79C167F2C3F005C8FE6 /* MainViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = FAFAD79A167F2C3F005C8FE6 /* MainViewController.xib */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		5BDEF8FA16F264BB00AE37CB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5BDEF8F416F264BB00AE37CB /* zxing-objc.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 3B83EB25158E6C5100A3B31F;
+			remoteInfo = "zxing-objc";
+		};
+		5BDEF8FC16F264BB00AE37CB /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5BDEF8F416F264BB00AE37CB /* zxing-objc.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 3B83EB90158E71AD00A3B31F;
+			remoteInfo = "zxing-objc-framework";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		5BAB627A16F72F9600A6F17C /* Copy Files (1 item) */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				5BAB627B16F72FA400A6F17C /* zxing-objc-framework.framework in Copy Files (1 item) */,
+			);
+			name = "Copy Files (1 item)";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		5B9A7C6A16F75ECB006DE99F /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = System/Library/Frameworks/QTKit.framework; sourceTree = SDKROOT; };
+		5B9A7C7816F76D46006DE99F /* ScanWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScanWindowController.h; path = ../ScanWindowController.h; sourceTree = "<group>"; };
+		5B9A7C7916F76D46006DE99F /* ScanWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ScanWindowController.m; path = ../ScanWindowController.m; sourceTree = "<group>"; };
+		5B9A7C7A16F76D46006DE99F /* ScanWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = ScanWindowController.xib; path = ../ScanWindowController.xib; sourceTree = "<group>"; };
+		5BDEF8F416F264BB00AE37CB /* zxing-objc.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "zxing-objc.xcodeproj"; path = "zxing/objc/zxing-objc.xcodeproj"; sourceTree = "<group>"; };
 		FA65400516F0A90E009FF002 /* DataBaseInteraction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataBaseInteraction.h; sourceTree = "<group>"; };
 		FA65400616F0A90E009FF002 /* DataBaseInteraction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataBaseInteraction.m; sourceTree = "<group>"; };
 		FAD02E2E16F081C7009FC45B /* libsqlite3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.0.dylib; path = usr/lib/libsqlite3.0.dylib; sourceTree = SDKROOT; };
@@ -41,9 +80,6 @@
 		FAD02E3616F083CB009FC45B /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
 		FAD02E3816F083D3009FC45B /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
 		FAD02E3A16F083E0009FC45B /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
-		FAD02E6316F085AD009FC45B /* ScanViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ScanViewController.h; sourceTree = "<group>"; };
-		FAD02E6416F085AD009FC45B /* ScanViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScanViewController.m; sourceTree = "<group>"; };
-		FAD02E6516F085AD009FC45B /* ScanViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ScanViewController.xib; sourceTree = "<group>"; };
 		FAF9023616809066006F7E6D /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		FAF902601680A932006F7E6D /* JSONKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = JSONKit.h; sourceTree = "<group>"; };
 		FAF902611680A932006F7E6D /* JSONKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = JSONKit.m; sourceTree = "<group>"; };
@@ -73,6 +109,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5B9A7C6B16F75ECB006DE99F /* QTKit.framework in Frameworks */,
+				5BAB627916F72EF300A6F17C /* zxing-objc-framework.framework in Frameworks */,
 				FAD02E3B16F083E0009FC45B /* AudioToolbox.framework in Frameworks */,
 				FAD02E3916F083D3009FC45B /* CoreMedia.framework in Frameworks */,
 				FAD02E3716F083CB009FC45B /* CoreVideo.framework in Frameworks */,
@@ -89,12 +127,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5BDEF8F516F264BB00AE37CB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5BDEF8FB16F264BB00AE37CB /* libzxing-objc.a */,
+				5BDEF8FD16F264BB00AE37CB /* zxing-objc-framework.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		FAFAD72A167E57DB005C8FE6 = {
 			isa = PBXGroup;
 			children = (
+				5B9A7C6A16F75ECB006DE99F /* QTKit.framework */,
 				FAFAD73F167E57DB005C8FE6 /* TeamHRM */,
 				FAFAD738167E57DB005C8FE6 /* Frameworks */,
 				FAFAD736167E57DB005C8FE6 /* Products */,
+				5BDEF8F416F264BB00AE37CB /* zxing-objc.xcodeproj */,
 			);
 			sourceTree = "<group>";
 		};
@@ -137,6 +186,9 @@
 		FAFAD73F167E57DB005C8FE6 /* TeamHRM */ = {
 			isa = PBXGroup;
 			children = (
+				5B9A7C7816F76D46006DE99F /* ScanWindowController.h */,
+				5B9A7C7916F76D46006DE99F /* ScanWindowController.m */,
+				5B9A7C7A16F76D46006DE99F /* ScanWindowController.xib */,
 				FAF902601680A932006F7E6D /* JSONKit.h */,
 				FAF902611680A932006F7E6D /* JSONKit.m */,
 				FAFAD74B167E57DB005C8FE6 /* AppDelegate.h */,
@@ -148,9 +200,6 @@
 				FAFAD798167F2C3F005C8FE6 /* MainViewController.h */,
 				FAFAD799167F2C3F005C8FE6 /* MainViewController.m */,
 				FAFAD79A167F2C3F005C8FE6 /* MainViewController.xib */,
-				FAD02E6316F085AD009FC45B /* ScanViewController.h */,
-				FAD02E6416F085AD009FC45B /* ScanViewController.m */,
-				FAD02E6516F085AD009FC45B /* ScanViewController.xib */,
 				FA65400516F0A90E009FF002 /* DataBaseInteraction.h */,
 				FA65400616F0A90E009FF002 /* DataBaseInteraction.m */,
 			);
@@ -179,6 +228,7 @@
 				FAFAD731167E57DB005C8FE6 /* Sources */,
 				FAFAD732167E57DB005C8FE6 /* Frameworks */,
 				FAFAD733167E57DB005C8FE6 /* Resources */,
+				5BAB627A16F72F9600A6F17C /* Copy Files (1 item) */,
 			);
 			buildRules = (
 			);
@@ -208,12 +258,35 @@
 			mainGroup = FAFAD72A167E57DB005C8FE6;
 			productRefGroup = FAFAD736167E57DB005C8FE6 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 5BDEF8F516F264BB00AE37CB /* Products */;
+					ProjectRef = 5BDEF8F416F264BB00AE37CB /* zxing-objc.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				FAFAD734167E57DB005C8FE6 /* TeamHRM */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		5BDEF8FB16F264BB00AE37CB /* libzxing-objc.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libzxing-objc.a";
+			remoteRef = 5BDEF8FA16F264BB00AE37CB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		5BDEF8FD16F264BB00AE37CB /* zxing-objc-framework.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = "zxing-objc-framework.framework";
+			remoteRef = 5BDEF8FC16F264BB00AE37CB /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		FAFAD733167E57DB005C8FE6 /* Resources */ = {
@@ -224,7 +297,7 @@
 				FAFAD74A167E57DB005C8FE6 /* Credits.rtf in Resources */,
 				FAFAD797167F2BE6005C8FE6 /* MainWindow.xib in Resources */,
 				FAFAD79C167F2C3F005C8FE6 /* MainViewController.xib in Resources */,
-				FAD02E6716F085AD009FC45B /* ScanViewController.xib in Resources */,
+				5B9A7C7C16F76D46006DE99F /* ScanWindowController.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -240,8 +313,8 @@
 				FAFAD766167E6B2D005C8FE6 /* User.m in Sources */,
 				FAFAD79B167F2C3F005C8FE6 /* MainViewController.m in Sources */,
 				FAF902621680A933006F7E6D /* JSONKit.m in Sources */,
-				FAD02E6616F085AD009FC45B /* ScanViewController.m in Sources */,
 				FA65400716F0A90E009FF002 /* DataBaseInteraction.m in Sources */,
+				5B9A7C7B16F76D46006DE99F /* ScanWindowController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -270,10 +343,10 @@
 		FAFAD751167E57DB005C8FE6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
+				ALWAYS_SEARCH_USER_PATHS = YES;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
-				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -291,6 +364,10 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					zxing/cpp/core/src,
+					zxing/objc/src,
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
@@ -300,10 +377,10 @@
 		FAFAD752167E57DB005C8FE6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
+				ALWAYS_SEARCH_USER_PATHS = YES;
 				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
-				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_CXX_LANGUAGE_STANDARD = "compiler-default";
+				CLANG_CXX_LIBRARY = "compiler-default";
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -315,7 +392,12 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					zxing/cpp/core/src,
+					zxing/objc/src,
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -334,7 +416,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/TeamHRM\"",
-					"\"$(SRCROOT)/TeamHRM/ZBarSDK\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;
@@ -355,7 +436,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/TeamHRM\"",
-					"\"$(SRCROOT)/TeamHRM/ZBarSDK\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = app;

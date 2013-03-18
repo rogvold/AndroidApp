@@ -16,6 +16,7 @@
 {
     self.mainViewController = [[MainViewController alloc] initWithNibName:@"MainViewController" bundle:nil];
     [self.window.contentView addSubview:self.mainViewController.view];
+    
     self.mainViewController.view.frame = ((NSView*)self.window.contentView).bounds;
 }
 

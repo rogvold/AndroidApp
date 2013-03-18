@@ -10,7 +10,7 @@
 #import "MainViewController.h"
 #import "ScanViewController.h"
 
-@interface AppDelegate : NSObject <NSApplicationDelegate>
+@interface AppDelegate : NSObject <NSApplicationDelegate, ZXCaptureDelegate>
 
 @property (assign) IBOutlet NSWindow *window;
 @property (nonatomic,strong) IBOutlet MainViewController *mainViewController;

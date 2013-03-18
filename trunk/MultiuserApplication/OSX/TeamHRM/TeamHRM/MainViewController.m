@@ -7,6 +7,7 @@
 //
 
 #import "MainViewController.h"
+#import "ScanWindowController.h"
 #import <IOBluetooth/IOBluetooth.h>
 #import <sys/socket.h>
 #import <netinet/in.h>
@@ -1022,8 +1023,11 @@
 
 - (IBAction)openScanWindow:(id)sender
 {
-    self.scanSheet = [[ScanViewController alloc] initWithNibName:@"ScanViewController" bundle:nil];
-    [NSApp beginSheet:self.scanSheet.view.window modalForWindow:self.view.window modalDelegate:self didEndSelector:@selector(scanSheetDidEnd:returnCode:contextInfo:) contextInfo:nil];
+    self.scanSheet = [[ScanWindowController alloc] initWithWindowNibName:@"ScanWindowController"];
+    [self.scanSheet showWindow:self];
+    //self.scanSheet = [[ScanViewController alloc] initWithNibName:@"ScanViewController" bundle:nil];
+
+    //[NSApp beginSheet:self.scanSheet.view.window modalForWindow:self.view.window modalDelegate:self didEndSelector:@selector(scanSheetDidEnd:returnCode:contextInfo:) contextInfo:nil];
 }
 
 -(void)scanSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
