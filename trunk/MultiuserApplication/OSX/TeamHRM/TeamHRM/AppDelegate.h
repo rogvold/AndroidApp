@@ -8,12 +8,10 @@
 
 #import <Cocoa/Cocoa.h>
 #import "MainViewController.h"
-#import "ScanViewController.h"
 
 @interface AppDelegate : NSObject <NSApplicationDelegate, ZXCaptureDelegate>
 
 @property (assign) IBOutlet NSWindow *window;
 @property (nonatomic,strong) IBOutlet MainViewController *mainViewController;
-@property (nonatomic,strong) IBOutlet ScanViewController *scanViewController;
 
 @end
