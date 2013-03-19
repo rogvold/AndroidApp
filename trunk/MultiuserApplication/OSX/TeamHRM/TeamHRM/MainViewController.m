@@ -640,7 +640,6 @@
 - (BOOL) isLECapableHardware
 {
     NSString * state = nil;
-    NSLog(@"%ld", [manager state]);
     [self.addUserButton setEnabled:YES];
     
     
@@ -1019,15 +1018,22 @@
             }
         }
     }
+    NSArray *result = [self.dataBase performQuery:@"select * from sessions"];
+    if ([result count] == 0)
+    {
+        NSAlert *alert = [[NSAlert alloc] init];
+        [alert setMessageText:@"Synchronization successfully finished."];
+        [alert addButtonWithTitle:@"OK"];
+        [alert setIcon:[[NSImage alloc] initWithContentsOfFile:@"AppIcon"]];
+        [alert beginSheetModalForWindow:[[self view] window] modalDelegate:self didEndSelector:nil contextInfo:nil];
+    }
 }
 
 - (IBAction)openScanWindow:(id)sender
 {
     self.scanSheet = [[ScanWindowController alloc] initWithWindowNibName:@"ScanWindowController"];
-    [self.scanSheet showWindow:self];
-    //self.scanSheet = [[ScanViewController alloc] initWithNibName:@"ScanViewController" bundle:nil];
-
-    //[NSApp beginSheet:self.scanSheet.view.window modalForWindow:self.view.window modalDelegate:self didEndSelector:@selector(scanSheetDidEnd:returnCode:contextInfo:) contextInfo:nil];
+    //self.scanSheet = [[ScanWindowController alloc] initWithNibName:@"ScanViewController" bundle:nil];
+    [NSApp beginSheet:self.scanSheet.window modalForWindow:self.view.window modalDelegate:self didEndSelector:@selector(scanSheetDidEnd:returnCode:contextInfo:) contextInfo:nil];
 }
 
 -(void)scanSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo

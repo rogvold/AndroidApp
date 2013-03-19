@@ -611,7 +611,20 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "1031"
          endingLineNumber = "1031"
-         landmarkName = "-scanSheetDidEnd:returnCode:contextInfo:"
+         landmarkName = "@implementation MainViewController"
+         landmarkType = "3">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         filePath = "TeamHRM/MainViewController.m"
+         timestampString = "385334938.001526"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "1034"
+         endingLineNumber = "1034"
+         landmarkName = "-openScanWindow:"
          landmarkType = "5">
       </FileBreakpoint>
    </FileBreakpoints>

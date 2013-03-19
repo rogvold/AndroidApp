@@ -13,6 +13,7 @@
 		5BB6691016F7AAF20044EF88 /* ScanWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5BB6690E16F7AAF20044EF88 /* ScanWindowController.m */; };
 		5BB6691116F7AAF20044EF88 /* ScanWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 5BB6690F16F7AAF20044EF88 /* ScanWindowController.xib */; };
 		FA65400716F0A90E009FF002 /* DataBaseInteraction.m in Sources */ = {isa = PBXBuildFile; fileRef = FA65400616F0A90E009FF002 /* DataBaseInteraction.m */; };
+		FABA8B6616F8878C007F919D /* AppIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = FABA8B6516F8878C007F919D /* AppIcon.icns */; };
 		FAD02E2F16F081C7009FC45B /* libsqlite3.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = FAD02E2E16F081C7009FC45B /* libsqlite3.0.dylib */; };
 		FAD02E3116F0838D009FC45B /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAD02E3016F0838C009FC45B /* AVFoundation.framework */; };
 		FAD02E3316F083AE009FC45B /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAD02E3216F083AE009FC45B /* QuartzCore.framework */; };
@@ -73,6 +74,7 @@
 		5BDEF8F416F264BB00AE37CB /* zxing-objc.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "zxing-objc.xcodeproj"; path = "zxing/objc/zxing-objc.xcodeproj"; sourceTree = "<group>"; };
 		FA65400516F0A90E009FF002 /* DataBaseInteraction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataBaseInteraction.h; sourceTree = "<group>"; };
 		FA65400616F0A90E009FF002 /* DataBaseInteraction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DataBaseInteraction.m; sourceTree = "<group>"; };
+		FABA8B6516F8878C007F919D /* AppIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = AppIcon.icns; path = ../AppIcon.icns; sourceTree = "<group>"; };
 		FAD02E2E16F081C7009FC45B /* libsqlite3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.0.dylib; path = usr/lib/libsqlite3.0.dylib; sourceTree = SDKROOT; };
 		FAD02E3016F0838C009FC45B /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		FAD02E3216F083AE009FC45B /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
@@ -136,10 +138,27 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		FABA8B6316F84823007F919D /* JSONKit */ = {
+			isa = PBXGroup;
+			children = (
+				FAF902601680A932006F7E6D /* JSONKit.h */,
+				FAF902611680A932006F7E6D /* JSONKit.m */,
+			);
+			name = JSONKit;
+			sourceTree = "<group>";
+		};
+		FABA8B6416F84833007F919D /* DataBaseIntercation */ = {
+			isa = PBXGroup;
+			children = (
+				FA65400516F0A90E009FF002 /* DataBaseInteraction.h */,
+				FA65400616F0A90E009FF002 /* DataBaseInteraction.m */,
+			);
+			name = DataBaseIntercation;
+			sourceTree = "<group>";
+		};
 		FAFAD72A167E57DB005C8FE6 = {
 			isa = PBXGroup;
 			children = (
-				5B9A7C6A16F75ECB006DE99F /* QTKit.framework */,
 				FAFAD73F167E57DB005C8FE6 /* TeamHRM */,
 				FAFAD738167E57DB005C8FE6 /* Frameworks */,
 				FAFAD736167E57DB005C8FE6 /* Products */,
@@ -158,6 +177,7 @@
 		FAFAD738167E57DB005C8FE6 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				5B9A7C6A16F75ECB006DE99F /* QTKit.framework */,
 				FAD02E3A16F083E0009FC45B /* AudioToolbox.framework */,
 				FAD02E3816F083D3009FC45B /* CoreMedia.framework */,
 				FAD02E3616F083CB009FC45B /* CoreVideo.framework */,
@@ -186,11 +206,8 @@
 		FAFAD73F167E57DB005C8FE6 /* TeamHRM */ = {
 			isa = PBXGroup;
 			children = (
-				5BB6690D16F7AAF20044EF88 /* ScanWindowController.h */,
-				5BB6690E16F7AAF20044EF88 /* ScanWindowController.m */,
-				5BB6690F16F7AAF20044EF88 /* ScanWindowController.xib */,
-				FAF902601680A932006F7E6D /* JSONKit.h */,
-				FAF902611680A932006F7E6D /* JSONKit.m */,
+				FABA8B6416F84833007F919D /* DataBaseIntercation */,
+				FABA8B6316F84823007F919D /* JSONKit */,
 				FAFAD74B167E57DB005C8FE6 /* AppDelegate.h */,
 				FAFAD74C167E57DB005C8FE6 /* AppDelegate.m */,
 				FAFAD740167E57DB005C8FE6 /* Supporting Files */,
@@ -200,8 +217,9 @@
 				FAFAD798167F2C3F005C8FE6 /* MainViewController.h */,
 				FAFAD799167F2C3F005C8FE6 /* MainViewController.m */,
 				FAFAD79A167F2C3F005C8FE6 /* MainViewController.xib */,
-				FA65400516F0A90E009FF002 /* DataBaseInteraction.h */,
-				FA65400616F0A90E009FF002 /* DataBaseInteraction.m */,
+				5BB6690D16F7AAF20044EF88 /* ScanWindowController.h */,
+				5BB6690E16F7AAF20044EF88 /* ScanWindowController.m */,
+				5BB6690F16F7AAF20044EF88 /* ScanWindowController.xib */,
 			);
 			path = TeamHRM;
 			sourceTree = "<group>";
@@ -209,6 +227,7 @@
 		FAFAD740167E57DB005C8FE6 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				FABA8B6516F8878C007F919D /* AppIcon.icns */,
 				FAFAD741167E57DB005C8FE6 /* TeamHRM-Info.plist */,
 				FAFAD742167E57DB005C8FE6 /* InfoPlist.strings */,
 				FAFAD745167E57DB005C8FE6 /* main.m */,
@@ -298,6 +317,7 @@
 				FAFAD797167F2BE6005C8FE6 /* MainWindow.xib in Resources */,
 				FAFAD79C167F2C3F005C8FE6 /* MainViewController.xib in Resources */,
 				5BB6691116F7AAF20044EF88 /* ScanWindowController.xib in Resources */,
+				FABA8B6616F8878C007F919D /* AppIcon.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

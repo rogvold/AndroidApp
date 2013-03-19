@@ -7,8 +7,13 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#include <stdio.h>
 
 int main(int argc, char *argv[])
 {
+    NSString *homeDirectory = [NSSearchPathForDirectoriesInDomains(NSLibraryDirectory, NSUserDomainMask, YES) objectAtIndex:0];
+    NSString *logPath = [homeDirectory stringByAppendingPathComponent:@"Logs/TeamHRM.log"];
+    const char *path = [logPath cStringUsingEncoding:NSASCIIStringEncoding];
+    freopen([logPath cStringUsingEncoding:NSASCIIStringEncoding], "a" ,stderr);
     return NSApplicationMain(argc, (const char **)argv);
 }
