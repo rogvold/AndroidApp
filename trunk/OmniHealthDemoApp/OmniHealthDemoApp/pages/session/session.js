@@ -54,7 +54,7 @@
                 e.preventDefault();
                 var $a = $(this),
                     $activeTriggers = $triggers.filter('.active');
-
+                $activeTriggers.removeClass("active");
                 if ($a.hasClass('active')) {
                     $a.removeClass("active");
 

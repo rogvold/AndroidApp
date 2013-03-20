@@ -10,7 +10,7 @@
     var endTime = null;
     var user = null;
     var deviceId = null;
-    var sessionTime = 5000;
+    var sessionTime = 120000;
     var chart;
     var timer;
 

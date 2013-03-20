@@ -56,7 +56,7 @@
     }
 
     function selectionChanged () {
-        var stateSelected = false;
+        var stateSelected = true;
         var activitySelected = false;
         var activities = document.getElementsByName('activity');
 

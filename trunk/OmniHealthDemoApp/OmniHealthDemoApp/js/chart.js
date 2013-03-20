@@ -36,7 +36,7 @@
             this.chart.fontFamily = "Segoe UI";
             this.chart.pathToImages = "/amcharts/amcharts/images/";
             this.chart.autoMarginOffset = 3;
-            this.chart.marginRight = 15;
+            this.chart.marginRight = 20;
             this.chart.zoomOutButton = {
                 backgroundColor: '#FFFFFF',
                 backgroundAlpha: 0.15
@@ -82,6 +82,7 @@
             chartCursor.categoryBalloonDateFormat = "JJ:NN:SS, DD MMMM";
             chartCursor.categoryBalloonAlpha = 0.4;
             chartCursor.cursorColor = "#FFFFFF";
+            chartCursor.categoryBalloonEnabled = false;
             this.chart.addChartCursor(chartCursor);
 
             // SCROLLBAR
