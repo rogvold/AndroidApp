@@ -44,9 +44,10 @@
 }
 
 .login-pwd{
+    position: absolute;
     width: 61%;
     margin-top: 10%;
-    height: 90%;
+    /*height: 90%;*/
     margin-left: 10%;
 }
 

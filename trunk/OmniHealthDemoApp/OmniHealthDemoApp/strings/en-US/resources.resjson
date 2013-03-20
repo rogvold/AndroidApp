@@ -15,5 +15,6 @@
     "placeholderEmail"      : "Enter your email",
     "placeholderPwd"        : "Enter your password",
     "save"                  : "Save",
-    "connected"             : "Succesfully connected to"
+    "connected"             : "Succesfully connected to",
+    "record"                : "Record"
 }

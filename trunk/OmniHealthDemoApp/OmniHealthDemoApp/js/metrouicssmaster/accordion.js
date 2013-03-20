@@ -40,7 +40,7 @@
                     });
 
                 } else {
-                    $frames.slideUp(undefined, function(){
+                    $frames.slideUp(undefined, function () {
                         $activeLi.removeClass("active");
                     });
                     target.slideDown();

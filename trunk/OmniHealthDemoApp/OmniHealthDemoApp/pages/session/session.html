@@ -10,6 +10,9 @@
     <script src="//Microsoft.WinJS.1.0/js/base.js"></script>
     <script src="//Microsoft.WinJS.1.0/js/ui.js"></script>
 
+    <link href="/css/metrouicssmaster/modern.css" rel="stylesheet">
+    <link href="/css/metrouicssmaster/modern-responsive.css" rel="stylesheet">
+
     <link href="/css/default.css" rel="stylesheet">
     <link href="session.css" rel="stylesheet" />
     <script src="session.js"></script>
@@ -19,30 +22,86 @@
     <script src="/amcharts/amcharts/amcharts.js"></script>
     <script src="/js/chartData.js"></script>
 
+    <script src="/js/jquery.js"></script>
+    <script src="/js/metrouicssmaster/accordion.js"></script>
+
 </head>
 <body>
-    <div class="frame fragment">
-        <div class="my-header">
-            <div class="left-button-div">
-                <button id="backButton" class="win-backbutton" aria-label="Back" type="button"></button>
+    <div class="metrouicss">
+        <div class="page fixedheader">
+            <div class="page-header">
+                <div class="page-header-content">
+                    <div class="left-button-div">
+                        <button id="backButton" class="win-roundbutton win-backbutton" aria-label="Back" type="button"></button>
+                    </div>
+                    <header aria-label="Header content" role="banner">
+                        <h1 class="fg-color-white" data-win-res="{textContent: 'record'}"></h1>
+                    </header>
+                    <div class="right-button-div">
+                        <button class="win-roundbutton win-cancelbutton" aria-label="Back" type="button"></button>
+                    </div>
+                </div>
             </div>
-            <header aria-label="Header content" role="banner">
-                <h1 class="titlearea win-type-ellipsis">
-                    <span class="pagetitle" data-win-res="{textContent: 'record'}">Record</span>
-                </h1>
-            </header>
-            <div class="right-button-div">
-                <button class="win-backbutton my-logout-button my-cross-button" disabled aria-label="Back" type="button"></button>            
+            <div class="page-region">
+                <div class="page-region-content">
+                    <div class="top-part">
+                        <div class="index-area">
+                            <div class="rsai-area">
+                                <canvas id="rsaiCanvas"></canvas>
+                            </div>
+                            <div class="bpm-area">
+                                <canvas id="bpmCanvas"></canvas>
+                            </div>
+                        </div>
+                        <div class="accordion-area">
+                            <ul class="accordion span10" data-role="accordion">
+                                <li class="active">
+                                    <a href="#">frame 1</a>
+                                    <div class="scrollable-y">
+                                        <h3>frame 1</h3>
+                                        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur porta condimentum sem sed commodo.
+                                        asdagdgasdgadsgadsgadsgadsgasdg adsgadsg asdg adsg adsg asdg adsg adsg adsg adsg asdg asdg asdg adsg as
+                                        <p>
+                                            subcontent 1 asf asfasdf adsg asdg sadg sadg asdg asdg asd gsadg asdg sadg sadg sadg sadg sad gsadg asdg asdg adsg asdg adsg ads g
+                                            фыпывапрфы фыар фвра фыпо ыпо вфр фвр фвар фвар фва фвар фвар фвар фвар фавр фвар фвар фвар фвар фвар 
+                                            фвар фвар фвар фвар фвар фвар фвар фвар фвар фвар фвар фвар фвар фвар фвар фвар фвар фвар фвар фвар фвар фвар фвар фвар фвар фвар фвар фвар 
+                                            sadg asdg asdg sad gasdg asd g adsg asdg asdg sadgwag ah afgh asdg asdg asgd 
+                                        </p>
+                                    </div>
+                                </li>
+                                <li>
+                                    <a href="#">frame 2</a>
+                                    <div>
+                                        <h3>frame 2</h3>
+                                        Curabitur porta condimentum sem sed commodo. Praesent vestibulum, libero eget lacinia pretium, metus augue dapibus odio, nec placerat mauris justo non ante.
+                                        <div>
+                                            subcontent 2
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <a href="#">frame 3</a>
+                                    <div>
+                                        <h3>frame 3</h3>
+                                        Maecenas adipiscing nulla sed sem molestie quis pulvinar lectus convallis. Nam tortor arcu, gravida nec tristique sit amet, pretium sagittis eros. Curabitur at nisi ut ligula ornare euismod.
+                                    </div>
+                                </li>
+                                <li>
+                                    <a href="#">frame 4</a>
+                                    <div>
+                                        <h3>frame 4</h3>
+                                        Ut vitae tortor eget elit dictum dictum. Ut porttitor, ante non blandit gravida, felis risus feugiat neque, eu tincidunt neque ante at urna. Maecenas nec felis nulla.
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="chart-area">
+                        <div id="chartCanvas"></div>
+                    </div>
+                </div>
             </div>
         </div>
-        <section aria-label="Main content" role="main">
-            <div class="rsai-area">
-				<canvas id="rsaiCanvas"></canvas>
-			</div>
-            <div class="chart-area">
-                <div id="chartCanvas" style="width: 750px; height: 300px"></div>
-            </div>
-        </section>
     </div>
 </body>
 </html>

@@ -29,6 +29,7 @@
             document.getElementById('backButton').addEventListener('click', function (args) {
                 WinJS.Navigation.navigate("/pages/home/home.html");
             });
+            WinJS.Resources.processAll();
             var session = options.session;
             drawRsai(session.rsai[0]);
             var chart = new Chart.renderer();

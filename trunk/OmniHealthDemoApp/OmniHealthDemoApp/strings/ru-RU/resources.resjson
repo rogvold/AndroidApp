@@ -15,5 +15,6 @@
     "placeholderEmail"      : "Введите Ваш email",
     "placeholderPwd"        : "Введите Ваш пароль",
     "save"                  : "Сохранить",
-    "connected"             : "Успешно подключено к"
+    "connected"             : "Успешно подключено к",
+    "record"                : "Запись"
 }
