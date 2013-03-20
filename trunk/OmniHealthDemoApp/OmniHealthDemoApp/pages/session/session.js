@@ -29,6 +29,20 @@
             document.getElementById('backButton').addEventListener('click', function (args) {
                 WinJS.Navigation.navigate("/pages/home/home.html");
             });
+            $(function () {
+                $("#accordion").accordion({
+                    heightStyle: "fill"
+                });
+            });
+            $(function () {
+                $("#accordion-resizer").resizable({
+                    minHeight: 140,
+                    minWidth: 200,
+                    resize: function () {
+                        $("#accordion").accordion("refresh");
+                    }
+                });
+            });
             WinJS.Resources.processAll();
             var session = options.session;
             drawRsai(session.rsai[0]);

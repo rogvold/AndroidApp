@@ -70,7 +70,7 @@
             graph.valueField = "visits";
             graph.lineAlpha = 1;
             graph.lineColor = "#000000";
-            graph.fillAlphas = 0; // setting fillAlphas to > 0 value makes it area graph
+            graph.fillAlphas = 0.4; // setting fillAlphas to > 0 value makes it area graph
             this.chart.addGraph(graph);
 
             // CURSOR
