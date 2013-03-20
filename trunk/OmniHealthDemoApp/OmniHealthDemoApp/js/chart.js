@@ -21,7 +21,7 @@
             for (var i = 0; i < timestamps.length; i++) {
                 this.chartData.push({
                     date: timestamps[i],
-                    visits: data.intervals[i]
+                    intervals: data.intervals[i]
                 });
             }
             this.chart.validateData();
@@ -38,11 +38,12 @@
             this.chart.autoMarginOffset = 3;
             this.chart.marginRight = 15;
             this.chart.zoomOutButton = {
-                backgroundColor: '#000000',
+                backgroundColor: '#FFFFFF',
                 backgroundAlpha: 0.15
             };
             this.chart.dataProvider = this.chartData;
             this.chart.categoryField = "date";
+            this.chart.balloon.color = "#000000";
 
             // data updated event will be fired when chart is displayed,
             // also when data will be updated. We'll use it to set some
@@ -56,20 +57,22 @@
             categoryAxis.minPeriod = "fff"; // as we have data with minute interval, we have to set "mm" here.             
             categoryAxis.gridAlpha = 0.07;
             categoryAxis.showLastLabel = false;
-            categoryAxis.axisColor = "#DADADA";
+            categoryAxis.axisColor = "#FFFFFF";
+            categoryAxis.axisThickness = 3;
 
             // Value
             var valueAxis = new AmCharts.ValueAxis();
             valueAxis.gridAlpha = 0.07;
+            valueAxis.axisColor = "#FFFFFF";
+            valueAxis.axisThickness = 3;
             this.chart.addValueAxis(valueAxis);
 
             // GRAPH
             var graph = new AmCharts.AmGraph();
             graph.type = "line"; // try to change it to "column"
-            graph.title = "red line";
-            graph.valueField = "visits";
-            graph.lineAlpha = 1;
-            graph.lineColor = "#000000";
+            graph.valueField = "intervals";
+            graph.lineAlpha = 0.4;
+            graph.lineColor = "#FFFFFF";
             graph.fillAlphas = 0.4; // setting fillAlphas to > 0 value makes it area graph
             this.chart.addGraph(graph);
 
@@ -77,12 +80,14 @@
             var chartCursor = new AmCharts.ChartCursor();
             chartCursor.cursorPosition = "mouse";
             chartCursor.categoryBalloonDateFormat = "JJ:NN:SS, DD MMMM";
+            chartCursor.categoryBalloonAlpha = 0.4;
+            chartCursor.cursorColor = "#FFFFFF";
             this.chart.addChartCursor(chartCursor);
 
             // SCROLLBAR
-            var chartScrollbar = new AmCharts.ChartScrollbar();
+            //var chartScrollbar = new AmCharts.ChartScrollbar();
 
-            this.chart.addChartScrollbar(chartScrollbar);
+            //this.chart.addChartScrollbar(chartScrollbar);
 
             // WRITE
             this.chart.write(container);

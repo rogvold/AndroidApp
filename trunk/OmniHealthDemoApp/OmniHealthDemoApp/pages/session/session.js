@@ -43,6 +43,26 @@
                     }
                 });
             });
+
+            var $element = $("#accordion");
+
+            var $triggers;
+
+            $triggers = $element.children("h3");
+
+            $triggers.on('click', function (e) {
+                e.preventDefault();
+                var $a = $(this),
+                    $activeTriggers = $triggers.filter('.active');
+
+                if ($a.hasClass('active')) {
+                    $a.removeClass("active");
+
+                } else {
+                    $a.addClass("active");
+                }
+            });
+
             WinJS.Resources.processAll();
             var session = options.session;
             drawRsai(session.rsai[0]);
@@ -52,11 +72,11 @@
         },
 
         unload: function () {
-            
+
         },
 
         updateLayout: function (element, viewState, lastViewState) {
-            
+
         }
     });
 })();
