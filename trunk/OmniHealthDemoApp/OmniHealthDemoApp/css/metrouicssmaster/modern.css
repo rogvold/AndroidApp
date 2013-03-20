@@ -2462,7 +2462,9 @@ License:	CC BY-SA 3.0 -- http://creativecommons.org/licenses/by-sa/3.0/
   letter-spacing: 0.01em;
   line-height: 24pt;
    
-  color: rgba(0, 0, 0, 0.6);
+  /*color: rgba(0, 0, 0, 0.6);  */
+  color: rgba(255, 255, 255, 1);
+  
   font-size: 16pt;
   line-height: 24px;
 }
