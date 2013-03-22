@@ -434,11 +434,29 @@
         {
             NSString *decodedString = [resultString base64DecodedString];
             NSArray *resultArray = [decodedString componentsSeparatedByString:@" "];
-            username = resultArray[0];
-            password = resultArray[1];
-            [retryButton setEnabled:YES];
-            [signInButton setEnabled:YES];
-            [resultsText setStringValue:[NSString stringWithFormat:@"Detected user with username: %@", username]];
+            if ([resultArray count] == 2)
+            {
+                NSString *emailRegex = @"[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}";
+                NSPredicate *emailTest = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", emailRegex];
+                if (![emailTest evaluateWithObject:resultArray[0]])
+                {
+                    [retryButton setEnabled:YES];
+                    [resultsText setStringValue:@"Authorization data is not valid. Please try again."];
+                }
+                else
+                {
+                    username = resultArray[0];
+                    password = resultArray[1];
+                    [retryButton setEnabled:YES];
+                    [signInButton setEnabled:YES];
+                    [resultsText setStringValue:[NSString stringWithFormat:@"Detected user with username: %@.", username]];
+                }
+            }
+            else
+            {
+                [retryButton setEnabled:YES];
+                [resultsText setStringValue:@"Authorization data is not valid. Please try again."];
+            }
             [self manageOverlay:inResult];
             
             [zxingEngine stop];							// stop and wait for user to want to "Capture" again
