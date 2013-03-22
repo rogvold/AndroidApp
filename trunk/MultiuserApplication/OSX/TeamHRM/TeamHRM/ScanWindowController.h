@@ -14,33 +14,33 @@
 @interface ScanWindowController : NSWindowController<ZXCaptureDelegate>
 {
 @private
-
-IBOutlet	NSWindow*				mainWindow;
-IBOutlet	NSView*					mainView;
-IBOutlet	NSView*					previewView;
-IBOutlet	NSView*					binaryView;
-IBOutlet	NSView*					luminanceView;
-IBOutlet	NSTextField*			resultsText;
-IBOutlet	NSPopUpButton*			sourceSelectPopupMenu;
-IBOutlet	NSButton*				mirrorVideoCheckbox;
-IBOutlet	NSButton*				soundsCheckbox;
-IBOutlet	NSButton*				appLogoButton;
-IBOutlet	NSButton*				captureButton;
-IBOutlet	NSBox*					previewBox;
-IBOutlet	NSBox*					binaryBox;
-IBOutlet	NSBox*					luminanceBox;
-
-ZXCapture*				zxingEngine;
-CALayer*				captureLayer;
-//ZXOverlay*				resultsLayer;
-QTCaptureDevice*                      captureDevice;
-NSUserDefaults*			userdefaults;
-NSMutableArray*			allVideoDevices;
-CVImageBufferRef                      currentImageBuffer;
-NSString*				currentVideoSourceName;
-BOOL					mirrorVideoMode;
-NSSound*				resultsSound;
-
+    
+    IBOutlet	NSWindow*				mainWindow;
+    IBOutlet	NSView*					mainView;
+    IBOutlet	NSView*					previewView;
+    IBOutlet	NSView*					binaryView;
+    IBOutlet	NSView*					luminanceView;
+    IBOutlet	NSTextField*			resultsText;
+    IBOutlet	NSPopUpButton*			sourceSelectPopupMenu;
+    IBOutlet	NSButton*				mirrorVideoCheckbox;
+    IBOutlet	NSButton*				soundsCheckbox;
+    IBOutlet	NSButton*				appLogoButton;
+    IBOutlet	NSButton*				captureButton;
+    IBOutlet	NSButton*				closeButton;
+    IBOutlet	NSBox*					previewBox;
+    IBOutlet	NSBox*					binaryBox;
+    IBOutlet	NSBox*					luminanceBox;
+    
+    ZXCapture*				zxingEngine;
+    CALayer*				captureLayer;
+    //ZXOverlay*				resultsLayer;
+    QTCaptureDevice*                      captureDevice;
+    NSUserDefaults*			userdefaults;
+    NSMutableArray*			allVideoDevices;
+    CVImageBufferRef                      currentImageBuffer;
+    NSString*				currentVideoSourceName;
+    BOOL					mirrorVideoMode;
+    NSSound*				resultsSound;
 }
 // --------------------------------------------------------------------
 
@@ -61,8 +61,9 @@ NSSound*				resultsSound;
 @property (nonatomic, retain) IBOutlet	NSPopUpButton*		sourceSelectPopupMenu;
 @property (nonatomic, retain) IBOutlet	NSButton*			mirrorVideoCheckbox;
 @property (nonatomic, retain) IBOutlet	NSButton*			soundsCheckbox;
-@property (nonatomic, retain) IBOutlet	NSButton*			appLogoButton;
-@property (nonatomic, retain) IBOutlet	NSButton*			captureButton;
+@property (nonatomic, retain) IBOutlet	NSButton*			retryButton;
+@property (nonatomic, retain) IBOutlet	NSButton*			signInButton;
+@property (nonatomic, retain) IBOutlet	NSButton*			closeButton;
 
 @property (nonatomic, retain)			NSUserDefaults*		userdefaults;
 @property (nonatomic, retain)			ZXCapture*			zxingEngine;
@@ -76,6 +77,8 @@ NSSound*				resultsSound;
 @property (nonatomic, retain)			NSString*			currentVideoSourceName;
 @property (nonatomic, assign)			BOOL				mirrorVideoMode;
 @property (nonatomic, retain)			NSSound*			resultsSound;
+@property (nonatomic, retain)           NSString*               username;
+@property (nonatomic, retain)           NSString*               password;
 
 // --------------------------------------------------------------------
 
@@ -87,10 +90,9 @@ NSSound*				resultsSound;
 - (IBAction)	zxingImagePressed:(id) sender;
 - (IBAction)	configureForVideoSource:(id) sender;
 - (IBAction)    closeSheet:(id)sender;
+- (IBAction)    cancelSheet:(id)sender;
 - (void)		awakeFromNib;
 
-- (void)		applicationDidFinishLaunching:(NSNotification *)notification;
-- (void)		applicationWillTerminate:(NSNotification *)notification;
 - (void)		setupPreferences:(BOOL) forceReset;
 - (void)		setupSound;
 
@@ -105,8 +107,6 @@ NSSound*				resultsSound;
                               pt2:(CGPoint)point2;
 
 //- (void)		setupVideoSourceMenuForName:(NSString*) displayName;
-
-- (void)		exitTheApp;
 
 // --------------------------------------------------------------------
 

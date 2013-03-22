@@ -11,7 +11,7 @@
 #import "ScanWindowController.h"
 #import "DataBaseInteraction.h"
 
-@interface MainViewController : NSViewController <CBPeripheralDelegate, CBCentralManagerDelegate, NSTableViewDelegate, NSTextFieldDelegate>
+@interface MainViewController : NSViewController <CBPeripheralDelegate, CBCentralManagerDelegate, NSTableViewDelegate, NSTextFieldDelegate, NSWindowDelegate>
 {
     CBCentralManager *manager;
 }

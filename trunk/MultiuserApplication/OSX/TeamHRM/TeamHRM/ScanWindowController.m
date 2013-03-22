@@ -8,6 +8,7 @@
 
 #import "ScanWindowController.h"
 #import <ZXing/ZXResult.h>
+#import "Base64.h"
 
 //@interface ScanWindowController ()
 //
@@ -27,35 +28,32 @@
 @synthesize userdefaults;
 @synthesize zxingEngine;
 @synthesize captureLayer;
-//@synthesize resultsLayer;
+@synthesize closeButton;
 @synthesize captureDevice;
 @synthesize mirrorVideoMode;
 @synthesize resultsText;
-@synthesize captureButton;
+@synthesize retryButton;
 
 @synthesize sourceSelectPopupMenu;
 @synthesize mirrorVideoCheckbox;
 @synthesize soundsCheckbox;
-@synthesize appLogoButton;
+@synthesize signInButton;
 @synthesize currentImageBuffer;
 @synthesize allVideoDevices;
 @synthesize currentVideoSourceName;
 @synthesize resultsSound;
+@synthesize username;
+@synthesize password;
 
 - (id)initWithWindow:(NSWindow *)window
 {
     self = [super initWithWindow:window];
-    if (self) {
-        [self applicationDidFinishLaunching:nil];
-    }
-    
     return self;
 }
 
 - (void)windowDidLoad
 {
     [super windowDidLoad];
-    [self awakeFromNib];
     
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
 }
@@ -68,12 +66,9 @@
 	
     allVideoDevices		= [[NSMutableArray alloc] init];
     [self setUserdefaults:[NSUserDefaults standardUserDefaults]];
-}
-
-// ----------------------------------------------------------------------------------------
-
-- (void)applicationDidFinishLaunching:(NSNotification*) aNotification
-{
+    
+    [userdefaults setBool:[soundsCheckbox state] forKey:KZXING_SOUND_ON_RESULT];
+    
 #ifdef __DEBUG_LOGGING__
     NSLog(@"AppDelegate::applicationDidFinishLaunching - ENTER");
 #endif
@@ -140,8 +135,6 @@
             }
             
             [self performVideoSourceScan];
-            
-            [captureButton			setTitle:kCANCELTITLE];
 			
             if((nil == captureDevice) && (nil != allVideoDevices) && (0 < [allVideoDevices count]))
             {
@@ -157,67 +150,43 @@
     }
 }
 
-// -------------------------------------------------------------------------------------
 
-- (void) applicationWillTerminate:(NSNotification *)notification
+- (IBAction) captureButtonPressed:(id) sender
 {
+#pragma unused(sender)
+	
 #ifdef __DEBUG_LOGGING__
-    NSLog(@"AppDelegate::applicationWillTerminate - ENTER");
+    NSLog(@"AppDelegate::captureButtonPressed - ENTER");
 #endif
 	
-    // anything needed to be done on the way out?
-}
-
-// -------------------------------------------------------------------------------------
-
-- (IBAction) windowWillClose:(NSNotification *)notification
-{
-    static Boolean beenhere = FALSE;
-	
-    NSWindow* theWindow = (NSWindow*)[notification object];
-	
-    if(((mainWindow == theWindow) || (nil == notification)) && (beenhere == FALSE))
+    if(!zxingEngine.running)
     {
+        // Remove the RESULTS layer if it's there...
+        //if(nil != resultsLayer)
+        //	{
+        //	[resultsLayer removeFromSuperlayer];
+        //	[resultsLayer release];
+        //	resultsLayer = nil;
+        //	}
+        
 #ifdef __DEBUG_LOGGING__
-        NSLog(@"AppDelegate::windowWillClose - ENTER");
+        NSLog(@"AppDelegate::captureButtonPressed - zxingEngine was not running");
 #endif
+        
 		
-        beenhere = TRUE;
-        [self exitTheApp];		// call this from here?
+        [captureButton			setTitle:kCANCELTITLE];
+        [resultsText			setStringValue:kBLANKSTR];	// NSTextField
+		
+        zxingEngine.captureDevice = captureDevice ;
+        zxingEngine.delegate = self;
+        zxingEngine.mirror = mirrorVideoMode;
+        
+        [zxingEngine start];
     }
-}
-
-// -------------------------------------------------------------------------------------
-
-- (void) dealloc
-{
-#ifdef __DEBUG_LOGGING__
-    NSLog(@"AppDelegate::dealloc - ENTER");
-#endif
-	
-    [allVideoDevices	removeAllObjects];
-    //  [allVideoDevices	release];
-    
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    // [super dealloc];
-}
-
-// ------------------------------------------------------------------------------------
-
-- (void) exitTheApp
-{
-#ifdef __DEBUG_LOGGING__
-    NSLog(@"AppDelegate::exitTheApp - ENTER");
-#endif
-	
-    static Boolean beenhere = FALSE;
-	
-    if(FALSE == beenhere)
-    {
-        // shutdown all of the open windows, resources, streams, etc.
-		
-        beenhere = TRUE;
-        [NSApp terminate:nil];
+    else	// isRunning 
+    {			
+        [zxingEngine stop];
+        [captureButton			setTitle:kCAPTURETITLE];
     }
 }
 
@@ -289,8 +258,6 @@
         }
     }
 }
-
-// ------------------------------------------------------------------------------------------
 // called when user clicks in or selects an item in the popup menu
 
 - (IBAction) selectedVideoSourceChange:(id)sender
@@ -301,8 +268,6 @@
 	
     [self performSelectorOnMainThread:@selector(configureForVideoSource:) withObject:sender waitUntilDone:NO];
 }
-
-// ------------------------------------------------------------------------------------------
 
 - (IBAction) configureForVideoSource:(id) sender
 {
@@ -388,185 +353,6 @@
     }
 }
 
-// ------------------------------------------------------------------------------------------
-
-- (IBAction) captureButtonPressed:(id) sender
-{
-#pragma unused(sender)
-	
-#ifdef __DEBUG_LOGGING__
-    NSLog(@"AppDelegate::captureButtonPressed - ENTER");
-#endif
-	
-    if(!zxingEngine.running)
-    {
-        // Remove the RESULTS layer if it's there...
-        //if(nil != resultsLayer)
-        //	{
-        //	[resultsLayer removeFromSuperlayer];
-        //	[resultsLayer release];
-        //	resultsLayer = nil;
-        //	}
-        
-#ifdef __DEBUG_LOGGING__
-        NSLog(@"AppDelegate::captureButtonPressed - zxingEngine was not running");
-#endif
-        
-		
-        [captureButton			setTitle:kCANCELTITLE];
-        [resultsText			setStringValue:kBLANKSTR];	// NSTextField
-		
-        zxingEngine.captureDevice = captureDevice ;
-        zxingEngine.delegate = self;
-        zxingEngine.mirror = mirrorVideoMode;
-        
-        [zxingEngine start];
-    }
-    else	// isRunning
-    {
-        [zxingEngine stop];
-        [captureButton			setTitle:kCAPTURETITLE];
-    }
-}
-
-// ------------------------------------------------------------------------------------------
-
-- (IBAction) mirrorCheckboxPressed:(id) sender
-{
-#pragma unused(sender)
-	
-#ifdef __DEBUG_LOGGING__
-    NSLog(@"AppDelegate::mirrorCheckboxPressed - ENTER");
-#endif
-	
-    [self setMirrorVideoMode:[mirrorVideoCheckbox state]];
-	
-    [userdefaults setBool:[self mirrorVideoMode] forKey:KZXING_MIRROR_VIDEO];
-}
-
-// ------------------------------------------------------------------------------------------
-
-- (IBAction) soundsCheckboxPressed:(id) sender
-{
-#pragma unused(sender)
-	
-#ifdef __DEBUG_LOGGING__
-    NSLog(@"AppDelegate::soundsCheckboxPressed - ENTER");
-#endif
-    
-    [userdefaults setBool:[soundsCheckbox state] forKey:KZXING_SOUND_ON_RESULT];
-}
-
-// ------------------------------------------------------------------------------------------
-
-- (IBAction) zxingImagePressed:(id) sender
-{
-#pragma unused(sender)
-	
-    BOOL	success = NO;
-    NSURL*	zxingweblink = [NSURL URLWithString:kZXINGWEBURL];
-	
-    success = [[NSWorkspace sharedWorkspace] openURL:zxingweblink];
-	
-#ifdef __DEBUG_LOGGING__
-    if (YES == success)
-        NSLog(@"AppDelegate::zxingImagePressed - ZXing website access successful.");
-    else
-        NSLog(@"AppDelegate::zxingImagePressed - ZXing website access failed.");
-#endif
-}
-
-// ------------------------------------------------------------------------------------------
-// The name of the video source saved into prefs is compared to the names in the popup menu
-// if a match can be made, the menu is set so that item is the selected item and the actual
-// captureDevice object reference is sent to the ZXCapture object
-/*
- - (void) setupVideoSourceMenuForName:(NSString*) inDisplayName
- {
- NSString* displayName = inDisplayName;
- 
- if((nil == displayName) && (nil != allVideoDevices))
- {
- NSString* savedName = [userdefaults objectForKey:kZXING_VIDEOSOURCENAME];
- if(nil == savedName)
- {
- NSInteger devicecount = [allVideoDevices count];
- if(0 < devicecount)
- {
- QTCaptureDevice* thedevice = [allVideoDevices objectAtIndex:0];
- if(nil != thedevice)
- {
- NSString* thelocalizedDisplayName = [thedevice localizedDisplayName];
- if(nil != thelocalizedDisplayName)
- {
- displayName = thelocalizedDisplayName;
- [userdefaults setObject:displayName forKey:kZXING_VIDEOSOURCENAME];
- [userdefaults synchronize];
- }
- }
- }
- }
- else
- {
- displayName = savedName;
- }
- }
- 
- if(nil != displayName)
- {
- NSInteger	menuitemindex = [sourceSelectPopupMenu indexOfItemWithTitle:displayName];
- 
- if(kNO_SUCH_MENU_ITEM != menuitemindex)
- {
- if(nil != allVideoDevices)
- {
- // there is always a first item = 'Video Source Select' above the actual sources.
- NSInteger adjustedindex = (menuitemindex - 1);
- 
- if((0 <= adjustedindex) && (adjustedindex < [allVideoDevices count]))
- {
- QTCaptureDevice* aCaptureDevice = [allVideoDevices objectAtIndex:adjustedindex];
- if(nil != aCaptureDevice)
- {
- // double check
- NSString* captureDeviceDisplayName = [aCaptureDevice localizedDisplayName];
- if(NSOrderedSame == [displayName compare:captureDeviceDisplayName])
- {
- NSMenuItem*	themenuitem = [sourceSelectPopupMenu itemWithTitle:displayName];
- [sourceSelectPopupMenu selectItemWithTitle:displayName];
- 
- [userdefaults setObject:displayName forKey:kZXING_VIDEOSOURCENAME];
- [userdefaults synchronize];
- [self setCurrentVideoSourceName:displayName];
- [self setCaptureDevice:aCaptureDevice];
- if(nil != themenuitem)
- {
- [themenuitem setTag:(menuitemindex+kVIDEOSOURCEOFFSET)];
- }
- }
- else
- {
- #ifdef __DEBUG_LOGGING__
- NSLog(@"ERROR ZXSourceSelect::setupVideoSourceMenuForName - Can't match [%@] in allVideoDevices",
- displayName);
- #endif
- }
- }
- }
- else
- {
- #ifdef __DEBUG_LOGGING__
- NSLog(@"ERROR ZXSourceSelect::setupVideoSourceMenuForName - 'adjustedindex' [%d] into allvideo Devices array",
- (int)adjustedindex);
- #endif
- }
- }
- }
- }
- }
- */
-// ------------------------------------------------------------------------------------------
-
 - (CGRect) shrinkContentRect:(NSRect) inRect
 {
     CGRect result;
@@ -578,8 +364,6 @@
 	
     return(result);
 }
-
-// ------------------------------------------------------------------------------------------
 
 - (void) setupPreferences:(BOOL) forceReset
 {
@@ -607,9 +391,6 @@
     zxingEngine.mirror = mirror;
 }
 
-
-// -----------------------------------------------------------------------------------------
-
 - (ZXCapture*) createZXcapture
 {
 #ifdef __DEBUG_LOGGING__
@@ -627,9 +408,7 @@
 {
     BOOL playsounds = (BOOL)[userdefaults boolForKey:KZXING_SOUND_ON_RESULT];
 	
-    [soundsCheckbox setState:playsounds];
-	
-    NSSound* thesound = [NSSound soundNamed:kCAPTURESUCCESSSOUNDFILENAME];
+    NSSound* thesound = [NSSound soundNamed:@"shutter"];
     if(nil != thesound)
     {
         [self setResultsSound:thesound];
@@ -649,28 +428,28 @@
 	
     if(nil != inResult)
     {
-        NSString* resultText = [inResult text];
+        NSString* resultString = [inResult text];
 		
-        if(nil != resultText)
+        if(nil != resultString)
         {
-            [resultsText setStringValue:resultText];
+            NSString *decodedString = [resultString base64DecodedString];
+            NSArray *resultArray = [decodedString componentsSeparatedByString:@" "];
+            username = resultArray[0];
+            password = resultArray[1];
+            [retryButton setEnabled:YES];
+            [signInButton setEnabled:YES];
+            [resultsText setStringValue:[NSString stringWithFormat:@"Detected user with username: %@", username]];
             [self manageOverlay:inResult];
             
             [zxingEngine stop];							// stop and wait for user to want to "Capture" again
-			
-            [captureButton			setTitle:kCAPTURETITLE];
 			
 #ifdef __DEBUG_LOGGING__
             NSLog(@"AppDelegate::captureResult - inResult text[%@]", resultText);
 #endif
 			
-            BOOL playSound = [soundsCheckbox state];
-            if(YES == playSound)
+            if(nil != resultsSound)
             {
-                if(nil != resultsSound)
-                {
-                    [resultsSound play];
-                }
+                [resultsSound play];
             }
         }
     }
@@ -741,5 +520,27 @@
 
 //		finish: ZXCaptureDelegate functions:
 //
+
+- (IBAction)closeSheet:(id)sender
+{
+    [zxingEngine stop];
+    [allVideoDevices	removeAllObjects];
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    
+    [NSApp endSheet:self.window returnCode:NSAlertDefaultReturn];
+    [self.window orderOut:self];
+}
+
+- (IBAction)cancelSheet:(id)sender
+{
+    [zxingEngine stop];
+    [allVideoDevices	removeAllObjects];
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    
+    [NSApp endSheet:self.window returnCode:NSAlertAlternateReturn];
+    [self.window orderOut:self];
+}
 
 @end

@@ -1032,13 +1032,33 @@
 - (IBAction)openScanWindow:(id)sender
 {
     self.scanSheet = [[ScanWindowController alloc] initWithWindowNibName:@"ScanWindowController"];
-    //self.scanSheet = [[ScanWindowController alloc] initWithNibName:@"ScanViewController" bundle:nil];
     [NSApp beginSheet:self.scanSheet.window modalForWindow:self.view.window modalDelegate:self didEndSelector:@selector(scanSheetDidEnd:returnCode:contextInfo:) contextInfo:nil];
 }
 
 -(void)scanSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
-    NSLog(@"Fuck yeah!");
+    if( returnCode == NSAlertDefaultReturn )
+    {
+        User *newUser = [User alloc];
+        newUser.username = self.scanSheet.username;
+        newUser.password = self.scanSheet.password;
+        newUser.create = 1;
+        newUser.RRs = [NSMutableArray array];
+        newUser.RRsToSend = [NSMutableArray array];
+        newUser.heartRate = @"0";
+        NSArray *result = [self.dataBase performQuery:[NSString stringWithFormat:@"select user_id from users where username = \"%@\"", newUser.username]];
+        if ([result count] == 0)
+        {
+            [self.dataBase performQuery:[NSString stringWithFormat:@"insert into users(username, password) values(\"%@\", \"%@\")", newUser.username, newUser.password]];
+            
+            result = [self.dataBase performQuery:[NSString stringWithFormat:@"select user_id from users where username = \"%@\"", newUser.username]];
+        }
+        newUser.userId = [[[result objectAtIndex:0] objectAtIndex:0] intValue];
+        NSMutableArray *user = [self mutableArrayValueForKey:@"users"];
+        if( ![self.users containsObject:newUser] )
+            [user addObject:newUser];
+        [self.removeUserButton setEnabled:YES];
+    }
 }
 
 

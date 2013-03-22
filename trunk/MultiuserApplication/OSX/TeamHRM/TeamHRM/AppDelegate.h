@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 #import "MainViewController.h"
 
-@interface AppDelegate : NSObject <NSApplicationDelegate, ZXCaptureDelegate>
+@interface AppDelegate : NSObject <NSApplicationDelegate, ZXCaptureDelegate, NSWindowDelegate>
 
 @property (assign) IBOutlet NSWindow *window;
 @property (nonatomic,strong) IBOutlet MainViewController *mainViewController;
