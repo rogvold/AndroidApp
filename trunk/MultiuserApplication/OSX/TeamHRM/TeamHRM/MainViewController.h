@@ -34,6 +34,7 @@
 @property (strong) IBOutlet NSTextField *surnameFieldValue;
 @property (strong) IBOutlet NSTextField *weightFieldValue;
 @property (strong) IBOutlet NSTextField *heightFieldValue;
+@property (strong) IBOutlet NSTextField *ageFieldValue;
 @property (strong) IBOutlet NSTextField *sensorFieldValue;
 @property (strong) IBOutlet NSTextField *heartRateFieldValue;
 @property (strong) NSString *heartRate;
@@ -45,6 +46,7 @@
 @property (strong) IBOutlet NSTextField *surnameField;
 @property (strong) IBOutlet NSTextField *weightField;
 @property (strong) IBOutlet NSTextField *heightField;
+@property (strong) IBOutlet NSTextField *ageField;
 @property (strong) IBOutlet NSTextField *bpmField;
 @property (strong) IBOutlet NSTextField *sensorField;
 @property (strong) IBOutlet NSWindow *removeConfirmationWindow;
@@ -57,6 +59,9 @@
 @property (strong) IBOutlet NSScrollView *sensorsScrollView;
 
 @property (strong) IBOutlet NSTextField *authError;
+
+@property (strong) NSString *baseUrl;
+@property (strong) NSString *secret;
 
 - (IBAction)addUserButtonPressed:(id)sender;
 - (IBAction)removeUserButtonPressed:(id)sender;
@@ -76,6 +81,6 @@
 
 - (IBAction)syncData:(id)sender;
 
-- (IBAction)scanQRCode:(id)sender;
+- (IBAction)terminateApp:(id)sender;
 
 @end

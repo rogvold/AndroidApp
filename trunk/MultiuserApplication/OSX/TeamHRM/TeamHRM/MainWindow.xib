@@ -338,9 +338,9 @@
 					<object class="IBOutletConnection" key="connection">
 						<string key="label">delegate</string>
 						<reference key="source" ref="986977276"/>
-						<reference key="destination" ref="1050"/>
+						<reference key="destination" ref="987614521"/>
 					</object>
-					<int key="connectionID">1091</int>
+					<int key="connectionID">1092</int>
 				</object>
 			</array>
 			<object class="IBMutableOrderedSet" key="objectRecords">
@@ -624,7 +624,7 @@
 			<nil key="activeLocalization"/>
 			<dictionary class="NSMutableDictionary" key="localizations"/>
 			<nil key="sourceID"/>
-			<int key="maxID">1091</int>
+			<int key="maxID">1092</int>
 		</object>
 		<object class="IBClassDescriber" key="IBDocument.Classes">
 			<array class="NSMutableArray" key="referencedPartialClassDescriptions">
@@ -666,8 +666,8 @@
 						<string key="openRegisterUserSheet:">id</string>
 						<string key="registerUserButtonPressed:">id</string>
 						<string key="removeUserButtonPressed:">id</string>
-						<string key="scanQRCode:">id</string>
 						<string key="syncData:">id</string>
+						<string key="terminateApp:">id</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="actionInfosByName">
 						<object class="IBActionInfo" key="addUserButtonPressed:">
@@ -718,12 +718,12 @@
 							<string key="name">removeUserButtonPressed:</string>
 							<string key="candidateClassName">id</string>
 						</object>
-						<object class="IBActionInfo" key="scanQRCode:">
-							<string key="name">scanQRCode:</string>
-							<string key="candidateClassName">id</string>
-						</object>
 						<object class="IBActionInfo" key="syncData:">
 							<string key="name">syncData:</string>
+							<string key="candidateClassName">id</string>
+						</object>
+						<object class="IBActionInfo" key="terminateApp:">
+							<string key="name">terminateApp:</string>
 							<string key="candidateClassName">id</string>
 						</object>
 					</dictionary>

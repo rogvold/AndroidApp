@@ -32,6 +32,8 @@
 @property (strong) NSString *surname;
 @property (strong) NSString *weight;
 @property (strong) NSString *height;
+@property (strong) NSString *age;
+@property (strong) NSString *sex;
 @property BOOL isConnected;
 
 @end

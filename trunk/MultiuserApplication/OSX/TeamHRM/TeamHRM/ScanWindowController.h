@@ -15,32 +15,31 @@
 {
 @private
     
-    IBOutlet	NSWindow*				mainWindow;
-    IBOutlet	NSView*					mainView;
-    IBOutlet	NSView*					previewView;
-    IBOutlet	NSView*					binaryView;
-    IBOutlet	NSView*					luminanceView;
-    IBOutlet	NSTextField*			resultsText;
-    IBOutlet	NSPopUpButton*			sourceSelectPopupMenu;
-    IBOutlet	NSButton*				mirrorVideoCheckbox;
-    IBOutlet	NSButton*				soundsCheckbox;
-    IBOutlet	NSButton*				appLogoButton;
-    IBOutlet	NSButton*				captureButton;
-    IBOutlet	NSButton*				closeButton;
-    IBOutlet	NSBox*					previewBox;
-    IBOutlet	NSBox*					binaryBox;
-    IBOutlet	NSBox*					luminanceBox;
+    IBOutlet	NSWindow				*mainWindow;
+    IBOutlet	NSView					*mainView;
+    IBOutlet	NSView					*previewView;
+    IBOutlet	NSView					*binaryView;
+    IBOutlet	NSView                  *luminanceView;
+    IBOutlet	NSTextField             *resultsText;
+    IBOutlet	NSPopUpButton           *sourceSelectPopupMenu;
+    IBOutlet	NSButton				*mirrorVideoCheckbox;
+    IBOutlet	NSButton				*soundsCheckbox;
+    IBOutlet	NSButton				*appLogoButton;
+    IBOutlet	NSButton				*captureButton;
+    IBOutlet	NSButton				*closeButton;
+    IBOutlet	NSBox					*previewBox;
+    IBOutlet	NSBox					*binaryBox;
+    IBOutlet	NSBox					*luminanceBox;
     
-    ZXCapture*				zxingEngine;
-    CALayer*				captureLayer;
-    //ZXOverlay*				resultsLayer;
-    QTCaptureDevice*                      captureDevice;
-    NSUserDefaults*			userdefaults;
-    NSMutableArray*			allVideoDevices;
-    CVImageBufferRef                      currentImageBuffer;
-    NSString*				currentVideoSourceName;
-    BOOL					mirrorVideoMode;
-    NSSound*				resultsSound;
+    ZXCapture				*zxingEngine;
+    CALayer                 *captureLayer;
+    QTCaptureDevice         *captureDevice;
+    NSUserDefaults			*userdefaults;
+    NSMutableArray          *allVideoDevices;
+    CVImageBufferRef        currentImageBuffer;
+    NSString                *currentVideoSourceName;
+    BOOL					*mirrorVideoMode;
+    NSSound                 *resultsSound;
 }
 // --------------------------------------------------------------------
 
@@ -67,7 +66,6 @@
 
 @property (nonatomic, retain)			NSUserDefaults*		userdefaults;
 @property (nonatomic, retain)			ZXCapture*			zxingEngine;
-//@property (nonatomic, retain)			ZXOverlay*			resultsLayer;
 
 @property (nonatomic, retain)			CALayer*			captureLayer;
 @property (nonatomic, retain)			QTCaptureDevice*	captureDevice;

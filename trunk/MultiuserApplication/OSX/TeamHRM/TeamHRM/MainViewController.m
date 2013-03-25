@@ -29,6 +29,8 @@
     if (self) {
         self.heartRateMonitors = [NSMutableArray array];
         self.users = [NSMutableArray array];
+        self.baseUrl = @"http://www.cardiomood.com/BaseProjectWeb/";
+        self.secret = @"h7a7RaRtvAVwnMGq5BV6";
         manager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
         [self isLECapableHardware];
         NSString *applicationSupportPath = [NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) objectAtIndex:0];
@@ -281,6 +283,7 @@
     self.surnameFieldValue.hidden = false;
     self.weightFieldValue.hidden = false;
     self.heightFieldValue.hidden = false;
+    self.ageFieldValue.hidden = false;
     self.sensorFieldValue.hidden = false;
     self.heartRateFieldValue.hidden = false;
     
@@ -288,6 +291,7 @@
     self.surnameField.hidden = false;
     self.weightField.hidden = false;
     self.heightField.hidden = false;
+    self.ageField.hidden = false;
     self.bpmField.hidden = false;
     self.sensorField.hidden = false;
     
@@ -306,6 +310,8 @@
         self.weightFieldValue.stringValue = user.weight;
     if (user.height)
         self.heightFieldValue.stringValue = user.height;
+    if (user.age)
+        self.ageFieldValue.stringValue = user.age;
     if (user.connectedPeripheral)
         self.sensorFieldValue.stringValue = user.connectedPeripheral.name;
     if (user.heartRate)
@@ -331,6 +337,7 @@
     self.surnameFieldValue.hidden = true;
     self.weightFieldValue.hidden = true;
     self.heightFieldValue.hidden = true;
+    self.ageFieldValue.hidden = true;
     self.sensorFieldValue.hidden = true;
     self.heartRateFieldValue.hidden = true;
     
@@ -338,6 +345,7 @@
     self.surnameField.hidden = true;
     self.weightField.hidden = true;
     self.heightField.hidden = true;
+    self.ageField.hidden = true;
     self.bpmField.hidden = true;
     self.sensorField.hidden = true;
     
@@ -349,6 +357,7 @@
     self.surnameFieldValue.stringValue = @"";
     self.weightFieldValue.stringValue = @"";
     self.heightFieldValue.stringValue = @"";
+    self.ageFieldValue.stringValue = @"";
     self.sensorFieldValue.stringValue = @"";
     self.heartRateFieldValue.stringValue = @"";
 }
@@ -919,33 +928,26 @@
 // Send intervals to server
 - (NSString *) sendRRs:(NSMutableArray *)rrs withUser:(User *)user
 {
-    //NSData* jsonData = [self makeJSON:rrs];
-    NSString* jsonString = [self makeJSON:rrs withUser:user];
-    NSURL* url = [NSURL URLWithString:@"http://reshaka.ru:8080/BaseProjectWeb/faces/sync"];
+    NSString* jsonString = [@"json=" stringByAppendingString:[self makeJSON:user]];
     
-    
-    NSString* stringToSend = [@"json=" stringByAppendingString:jsonString];
-    NSData* dataToSend = [stringToSend dataUsingEncoding:NSUTF8StringEncoding];
-    
+    NSString *urlString = [NSString stringWithFormat:@"%@resources/rates/sync?%@", self.baseUrl, jsonString];
+    NSURL* url = [NSURL URLWithString:urlString];
     
     NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:url];
     [request setHTTPMethod:@"POST"];
     [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
-    [request setHTTPBody:dataToSend];
-    //[NSURLConnection connectionWithRequest:request delegate:self];
     NSError *error;
     return [[NSString alloc] initWithData:[NSURLConnection sendSynchronousRequest:request returningResponse:nil error:&error] encoding:NSUTF8StringEncoding];
-    //NSDictionary *responseDict = [NSJSONSerialization JSONObjectWithData:[NSURLConnection sendSynchronousRequest:request returningResponse:nil error:&error] options:0 error:&error];
 }
 
 // Make json based on array of rr intervals
--(NSString *) makeJSON:(NSMutableArray *)rrs withUser:(User *)user
+-(NSString *) makeJSON:(User *)user
 {
     NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
     [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss.SSS"];
     NSString* dateString = [dateFormatter stringFromDate:user.startTime];
-    NSArray* objects = @[dateString, user.deviceId, user.deviceName, rrs, user.username, user.password, user.create == 0 ? @"0" : @"1"];
-    NSArray* keys = @[@"start", @"device_id", @"device_name", @"rates", @"email", @"password", @"create"];
+    NSArray* objects = @[dateString, user.RRsToSend, user.username, user.password, user.create == 0 ? @"0" : @"1"];
+    NSArray* keys = @[@"start", @"rates", @"email", @"password", @"create"];
     
     user.create = 0;
     NSDictionary* JSONDictionary = [NSDictionary dictionaryWithObjects:objects forKeys:keys];
@@ -1039,26 +1041,76 @@
 {
     if( returnCode == NSAlertDefaultReturn )
     {
-        User *newUser = [User alloc];
-        newUser.username = self.scanSheet.username;
-        newUser.password = self.scanSheet.password;
-        newUser.create = 1;
-        newUser.RRs = [NSMutableArray array];
-        newUser.RRsToSend = [NSMutableArray array];
-        newUser.heartRate = @"0";
-        NSArray *result = [self.dataBase performQuery:[NSString stringWithFormat:@"select user_id from users where username = \"%@\"", newUser.username]];
-        if ([result count] == 0)
+        NSString *username = self.scanSheet.username;
+        BOOL retry = false;
+        for (User *user in self.users)
         {
-            [self.dataBase performQuery:[NSString stringWithFormat:@"insert into users(username, password) values(\"%@\", \"%@\")", newUser.username, newUser.password]];
-            
-            result = [self.dataBase performQuery:[NSString stringWithFormat:@"select user_id from users where username = \"%@\"", newUser.username]];
+            if ([user.username isEqualToString:username])
+            {
+                retry = true;
+            }
         }
-        newUser.userId = [[[result objectAtIndex:0] objectAtIndex:0] intValue];
-        NSMutableArray *user = [self mutableArrayValueForKey:@"users"];
-        if( ![self.users containsObject:newUser] )
-            [user addObject:newUser];
-        [self.removeUserButton setEnabled:YES];
+        if (retry)
+        {
+            [NSApp endSheet:self.scanSheet.window returnCode:NSAlertDefaultReturn];
+            [self.scanSheet.window orderOut:self];
+            NSAlert *alert = [[NSAlert alloc] init];
+            [alert setMessageText:@"User with this username currently signed in."];
+            [alert addButtonWithTitle:@"OK"];
+            [alert setIcon:[[NSImage alloc] initWithContentsOfFile:@"AppIcon"]];
+            [alert beginSheetModalForWindow:[[self view] window] modalDelegate:self didEndSelector:nil contextInfo:nil];
+        }
+        else
+        {
+            User *newUser = [User alloc];
+            newUser.username = self.scanSheet.username;
+            newUser.password = self.scanSheet.password;
+            newUser.create = 1;
+            newUser.RRs = [NSMutableArray array];
+            newUser.RRsToSend = [NSMutableArray array];
+            newUser.heartRate = @"0";
+            newUser = [self setUserData:newUser];
+            NSArray *result = [self.dataBase performQuery:[NSString stringWithFormat:@"select user_id from users where username = \"%@\"", newUser.username]];
+            if ([result count] == 0)
+            {
+                [self.dataBase performQuery:[NSString stringWithFormat:@"insert into users(username, password) values(\"%@\", \"%@\")", newUser.username, newUser.password]];
+                
+                result = [self.dataBase performQuery:[NSString stringWithFormat:@"select user_id from users where username = \"%@\"", newUser.username]];
+            }
+            newUser.userId = [[[result objectAtIndex:0] objectAtIndex:0] intValue];
+            NSMutableArray *user = [self mutableArrayValueForKey:@"users"];
+            if( ![self.users containsObject:newUser] )
+                [user addObject:newUser];
+            [self.removeUserButton setEnabled:YES];
+        }
     }
+    
+}
+
+-(User*)setUserData:(User*)user
+{
+    NSError* error = nil;
+    NSString *urlString = [NSString stringWithFormat:@"%@resources/auth/info?secret=%@&email=%@&password=%@", self.baseUrl, self.secret, user.username, user.password];
+    
+    NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"%@", urlString]];
+    
+    NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:url];
+    [request setHTTPMethod:@"POST"];
+    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+    
+    NSDictionary *response = [NSJSONSerialization
+              JSONObjectWithData:[NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil]
+              options:kNilOptions
+              error:&error];
+    
+    user.name = [response objectForKey:@"firstName"];
+    user.surname = [response objectForKey:@"lastName"];
+    user.weight = [response objectForKey:@"weight"];
+    user.height = [response objectForKey:@"height"];
+    user.age = [response objectForKey:@"age"];
+    user.sex = [response objectForKey:@"sex"];
+    
+    return user;
 }
 
 

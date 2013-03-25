@@ -30,7 +30,6 @@
 @synthesize captureLayer;
 @synthesize closeButton;
 @synthesize captureDevice;
-@synthesize mirrorVideoMode;
 @synthesize resultsText;
 @synthesize retryButton;
 

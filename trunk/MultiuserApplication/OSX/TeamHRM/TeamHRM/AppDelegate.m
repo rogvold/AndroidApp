@@ -25,4 +25,10 @@
     return YES;
 }
 
+- (BOOL)windowShouldClose:(id)sender
+{
+    [NSApp terminate:self];
+    return FALSE;
+}
+
 @end
