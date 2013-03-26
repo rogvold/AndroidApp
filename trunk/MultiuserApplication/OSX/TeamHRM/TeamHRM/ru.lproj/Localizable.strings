@@ -1,0 +1,18 @@
+/*
+ Localizable.strings
+ TeamHRM
+ 
+ Created by Alexander O. Taraymovich on 26.03.13.
+ Copyright (c) 2013 Alexander O. Taraymovich. All rights reserved.
+ */
+
+"Connect" = "Соединить";
+"Disconnect" = "Разъединить";
+"Detected" = "Найден пользователь с именем:";
+"Not supported" = "Платформа/оборудование не поддерживает Bluetooth Low Energy.";
+"Not authorized" = "Приложение не авторизовано для использования Bluetooth Low Energy.";
+"Powered on" = "Bluetooth активирован.";
+"No connection" = "Отсутствует интернет-соединение.";
+"Sync success" = "Синхронизация успешно завершена.";
+"User suplicate" = "Пользователь с таким именем уже вошел в систему.";
+"Authorization fail" = "Данные авторизации неверны. Попробуйте еще раз.";

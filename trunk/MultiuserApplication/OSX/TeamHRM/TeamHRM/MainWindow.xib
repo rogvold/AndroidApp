@@ -587,6 +587,8 @@
 				<string key="-3.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="823.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="825.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
+				<boolean value="YES" key="826.IBNSWindowAutoPositionCentersHorizontal"/>
+				<boolean value="YES" key="826.IBNSWindowAutoPositionCentersVertical"/>
 				<string key="826.IBPluginDependency">com.apple.InterfaceBuilder.CocoaPlugin</string>
 				<string key="826.IBWindowTemplateEditedContentRect">{{380, 496}, {480, 360}}</string>
 				<integer value="1" key="826.NSWindowTemplate.visibleAtLaunch"/>
@@ -664,6 +666,8 @@
 						<string key="connectButtonPressed:">id</string>
 						<string key="openAddUserSheet:">id</string>
 						<string key="openRegisterUserSheet:">id</string>
+						<string key="openRemoveUserSheet:">id</string>
+						<string key="openScanWindow:">id</string>
 						<string key="registerUserButtonPressed:">id</string>
 						<string key="removeUserButtonPressed:">id</string>
 						<string key="syncData:">id</string>
@@ -710,6 +714,14 @@
 							<string key="name">openRegisterUserSheet:</string>
 							<string key="candidateClassName">id</string>
 						</object>
+						<object class="IBActionInfo" key="openRemoveUserSheet:">
+							<string key="name">openRemoveUserSheet:</string>
+							<string key="candidateClassName">id</string>
+						</object>
+						<object class="IBActionInfo" key="openScanWindow:">
+							<string key="name">openScanWindow:</string>
+							<string key="candidateClassName">id</string>
+						</object>
 						<object class="IBActionInfo" key="registerUserButtonPressed:">
 							<string key="name">registerUserButtonPressed:</string>
 							<string key="candidateClassName">id</string>
@@ -731,6 +743,8 @@
 						<string key="addButton">NSButton</string>
 						<string key="addSheet">NSWindow</string>
 						<string key="addUserButton">NSButton</string>
+						<string key="ageField">NSTextField</string>
+						<string key="ageFieldValue">NSTextField</string>
 						<string key="authError">NSTextField</string>
 						<string key="bpmField">NSTextField</string>
 						<string key="connectButton">NSButton</string>
@@ -754,6 +768,7 @@
 						<string key="signupButton">NSButton</string>
 						<string key="surnameField">NSTextField</string>
 						<string key="surnameFieldValue">NSTextField</string>
+						<string key="syncButton">NSButton</string>
 						<string key="userTableView">NSTableView</string>
 						<string key="username">NSTextField</string>
 						<string key="usersArrayController">NSArrayController</string>
@@ -772,6 +787,14 @@
 						<object class="IBToOneOutletInfo" key="addUserButton">
 							<string key="name">addUserButton</string>
 							<string key="candidateClassName">NSButton</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="ageField">
+							<string key="name">ageField</string>
+							<string key="candidateClassName">NSTextField</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="ageFieldValue">
+							<string key="name">ageFieldValue</string>
+							<string key="candidateClassName">NSTextField</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="authError">
 							<string key="name">authError</string>
@@ -864,6 +887,10 @@
 						<object class="IBToOneOutletInfo" key="surnameFieldValue">
 							<string key="name">surnameFieldValue</string>
 							<string key="candidateClassName">NSTextField</string>
+						</object>
+						<object class="IBToOneOutletInfo" key="syncButton">
+							<string key="name">syncButton</string>
+							<string key="candidateClassName">NSButton</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="userTableView">
 							<string key="name">userTableView</string>

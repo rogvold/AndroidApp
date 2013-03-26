@@ -1,0 +1,18 @@
+/* 
+  Localizable.strings
+  TeamHRM
+
+  Created by Alexander O. Taraymovich on 26.03.13.
+  Copyright (c) 2013 Alexander O. Taraymovich. All rights reserved.
+*/
+
+"Connect" = "Connect";
+"Disconnect" = "Disconnect";
+"Detected" = "Detected user with username:";
+"Not supported" = "The platform/hardware doesn't support Bluetooth Low Energy.";
+"Not authorized" = "The app is not authorized to use Bluetooth Low Energy.";
+"Powered on" = "Bluetooth is currently powered on.";
+"No connection" = "No internet connection.";
+"Sync success" = "Synchronization successfully finished.";
+"User suplicate" = "User with this username currently signed in.";
+"Authorization fail" = "Authorization data is not valid. Please try again.";

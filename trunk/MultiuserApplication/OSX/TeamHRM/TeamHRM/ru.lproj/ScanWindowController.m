@@ -440,7 +440,7 @@
                 if (![emailTest evaluateWithObject:resultArray[0]])
                 {
                     [retryButton setEnabled:YES];
-                    [resultsText setStringValue:@"Authorization data is not valid. Please try again."];
+                    [resultsText setStringValue:NSLocalizedString(@"Authorization fail", nil)];
                 }
                 else
                 {
@@ -448,13 +448,13 @@
                     password = resultArray[1];
                     [retryButton setEnabled:YES];
                     [signInButton setEnabled:YES];
-                    [resultsText setStringValue:[NSString stringWithFormat:@"Detected user with username: %@.", username]];
+                    [resultsText setStringValue:[NSString stringWithFormat:@"%@: %@.", NSLocalizedString(@"Detected", @""),username]];
                 }
             }
             else
             {
                 [retryButton setEnabled:YES];
-                [resultsText setStringValue:@"Authorization data is not valid. Please try again."];
+                [resultsText setStringValue:NSLocalizedString(@"Authorization fail", nil)];
             }
             [self manageOverlay:inResult];
             

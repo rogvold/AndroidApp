@@ -312,7 +312,7 @@
         self.sensorFieldValue.stringValue = user.connectedPeripheral.name;
     if (user.heartRate)
         self.heartRateFieldValue.stringValue = user.heartRate;
-    self.connectButton.title = user.isConnected ? @"Disconnect" : @"Connect";
+    self.connectButton.title = user.isConnected ? NSLocalizedString(@"Disconnect", nil) : NSLocalizedString(@"Connect", nil);
     self.sensorsView.enabled = !user.isConnected;
 }
 
@@ -450,7 +450,7 @@
             [self.heartRateMonitors removeObject:peripheral];
             self.sensorFieldValue.stringValue = user.connectedPeripheral.name;
             user.isConnected = true;
-            self.connectButton.title = @"Disconnect";
+            self.connectButton.title = NSLocalizedString(@"Disconnect", nil);
             self.sensorsView.enabled = false;
         }
     }
@@ -649,13 +649,13 @@
     switch ([manager state])
     {
         case CBCentralManagerStateUnsupported:
-            state = @"The platform/hardware doesn't support Bluetooth Low Energy.";
+            state = NSLocalizedString(@"Not supported", nil);
             break;
         case CBCentralManagerStateUnauthorized:
-            state = @"The app is not authorized to use Bluetooth Low Energy.";
+            state = NSLocalizedString(@"Not authorized", nil);
             break;
         case CBCentralManagerStatePoweredOff:
-            state = @"Bluetooth is currently powered off.";
+            state = NSLocalizedString(@"Powered on", nil);
             break;
         case CBCentralManagerStatePoweredOn:
             [self.addUserButton setEnabled:YES];
@@ -739,7 +739,7 @@
  */
 - (void)centralManager:(CBCentralManager *)central didDisconnectPeripheral:(CBPeripheral *)aPeripheral error:(NSError *)error
 {
-    [self.connectButton setTitle:@"Connect"];
+    [self.connectButton setTitle:NSLocalizedString(@"Connect", nil)];
     self.heartRate = @"0";
     self.sensorFieldValue.stringValue = @"";
     self.sensorsView.enabled = true;
@@ -767,7 +767,7 @@
 - (void)centralManager:(CBCentralManager *)central didFailToConnectPeripheral:(CBPeripheral *)aPeripheral error:(NSError *)error
 {
     NSLog(@"Fail to connect to peripheral: %@ with error = %@", aPeripheral, [error localizedDescription]);
-    [self.connectButton setTitle:@"Connect"];
+    [self.connectButton setTitle:NSLocalizedString(@"Connect", nil)];
 }
 
 #pragma mark - CBPeripheral delegate methods
@@ -991,7 +991,7 @@
     else
     {
         NSAlert *alert = [[NSAlert alloc] init];
-        [alert setMessageText:@"No internet connection"];
+        [alert setMessageText:NSLocalizedString(@"No connection", nil)];
         [alert addButtonWithTitle:@"OK"];
         [alert setIcon:[[NSImage alloc] initWithContentsOfFile:@"AppIcon"]];
         [alert beginSheetModalForWindow:[[self view] window] modalDelegate:self didEndSelector:nil contextInfo:nil];
@@ -1042,7 +1042,7 @@
     if ([result count] == 0)
     {
         NSAlert *alert = [[NSAlert alloc] init];
-        [alert setMessageText:@"Synchronization successfully finished."];
+        [alert setMessageText:NSLocalizedString(@"Sync success", nil)];
         [alert addButtonWithTitle:@"OK"];
         [alert setIcon:[[NSImage alloc] initWithContentsOfFile:@"AppIcon"]];
         [alert beginSheetModalForWindow:[[self view] window] modalDelegate:self didEndSelector:nil contextInfo:nil];
@@ -1074,7 +1074,7 @@
             [NSApp endSheet:self.scanSheet.window returnCode:NSAlertDefaultReturn];
             [self.scanSheet.window orderOut:self];
             NSAlert *alert = [[NSAlert alloc] init];
-            [alert setMessageText:@"User with this username currently signed in."];
+            [alert setMessageText:NSLocalizedString(@"User duplicate", nil)];
             [alert addButtonWithTitle:@"OK"];
             [alert setIcon:[[NSImage alloc] initWithContentsOfFile:@"AppIcon"]];
             [alert beginSheetModalForWindow:[[self view] window] modalDelegate:self didEndSelector:nil contextInfo:nil];
