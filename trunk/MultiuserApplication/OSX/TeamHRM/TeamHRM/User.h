@@ -20,11 +20,8 @@
 @property (strong) NSString *deviceName;
 @property (strong) NSString *deviceId;
 @property (strong) NSString *heartRate;
-// RR intervals
-@property (strong) NSMutableArray *RRs;
-// Queue for intervals waiting to be sent
-@property (strong) NSMutableArray *RRsToSend;
-// Start time for each portion of intervals sending to server
+@property (strong) NSMutableArray *intervals;
+@property (strong) NSMutableArray *intervalsToSave;
 @property (strong) NSDate *startTime;
 @property (assign) int create;
 

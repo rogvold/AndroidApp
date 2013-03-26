@@ -18,6 +18,12 @@
     [self.window.contentView addSubview:self.mainViewController.view];
     
     self.mainViewController.view.frame = ((NSView*)self.window.contentView).bounds;
+    
+    NSArray *result = [self.mainViewController.dataBase performQuery:@"select * from sessions"];
+    if ([result count] != 0 && [MainViewController hasConnectivity])
+    {
+        [self.mainViewController.syncButton setEnabled:YES];
+    }
 }
 
 - (BOOL) applicationShouldTerminateAfterLastWindowClosed:(NSApplication *)application

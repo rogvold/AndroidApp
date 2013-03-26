@@ -54,6 +54,7 @@
 @property (strong) IBOutlet NSButton *addButton;
 @property (strong) IBOutlet NSButton *addUserButton;
 @property (strong) IBOutlet NSButton *removeUserButton;
+@property (strong) IBOutlet NSButton *syncButton;
 @property (strong) IBOutlet NSTableView *sensorsView;
 @property (strong) IBOutlet NSButton *connectButton;
 @property (strong) IBOutlet NSScrollView *sensorsScrollView;
@@ -82,5 +83,6 @@
 - (IBAction)syncData:(id)sender;
 
 - (IBAction)terminateApp:(id)sender;
++ (BOOL)hasConnectivity;
 
 @end

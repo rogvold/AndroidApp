@@ -46,26 +46,22 @@
                 NSLog(@"%@", error);
             }
         }
-        NSString *databasePath = [applicationPath stringByAppendingPathComponent:@"local.sqlite"];
+        NSString *databasePath = [applicationPath stringByAppendingPathComponent:@"local.db"];
         self.dataBase = [[DataBaseInteraction alloc] initWithPath:databasePath];
-        NSArray *result = [self.dataBase performQuery:@"select count(*) from users"];
-        if (!result)
+        NSArray *result = [self.dataBase performQuery:@"select * from users"];
+        if ([result count] == 0)
         {
-            [self.dataBase performQuery:@"create table users(user_id integer primary key, username text, password text)"];
+            [self.dataBase performQuery:@"create table users(user_id integer primary key, username text, password text, first_name text, last_name text, height integer, weight integer, age integer, sex integer)"];
             [self.dataBase performQuery:@"create table intervals(intervals_id integer primary key, session_id numeric, value text)"];
             [self.dataBase performQuery:@"create table sessions(session_id integer primary key, user_id numeric, start_time text, device_name text, device_id text)"];
         }
-        //BOOL isConnected = [self hasConnectivity];
-        [self resetDetailInfo];
+        //[self resetDetailInfo];
     }
     
     return self;
 }
 
-/*
- Connectivity testing code
- */
-- (BOOL)hasConnectivity {
++ (BOOL)hasConnectivity {
     struct sockaddr_in zeroAddress;
     bzero(&zeroAddress, sizeof(zeroAddress));
     zeroAddress.sin_len = sizeof(zeroAddress);
@@ -270,7 +266,7 @@
         if ([self.userTableView selectedRow] != -1)
         {
             User *selectedUser = [self selectedUser];
-            
+            [self getLocalUserData:selectedUser];
             [self setDetailInfo:selectedUser];
         }
     }
@@ -378,24 +374,24 @@
 - (IBAction)closeAddUserSheet:(id)sender
 {
     /*int exists = [self userExists:self.username.stringValue];
-    int rightPass = [self checkUser:self.username.stringValue withPassword:self.password.stringValue];
-    if (exists && rightPass)
-    {*/
-        [NSApp endSheet:self.addSheet returnCode:NSAlertDefaultReturn];
-        [self.addSheet orderOut:self];
-        /*}
-    else if (!exists)
-    {
-        self.authError.stringValue = @"User with entered e-mail not found.";
-    }
-    else if (exists && !rightPass)
-    {
-        self.authError.stringValue = @"Password is incorrect. Try again.";
-    }
-    else if (exists == -1 && rightPass == -1)
-    {
-        self.authError.stringValue = @"An error occured. Try again later.";
-    }*/
+     int rightPass = [self checkUser:self.username.stringValue withPassword:self.password.stringValue];
+     if (exists && rightPass)
+     {*/
+    [NSApp endSheet:self.addSheet returnCode:NSAlertDefaultReturn];
+    [self.addSheet orderOut:self];
+    /*}
+     else if (!exists)
+     {
+     self.authError.stringValue = @"User with entered e-mail not found.";
+     }
+     else if (exists && !rightPass)
+     {
+     self.authError.stringValue = @"Password is incorrect. Try again.";
+     }
+     else if (exists == -1 && rightPass == -1)
+     {
+     self.authError.stringValue = @"An error occured. Try again later.";
+     }*/
 }
 
 /*
@@ -418,8 +414,7 @@
         newUser.username = self.username.stringValue;
         newUser.password = self.password.stringValue;
         newUser.create = 1;
-        newUser.RRs = [NSMutableArray array];
-        newUser.RRsToSend = [NSMutableArray array];
+        newUser.intervals = [NSMutableArray array];
         newUser.heartRate = @"0";
         NSArray *result = [self.dataBase performQuery:[NSString stringWithFormat:@"select user_id from users where username = \"%@\"", newUser.username]];
         if ([result count] == 0)
@@ -450,6 +445,7 @@
         {
             NSUInteger anIndex = [indexes firstIndex];
             CBPeripheral *peripheral = [self.heartRateMonitors objectAtIndex:anIndex];
+            user.connectedPeripheral = peripheral;
             [manager connectPeripheral:peripheral options:nil];
             [self.heartRateMonitors removeObject:peripheral];
             self.sensorFieldValue.stringValue = user.connectedPeripheral.name;
@@ -611,23 +607,21 @@
         }
         else
         {
-            //NSLog(@"RR intervals are present");
+            NSLog(@"RR intervals are present");
             NSMutableArray* rrs = [NSMutableArray array];
             uint16_t rr = (CFSwapInt16LittleToHost(*(uint16_t *)(&reportData[rrByte])) * 1000) / 1024;
             while (rr != 0)
             {
-                //NSLog(@"%@", [NSString stringWithFormat:@"RR: %d", rr]);
                 [rrs addObject:[NSNumber numberWithInt:rr]];
                 rrByte += 2;
                 rr = (CFSwapInt16LittleToHost(*(uint16_t *)(&reportData[rrByte])) * 1000) / 1024;
             }
-            [updatingUser.RRs addObjectsFromArray:rrs];
-            [updatingUser.RRsToSend addObjectsFromArray:rrs];
-            // Send every 10 intervals to server
-            if ([updatingUser.RRsToSend count] >= 10) {
-                //[self sendRRs:updatingUser.RRsToSend withUser:updatingUser];
-                [self saveIntervals:updatingUser.RRsToSend withUser:updatingUser];
-                [updatingUser.RRsToSend removeAllObjects];
+            [updatingUser.intervals addObjectsFromArray:rrs];
+            [updatingUser.intervalsToSave addObjectsFromArray:rrs];
+            
+            if ([updatingUser.intervalsToSave count] >= 50) {
+                [self saveIntervals:updatingUser];
+                [updatingUser.intervalsToSave removeAllObjects];
                 updatingUser.startTime = [NSDate date];
             }
         }
@@ -636,7 +630,7 @@
         if (updatingUser == [self selectedUser])
         {
             self.heartRate = updatingUser.heartRate;
-            NSLog(@"Data recieved from: %@", updatingUser.connectedPeripheral);
+            //NSLog(@"Data recieved from: %@", updatingUser.connectedPeripheral);
         }
     }
 }
@@ -760,6 +754,10 @@
         user.connectedPeripheral = nil;
         user.heartRate = @"0";
         user.isConnected = false;
+        if ([user.intervalsToSave count] > 0)
+        {
+            [self saveIntervals:user];
+        }
     }
 }
 
@@ -926,27 +924,38 @@
 
 #pragma mark Json methods
 // Send intervals to server
-- (NSString *) sendRRs:(NSMutableArray *)rrs withUser:(User *)user
+- (NSString *) sendRRs:(User *)user
 {
-    NSString* jsonString = [@"json=" stringByAppendingString:[self makeJSON:user]];
+    NSError *error;
+    NSString* jsonString = [self makeJSON:user];
+    NSString* stringToSend = [@"json=" stringByAppendingString:jsonString];
+    NSData* dataToSend = [stringToSend dataUsingEncoding:NSUTF8StringEncoding];
     
-    NSString *urlString = [NSString stringWithFormat:@"%@resources/rates/sync?%@", self.baseUrl, jsonString];
+    NSString *urlString = [NSString stringWithFormat:@"%@resources/rates/sync", self.baseUrl];
     NSURL* url = [NSURL URLWithString:urlString];
     
     NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:url];
     [request setHTTPMethod:@"POST"];
     [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
-    NSError *error;
-    return [[NSString alloc] initWithData:[NSURLConnection sendSynchronousRequest:request returningResponse:nil error:&error] encoding:NSUTF8StringEncoding];
+    [request setHTTPBody:dataToSend];
+    
+    NSDictionary *response = [NSJSONSerialization
+              JSONObjectWithData:[NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil]
+              options:kNilOptions
+              error:&error];
+    if ([response objectForKey:@"response"])
+        return [response objectForKey:@"response"];
+    else
+    {
+        NSLog(@"%@", [response objectForKey:@"error"]);
+        return @"";
+    }
 }
 
 // Make json based on array of rr intervals
 -(NSString *) makeJSON:(User *)user
 {
-    NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss.SSS"];
-    NSString* dateString = [dateFormatter stringFromDate:user.startTime];
-    NSArray* objects = @[dateString, user.RRsToSend, user.username, user.password, user.create == 0 ? @"0" : @"1"];
+    NSArray* objects = @[[NSString stringWithFormat:@"%ld", (NSInteger)([user.startTime timeIntervalSince1970] * 1000)], user.intervals, user.username, user.password, user.create == 0 ? @"0" : @"1"];
     NSArray* keys = @[@"start", @"rates", @"email", @"password", @"create"];
     
     user.create = 0;
@@ -965,14 +974,17 @@
     return json;
 }
 
--(void) saveIntervals:(NSArray *)rrs withUser:(User *)user
+-(void) saveIntervals:(User *)user
 {
-    [self.dataBase performQuery:[NSString stringWithFormat:@"insert into intervals(session_id, value) values(%ld, \"%@\")", (long)user.currentSessionId, [rrs componentsJoinedByString:@","]]];
+    [self.dataBase performQuery:[NSString stringWithFormat:@"insert into intervals(session_id, value) values(%ld, \"%@\")", (long)user.currentSessionId, [user.intervalsToSave componentsJoinedByString:@","]]];
+    [user.intervalsToSave removeAllObjects];
+
 }
 
 - (IBAction) syncData:(id)sender
 {
-    if ([self hasConnectivity])
+    [self.syncButton setEnabled:NO];
+    if ([MainViewController hasConnectivity])
     {
         [self performSelectorInBackground:@selector(sync) withObject:nil];
     }
@@ -991,6 +1003,10 @@
     NSArray *users = [self.dataBase performQuery:@"select * from users"];
     for (NSArray *user in users)
     {
+        User *newUser = [User alloc];
+        newUser.username = [user objectAtIndex:1];
+        newUser.password = [user objectAtIndex:2];
+        [self getUserData:newUser];
         NSArray *sessions = [self.dataBase performQuery:[NSString stringWithFormat:@"select * from sessions where user_id = %ld", (long)[[user objectAtIndex:0] intValue]]];
         for (NSArray *session in sessions)
         {
@@ -1000,25 +1016,27 @@
             {
                 [intervals addObjectsFromArray:[[value objectAtIndex:0] componentsSeparatedByString:@","]];
             }
-            User *newUser = [User alloc];
-            newUser.username = [user objectAtIndex:1];
-            newUser.password = [user objectAtIndex:2];
             newUser.create = 1;
-            newUser.RRs = intervals;
-            newUser.RRsToSend = intervals;
+            newUser.intervals = intervals;
             newUser.heartRate = @"0";
             NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
             [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss.SSS"];
             newUser.startTime = [dateFormatter dateFromString:[session objectAtIndex:2]];
             newUser.deviceName = [session objectAtIndex:3];
             newUser.deviceId = [session objectAtIndex:4];
-            if ([[self sendRRs:intervals withUser:newUser] isEqualToString:@"ok"])
+            if ([[self sendRRs:newUser] isEqual:@"1"])
             {
                 [self.dataBase performQuery:[NSString stringWithFormat:@"delete from intervals where session_id = %ld", (long)[[session objectAtIndex:0] intValue]]];
                 [self.dataBase performQuery:[NSString stringWithFormat:@"delete from sessions where session_id = %ld", (long)[[session objectAtIndex:0] intValue]]];
                 [self.dataBase performQuery:@"vacuum"];
             }
         }
+    }
+    User *selectedUser = [self selectedUser];
+    if (selectedUser)
+    {
+        [self getLocalUserData:selectedUser];
+        [self setDetailInfo:selectedUser];
     }
     NSArray *result = [self.dataBase performQuery:@"select * from sessions"];
     if ([result count] == 0)
@@ -1028,6 +1046,7 @@
         [alert addButtonWithTitle:@"OK"];
         [alert setIcon:[[NSImage alloc] initWithContentsOfFile:@"AppIcon"]];
         [alert beginSheetModalForWindow:[[self view] window] modalDelegate:self didEndSelector:nil contextInfo:nil];
+        [self.syncButton setEnabled:NO];
     }
 }
 
@@ -1066,10 +1085,9 @@
             newUser.username = self.scanSheet.username;
             newUser.password = self.scanSheet.password;
             newUser.create = 1;
-            newUser.RRs = [NSMutableArray array];
-            newUser.RRsToSend = [NSMutableArray array];
+            newUser.intervals = [NSMutableArray array];
+            newUser.intervalsToSave = [NSMutableArray array];
             newUser.heartRate = @"0";
-            newUser = [self setUserData:newUser];
             NSArray *result = [self.dataBase performQuery:[NSString stringWithFormat:@"select user_id from users where username = \"%@\"", newUser.username]];
             if ([result count] == 0)
             {
@@ -1077,6 +1095,11 @@
                 
                 result = [self.dataBase performQuery:[NSString stringWithFormat:@"select user_id from users where username = \"%@\"", newUser.username]];
             }
+            if ([MainViewController hasConnectivity])
+            {
+                [self getUserData:newUser];
+            }
+            newUser = [self getLocalUserData:newUser];
             newUser.userId = [[[result objectAtIndex:0] objectAtIndex:0] intValue];
             NSMutableArray *user = [self mutableArrayValueForKey:@"users"];
             if( ![self.users containsObject:newUser] )
@@ -1087,7 +1110,7 @@
     
 }
 
--(User*)setUserData:(User*)user
+-(void)getUserData:(User*)user
 {
     NSError* error = nil;
     NSString *urlString = [NSString stringWithFormat:@"%@resources/auth/info?secret=%@&email=%@&password=%@", self.baseUrl, self.secret, user.username, user.password];
@@ -1097,11 +1120,12 @@
     NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:url];
     [request setHTTPMethod:@"POST"];
     [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
+    //[request setTimeoutInterval:5];
     
     NSDictionary *response = [NSJSONSerialization
-              JSONObjectWithData:[NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil]
-              options:kNilOptions
-              error:&error];
+                              JSONObjectWithData:[NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil]
+                              options:kNilOptions
+                              error:&error];
     
     user.name = [response objectForKey:@"firstName"];
     user.surname = [response objectForKey:@"lastName"];
@@ -1109,9 +1133,21 @@
     user.height = [response objectForKey:@"height"];
     user.age = [response objectForKey:@"age"];
     user.sex = [response objectForKey:@"sex"];
+    [self.dataBase performQuery:[NSString stringWithFormat:@"update users set first_name = \"%@\", last_name = \"%@\", weight = \"%@\", height = \"%@\", age = \"%@\", sex = \"%@\" where username = \"%@\"", user.name, user.surname, user.weight, user.height, user.age, user.sex, user.username]];
+}
+
+-(User*)getLocalUserData:(User*)user
+{
+    NSArray *result = [self.dataBase performQuery:[NSString stringWithFormat:@"select * from users where username = \"%@\"", user.username]];
+    
+    user.name = [[[result objectAtIndex:0]objectAtIndex:3] isEqual:[NSNull  null]] ? @"" : [[result objectAtIndex:0]objectAtIndex:3];
+    user.surname = [[[result objectAtIndex:0]objectAtIndex:4] isEqual:[NSNull  null]] ? @"" : [[result objectAtIndex:0]objectAtIndex:4];
+    user.weight = [[[result objectAtIndex:0]objectAtIndex:5] isEqual:[NSNull  null]] ? @"" : [[result objectAtIndex:0]objectAtIndex:5];
+    user.height = [[[result objectAtIndex:0]objectAtIndex:6] isEqual:[NSNull  null]] ? @"" : [[result objectAtIndex:0]objectAtIndex:6];
+    user.age = [[[result objectAtIndex:0]objectAtIndex:7] isEqual:[NSNull  null]] ? @"" : [[result objectAtIndex:0]objectAtIndex:7];
+    user.sex = [[[result objectAtIndex:0]objectAtIndex:8] isEqual:[NSNull  null]] ? @"" : [[result objectAtIndex:0]objectAtIndex:8];
     
     return user;
 }
-
 
 @end

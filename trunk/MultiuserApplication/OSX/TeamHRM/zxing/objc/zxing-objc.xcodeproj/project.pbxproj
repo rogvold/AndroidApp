@@ -141,6 +141,7 @@
 		3BC3D69A158E8D5B0037CE30 /* QTKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QTKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk/System/Library/Frameworks/QTKit.framework; sourceTree = DEVELOPER_DIR; };
 		3BC3D69C158E8E7F0037CE30 /* zxing_objc_framework.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = zxing_objc_framework.h; sourceTree = "<group>"; };
 		3BC3D69E158E8E880037CE30 /* zxing_objc_framework.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = zxing_objc_framework.m; sourceTree = "<group>"; };
+		FA77A63E1700580E00A4F961 /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -374,6 +375,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				ru,
 			);
 			mainGroup = 3B83EB1A158E6C5100A3B31F;
 			productRefGroup = 3B83EB26158E6C5100A3B31F /* Products */;
@@ -493,6 +495,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				3B83EB9B158E71AD00A3B31F /* en */,
+				FA77A63E1700580E00A4F961 /* ru */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";

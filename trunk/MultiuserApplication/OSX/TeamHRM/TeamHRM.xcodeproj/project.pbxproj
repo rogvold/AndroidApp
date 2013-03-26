@@ -289,6 +289,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				ru,
 			);
 			mainGroup = FAFAD72A167E57DB005C8FE6;
 			productRefGroup = FAFAD736167E57DB005C8FE6 /* Products */;
