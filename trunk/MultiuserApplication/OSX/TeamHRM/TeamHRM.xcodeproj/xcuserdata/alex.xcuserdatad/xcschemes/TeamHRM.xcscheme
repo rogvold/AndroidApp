@@ -59,8 +59,8 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "-AppleLanguages &quot;(Russian)&quot;"
-            isEnabled = "NO">
+            argument = "-AppleLanguages &quot;(English)&quot;"
+            isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
       <AdditionalOptions>

@@ -448,7 +448,7 @@
                     password = resultArray[1];
                     [retryButton setEnabled:YES];
                     [signInButton setEnabled:YES];
-                    [resultsText setStringValue:[NSString stringWithFormat:@"%@: %@.", NSLocalizedString(@"Detected", nil),username]];
+                    [resultsText setStringValue:[NSString stringWithFormat:@"%@ %@.", NSLocalizedString(@"Detected", nil),username]];
                 }
             }
             else

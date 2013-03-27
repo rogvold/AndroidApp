@@ -27,6 +27,7 @@
 		FAF902621680A933006F7E6D /* JSONKit.m in Sources */ = {isa = PBXBuildFile; fileRef = FAF902611680A932006F7E6D /* JSONKit.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		FAF956B41701AB510033D5DD /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = FAF956B61701AB510033D5DD /* Localizable.strings */; };
 		FAF956BD1701ACA50033D5DD /* ScanWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = FAF956BC1701ACA50033D5DD /* ScanWindowController.m */; };
+		FAF956BF1701B1CE0033D5DD /* Settings.plist in Resources */ = {isa = PBXBuildFile; fileRef = FAF956BE1701B1CD0033D5DD /* Settings.plist */; };
 		FAFAD73A167E57DB005C8FE6 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAFAD739167E57DB005C8FE6 /* Cocoa.framework */; };
 		FAFAD744167E57DB005C8FE6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = FAFAD742167E57DB005C8FE6 /* InfoPlist.strings */; };
 		FAFAD746167E57DB005C8FE6 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = FAFAD745167E57DB005C8FE6 /* main.m */; };
@@ -98,6 +99,7 @@
 		FAF956B51701AB510033D5DD /* en */ = {isa = PBXFileReference; lastKnownFileType = file; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		FAF956B71701AB550033D5DD /* ru */ = {isa = PBXFileReference; lastKnownFileType = file; name = ru; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
 		FAF956BC1701ACA50033D5DD /* ScanWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ScanWindowController.m; sourceTree = "<group>"; };
+		FAF956BE1701B1CD0033D5DD /* Settings.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Settings.plist; sourceTree = "<group>"; };
 		FAFAD735167E57DB005C8FE6 /* TeamHRM.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TeamHRM.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAFAD739167E57DB005C8FE6 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		FAFAD73C167E57DB005C8FE6 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
@@ -257,6 +259,7 @@
 				FAFAD747167E57DB005C8FE6 /* TeamHRM-Prefix.pch */,
 				FAFAD748167E57DB005C8FE6 /* Credits.rtf */,
 				FAF956B61701AB510033D5DD /* Localizable.strings */,
+				FAF956BE1701B1CD0033D5DD /* Settings.plist */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -345,6 +348,7 @@
 				FABA8B6616F8878C007F919D /* AppIcon.icns in Resources */,
 				FAD88D8C16F9ACA5001B013D /* shutter.aiff in Resources */,
 				FAF956B41701AB510033D5DD /* Localizable.strings in Resources */,
+				FAF956BF1701B1CE0033D5DD /* Settings.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

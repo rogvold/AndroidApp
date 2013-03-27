@@ -29,8 +29,11 @@
     if (self) {
         self.heartRateMonitors = [NSMutableArray array];
         self.users = [NSMutableArray array];
-        self.baseUrl = @"http://www.cardiomood.com/BaseProjectWeb/";
-        self.secret = @"h7a7RaRtvAVwnMGq5BV6";
+        NSString *settingsBundle = [[NSBundle mainBundle] pathForResource:@"Settings" ofType:@"plist"];
+        if(!settingsBundle) {
+            NSLog(@"Could not find Settings.plist");
+        }
+        self.appSettings = [NSDictionary dictionaryWithContentsOfFile:settingsBundle];
         manager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
         [self isLECapableHardware];
         NSString *applicationSupportPath = [NSSearchPathForDirectoriesInDomains(NSApplicationSupportDirectory, NSUserDomainMask, YES) objectAtIndex:0];
@@ -46,7 +49,7 @@
                 NSLog(@"%@", error);
             }
         }
-        NSString *databasePath = [applicationPath stringByAppendingPathComponent:@"local.db"];
+        NSString *databasePath = [applicationPath stringByAppendingPathComponent:[self.appSettings objectForKey:@"DataBase"]];
         self.dataBase = [[DataBaseInteraction alloc] initWithPath:databasePath];
         NSArray *result = [self.dataBase performQuery:@"select * from users"];
         if ([result count] == 0)
@@ -109,140 +112,6 @@
     }
     
     return NO;
-}
-
-- (void)controlTextDidChange:(NSNotification *)notification
-{
-    if (notification.object == self.username || notification.object == self.password)
-    {
-        if ([self.username.stringValue length] != 0 && [self.password.stringValue length])
-        {
-            [self.addButton setEnabled:YES];
-        }
-        else
-        {
-            [self.addButton setEnabled:NO];
-        }
-    }
-    else if (notification.object == self.registrationUsername || notification.object == self.registrationPassword)
-    {
-        if ([self.registrationUsername.stringValue length] != 0 && [self.registrationPassword.stringValue length])
-        {
-            [self.signupButton setEnabled:YES];
-        }
-        else
-        {
-            [self.signupButton setEnabled:NO];
-        }
-    }
-}
-
--(int) userExists:(NSString *)username
-{
-    NSArray* objects = @[@"CheckUserExistence", username, @"h7a7RaRtvAVwnMGq5BV6"];
-    NSArray* keys = @[@"purpose", @"email", @"secret"];
-    
-    NSDictionary* JSONDictionary = [NSDictionary dictionaryWithObjects:objects forKeys:keys];
-    NSError* error = nil;
-    NSData* jsonData = [NSJSONSerialization dataWithJSONObject:JSONDictionary options:NSJSONWritingPrettyPrinted error:&error];
-    NSString* json = nil;
-    if (! jsonData)
-    {
-        NSLog(@"Got an error: %@", error);
-    }
-    else
-    {
-        json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-    }
-    
-    NSURL* url = [NSURL URLWithString:@"http://reshaka.ru:8080/BaseProjectWeb/mobileauth"];
-    
-    
-    NSString* stringToSend = [@"json=" stringByAppendingString:json];
-    NSData* dataToSend = [stringToSend dataUsingEncoding:NSUTF8StringEncoding];
-    
-    
-    NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:url];
-    [request setHTTPMethod:@"POST"];
-    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
-    [request setHTTPBody:dataToSend];
-    
-    return [[[NSJSONSerialization
-              JSONObjectWithData:[NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil]
-              options:kNilOptions
-              error:&error] objectForKey:@"response"] intValue];
-}
-
-- (int) checkUser:(NSString *)username withPassword:(NSString *)password
-{
-    NSArray* objects = @[@"CheckAuthorisationData", username, password, @"h7a7RaRtvAVwnMGq5BV6"];
-    NSArray* keys = @[@"purpose", @"email", @"password", @"secret"];
-    
-    NSDictionary* JSONDictionary = [NSDictionary dictionaryWithObjects:objects forKeys:keys];
-    NSError* error = nil;
-    NSData* jsonData = [NSJSONSerialization dataWithJSONObject:JSONDictionary options:NSJSONWritingPrettyPrinted error:&error];
-    NSString* json = nil;
-    if (! jsonData)
-    {
-        NSLog(@"Got an error: %@", error);
-    }
-    else
-    {
-        json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-    }
-    
-    NSURL* url = [NSURL URLWithString:@"http://reshaka.ru:8080/BaseProjectWeb/mobileauth"];
-    
-    
-    NSString* stringToSend = [@"json=" stringByAppendingString:json];
-    NSData* dataToSend = [stringToSend dataUsingEncoding:NSUTF8StringEncoding];
-    
-    
-    NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:url];
-    [request setHTTPMethod:@"POST"];
-    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
-    [request setHTTPBody:dataToSend];
-    
-    return [[[NSJSONSerialization
-              JSONObjectWithData:[NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil]
-              options:kNilOptions
-              error:&error] objectForKey:@"response"] intValue];
-}
-
-- (int) checkUserRegistration:(NSString *)username withPassword:(NSString *)password
-{
-    NSArray* objects = @[@"Register", username, password, @"h7a7RaRtvAVwnMGq5BV6"];
-    NSArray* keys = @[@"purpose", @"email", @"password", @"secret"];
-    
-    NSDictionary* JSONDictionary = [NSDictionary dictionaryWithObjects:objects forKeys:keys];
-    NSError* error = nil;
-    NSData* jsonData = [NSJSONSerialization dataWithJSONObject:JSONDictionary options:NSJSONWritingPrettyPrinted error:&error];
-    NSString* json = nil;
-    if (! jsonData)
-    {
-        NSLog(@"Got an error: %@", error);
-    }
-    else
-    {
-        json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-    }
-    
-    NSURL* url = [NSURL URLWithString:@"http://reshaka.ru:8080/BaseProjectWeb/mobileauth"];
-    
-    
-    NSString* stringToSend = [@"json=" stringByAppendingString:json];
-    NSData* dataToSend = [stringToSend dataUsingEncoding:NSUTF8StringEncoding];
-    
-    
-    NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:url];
-    [request setHTTPMethod:@"POST"];
-    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
-    [request setHTTPBody:dataToSend];
-    
-    return [[[NSJSONSerialization
-              JSONObjectWithData:[NSURLConnection sendSynchronousRequest:request returningResponse:nil error:nil]
-              options:kNilOptions
-              error:&error] objectForKey:@"response"] intValue];
 }
 
 #pragma mark User Table selection methods
@@ -319,7 +188,7 @@
 - (IBAction)addUserButtonPressed:(id)sender
 {
     //[self openAddUserSheet:nil];
-    [self openScanWindow:nil];
+    [self openScanWindow];
 }
 
 - (IBAction)removeUserButtonPressed:(id)sender
@@ -358,82 +227,6 @@
     self.heartRateFieldValue.stringValue = @"";
 }
 
-#pragma mark - Add sheet methods
-
-/*
- Open scan sheet to discover heart rate peripherals if it is LE capable hardware
- */
-- (IBAction)openAddUserSheet:(id)sender
-{
-    [NSApp beginSheet:self.addSheet modalForWindow:self.view.window modalDelegate:self didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) contextInfo:nil];
-}
-
-/*
- Close scan sheet once device is selected
- */
-- (IBAction)closeAddUserSheet:(id)sender
-{
-    /*int exists = [self userExists:self.username.stringValue];
-     int rightPass = [self checkUser:self.username.stringValue withPassword:self.password.stringValue];
-     if (exists && rightPass)
-     {*/
-    [NSApp endSheet:self.addSheet returnCode:NSAlertDefaultReturn];
-    [self.addSheet orderOut:self];
-    /*}
-     else if (!exists)
-     {
-     self.authError.stringValue = @"User with entered e-mail not found.";
-     }
-     else if (exists && !rightPass)
-     {
-     self.authError.stringValue = @"Password is incorrect. Try again.";
-     }
-     else if (exists == -1 && rightPass == -1)
-     {
-     self.authError.stringValue = @"An error occured. Try again later.";
-     }*/
-}
-
-/*
- Close scan sheet without choosing any device
- */
-- (IBAction)cancelAddUserSheet:(id)sender
-{
-    [NSApp endSheet:self.addSheet returnCode:NSAlertAlternateReturn];
-    [self.addSheet orderOut:self];
-}
-
-/*
- This method is called when Scan sheet is closed. Initiate connection to selected heart rate peripheral
- */
-- (void)sheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
-{
-    if( returnCode == NSAlertDefaultReturn )
-    {
-        User *newUser = [User alloc];
-        newUser.username = self.username.stringValue;
-        newUser.password = self.password.stringValue;
-        newUser.create = 1;
-        newUser.intervals = [NSMutableArray array];
-        newUser.heartRate = @"0";
-        NSArray *result = [self.dataBase performQuery:[NSString stringWithFormat:@"select user_id from users where username = \"%@\"", newUser.username]];
-        if ([result count] == 0)
-        {
-            [self.dataBase performQuery:[NSString stringWithFormat:@"insert into users(username, password) values(\"%@\", \"%@\")", newUser.username, newUser.password]];
-            
-            result = [self.dataBase performQuery:[NSString stringWithFormat:@"select user_id from users where username = \"%@\"", newUser.username]];
-        }
-        newUser.userId = [[[result objectAtIndex:0] objectAtIndex:0] intValue];
-        NSMutableArray *user = [self mutableArrayValueForKey:@"users"];
-        if( ![self.users containsObject:newUser] )
-            [user addObject:newUser];
-        self.username.stringValue = @"";
-        self.password.stringValue = @"";
-        self.authError.stringValue = @"";
-        [self.removeUserButton setEnabled:YES];
-    }
-}
-
 - (IBAction)connectButtonPressed:(id)sender
 {
     User *user = [self selectedUser];
@@ -457,58 +250,6 @@
     else
     {
         [manager cancelPeripheralConnection:user.connectedPeripheral];
-    }
-}
-
-#pragma mark - Register sheet methods
-- (IBAction)registerUserButtonPressed:(id)sender
-{
-    [self openRegisterUserSheet:nil];
-}
-
-- (IBAction)openRegisterUserSheet:(id)sender
-{
-    [self cancelAddUserSheet:nil];
-    [NSApp beginSheet:self.registerSheet modalForWindow:self.view.window modalDelegate:self didEndSelector:@selector(registerSheetDidEnd:returnCode:contextInfo:) contextInfo:nil];
-}
-
-- (IBAction)closeRegisterUserSheet:(id)sender
-{
-    int exists = [self userExists:self.registrationUsername.stringValue];
-    int registrationStatus = -1;
-    if(!exists)
-        registrationStatus = [self checkUserRegistration:self.registrationUsername.stringValue withPassword:self.registrationPassword.stringValue];
-    if (!exists && registrationStatus == 1)
-    {
-        [NSApp endSheet:self.registerSheet returnCode:NSAlertDefaultReturn];
-        [self.registerSheet orderOut:self];
-        [self openAddUserSheet:nil];
-    }
-    else if (exists)
-    {
-        self.registrationError.stringValue = @"User with entered e-mail already exists";
-    }
-    else if (!exists && registrationStatus == -1)
-    {
-        self.registrationError.stringValue = @"A problem occured. Try again later.";
-    }
-}
-
-- (IBAction)cancelRegisterUserSheet:(id)sender
-{
-    [NSApp endSheet:self.registerSheet returnCode:NSAlertAlternateReturn];
-    [self.registerSheet orderOut:self];
-    [self openAddUserSheet:nil];
-}
-
-- (void)registerSheetDidEnd:(NSWindow *)sheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
-{
-    if( returnCode == NSAlertDefaultReturn )
-    {
-        self.username.stringValue = self.registrationUsername.stringValue;
-        self.password.stringValue = self.registrationPassword.stringValue;
-        [self.addButton setEnabled:YES];
-        self.registrationError.stringValue = @"";
     }
 }
 
@@ -931,7 +672,7 @@
     NSString* stringToSend = [@"json=" stringByAppendingString:jsonString];
     NSData* dataToSend = [stringToSend dataUsingEncoding:NSUTF8StringEncoding];
     
-    NSString *urlString = [NSString stringWithFormat:@"%@resources/rates/sync", self.baseUrl];
+    NSString *urlString = [NSString stringWithFormat:@"%@resources/rates/sync", [self.appSettings objectForKey:@"BaseURL"]];
     NSURL* url = [NSURL URLWithString:urlString];
     
     NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:url];
@@ -974,6 +715,7 @@
     return json;
 }
 
+#pragma mark Local DB Sync methods
 -(void) saveIntervals:(User *)user
 {
     [self.dataBase performQuery:[NSString stringWithFormat:@"insert into intervals(session_id, value) values(%ld, \"%@\")", (long)user.currentSessionId, [user.intervalsToSave componentsJoinedByString:@","]]];
@@ -1050,7 +792,8 @@
     }
 }
 
-- (IBAction)openScanWindow:(id)sender
+#pragma mark Scan window methods
+- (void)openScanWindow
 {
     self.scanSheet = [[ScanWindowController alloc] initWithWindowNibName:@"ScanWindowController"];
     [NSApp beginSheet:self.scanSheet.window modalForWindow:self.view.window modalDelegate:self didEndSelector:@selector(scanSheetDidEnd:returnCode:contextInfo:) contextInfo:nil];
@@ -1110,10 +853,11 @@
     
 }
 
+#pragma mark Get user data methods
 -(void)getUserData:(User*)user
 {
     NSError* error = nil;
-    NSString *urlString = [NSString stringWithFormat:@"%@resources/auth/info?secret=%@&email=%@&password=%@", self.baseUrl, self.secret, user.username, user.password];
+    NSString *urlString = [NSString stringWithFormat:@"%@resources/auth/info?secret=%@&email=%@&password=%@", [self.appSettings objectForKey:@"BaseURL"], [self.appSettings objectForKey:@"Secret"], user.username, user.password];
     
     NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"%@", urlString]];
     

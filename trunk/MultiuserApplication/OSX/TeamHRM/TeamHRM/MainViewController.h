@@ -17,18 +17,9 @@
 }
 
 @property (strong) NSMutableArray *users;
-@property (strong) IBOutlet NSWindow *addSheet;
 @property (strong) NSMutableArray *heartRateMonitors;
 @property (assign) IBOutlet NSArrayController *monitorsArrayController;
 @property (assign) IBOutlet NSArrayController *usersArrayController;
-@property (strong) IBOutlet NSSecureTextField *password;
-@property (strong) IBOutlet NSTextField *username;
-
-@property (strong) IBOutlet NSSecureTextField *registrationPassword;
-@property (strong) IBOutlet NSTextField *registrationUsername;
-@property (strong) IBOutlet NSButton *signupButton;
-@property (strong) IBOutlet NSWindow *registerSheet;
-@property (strong) IBOutlet NSTextField *registrationError;
 
 @property (strong) IBOutlet NSTextField *nameFieldValue;
 @property (strong) IBOutlet NSTextField *surnameFieldValue;
@@ -51,7 +42,6 @@
 @property (strong) IBOutlet NSTextField *sensorField;
 @property (strong) IBOutlet NSWindow *removeConfirmationWindow;
 
-@property (strong) IBOutlet NSButton *addButton;
 @property (strong) IBOutlet NSButton *addUserButton;
 @property (strong) IBOutlet NSButton *removeUserButton;
 @property (strong) IBOutlet NSButton *syncButton;
@@ -59,30 +49,18 @@
 @property (strong) IBOutlet NSButton *connectButton;
 @property (strong) IBOutlet NSScrollView *sensorsScrollView;
 
-@property (strong) IBOutlet NSTextField *authError;
-
-@property (strong) NSString *baseUrl;
-@property (strong) NSString *secret;
+@property (strong) NSDictionary *appSettings;
 
 - (IBAction)addUserButtonPressed:(id)sender;
 - (IBAction)removeUserButtonPressed:(id)sender;
-- (IBAction)openAddUserSheet:(id)sender;
-- (IBAction)closeAddUserSheet:(id)sender;
-- (IBAction)cancelAddUserSheet:(id)sender;
 
 - (IBAction)cancelRemoveUserSheet:(id)sender;
 - (IBAction)closeRemoveUserSheet:(id)sender;
 
 - (IBAction)connectButtonPressed:(id)sender;
 
-- (IBAction)registerUserButtonPressed:(id)sender;
-- (IBAction)openRegisterUserSheet:(id)sender;
-- (IBAction)closeRegisterUserSheet:(id)sender;
-- (IBAction)cancelRegisterUserSheet:(id)sender;
-
 - (IBAction)syncData:(id)sender;
 
-- (IBAction)terminateApp:(id)sender;
 + (BOOL)hasConnectivity;
 
 @end
