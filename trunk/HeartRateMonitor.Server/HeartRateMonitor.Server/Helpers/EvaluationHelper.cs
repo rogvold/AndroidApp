@@ -18,10 +18,10 @@ namespace HeartRateMonitor.Server.Helpers
         {
             var sessionData = new SessionData()
                 {
-                    Intervals = session.Rates
+                    Intervals = session.Intervals
                 };
             sessionData.Intervals = Filter.Filtrate(sessionData);
-            session.Rates = sessionData.Intervals;
+            session.Intervals = sessionData.Intervals;
             session.AMoPercents = sessionData.Evaluate(new AMoPercents());
             session.Mo = sessionData.Evaluate(new Mo());
             session.RSAI = sessionData.Evaluate(new RSAI());

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
+using ClientServerInteraction.Error;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -9,52 +11,83 @@ namespace ClientServerInteraction
 {
     public class ServerHelper
     {
-        // hardcoded server url
-        private const string ServerBase = @"http://omnihealth.azurewebsites.net/";
-        private const string Account = @"Account/";
-        private const string Evaluation = @"Evaluation/";
+        // server url and controller suffixes
+        private const string ServerBase = @"http://www.cardiomood.com/BaseProjectWeb/";
+        private const string Resources = @"resources/";
+        private const string Authorization = @"auth/";
+        private const string Rates = @"rates/";
 
-        // returns true on successful registration
-        public static bool RegisterUser(string email, string password, string username)
+        public static Task<bool> ValidateEmail(string email)
         {
-            var response = JSONRequestHelper.SendRequest(ServerBase + Account + @"RegisterUser", 
-                                 SerializationHelper.SerializeRegistrationInfo(email, password, username));
-
-            return SerializationHelper.DeserializeRegistrationResponse(response);
+            const string url = ServerBase + Resources + Authorization + "check_existence";
+            var queryString = SerializationHelper.CreateQueryString(new Dictionary<object, object> {{"email", email}});
+            return
+                HttpHelper.PostAsync(url, queryString, null).ContinueWith(json => SerializationHelper.DeserializeValidationResponse(json.Result));
+        }   
+        
+        public static Task<bool> Register(string email, string password)
+        {
+            const string url = ServerBase + Resources + Authorization + "register";
+            var queryString = SerializationHelper.CreateQueryString(new Dictionary<object, object> {{"email", email}, {"password", password}});
+            return
+                HttpHelper.PostAsync(url, queryString, null).ContinueWith(
+                    json => SerializationHelper.DeserializeValidationResponse(json.Result));
         }
 
-        public static User AuthorizeUser(string email, string password)
+        public static Task<bool> CheckAuthorizationData(string email, string password)
         {
-            var response = JSONRequestHelper.SendRequest(ServerBase + Account + @"AuthorizeUser",
-                                            SerializationHelper.SerializeAuthorizationInfo(email, password));
-
-            return SerializationHelper.DeserializeUser(response);
+            const string url = ServerBase + Resources + Authorization + "check_data";
+            var queryString = SerializationHelper.CreateQueryString(new Dictionary<object, object> { { "email", email }, { "password", password } });
+            return
+                HttpHelper.PostAsync(url, queryString, null).ContinueWith(
+                    json => SerializationHelper.DeserializeValidationResponse(json.Result));
         }
 
-        public static User GetUserInfo(string userId)
+        public static Task<User> GetUserInfo(string email, string password)
         {
-            var json = JsonConvert.SerializeObject(new
-            {
-                UserId = userId
-            });
-
-            var response = JSONRequestHelper.SendRequest(ServerBase + Account + @"GetUserInfo", json);
-            return SerializationHelper.DeserializeUser(response);
+            const string url = ServerBase + Resources + Authorization + "info";
+            var queryString =
+                SerializationHelper.CreateQueryString(new Dictionary<object, object>
+                    {{"email", email}, {"password", password}});
+            return
+                HttpHelper.PostAsync(url, queryString, null).ContinueWith(
+                    json => SerializationHelper.DeserializeUser(json.Result));
         }
 
-        // returns evaluated session
-        public static Session AddSession(Session session)
+        public static Task<bool> UpdateUserInfo(User user)
         {
-            var response = JSONRequestHelper.SendRequest(ServerBase + Evaluation + @"AddSession",
-                                                         SerializationHelper.SerializeSession(session));
-            return SerializationHelper.DeserializeSession(response);
+            const string url = ServerBase + Resources + Authorization + "info";
+            var json = SerializationHelper.SerializeUser(user);
+            var queryString =
+                SerializationHelper.CreateQueryString(new Dictionary<object, object> { { "json", json } });
+            return
+                HttpHelper.PostAsync(url, queryString, null).ContinueWith(
+                    resp => SerializationHelper.DeserializeValidationResponse(resp.Result));
         }
 
-        public static List<Session> GetSessions(List<string> sessionIds)
+        public static Task<bool> Upload(string email, string password, long start, IEnumerable<int> rates)
         {
-            var response = JSONRequestHelper.SendRequest(ServerBase + Evaluation + @"GetSessions",
-                                                         SerializationHelper.SerializeSessionIds(sessionIds));
-            return SerializationHelper.DeserializeSessionList(response);
-        } 
+            const string url = ServerBase + Resources + Rates + "upload";
+            var json = SerializationHelper.SerializeRates(email, password, start, rates);
+            var queryString =
+                SerializationHelper.CreateQueryString(new Dictionary<object, object> { { "json", json } });
+            return
+                HttpHelper.PostAsync(url, queryString, null).ContinueWith(
+                    resp => SerializationHelper.DeserializeValidationResponse(resp.Result));
+        }
+
+        public static Task<bool> SynchronizeRates(string email, string password, long start, IEnumerable<int> rates)
+        {
+            const string url = ServerBase + Resources + Rates + "sync";
+            var json = SerializationHelper.SerializeRates(email, password, start, rates);
+            var queryString =
+                SerializationHelper.CreateQueryString(new Dictionary<object, object> { { "json", json } });
+            return
+                HttpHelper.PostAsync(url, queryString, null).ContinueWith(
+                    resp => SerializationHelper.DeserializeValidationResponse(resp.Result));
+        }
+        
+
+      
     }
 }

@@ -6,28 +6,18 @@ namespace ClientServerInteraction
 {
     public class User
     {
-        private ObjectId _id;
-
-        [BsonId]
-        public ObjectId Id
-        {
-            get { return _id; }
-            set
-            {
-                _id = value;
-                IdString = _id.ToString();
-            }
-        }
-
-        public string IdString { get; private set; }
-
-        public List<string> Sessions { get; set; }
-
-        public string Username { get; set; }
-
+        public string About { get; set; }
+        public int Age { get; set; }
+        public string Department { get; set; }
+        public string Description { get; set; }
+        public string Diagnosis { get; set; }
         public string Email { get; set; }
-
+        public string FirstName { get; set; }
+        public float Height { get; set; }
+        public string LastName { get; set; }
         public string Password { get; set; }
-
+        public int Sex { get; set; }
+        public string StatusMessage { get; set; }
+        public float Weight { get; set; }
     }
 }

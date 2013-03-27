@@ -40,6 +40,8 @@ namespace ClientServerInteraction
 
         public int HealthState { get; set; }
 
+        public List<int> Intervals { get; set; }
+
         public List<int> Rates { get; set; }
 
         // Evaluations section
