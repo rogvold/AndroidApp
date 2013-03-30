@@ -68,22 +68,18 @@ namespace ClientServerInteraction
         public static Task<bool> Upload(string email, string password, long start, IEnumerable<int> rates)
         {
             const string url = ServerBase + Resources + Rates + "upload";
-            var json = SerializationHelper.SerializeRates(email, password, start, rates);
-            var queryString =
-                SerializationHelper.CreateQueryString(new Dictionary<object, object> { { "json", json } });
+            var json = "json=" + SerializationHelper.SerializeRates(email, password, start, rates);
             return
-                HttpHelper.PostAsync(url, queryString, null).ContinueWith(
+                HttpHelper.PostAsync(url, null, json).ContinueWith(
                     resp => SerializationHelper.DeserializeValidationResponse(resp.Result));
         }
 
         public static Task<bool> SynchronizeRates(string email, string password, long start, IEnumerable<int> rates)
         {
             const string url = ServerBase + Resources + Rates + "sync";
-            var json = SerializationHelper.SerializeRates(email, password, start, rates);
-            var queryString =
-                SerializationHelper.CreateQueryString(new Dictionary<object, object> { { "json", json } });
+            var json = "json=" + SerializationHelper.SerializeRates(email, password, start, rates);
             return
-                HttpHelper.PostAsync(url, queryString, null).ContinueWith(
+                HttpHelper.PostAsync(url, null, json).ContinueWith(
                     resp => SerializationHelper.DeserializeValidationResponse(resp.Result));
         }
         

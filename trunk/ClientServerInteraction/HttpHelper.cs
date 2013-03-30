@@ -17,7 +17,7 @@ namespace ClientServerInteraction
             if (queryString != null)
                 url += queryString;
             var request = (HttpWebRequest)WebRequest.Create(url);
-            request.ContentType = "text/json";
+            request.ContentType = "application/x-www-form-urlencoded";
             request.Method = "POST";
 
             if (json == null)
