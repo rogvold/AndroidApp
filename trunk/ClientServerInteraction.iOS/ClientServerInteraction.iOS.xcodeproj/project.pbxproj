@@ -1,0 +1,375 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		FA6AC5E017098631008C60F6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6AC5DF17098631008C60F6 /* Foundation.framework */; };
+		FA6AC5FE17098918008C60F6 /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6AC5F517098889008C60F6 /* libRestKit.a */; };
+		FA6AC60017098939008C60F6 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6AC5FF17098939008C60F6 /* CFNetwork.framework */; };
+		FA6AC60217098945008C60F6 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6AC60117098945008C60F6 /* CoreData.framework */; };
+		FA6AC60417098952008C60F6 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6AC60317098952008C60F6 /* MobileCoreServices.framework */; };
+		FA6AC6061709895C008C60F6 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6AC6051709895C008C60F6 /* Security.framework */; };
+		FA6AC60817098967008C60F6 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6AC60717098967008C60F6 /* SystemConfiguration.framework */; };
+		FAFD2AFB17098E8F005DF533 /* ClientServerInteraction.m in Sources */ = {isa = PBXBuildFile; fileRef = FAFD2AFA17098E8F005DF533 /* ClientServerInteraction.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		FA6AC5F417098889008C60F6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA6AC5ED17098889008C60F6 /* RestKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 25160D1614564E810060A5C5;
+			remoteInfo = RestKit;
+		};
+		FA6AC5F617098889008C60F6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA6AC5ED17098889008C60F6 /* RestKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 25160D2614564E820060A5C5;
+			remoteInfo = RestKitTests;
+		};
+		FA6AC5F817098889008C60F6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA6AC5ED17098889008C60F6 /* RestKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 25160E62145651060060A5C5;
+			remoteInfo = RestKitFramework;
+		};
+		FA6AC5FA17098889008C60F6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA6AC5ED17098889008C60F6 /* RestKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 25160E78145651060060A5C5;
+			remoteInfo = RestKitFrameworkTests;
+		};
+		FA6AC5FC170988E9008C60F6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA6AC5ED17098889008C60F6 /* RestKit.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 25160D1514564E810060A5C5;
+			remoteInfo = RestKit;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		FA6AC5DA17098631008C60F6 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/${PRODUCT_NAME}";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		FA6AC5DC17098631008C60F6 /* libClientServerInteraction.iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libClientServerInteraction.iOS.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		FA6AC5DF17098631008C60F6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		FA6AC5ED17098889008C60F6 /* RestKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RestKit.xcodeproj; path = RestKit/RestKit.xcodeproj; sourceTree = "<group>"; };
+		FA6AC5FF17098939008C60F6 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
+		FA6AC60117098945008C60F6 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		FA6AC60317098952008C60F6 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
+		FA6AC6051709895C008C60F6 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		FA6AC60717098967008C60F6 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		FAFD2AF817098E8F005DF533 /* ClientServerInteraction.iOS-Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ClientServerInteraction.iOS-Prefix.pch"; sourceTree = "<group>"; };
+		FAFD2AF917098E8F005DF533 /* ClientServerInteraction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ClientServerInteraction.h; sourceTree = "<group>"; };
+		FAFD2AFA17098E8F005DF533 /* ClientServerInteraction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ClientServerInteraction.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		FA6AC5D917098631008C60F6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FA6AC60817098967008C60F6 /* SystemConfiguration.framework in Frameworks */,
+				FA6AC6061709895C008C60F6 /* Security.framework in Frameworks */,
+				FA6AC60417098952008C60F6 /* MobileCoreServices.framework in Frameworks */,
+				FA6AC60217098945008C60F6 /* CoreData.framework in Frameworks */,
+				FA6AC60017098939008C60F6 /* CFNetwork.framework in Frameworks */,
+				FA6AC5FE17098918008C60F6 /* libRestKit.a in Frameworks */,
+				FA6AC5E017098631008C60F6 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		FA6AC5D317098631008C60F6 = {
+			isa = PBXGroup;
+			children = (
+				FAFD2AF717098E8F005DF533 /* ClientServerInteraction.iOS */,
+				FA6AC5DE17098631008C60F6 /* Frameworks */,
+				FA6AC5DD17098631008C60F6 /* Products */,
+				FA6AC5ED17098889008C60F6 /* RestKit.xcodeproj */,
+			);
+			sourceTree = "<group>";
+		};
+		FA6AC5DD17098631008C60F6 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FA6AC5DC17098631008C60F6 /* libClientServerInteraction.iOS.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		FA6AC5DE17098631008C60F6 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				FA6AC60717098967008C60F6 /* SystemConfiguration.framework */,
+				FA6AC6051709895C008C60F6 /* Security.framework */,
+				FA6AC60317098952008C60F6 /* MobileCoreServices.framework */,
+				FA6AC60117098945008C60F6 /* CoreData.framework */,
+				FA6AC5FF17098939008C60F6 /* CFNetwork.framework */,
+				FA6AC5DF17098631008C60F6 /* Foundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		FA6AC5EE17098889008C60F6 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FA6AC5F517098889008C60F6 /* libRestKit.a */,
+				FA6AC5F717098889008C60F6 /* RestKitTests.octest */,
+				FA6AC5F917098889008C60F6 /* RestKit.framework */,
+				FA6AC5FB17098889008C60F6 /* RestKitFrameworkTests.octest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		FAFD2AF717098E8F005DF533 /* ClientServerInteraction.iOS */ = {
+			isa = PBXGroup;
+			children = (
+				FAFD2AFC17098F71005DF533 /* Supporting files */,
+				FAFD2AF917098E8F005DF533 /* ClientServerInteraction.h */,
+				FAFD2AFA17098E8F005DF533 /* ClientServerInteraction.m */,
+			);
+			path = ClientServerInteraction.iOS;
+			sourceTree = "<group>";
+		};
+		FAFD2AFC17098F71005DF533 /* Supporting files */ = {
+			isa = PBXGroup;
+			children = (
+				FAFD2AF817098E8F005DF533 /* ClientServerInteraction.iOS-Prefix.pch */,
+			);
+			name = "Supporting files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		FA6AC5DB17098631008C60F6 /* ClientServerInteraction.iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FA6AC5EA17098631008C60F6 /* Build configuration list for PBXNativeTarget "ClientServerInteraction.iOS" */;
+			buildPhases = (
+				FA6AC5D817098631008C60F6 /* Sources */,
+				FA6AC5D917098631008C60F6 /* Frameworks */,
+				FA6AC5DA17098631008C60F6 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FA6AC5FD170988E9008C60F6 /* PBXTargetDependency */,
+			);
+			name = ClientServerInteraction.iOS;
+			productName = ClientServerIntercation_iOS;
+			productReference = FA6AC5DC17098631008C60F6 /* libClientServerInteraction.iOS.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		FA6AC5D417098631008C60F6 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0460;
+				ORGANIZATIONNAME = "Alexander O. Taraymovich";
+			};
+			buildConfigurationList = FA6AC5D717098631008C60F6 /* Build configuration list for PBXProject "ClientServerInteraction.iOS" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = FA6AC5D317098631008C60F6;
+			productRefGroup = FA6AC5DD17098631008C60F6 /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = FA6AC5EE17098889008C60F6 /* Products */;
+					ProjectRef = FA6AC5ED17098889008C60F6 /* RestKit.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				FA6AC5DB17098631008C60F6 /* ClientServerInteraction.iOS */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		FA6AC5F517098889008C60F6 /* libRestKit.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libRestKit.a;
+			remoteRef = FA6AC5F417098889008C60F6 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		FA6AC5F717098889008C60F6 /* RestKitTests.octest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = RestKitTests.octest;
+			remoteRef = FA6AC5F617098889008C60F6 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		FA6AC5F917098889008C60F6 /* RestKit.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = RestKit.framework;
+			remoteRef = FA6AC5F817098889008C60F6 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		FA6AC5FB17098889008C60F6 /* RestKitFrameworkTests.octest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = RestKitFrameworkTests.octest;
+			remoteRef = FA6AC5FA17098889008C60F6 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXSourcesBuildPhase section */
+		FA6AC5D817098631008C60F6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FAFD2AFB17098E8F005DF533 /* ClientServerInteraction.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		FA6AC5FD170988E9008C60F6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = RestKit;
+			targetProxy = FA6AC5FC170988E9008C60F6 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		FA6AC5E817098631008C60F6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		FA6AC5E917098631008C60F6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		FA6AC5EB17098631008C60F6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DSTROOT = /tmp/ClientServerIntercation_iOS.dst;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "ClientServerInteraction.iOS/ClientServerInteraction.iOS-Prefix.pch";
+				HEADER_SEARCH_PATHS = "\"$(BUILT_PRODUCTS_DIR)/../../Headers\"";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-all_load",
+				);
+				PRODUCT_NAME = ClientServerInteraction.iOS;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		FA6AC5EC17098631008C60F6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DSTROOT = /tmp/ClientServerIntercation_iOS.dst;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "ClientServerInteraction.iOS/ClientServerInteraction.iOS-Prefix.pch";
+				HEADER_SEARCH_PATHS = "\"$(BUILT_PRODUCTS_DIR)/../../Headers\"";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-all_load",
+				);
+				PRODUCT_NAME = ClientServerInteraction.iOS;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		FA6AC5D717098631008C60F6 /* Build configuration list for PBXProject "ClientServerInteraction.iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FA6AC5E817098631008C60F6 /* Debug */,
+				FA6AC5E917098631008C60F6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FA6AC5EA17098631008C60F6 /* Build configuration list for PBXNativeTarget "ClientServerInteraction.iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FA6AC5EB17098631008C60F6 /* Debug */,
+				FA6AC5EC17098631008C60F6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = FA6AC5D417098631008C60F6 /* Project object */;
+}
