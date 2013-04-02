@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		FA6AC5E017098631008C60F6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6AC5DF17098631008C60F6 /* Foundation.framework */; };
-		FA6AC5FE17098918008C60F6 /* libRestKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6AC5F517098889008C60F6 /* libRestKit.a */; };
 		FA6AC60017098939008C60F6 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6AC5FF17098939008C60F6 /* CFNetwork.framework */; };
 		FA6AC60217098945008C60F6 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6AC60117098945008C60F6 /* CoreData.framework */; };
 		FA6AC60417098952008C60F6 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6AC60317098952008C60F6 /* MobileCoreServices.framework */; };
@@ -16,44 +15,6 @@
 		FA6AC60817098967008C60F6 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6AC60717098967008C60F6 /* SystemConfiguration.framework */; };
 		FAFD2AFB17098E8F005DF533 /* ClientServerInteraction.m in Sources */ = {isa = PBXBuildFile; fileRef = FAFD2AFA17098E8F005DF533 /* ClientServerInteraction.m */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXContainerItemProxy section */
-		FA6AC5F417098889008C60F6 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = FA6AC5ED17098889008C60F6 /* RestKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 25160D1614564E810060A5C5;
-			remoteInfo = RestKit;
-		};
-		FA6AC5F617098889008C60F6 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = FA6AC5ED17098889008C60F6 /* RestKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 25160D2614564E820060A5C5;
-			remoteInfo = RestKitTests;
-		};
-		FA6AC5F817098889008C60F6 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = FA6AC5ED17098889008C60F6 /* RestKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 25160E62145651060060A5C5;
-			remoteInfo = RestKitFramework;
-		};
-		FA6AC5FA17098889008C60F6 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = FA6AC5ED17098889008C60F6 /* RestKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 25160E78145651060060A5C5;
-			remoteInfo = RestKitFrameworkTests;
-		};
-		FA6AC5FC170988E9008C60F6 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = FA6AC5ED17098889008C60F6 /* RestKit.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 25160D1514564E810060A5C5;
-			remoteInfo = RestKit;
-		};
-/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		FA6AC5DA17098631008C60F6 /* CopyFiles */ = {
@@ -70,7 +31,6 @@
 /* Begin PBXFileReference section */
 		FA6AC5DC17098631008C60F6 /* libClientServerInteraction.iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libClientServerInteraction.iOS.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA6AC5DF17098631008C60F6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		FA6AC5ED17098889008C60F6 /* RestKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RestKit.xcodeproj; path = RestKit/RestKit.xcodeproj; sourceTree = "<group>"; };
 		FA6AC5FF17098939008C60F6 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		FA6AC60117098945008C60F6 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		FA6AC60317098952008C60F6 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
@@ -91,7 +51,6 @@
 				FA6AC60417098952008C60F6 /* MobileCoreServices.framework in Frameworks */,
 				FA6AC60217098945008C60F6 /* CoreData.framework in Frameworks */,
 				FA6AC60017098939008C60F6 /* CFNetwork.framework in Frameworks */,
-				FA6AC5FE17098918008C60F6 /* libRestKit.a in Frameworks */,
 				FA6AC5E017098631008C60F6 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -105,7 +64,6 @@
 				FAFD2AF717098E8F005DF533 /* ClientServerInteraction.iOS */,
 				FA6AC5DE17098631008C60F6 /* Frameworks */,
 				FA6AC5DD17098631008C60F6 /* Products */,
-				FA6AC5ED17098889008C60F6 /* RestKit.xcodeproj */,
 			);
 			sourceTree = "<group>";
 		};
@@ -128,17 +86,6 @@
 				FA6AC5DF17098631008C60F6 /* Foundation.framework */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		FA6AC5EE17098889008C60F6 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				FA6AC5F517098889008C60F6 /* libRestKit.a */,
-				FA6AC5F717098889008C60F6 /* RestKitTests.octest */,
-				FA6AC5F917098889008C60F6 /* RestKit.framework */,
-				FA6AC5FB17098889008C60F6 /* RestKitFrameworkTests.octest */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		FAFD2AF717098E8F005DF533 /* ClientServerInteraction.iOS */ = {
@@ -173,7 +120,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				FA6AC5FD170988E9008C60F6 /* PBXTargetDependency */,
 			);
 			name = ClientServerInteraction.iOS;
 			productName = ClientServerIntercation_iOS;
@@ -199,49 +145,12 @@
 			mainGroup = FA6AC5D317098631008C60F6;
 			productRefGroup = FA6AC5DD17098631008C60F6 /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = FA6AC5EE17098889008C60F6 /* Products */;
-					ProjectRef = FA6AC5ED17098889008C60F6 /* RestKit.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				FA6AC5DB17098631008C60F6 /* ClientServerInteraction.iOS */,
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXReferenceProxy section */
-		FA6AC5F517098889008C60F6 /* libRestKit.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRestKit.a;
-			remoteRef = FA6AC5F417098889008C60F6 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		FA6AC5F717098889008C60F6 /* RestKitTests.octest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = RestKitTests.octest;
-			remoteRef = FA6AC5F617098889008C60F6 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		FA6AC5F917098889008C60F6 /* RestKit.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = RestKit.framework;
-			remoteRef = FA6AC5F817098889008C60F6 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		FA6AC5FB17098889008C60F6 /* RestKitFrameworkTests.octest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = RestKitFrameworkTests.octest;
-			remoteRef = FA6AC5FA17098889008C60F6 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
 
 /* Begin PBXSourcesBuildPhase section */
 		FA6AC5D817098631008C60F6 /* Sources */ = {
@@ -253,14 +162,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		FA6AC5FD170988E9008C60F6 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = RestKit;
-			targetProxy = FA6AC5FC170988E9008C60F6 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		FA6AC5E817098631008C60F6 /* Debug */ = {
