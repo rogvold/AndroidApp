@@ -1,5 +1,5 @@
 //
-//  ViewController.h
+//  DeviceViewController.h
 //  CardioMood
 //
 //  Created by Alexander O. Taraymovich on 07.10.12.
@@ -9,8 +9,8 @@
 #import <UIKit/UIKit.h>
 #import <CoreBluetooth/CoreBluetooth.h>
 
-@interface ViewController : UIViewController
-@property (strong) NSMutableArray *CardioMoods;
+@interface DeviceViewController : UIViewController
+@property (nonatomic, strong) NSMutableArray *heartRateMonitors;
 @property (nonatomic, strong) IBOutlet UILabel *heartRateLabel;
 @property (nonatomic, strong) IBOutlet UILabel *connectedMonitor;
 @property (nonatomic, strong) IBOutlet UITableView *sensorsTable;

@@ -1,47 +1,47 @@
 //
-//  ViewController.m
+//  DeviceViewController.m
 //  CardioMood
 //
 //  Created by Alexander O. Taraymovich on 07.10.12.
 //  Copyright (c) 2012 Alexander O. Taraymovich. All rights reserved.
 //
 
-#import "ViewController.h"
+#import "DeviceViewController.h"
 #import <CoreBluetooth/CoreBluetooth.h>
 #import <CoreFoundation/CoreFoundation.h>
 #include <mach/mach.h>
 
-@interface ViewController () <CBCentralManagerDelegate, CBPeripheralDelegate, UITableViewDataSource, UITableViewDelegate>
+@interface DeviceViewController () <CBCentralManagerDelegate, CBPeripheralDelegate, UITableViewDataSource, UITableViewDelegate>
 
 //@property (strong) NSMutableArray *heartRate;
 @end
 
-@implementation ViewController
-@synthesize CardioMoods = _CardioMoods;
-@synthesize heartRateLabel = _heartRateLabel;
-@synthesize connectedMonitor = _connectedMonitor;
-@synthesize manager = _manager;
-@synthesize sensorsTable = _sensorsTable;
-@synthesize bpm = _bpm;
-@synthesize currentlyConnectedPeripheral = _currentlyConnectedPeripheral;
-@synthesize lastConnectedPeripheral = _lastConnectedPeripheral;
+@implementation DeviceViewController
+@synthesize heartRateMonitors;
+@synthesize heartRateLabel;
+@synthesize connectedMonitor;
+@synthesize manager;
+@synthesize sensorsTable;
+@synthesize bpm;
+@synthesize currentlyConnectedPeripheral;
+@synthesize lastConnectedPeripheral;
 
 @synthesize RRs;
 @synthesize RRsToSend;
 @synthesize startTime;
 @synthesize create;
-@synthesize login =_login;
-@synthesize password = _password;
+@synthesize login;
+@synthesize password;
 
 - (void)loadView
 {
     [super loadView];
-    self.CardioMoods = [NSMutableArray array];
-    self.RRs = [NSMutableArray array];
-    self.RRsToSend = [NSMutableArray array];
-    self.startTime = nil;
-    self.create = 1;
-    self.manager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
+    heartRateMonitors = [NSMutableArray array];
+    RRs = [NSMutableArray array];
+    RRsToSend = [NSMutableArray array];
+    startTime = nil;
+    create = 1;
+    manager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
     [self startScan];
 }
 
@@ -64,7 +64,7 @@
 - (BOOL) isLECapableHardware
 {
     NSString * state = nil;
-    switch ([self.manager state]) {
+    switch ([manager state]) {
         case CBCentralManagerStateUnsupported:
             state = @"The platform/hardware doesn't support Bluetooth Low Energy.";
             break;
@@ -87,14 +87,14 @@
 // Request CBCentralManager to scan for heart rate peripherals using service UUID 0x180D
 - (void) startScan
 {
-    [self.manager scanForPeripheralsWithServices:[NSArray arrayWithObject:[CBUUID UUIDWithString:@"180D"]]
+    [manager scanForPeripheralsWithServices:[NSArray arrayWithObject:[CBUUID UUIDWithString:@"180D"]]
                                          options:nil];
 }
 
 // Request CBCentralManager to stop scanning for heart rate peripherals
 - (void) stopScan
 {
-    [self.manager stopScan];
+    [manager stopScan];
 }
 
 #pragma mark - CBCentralManager delegate methods
@@ -112,46 +112,46 @@
                    RSSI:(NSNumber *)RSSI
 {
     NSMutableArray *peripherals = [self mutableArrayValueForKey:@"CardioMoods"];
-    if( ![self.CardioMoods containsObject:aPeripheral] && aPeripheral.name != nil)
+    if( ![heartRateMonitors containsObject:aPeripheral] && aPeripheral.name != nil)
         [peripherals addObject:aPeripheral];
     
-    if([[self lastConnectedPeripheral] UUID] != nil)
+    if([lastConnectedPeripheral UUID] != nil)
     {
-        [[self manager] retrievePeripherals:[NSArray arrayWithObject:(id)self.lastConnectedPeripheral.UUID]];
+        [manager retrievePeripherals:[NSArray arrayWithObject:(id)lastConnectedPeripheral.UUID]];
     }
     
-    [[self sensorsTable] reloadData];
+    [sensorsTable reloadData];
 }
 
 #pragma mark TableView delegate methods
 - (void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *) indexPath {
-    CBPeripheral *device = [[self CardioMoods] objectAtIndex:[indexPath row]];
+    CBPeripheral *device = [heartRateMonitors objectAtIndex:[indexPath row]];
     if (![device isConnected]) {
-        if ([self.currentlyConnectedPeripheral isConnected]) {
-            [self.manager cancelPeripheralConnection:self.currentlyConnectedPeripheral];
+        if ([currentlyConnectedPeripheral isConnected]) {
+            [manager cancelPeripheralConnection:currentlyConnectedPeripheral];
         }
-        self.currentlyConnectedPeripheral = device;
-        [self.manager connectPeripheral:self.currentlyConnectedPeripheral
+        currentlyConnectedPeripheral = device;
+        [manager connectPeripheral:currentlyConnectedPeripheral
                                 options:[NSDictionary dictionaryWithObject:
                                          [NSNumber numberWithBool:YES]
                                                                     forKey:
                                          CBConnectPeripheralOptionNotifyOnDisconnectionKey]];
-        [self connectedMonitor].text = [self.currentlyConnectedPeripheral name];
-        [self connectedMonitor].enabled = TRUE;
-        [self heartRateLabel].enabled = TRUE;
-        [self bpm].enabled = TRUE;
+        connectedMonitor.text = [currentlyConnectedPeripheral name];
+        connectedMonitor.enabled = TRUE;
+        heartRateLabel.enabled = TRUE;
+        bpm.enabled = TRUE;
     }
     else {
-        [self.manager cancelPeripheralConnection:self.currentlyConnectedPeripheral];
-        [self connectedMonitor].text = @"No Connected Device";
-        [self connectedMonitor].enabled = FALSE;
-        [self heartRateLabel].text = @"0";
-        [self heartRateLabel].enabled = FALSE;
-        [self bpm].enabled = FALSE;
-        self.currentlyConnectedPeripheral = nil;
-        [[self sensorsTable] reloadData];
+        [manager cancelPeripheralConnection:currentlyConnectedPeripheral];
+        connectedMonitor.text = @"No Connected Device";
+        connectedMonitor.enabled = FALSE;
+        heartRateLabel.text = @"0";
+        heartRateLabel.enabled = FALSE;
+        bpm.enabled = FALSE;
+        currentlyConnectedPeripheral = nil;
+        [sensorsTable reloadData];
     }
-    [[self sensorsTable] reloadData];
+    [sensorsTable reloadData];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -165,7 +165,7 @@
 	if (!cell)
 		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:cellID];
     
-	device = [self.CardioMoods objectAtIndex:row];
+	device = [heartRateMonitors objectAtIndex:row];
     
     if ([[device name] length])
         [[cell textLabel] setText:[device name]];
@@ -183,7 +183,7 @@
 }
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return [[self CardioMoods] count];
+    return [heartRateMonitors count];
 }
 
 // Invoked when the central manager retrieves the list of known peripherals.
@@ -193,13 +193,13 @@
     NSLog(@"Retrieved peripheral: %u - %@", [peripherals count], peripherals);
     [self stopScan];
     if([peripherals count] >= 1) {
-        [[self manager] connectPeripheral:[peripherals objectAtIndex:0] options:[NSDictionary dictionaryWithObject:[NSNumber numberWithBool:YES] forKey:CBConnectPeripheralOptionNotifyOnDisconnectionKey]];
-        [self connectedMonitor].text = [[peripherals objectAtIndex:0] name];
-        [self connectedMonitor].enabled = TRUE;
-        [self heartRateLabel].enabled = TRUE;
-        [self bpm].enabled = TRUE;
-        self.currentlyConnectedPeripheral = [peripherals objectAtIndex:0];
-        [[self sensorsTable] reloadData];
+        [manager connectPeripheral:[peripherals objectAtIndex:0] options:[NSDictionary dictionaryWithObject:[NSNumber numberWithBool:YES] forKey:CBConnectPeripheralOptionNotifyOnDisconnectionKey]];
+        connectedMonitor.text = [[peripherals objectAtIndex:0] name];
+        connectedMonitor.enabled = TRUE;
+        heartRateLabel.enabled = TRUE;
+        bpm.enabled = TRUE;
+        currentlyConnectedPeripheral = [peripherals objectAtIndex:0];
+        [sensorsTable reloadData];
     }
 }
 
@@ -211,8 +211,8 @@
     [aPeripheral setDelegate:self];
     [aPeripheral discoverServices:nil];
     [self setLastConnectedPeripheral:aPeripheral];
-    self.startTime = [NSDate date];
-    [[self sensorsTable] reloadData];
+    startTime = [NSDate date];
+    [sensorsTable reloadData];
 }
 
 // Invoked when an existing connection with the peripheral is torn down.
@@ -221,13 +221,13 @@
 didDisconnectPeripheral:(CBPeripheral *)aPeripheral
                   error:(NSError *)error
 {
-    [self connectedMonitor].text = @"No Connected Device";
-    [self connectedMonitor].enabled = FALSE;
-    [self heartRateLabel].text = @"0";
-    [self heartRateLabel].enabled = FALSE;
-    [self bpm].enabled = FALSE;
-    self.currentlyConnectedPeripheral = nil;
-    [[self sensorsTable] reloadData];
+    connectedMonitor.text = @"No Connected Device";
+    connectedMonitor.enabled = FALSE;
+    heartRateLabel.text = @"0";
+    heartRateLabel.enabled = FALSE;
+    bpm.enabled = FALSE;
+    currentlyConnectedPeripheral = nil;
+    [sensorsTable reloadData];
     [self startScan];
 }
 
@@ -320,18 +320,18 @@ didDiscoverCharacteristicsForService:(CBService *)service
 - (void) updateWithHRMData:(NSData *)data
 {
     const uint8_t *reportData = [data bytes];
-    uint16_t bpm = 0;
+    uint16_t rate = 0;
     // n of byte containing rr
     int rrByte = 2;
     if ((reportData[0] & 0x01) == 0)
     {
         /* uint8 bpm */
-        bpm = reportData[1];
+        rate = reportData[1];
     }
     else
     {
         /* uint16 bpm */
-        bpm = CFSwapInt16LittleToHost(*(uint16_t *)(&reportData[1]));
+        rate = CFSwapInt16LittleToHost(*(uint16_t *)(&reportData[1]));
         rrByte++;
     }
     if ((reportData[0] & 0x04) == 1){
@@ -357,11 +357,10 @@ didDiscoverCharacteristicsForService:(CBService *)service
         if ([RRsToSend count] >= 10) {
             [self sendRRs:RRsToSend];
             [RRsToSend removeAllObjects];
-            self.startTime = [NSDate date];
+            startTime = [NSDate date];
         }
     }
-    self.heartRateLabel.text = [NSString stringWithFormat:@"%d", bpm];
-    //[[self heartRate] addObject:];
+    heartRateLabel.text = [NSString stringWithFormat:@"%d", rate];
 }
 
 // Invoked upon completion of a -[readValueForCharacteristic:] request
@@ -453,11 +452,10 @@ didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic
     NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
     [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss.SSS"];
     NSString* dateString = [dateFormatter stringFromDate:startTime];
-    NSString* uuid = (__bridge NSString *)CFUUIDCreateString(NULL, [self.currentlyConnectedPeripheral UUID]);
-    // !!! HARDCODE: user_id, device_id, device_name
-    NSArray* objects = [NSArray arrayWithObjects:dateString, uuid, [self.currentlyConnectedPeripheral name], rrs, self.login, self.password, self.create == 0 ? @"0" : @"1", nil];
+    NSString* uuid = (__bridge NSString *)CFUUIDCreateString(NULL, [currentlyConnectedPeripheral UUID]);
+    NSArray* objects = [NSArray arrayWithObjects:dateString, uuid, [currentlyConnectedPeripheral name], rrs, login, password, create == 0 ? @"0" : @"1", nil];
     NSArray* keys = [NSArray arrayWithObjects:@"start", @"device_id", @"device_name", @"rates", @"email", @"password", @"create", nil];
-    self.create = 0;
+    create = 0;
     NSDictionary* JSONDictionary = [NSDictionary dictionaryWithObjects:objects forKeys:keys];
     NSError* error = nil;
     NSData* jsonData = [NSJSONSerialization dataWithJSONObject:JSONDictionary options:NSJSONWritingPrettyPrinted error:&error];

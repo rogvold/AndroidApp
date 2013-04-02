@@ -7,7 +7,7 @@
 //
 
 #import "LoginViewController.h"
-#import "ViewController.h"
+#import "DeviceViewController.h"
 #import "KeychainItemWrapper.h"
 
 @interface LoginViewController ()
@@ -23,15 +23,8 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	self.keychainItem = [[KeychainItemWrapper alloc] initWithIdentifier:@"HRMLogin" accessGroup:nil];
-    NSString *password = [self.keychainItem objectForKey:CFBridgingRelease(kSecValueData)];
-    NSString *username = [self.keychainItem objectForKey:CFBridgingRelease(kSecAttrAccount)];
-    if (username && password)
-    {
-        self.loginField.text = username;
-        self.passwordField.text = password;
-        //[self performSegueWithIdentifier:@"signInSegue" sender:self];
-    }
+    [self.signInButton setTarget:self];
+    [self.signInButton setAction:@selector(signInButtonPressed:)];
 }
 
 - (void)didReceiveMemoryWarning
@@ -42,6 +35,7 @@
 
 - (IBAction)signInButtonPressed:(id)sender
 {
+    self.keychainItem = [[KeychainItemWrapper alloc] initWithIdentifier:@"CardioMood" accessGroup:nil];
     NSString *password = [self.keychainItem objectForKey:CFBridgingRelease(kSecValueData)];
     NSString *username = [self.keychainItem objectForKey:CFBridgingRelease(kSecAttrAccount)];
     if ((self.loginField.text != username || self.passwordField.text != password)
@@ -51,6 +45,7 @@
         [self.keychainItem setObject:self.passwordField.text forKey:CFBridgingRelease(kSecValueData)];
         [self.keychainItem setObject:self.loginField.text forKey:CFBridgingRelease(kSecAttrAccount)];
     }
+    [self performSegueWithIdentifier:@"signInSegue" sender:self];
 }
 
 -(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender{

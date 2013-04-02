@@ -9,6 +9,10 @@
 /* Begin PBXBuildFile section */
 		FA4F915817074B7E006FF8D8 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FA4F915717074B7E006FF8D8 /* Icon@2x.png */; };
 		FA4F915A17074B83006FF8D8 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = FA4F915917074B83006FF8D8 /* Icon.png */; };
+		FA4F915C17084229006FF8D8 /* stat@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FA4F915B17084229006FF8D8 /* stat@2x.png */; };
+		FAA5F322170A2B5C00D7640D /* UserSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA5F321170A2B5C00D7640D /* UserSettingsViewController.m */; };
+		FAA5F32A170B02E500D7640D /* female@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FAA5F328170B02E500D7640D /* female@2x.png */; };
+		FAA5F32B170B02E500D7640D /* male@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FAA5F329170B02E500D7640D /* male@2x.png */; };
 		FAA91A0317074AB900999FCB /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA9199C17074AB900999FCB /* AppDelegate.m */; };
 		FAA91A0417074AB900999FCB /* CardioMood-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FAA9199D17074AB900999FCB /* CardioMood-Info.plist */; };
 		FAA91A0517074AB900999FCB /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FAA919EF17074AB900999FCB /* Default-568h@2x.png */; };
@@ -22,18 +26,45 @@
 		FAA91A0D17074AB900999FCB /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA919FC17074AB900999FCB /* LoginViewController.m */; };
 		FAA91A0E17074AB900999FCB /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA919FD17074AB900999FCB /* main.m */; };
 		FAA91A0F17074AB900999FCB /* new@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FAA919FE17074AB900999FCB /* new@2x.png */; };
-		FAA91A1017074AB900999FCB /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA91A0217074AB900999FCB /* ViewController.m */; };
+		FAA91A1017074AB900999FCB /* DeviceViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA91A0217074AB900999FCB /* DeviceViewController.m */; };
 		FAB310A216282EE5005B3E4A /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAB310A116282EE5005B3E4A /* QuartzCore.framework */; };
 		FACB18FA1621844300BF2D66 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FACB18F91621844300BF2D66 /* UIKit.framework */; };
 		FACB18FC1621844300BF2D66 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FACB18FB1621844300BF2D66 /* Foundation.framework */; };
 		FACB18FE1621844300BF2D66 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FACB18FD1621844300BF2D66 /* CoreGraphics.framework */; };
 		FACB19351621866800BF2D66 /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FACB19341621866800BF2D66 /* CoreBluetooth.framework */; };
 		FAE1C871167E3941004F927B /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAE1C870167E3941004F927B /* Security.framework */; };
+		FAFD2B07170993AC005DF533 /* libClientServerInteraction.iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FAFD2B04170992E2005DF533 /* libClientServerInteraction.iOS.a */; };
+		FAFD2B0B17099623005DF533 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAFD2B0A17099623005DF533 /* MobileCoreServices.framework */; };
+		FAFD2B0D17099630005DF533 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAFD2B0C17099630005DF533 /* SystemConfiguration.framework */; };
+		FAFD2B0F17099678005DF533 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAFD2B0E17099678005DF533 /* CoreData.framework */; };
+		FAFD2B1117099682005DF533 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAFD2B1017099682005DF533 /* CFNetwork.framework */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		FAFD2B03170992E2005DF533 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FAFD2AFE170992E2005DF533 /* ClientServerInteraction.iOS.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = FA6AC5DC17098631008C60F6;
+			remoteInfo = ClientServerInteraction.iOS;
+		};
+		FAFD2B0517099372005DF533 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FAFD2AFE170992E2005DF533 /* ClientServerInteraction.iOS.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = FA6AC5DB17098631008C60F6;
+			remoteInfo = ClientServerInteraction.iOS;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		FA4F915717074B7E006FF8D8 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon@2x.png"; path = "../Icon@2x.png"; sourceTree = "<group>"; };
 		FA4F915917074B83006FF8D8 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon.png; path = ../Icon.png; sourceTree = "<group>"; };
+		FA4F915B17084229006FF8D8 /* stat@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stat@2x.png"; sourceTree = "<group>"; };
+		FAA5F320170A2B5C00D7640D /* UserSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserSettingsViewController.h; sourceTree = "<group>"; };
+		FAA5F321170A2B5C00D7640D /* UserSettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserSettingsViewController.m; sourceTree = "<group>"; };
+		FAA5F328170B02E500D7640D /* female@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "female@2x.png"; sourceTree = "<group>"; };
+		FAA5F329170B02E500D7640D /* male@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "male@2x.png"; sourceTree = "<group>"; };
 		FAA9199B17074AB900999FCB /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		FAA9199C17074AB900999FCB /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		FAA9199D17074AB900999FCB /* CardioMood-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "CardioMood-Info.plist"; sourceTree = "<group>"; };
@@ -52,10 +83,8 @@
 		FAA919FC17074AB900999FCB /* LoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoginViewController.m; sourceTree = "<group>"; };
 		FAA919FD17074AB900999FCB /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		FAA919FE17074AB900999FCB /* new@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "new@2x.png"; sourceTree = "<group>"; };
-		FAA919FF17074AB900999FCB /* ru */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ru; path = ru.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		FAA91A0017074AB900999FCB /* ru */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = ru; path = ru.lproj/MainStoryboard.storyboard; sourceTree = "<group>"; };
-		FAA91A0117074AB900999FCB /* ViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		FAA91A0217074AB900999FCB /* ViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		FAA91A0117074AB900999FCB /* DeviceViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DeviceViewController.h; sourceTree = "<group>"; };
+		FAA91A0217074AB900999FCB /* DeviceViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DeviceViewController.m; sourceTree = "<group>"; };
 		FAB310A116282EE5005B3E4A /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		FACB18F51621844300BF2D66 /* CardioMood.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CardioMood.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FACB18F91621844300BF2D66 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
@@ -64,6 +93,11 @@
 		FACB191D1621844300BF2D66 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
 		FACB19341621866800BF2D66 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
 		FAE1C870167E3941004F927B /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		FAFD2AFE170992E2005DF533 /* ClientServerInteraction.iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ClientServerInteraction.iOS.xcodeproj; path = ClientServerInteraction.iOS/ClientServerInteraction.iOS.xcodeproj; sourceTree = "<group>"; };
+		FAFD2B0A17099623005DF533 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
+		FAFD2B0C17099630005DF533 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		FAFD2B0E17099678005DF533 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		FAFD2B1017099682005DF533 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,7 +105,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FAFD2B1117099682005DF533 /* CFNetwork.framework in Frameworks */,
+				FAFD2B0F17099678005DF533 /* CoreData.framework in Frameworks */,
 				FAE1C871167E3941004F927B /* Security.framework in Frameworks */,
+				FAFD2B0D17099630005DF533 /* SystemConfiguration.framework in Frameworks */,
+				FAFD2B0B17099623005DF533 /* MobileCoreServices.framework in Frameworks */,
+				FAFD2B07170993AC005DF533 /* libClientServerInteraction.iOS.a in Frameworks */,
 				FAB310A216282EE5005B3E4A /* QuartzCore.framework in Frameworks */,
 				FACB19351621866800BF2D66 /* CoreBluetooth.framework in Frameworks */,
 				FACB18FA1621844300BF2D66 /* UIKit.framework in Frameworks */,
@@ -86,17 +125,19 @@
 		FAA9199A17074AB900999FCB /* CardioMood */ = {
 			isa = PBXGroup;
 			children = (
+				FAA91A1217074AF700999FCB /* Keychain Wrapper */,
+				FAA91A1117074AD800999FCB /* Supporting files */,
 				FAA9199B17074AB900999FCB /* AppDelegate.h */,
 				FAA9199C17074AB900999FCB /* AppDelegate.m */,
-				FAA91A1117074AD800999FCB /* Supporting files */,
 				FAA919F417074AB900999FCB /* MainStoryboard.storyboard */,
 				FAA919F717074AB900999FCB /* InfoViewController.h */,
 				FAA919F817074AB900999FCB /* InfoViewController.m */,
-				FAA91A1217074AF700999FCB /* Keychain Wrapper */,
 				FAA919FB17074AB900999FCB /* LoginViewController.h */,
 				FAA919FC17074AB900999FCB /* LoginViewController.m */,
-				FAA91A0117074AB900999FCB /* ViewController.h */,
-				FAA91A0217074AB900999FCB /* ViewController.m */,
+				FAA91A0117074AB900999FCB /* DeviceViewController.h */,
+				FAA91A0217074AB900999FCB /* DeviceViewController.m */,
+				FAA5F320170A2B5C00D7640D /* UserSettingsViewController.h */,
+				FAA5F321170A2B5C00D7640D /* UserSettingsViewController.m */,
 			);
 			path = CardioMood;
 			sourceTree = "<group>";
@@ -104,6 +145,9 @@
 		FAA91A1117074AD800999FCB /* Supporting files */ = {
 			isa = PBXGroup;
 			children = (
+				FAA5F328170B02E500D7640D /* female@2x.png */,
+				FAA5F329170B02E500D7640D /* male@2x.png */,
+				FA4F915B17084229006FF8D8 /* stat@2x.png */,
 				FA4F915917074B83006FF8D8 /* Icon.png */,
 				FA4F915717074B7E006FF8D8 /* Icon@2x.png */,
 				FAA9199D17074AB900999FCB /* CardioMood-Info.plist */,
@@ -134,6 +178,7 @@
 				FAA9199A17074AB900999FCB /* CardioMood */,
 				FACB18F81621844300BF2D66 /* Frameworks */,
 				FACB18F61621844300BF2D66 /* Products */,
+				FAFD2AFE170992E2005DF533 /* ClientServerInteraction.iOS.xcodeproj */,
 			);
 			sourceTree = "<group>";
 		};
@@ -148,6 +193,10 @@
 		FACB18F81621844300BF2D66 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FAFD2B1017099682005DF533 /* CFNetwork.framework */,
+				FAFD2B0E17099678005DF533 /* CoreData.framework */,
+				FAFD2B0C17099630005DF533 /* SystemConfiguration.framework */,
+				FAFD2B0A17099623005DF533 /* MobileCoreServices.framework */,
 				FAE1C870167E3941004F927B /* Security.framework */,
 				FAB310A116282EE5005B3E4A /* QuartzCore.framework */,
 				FACB19341621866800BF2D66 /* CoreBluetooth.framework */,
@@ -157,6 +206,14 @@
 				FACB191D1621844300BF2D66 /* SenTestingKit.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		FAFD2AFF170992E2005DF533 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FAFD2B04170992E2005DF533 /* libClientServerInteraction.iOS.a */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -173,6 +230,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				FAFD2B0617099372005DF533 /* PBXTargetDependency */,
 			);
 			name = CardioMood;
 			productName = HeartRateMonitor;
@@ -199,12 +257,28 @@
 			mainGroup = FACB18EA1621844300BF2D66;
 			productRefGroup = FACB18F61621844300BF2D66 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = FAFD2AFF170992E2005DF533 /* Products */;
+					ProjectRef = FAFD2AFE170992E2005DF533 /* ClientServerInteraction.iOS.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				FACB18F41621844300BF2D66 /* CardioMood */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		FAFD2B04170992E2005DF533 /* libClientServerInteraction.iOS.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libClientServerInteraction.iOS.a;
+			remoteRef = FAFD2B03170992E2005DF533 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		FACB18F31621844300BF2D66 /* Resources */ = {
@@ -221,6 +295,9 @@
 				FAA91A0F17074AB900999FCB /* new@2x.png in Resources */,
 				FA4F915817074B7E006FF8D8 /* Icon@2x.png in Resources */,
 				FA4F915A17074B83006FF8D8 /* Icon.png in Resources */,
+				FA4F915C17084229006FF8D8 /* stat@2x.png in Resources */,
+				FAA5F32A170B02E500D7640D /* female@2x.png in Resources */,
+				FAA5F32B170B02E500D7640D /* male@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -236,18 +313,26 @@
 				FAA91A0C17074AB900999FCB /* KeychainItemWrapper.m in Sources */,
 				FAA91A0D17074AB900999FCB /* LoginViewController.m in Sources */,
 				FAA91A0E17074AB900999FCB /* main.m in Sources */,
-				FAA91A1017074AB900999FCB /* ViewController.m in Sources */,
+				FAA91A1017074AB900999FCB /* DeviceViewController.m in Sources */,
+				FAA5F322170A2B5C00D7640D /* UserSettingsViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		FAFD2B0617099372005DF533 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = ClientServerInteraction.iOS;
+			targetProxy = FAFD2B0517099372005DF533 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		FAA919F217074AB900999FCB /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
 				FAA919F317074AB900999FCB /* en */,
-				FAA919FF17074AB900999FCB /* ru */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -256,7 +341,6 @@
 			isa = PBXVariantGroup;
 			children = (
 				FAA919F517074AB900999FCB /* en */,
-				FAA91A0017074AB900999FCB /* ru */,
 			);
 			name = MainStoryboard.storyboard;
 			sourceTree = "<group>";
@@ -331,8 +415,10 @@
 		FACB192F1621844300BF2D66 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = "\"$(SRCROOT)/CardioMood\"";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "CardioMood/CardioMood-Prefix.pch";
+				HEADER_SEARCH_PATHS = ClientServerInteraction.iOS/ClientServerInteraction.iOS;
 				INFOPLIST_FILE = "$(SRCROOT)/CardioMood/CardioMood-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				LIBRARY_SEARCH_PATHS = (
@@ -344,7 +430,7 @@
 					"-all_load",
 				);
 				PRODUCT_NAME = CardioMood;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -352,8 +438,10 @@
 		FACB19301621844300BF2D66 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = "\"$(SRCROOT)/CardioMood\"";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "CardioMood/CardioMood-Prefix.pch";
+				HEADER_SEARCH_PATHS = ClientServerInteraction.iOS/ClientServerInteraction.iOS;
 				INFOPLIST_FILE = "$(SRCROOT)/CardioMood/CardioMood-Info.plist";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
 				LIBRARY_SEARCH_PATHS = (
@@ -365,7 +453,7 @@
 					"-all_load",
 				);
 				PRODUCT_NAME = CardioMood;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
