@@ -7,27 +7,27 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "User.h"
 
 @interface ClientServerInteraction : NSObject
 
-//private
-
-+(void)httpPostJsonWithUrl:(NSString*)url withQueryString:(NSString*)queryString withJson:(NSString*)json completion:(void (^)(bool response, NSError* error))completionBlock withHandler:(void (^)(NSURLResponse *urlResponse,NSData *responseData, NSError *error))handler;
-
-+(NSString*)prepareQueryString:(NSDictionary*)params;
-
-+(void)commonBoolRequest:(NSString*)suffix withEmail:(NSString*)email withPassword:(NSString*)password completion:(void (^)(bool response, NSError* error))completionBlock;
-
-+(void (^)(NSURLResponse *urlResponse,NSData *responseData, NSError *error))createBoolHandler:(void (^)(bool response, NSError* error))completionBlock;
 
 
 //public
 
-+(void)validateEmail:(NSString*)email completion:(void (^)(bool response, NSError* error))completionBlock;
++(void)validateEmail:(NSString*)email completion:(void (^)(NSNumber* response, NSError* error))completionBlock;
 
-+(void)registerUser:(NSString*)email withPassword:(NSString*)password completion:(void (^)(bool response, NSError* error))completionBlock;
++(void)registerUser:(NSString*)email withPassword:(NSString*)password completion:(void (^)(NSNumber* response, NSError* error))completionBlock;
 
-+(void)checkData:(NSString*)email withPassword:(NSString*)password completion:(void (^)(bool response, NSError* error))completionBlock;
++(void)checkData:(NSString*)email withPassword:(NSString*)password completion:(void (^)(NSNumber* response, NSError* error))completionBlock;
+
++(void)getInfo:(NSString*)email withPassword:(NSString*)password completion:(void (^)(User* response, NSError* error))completionBlock;
+
++(void)updateInfo:(User*)user completion:(void (^)(NSNumber* response, NSError* error))completionBlock;
+
++(void)upload:(NSString*)email withPassword:(NSString*)password rates:(NSArray*) rates start:(long long) start completion:(void (^)(NSNumber* response, NSError* error))completionBlock;
+
++(void)sync:(NSString*)email withPassword:(NSString*)password rates:(NSArray*) rates start:(long long) start completion:(void (^)(NSNumber* response, NSError* error))completionBlock;
 
 
 @end
