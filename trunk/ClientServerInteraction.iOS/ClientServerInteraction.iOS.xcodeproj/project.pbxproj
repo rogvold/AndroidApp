@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5B6B655C170B3863004AC2AF /* User.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B6B655B170B3863004AC2AF /* User.m */; };
 		FA6AC5E017098631008C60F6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6AC5DF17098631008C60F6 /* Foundation.framework */; };
 		FA6AC60017098939008C60F6 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6AC5FF17098939008C60F6 /* CFNetwork.framework */; };
 		FA6AC60217098945008C60F6 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FA6AC60117098945008C60F6 /* CoreData.framework */; };
@@ -29,6 +30,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		5B6B655A170B3863004AC2AF /* User.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = User.h; sourceTree = "<group>"; };
+		5B6B655B170B3863004AC2AF /* User.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = User.m; sourceTree = "<group>"; };
 		FA6AC5DC17098631008C60F6 /* libClientServerInteraction.iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libClientServerInteraction.iOS.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		FA6AC5DF17098631008C60F6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		FA6AC5FF17098939008C60F6 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
@@ -94,6 +97,8 @@
 				FAFD2AFC17098F71005DF533 /* Supporting files */,
 				FAFD2AF917098E8F005DF533 /* ClientServerInteraction.h */,
 				FAFD2AFA17098E8F005DF533 /* ClientServerInteraction.m */,
+				5B6B655A170B3863004AC2AF /* User.h */,
+				5B6B655B170B3863004AC2AF /* User.m */,
 			);
 			path = ClientServerInteraction.iOS;
 			sourceTree = "<group>";
@@ -158,6 +163,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FAFD2AFB17098E8F005DF533 /* ClientServerInteraction.m in Sources */,
+				5B6B655C170B3863004AC2AF /* User.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
