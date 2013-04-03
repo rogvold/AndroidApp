@@ -183,6 +183,7 @@ NSString* const kSecret = @"h7a7RaRtvAVwnMGq5BV6";
     NSString* url = [NSString stringWithFormat:@"%@%@%@%@", kBaseUrl, kResources, kRates, suffix];
 
     NSString* json = [ClientServerInteraction serializeSession:email withPassword:password rates:rates start:start create:create];
+    json = [NSString stringWithFormat:@"json=%@", json];
     
     [ClientServerInteraction httpPostJsonWithUrl:url withQueryString:@"" withJson:json completion:completionBlock withHandler:[ClientServerInteraction createBoolHandler:completionBlock]];
 }
