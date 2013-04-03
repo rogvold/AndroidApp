@@ -24,9 +24,9 @@
 
 +(User*)deserializeUser:(NSDictionary*) dict;
 
-+(void)commonUploadRequest:(NSString*)suffix withEmail:(NSString*)email withPassword:(NSString*)password rates:(NSArray*) rates start:(long long) start completion:(void (^)(NSNumber* response, NSError* error))completionBlock;
++(void)commonUploadRequest:(NSString*)suffix withEmail:(NSString*)email withPassword:(NSString*)password rates:(NSArray*) rates start:(long long) start create:(int)create completion:(void (^)(NSNumber* response, NSError* error))completionBlock;
 
-+(NSString*)serializeSession:(NSString*)email withPassword:(NSString*)password rates:(NSArray*) rates start:(long long) start;
++(NSString*)serializeSession:(NSString*)email withPassword:(NSString*)password rates:(NSArray*) rates start:(long long) start create:(int)create;
 
 @end
 
@@ -64,11 +64,11 @@ NSString* const kSecret = @"h7a7RaRtvAVwnMGq5BV6";
 }
 
 +(void)upload:(NSString*)email withPassword:(NSString*)password rates:(NSArray*) rates start:(long long) start completion:(void (^)(NSNumber* response, NSError* error))completionBlock {
-    [ClientServerInteraction commonUploadRequest:@"upload" withEmail:email withPassword:password rates:rates start:start completion:completionBlock];
+    [ClientServerInteraction commonUploadRequest:@"upload" withEmail:email withPassword:password rates:rates start:start create:1 completion:completionBlock];
 }
 
 +(void)sync:(NSString*)email withPassword:(NSString*)password rates:(NSArray*) rates start:(long long) start completion:(void (^)(NSNumber* response, NSError* error))completionBlock {
-    [ClientServerInteraction commonUploadRequest:@"sync" withEmail:email withPassword:password rates:rates start:start completion:completionBlock];
+    [ClientServerInteraction commonUploadRequest:@"sync" withEmail:email withPassword:password rates:rates start:start create:0 completion:completionBlock];
 }
 
 
@@ -179,16 +179,16 @@ NSString* const kSecret = @"h7a7RaRtvAVwnMGq5BV6";
     return user;
 }
 
-+(void)commonUploadRequest:(NSString*)suffix withEmail:(NSString*)email withPassword:(NSString*)password rates:(NSArray*) rates start:(long long) start completion:(void (^)(NSNumber* response, NSError* error))completionBlock {
++(void)commonUploadRequest:(NSString*)suffix withEmail:(NSString*)email withPassword:(NSString*)password rates:(NSArray*) rates start:(long long) start create:(int)create completion:(void (^)(NSNumber* response, NSError* error))completionBlock {
     NSString* url = [NSString stringWithFormat:@"%@%@%@%@", kBaseUrl, kResources, kRates, suffix];
 
-    NSString* json = [ClientServerInteraction serializeSession:email withPassword:password rates:rates start:start];
+    NSString* json = [ClientServerInteraction serializeSession:email withPassword:password rates:rates start:start create:create];
     
     [ClientServerInteraction httpPostJsonWithUrl:url withQueryString:@"" withJson:json completion:completionBlock withHandler:[ClientServerInteraction createBoolHandler:completionBlock]];
 }
 
-+(NSString*)serializeSession:(NSString*)email withPassword:(NSString*)password rates:(NSArray*) rates start:(long long) start {
-    NSArray* objects = [NSArray arrayWithObjects:email, password, rates, [NSString stringWithFormat:@"%lld", start], [NSNumber numberWithInt:1], nil];
++(NSString*)serializeSession:(NSString*)email withPassword:(NSString*)password rates:(NSArray*) rates start:(long long) start create:(int)create {
+    NSArray* objects = [NSArray arrayWithObjects:email, password, rates, [NSString stringWithFormat:@"%lld", start], [NSNumber numberWithInt:create], nil];
     
     NSArray* keys = [NSArray arrayWithObjects:@"email", @"password", @"rates", @"start", @"create", nil];
     NSData* data = [NSJSONSerialization dataWithJSONObject:[NSDictionary dictionaryWithObjects:objects forKeys:keys] options:NSJSONWritingPrettyPrinted error:nil];
