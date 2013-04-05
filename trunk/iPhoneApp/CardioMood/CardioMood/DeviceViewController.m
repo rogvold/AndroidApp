@@ -10,6 +10,8 @@
 #import <CoreBluetooth/CoreBluetooth.h>
 #import <CoreFoundation/CoreFoundation.h>
 #include <mach/mach.h>
+#import "KeychainItemWrapper.h"
+#import <ClientServerInteraction.h>
 
 @interface DeviceViewController () <CBCentralManagerDelegate, CBPeripheralDelegate, UITableViewDataSource, UITableViewDelegate>
 
@@ -17,6 +19,7 @@
 @end
 
 @implementation DeviceViewController
+
 @synthesize heartRateMonitors;
 @synthesize heartRateLabel;
 @synthesize connectedMonitor;
@@ -42,6 +45,9 @@
     startTime = nil;
     create = 1;
     manager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
+    KeychainItemWrapper *keychainItem = [[KeychainItemWrapper alloc] initWithIdentifier:@"CardioMood" accessGroup:nil];
+    password = [keychainItem objectForKey:CFBridgingRelease(kSecValueData)];
+    login = [keychainItem objectForKey:CFBridgingRelease(kSecAttrAccount)];
     [self startScan];
 }
 
@@ -111,7 +117,7 @@
       advertisementData:(NSDictionary *)advertisementData
                    RSSI:(NSNumber *)RSSI
 {
-    NSMutableArray *peripherals = [self mutableArrayValueForKey:@"CardioMoods"];
+    NSMutableArray *peripherals = [self mutableArrayValueForKey:@"heartRateMonitors"];
     if( ![heartRateMonitors containsObject:aPeripheral] && aPeripheral.name != nil)
         [peripherals addObject:aPeripheral];
     
@@ -355,7 +361,11 @@ didDiscoverCharacteristicsForService:(CBService *)service
         [RRsToSend addObjectsFromArray:rrs];
         // Send every 10 intervals to server
         if ([RRsToSend count] >= 10) {
-            [self sendRRs:RRsToSend];
+            //[self sendRRs:RRsToSend];
+            [ClientServerInteraction upload:login withPassword:password rates:RRsToSend start:(long long)round([startTime timeIntervalSince1970] * 1000) completion:^(NSNumber* response, NSError* error){
+                if (error)
+                    NSLog(@"%@", error.userInfo);
+            }];
             [RRsToSend removeAllObjects];
             startTime = [NSDate date];
         }
@@ -426,49 +436,6 @@ didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic
                                                        encoding:NSUTF8StringEncoding];
         NSLog(@"Manufacturer Name = %@", manufacturer);
     }
-}
-
-// Send intervals to server
-- (void) sendRRs:(NSArray *)rrs
-{
-    NSString* jsonString = [self makeJSON:rrs];
-    NSURL* url = [NSURL URLWithString:@"http://reshaka.ru:8080/BaseProjectWeb/faces/input"];
-    
-    
-    NSString* stringToSend = [@"json=" stringByAppendingString:jsonString];
-    NSData* dataToSend = [stringToSend dataUsingEncoding:NSUTF8StringEncoding];
-    
-    
-    NSMutableURLRequest* request = [[NSMutableURLRequest alloc] initWithURL:url];
-    [request setHTTPMethod:@"POST"];
-    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
-    [request setHTTPBody:dataToSend];
-    [NSURLConnection connectionWithRequest:request delegate:self];
-}
-
-// Make json based on array of rr intervals
--(NSString *) makeJSON:(NSArray *)rrs
-{
-    NSDateFormatter* dateFormatter = [[NSDateFormatter alloc] init];
-    [dateFormatter setDateFormat:@"yyyy-MM-dd HH:mm:ss.SSS"];
-    NSString* dateString = [dateFormatter stringFromDate:startTime];
-    NSString* uuid = (__bridge NSString *)CFUUIDCreateString(NULL, [currentlyConnectedPeripheral UUID]);
-    NSArray* objects = [NSArray arrayWithObjects:dateString, uuid, [currentlyConnectedPeripheral name], rrs, login, password, create == 0 ? @"0" : @"1", nil];
-    NSArray* keys = [NSArray arrayWithObjects:@"start", @"device_id", @"device_name", @"rates", @"email", @"password", @"create", nil];
-    create = 0;
-    NSDictionary* JSONDictionary = [NSDictionary dictionaryWithObjects:objects forKeys:keys];
-    NSError* error = nil;
-    NSData* jsonData = [NSJSONSerialization dataWithJSONObject:JSONDictionary options:NSJSONWritingPrettyPrinted error:&error];
-    NSString* json = nil;
-    if (! jsonData)
-    {
-        NSLog(@"Got an error: %@", error);
-    }
-    else
-    {
-        json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-    }
-    return json;
 }
 
 @end

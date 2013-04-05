@@ -10,6 +10,8 @@
 		FA4F915817074B7E006FF8D8 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FA4F915717074B7E006FF8D8 /* Icon@2x.png */; };
 		FA4F915A17074B83006FF8D8 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = FA4F915917074B83006FF8D8 /* Icon.png */; };
 		FA4F915C17084229006FF8D8 /* stat@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FA4F915B17084229006FF8D8 /* stat@2x.png */; };
+		FA79A9F1170F19DB007AC210 /* RegisterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FA79A9F0170F19DB007AC210 /* RegisterViewController.m */; };
+		FA79A9F4170F2906007AC210 /* SettingsPageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FA79A9F3170F2906007AC210 /* SettingsPageViewController.m */; };
 		FAA5F322170A2B5C00D7640D /* UserSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA5F321170A2B5C00D7640D /* UserSettingsViewController.m */; };
 		FAA5F32A170B02E500D7640D /* female@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FAA5F328170B02E500D7640D /* female@2x.png */; };
 		FAA5F32B170B02E500D7640D /* male@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FAA5F329170B02E500D7640D /* male@2x.png */; };
@@ -32,6 +34,7 @@
 		FACB18FC1621844300BF2D66 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FACB18FB1621844300BF2D66 /* Foundation.framework */; };
 		FACB18FE1621844300BF2D66 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FACB18FD1621844300BF2D66 /* CoreGraphics.framework */; };
 		FACB19351621866800BF2D66 /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FACB19341621866800BF2D66 /* CoreBluetooth.framework */; };
+		FACFD6E7170C98D200AF1B8F /* CMLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = FACFD6E6170C98D200AF1B8F /* CMLabel.m */; };
 		FAE1C871167E3941004F927B /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAE1C870167E3941004F927B /* Security.framework */; };
 		FAFD2B07170993AC005DF533 /* libClientServerInteraction.iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FAFD2B04170992E2005DF533 /* libClientServerInteraction.iOS.a */; };
 		FAFD2B0B17099623005DF533 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAFD2B0A17099623005DF533 /* MobileCoreServices.framework */; };
@@ -61,6 +64,10 @@
 		FA4F915717074B7E006FF8D8 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon@2x.png"; path = "../Icon@2x.png"; sourceTree = "<group>"; };
 		FA4F915917074B83006FF8D8 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon.png; path = ../Icon.png; sourceTree = "<group>"; };
 		FA4F915B17084229006FF8D8 /* stat@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stat@2x.png"; sourceTree = "<group>"; };
+		FA79A9EF170F19DB007AC210 /* RegisterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RegisterViewController.h; path = ../RegisterViewController.h; sourceTree = "<group>"; };
+		FA79A9F0170F19DB007AC210 /* RegisterViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RegisterViewController.m; path = ../RegisterViewController.m; sourceTree = "<group>"; };
+		FA79A9F2170F2906007AC210 /* SettingsPageViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsPageViewController.h; sourceTree = "<group>"; };
+		FA79A9F3170F2906007AC210 /* SettingsPageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingsPageViewController.m; sourceTree = "<group>"; };
 		FAA5F320170A2B5C00D7640D /* UserSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserSettingsViewController.h; sourceTree = "<group>"; };
 		FAA5F321170A2B5C00D7640D /* UserSettingsViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserSettingsViewController.m; sourceTree = "<group>"; };
 		FAA5F328170B02E500D7640D /* female@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "female@2x.png"; sourceTree = "<group>"; };
@@ -92,6 +99,8 @@
 		FACB18FD1621844300BF2D66 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
 		FACB191D1621844300BF2D66 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
 		FACB19341621866800BF2D66 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
+		FACFD6E5170C98D200AF1B8F /* CMLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMLabel.h; sourceTree = "<group>"; };
+		FACFD6E6170C98D200AF1B8F /* CMLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CMLabel.m; sourceTree = "<group>"; };
 		FAE1C870167E3941004F927B /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		FAFD2AFE170992E2005DF533 /* ClientServerInteraction.iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ClientServerInteraction.iOS.xcodeproj; path = ClientServerInteraction.iOS/ClientServerInteraction.iOS.xcodeproj; sourceTree = "<group>"; };
 		FAFD2B0A17099623005DF533 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
@@ -138,6 +147,12 @@
 				FAA91A0217074AB900999FCB /* DeviceViewController.m */,
 				FAA5F320170A2B5C00D7640D /* UserSettingsViewController.h */,
 				FAA5F321170A2B5C00D7640D /* UserSettingsViewController.m */,
+				FACFD6E5170C98D200AF1B8F /* CMLabel.h */,
+				FACFD6E6170C98D200AF1B8F /* CMLabel.m */,
+				FA79A9EF170F19DB007AC210 /* RegisterViewController.h */,
+				FA79A9F0170F19DB007AC210 /* RegisterViewController.m */,
+				FA79A9F2170F2906007AC210 /* SettingsPageViewController.h */,
+				FA79A9F3170F2906007AC210 /* SettingsPageViewController.m */,
 			);
 			path = CardioMood;
 			sourceTree = "<group>";
@@ -315,6 +330,9 @@
 				FAA91A0E17074AB900999FCB /* main.m in Sources */,
 				FAA91A1017074AB900999FCB /* DeviceViewController.m in Sources */,
 				FAA5F322170A2B5C00D7640D /* UserSettingsViewController.m in Sources */,
+				FACFD6E7170C98D200AF1B8F /* CMLabel.m in Sources */,
+				FA79A9F1170F19DB007AC210 /* RegisterViewController.m in Sources */,
+				FA79A9F4170F2906007AC210 /* SettingsPageViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

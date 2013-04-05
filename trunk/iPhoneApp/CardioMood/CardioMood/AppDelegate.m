@@ -16,6 +16,7 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     KeychainItemWrapper *keychainItem = [[KeychainItemWrapper alloc] initWithIdentifier:@"CardioMood" accessGroup:nil];
+    //[keychainItem resetKeychainItem]; //need for debugging
     NSString *password = [keychainItem objectForKey:CFBridgingRelease(kSecValueData)];
     NSString *username = [keychainItem objectForKey:CFBridgingRelease(kSecAttrAccount)];
     [self.window makeKeyAndVisible];
