@@ -76,7 +76,7 @@ NSString* const kToken = @"token/";
 }
 
 +(void)checkDataForEmail:(NSString*)email forPassword:(NSString*)password completion:(void (^)(int code, NSNumber* response, NSError* error, ServerResponseError* serverError))completionBlock {
-    [ClientServerInteraction baseRequest:[NSString stringWithFormat:@"%@%@", kAuth, @"register"] :[NSDictionary dictionaryWithObjectsAndKeys:email, @"email", password, @"password", nil] :nil :completionBlock :[NSNumber class]];
+    [ClientServerInteraction baseRequest:[NSString stringWithFormat:@"%@%@", kAuth, @"check_data"] :[NSDictionary dictionaryWithObjectsAndKeys:email, @"email", password, @"password", nil] :nil :completionBlock :[NSNumber class]];
 }
 
 +(void)getInfo:(NSString*)token completion:(void (^)(int code, User* response, NSError* error, ServerResponseError* serverError))completionBlock {
@@ -96,7 +96,11 @@ NSString* const kToken = @"token/";
 }
 
 +(void)getAllSessions:(NSString*)token completion:(void (^)(int code, NSArray* response, NSError* error, ServerResponseError* serverError))completionBlock {
-    [ClientServerInteraction baseRequest:[NSString stringWithFormat:@"%@%@", kSessions, @"all"] :[NSDictionary dictionaryWithObjectsAndKeys:token, @"token", nil] :nil :completionBlock :[NSArray class]];
+    [ClientServerInteraction baseRequest:[NSString stringWithFormat:@"%@%@", kSessions, @"all"] :[NSDictionary dictionaryWithObjectsAndKeys:token, @"token", nil] :nil :completionBlock :[Session class]];
+}
+
++(void)getRatesForSessionId:(NSNumber*)sessionId token:(NSString*)token completion:(void (^)(int code, NSArray* response, NSError* error, ServerResponseError* serverError))completionBlock {
+    
 }
 
 
@@ -173,8 +177,10 @@ NSString* const kToken = @"token/";
         return [ClientServerInteraction deserializeAccessToken:obj];
     if (class == [ServerResponseError class])
         return [ClientServerInteraction deserializeServerError:obj];
-    if (class == [NSArray class])
+    if (class == [Session class])
         return [ClientServerInteraction deserializeSessionsArray:obj];
+    if (class == [NSArray class])
+        return obj;
     return nil;    
 }
 
@@ -192,6 +198,10 @@ NSString* const kToken = @"token/";
     NSString* jsonString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     
     return jsonString;
+}
+
++(NSArray*)deserializeRates:(NSArray*)rates {
+    return rates;
 }
 
 +(NSArray*)deserializeSessionsArray:(NSArray*) array {

@@ -36,4 +36,6 @@
 
 +(void)getAllSessions:(NSString*)token completion:(void (^)(int code, NSArray* response, NSError* error, ServerResponseError* serverError))completionBlock;
 
++(void)getRatesForSessionId:(NSNumber*)sessionId token:(NSString*)token completion:(void (^)(int code, NSArray* response, NSError* error, ServerResponseError* serverError))completionBlock;
+
 @end
