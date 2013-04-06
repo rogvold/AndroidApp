@@ -19,9 +19,10 @@
 @property (nonatomic, retain) NSString* firstName;
 @property (nonatomic, retain) NSString* lastName;
 @property (nonatomic, retain) NSString* statusMessage;
-@property (nonatomic) int age;
-@property (nonatomic) int sex;
-@property (nonatomic) double height;
-@property (nonatomic) double weight;
+@property (nonatomic, retain) NSString* birthDate;
+@property (nonatomic, retain) NSNumber* sex;
+@property (nonatomic, retain) NSNumber* height;
+@property (nonatomic, retain) NSNumber* weight;
+@property (nonatomic, retain) NSNumber* userId;
 
 @end
