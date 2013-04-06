@@ -44,6 +44,7 @@
 NSString* const kBaseUrl = @"http://www.cardiomood.com/BaseProjectWeb/";
 NSString* const kResources = @"resources/";
 NSString* const kAuth = @"SecureAuth/";
+NSString* const kSessions = @"SecureSessions/";
 NSString* const kRates = @"rates/";
 NSString* const kSecret = @"h7a7RaRtvAVwnMGq5BV6";
 NSString* const kToken = @"token/";
@@ -62,27 +63,27 @@ NSString* const kToken = @"token/";
     
 }
 
-+(void)authorize:(NSString*)email :(NSString*)password :(NSString*)deviceId :(void (^)(int code, AccessToken* response, NSError* error, ServerResponseError* serverError))completionBlock {
++(void)authorizeWithEmail:(NSString*)email withPassword:(NSString*)password withDeviceId:(NSString*)deviceId completion:(void (^)(int code, AccessToken* response, NSError* error, ServerResponseError* serverError))completionBlock {
     [ClientServerInteraction baseRequest:[NSString stringWithFormat:@"%@%@", kToken, @"authorize"] :[NSDictionary dictionaryWithObjectsAndKeys:email, @"email", password, @"password", deviceId, @"deviceId", nil] :nil :completionBlock :[AccessToken class]];
 }
 
-+(void)validateEmail:(NSString*)email :(void (^)(int code, NSNumber* response, NSError* error, ServerResponseError* serverError))completionBlock {
++(void)validateEmail:(NSString*)email completion:(void (^)(int code, NSNumber* response, NSError* error, ServerResponseError* serverError))completionBlock {
     [ClientServerInteraction baseRequest:[NSString stringWithFormat:@"%@%@", kAuth, @"check_existence"] :[NSDictionary dictionaryWithObjectsAndKeys:email, @"email", nil] :nil :completionBlock :[NSNumber class]];
 }
 
-+(void)registerUser:(NSString*)email :(NSString*)password :(void (^)(int code, NSNumber* response, NSError* error, ServerResponseError* serverError))completionBlock {
++(void)registerUserWithEmal:(NSString*)email withPassword:(NSString*)password completion:(void (^)(int code, NSNumber* response, NSError* error, ServerResponseError* serverError))completionBlock {
     [ClientServerInteraction baseRequest:[NSString stringWithFormat:@"%@%@", kAuth, @"register"] :[NSDictionary dictionaryWithObjectsAndKeys:email, @"email", password, @"password", nil] :nil :completionBlock :[NSNumber class]];
 }
 
-+(void)checkData:(NSString*)email :(NSString*)password :(void (^)(int code, NSNumber* response, NSError* error, ServerResponseError* serverError))completionBlock {
++(void)checkDataForEmail:(NSString*)email forPassword:(NSString*)password completion:(void (^)(int code, NSNumber* response, NSError* error, ServerResponseError* serverError))completionBlock {
     [ClientServerInteraction baseRequest:[NSString stringWithFormat:@"%@%@", kAuth, @"register"] :[NSDictionary dictionaryWithObjectsAndKeys:email, @"email", password, @"password", nil] :nil :completionBlock :[NSNumber class]];
 }
 
-+(void)getInfo:(NSString*)token :(void (^)(int code, User* response, NSError* error, ServerResponseError* serverError))completionBlock {
++(void)getInfo:(NSString*)token completion:(void (^)(int code, User* response, NSError* error, ServerResponseError* serverError))completionBlock {
     [ClientServerInteraction baseRequest:[NSString stringWithFormat:@"%@%@", kAuth, @"info"] :[NSDictionary dictionaryWithObjectsAndKeys:token, @"token", nil] :nil :completionBlock :[User class]];
 }
 
-+(void)updateInfo:(User*)user :(NSString*)token :(void (^)(int code, NSNumber* response, NSError* error, ServerResponseError* serverError))completionBlock {
++(void)updateInfoForUser:(User*)user token:(NSString*)token completion:(void (^)(int code, NSNumber* response, NSError* error, ServerResponseError* serverError))completionBlock {
     [ClientServerInteraction baseRequest:[NSString stringWithFormat:@"%@%@", kAuth, @"update_info"] :[NSDictionary dictionaryWithObjectsAndKeys:token, @"token", nil] :user :completionBlock :[NSNumber class]];
 }
 
@@ -92,6 +93,10 @@ NSString* const kToken = @"token/";
 
 +(void)sync:(NSString*)email withPassword:(NSString*)password rates:(NSArray*) rates start:(long long) start completion:(void (^)(NSNumber* response, NSError* error))completionBlock {
 
+}
+
++(void)getAllSessions:(NSString*)token completion:(void (^)(int code, NSArray* response, NSError* error, ServerResponseError* serverError))completionBlock {
+    [ClientServerInteraction baseRequest:[NSString stringWithFormat:@"%@%@", kSessions, @"all"] :[NSDictionary dictionaryWithObjectsAndKeys:token, @"token", nil] :nil :completionBlock :[NSArray class]];
 }
 
 
@@ -168,6 +173,8 @@ NSString* const kToken = @"token/";
         return [ClientServerInteraction deserializeAccessToken:obj];
     if (class == [ServerResponseError class])
         return [ClientServerInteraction deserializeServerError:obj];
+    if (class == [NSArray class])
+        return [ClientServerInteraction deserializeSessionsArray:obj];
     return nil;    
 }
 
@@ -185,6 +192,23 @@ NSString* const kToken = @"token/";
     NSString* jsonString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     
     return jsonString;
+}
+
++(NSArray*)deserializeSessionsArray:(NSArray*) array {
+    NSMutableArray* sessions = [[NSMutableArray alloc] init];
+    for (id obj in array) {
+        [sessions addObject:[ClientServerInteraction deserializeSession:obj]];
+    }
+    return sessions;
+}
+
++(Session*)deserializeSession:(NSDictionary*)dict
+{
+    Session* session = [Session alloc];
+    session.sessionId = dict[@"id"];
+    session.start = dict[@"start"];
+    session.end = dict[@"end"];
+    return session;
 }
 
 +(User*)deserializeUser:(NSDictionary*) dict {
