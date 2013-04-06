@@ -7,8 +7,14 @@ namespace ClientServerInteraction.Error
 {
     public class ServerResponseException : Exception
     {
-        public ServerResponseException() : base() { }
-        public ServerResponseException(string message) : base(message) { }
-        public ServerResponseException(string message, Exception inner) : base(message, inner) { }
+        public const int InvalidToken = 20;
+        public const int OtherError = 21;
+
+        public ServerResponseException(string message, int code) : base(message)
+        {
+            ErrorCode = code;
+        }
+
+        public int ErrorCode { get; set; }
     }
 }

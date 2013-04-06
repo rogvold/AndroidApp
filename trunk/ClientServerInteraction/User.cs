@@ -6,8 +6,9 @@ namespace ClientServerInteraction
 {
     public class User
     {
+        public int Id { get; set; }
         public string About { get; set; }
-        public int Age { get; set; }
+        public string BirthDate { get; set; }
         public string Department { get; set; }
         public string Description { get; set; }
         public string Diagnosis { get; set; }

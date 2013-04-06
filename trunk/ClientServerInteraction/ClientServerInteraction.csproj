@@ -47,10 +47,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AccessToken.cs" />
     <Compile Include="Error\ServerResponseException.cs" />
     <Compile Include="HttpHelper.cs" />
     <Compile Include="LowercaseContractResolver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ResponseCallback.cs" />
     <Compile Include="SerializationHelper.cs" />
     <Compile Include="ServerHelper.cs" />
     <Compile Include="Session.cs" />

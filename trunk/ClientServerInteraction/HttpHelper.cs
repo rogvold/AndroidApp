@@ -6,6 +6,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using ClientServerInteraction.Error;
+using Newtonsoft.Json.Linq;
 
 namespace ClientServerInteraction
 {
@@ -15,7 +16,7 @@ namespace ClientServerInteraction
         public static Task<string> PostAsync(string url, string queryString, string json)
         {
             if (queryString != null)
-                url += queryString;
+                url += "?" + queryString;
             var request = (HttpWebRequest)WebRequest.Create(url);
             request.ContentType = "application/x-www-form-urlencoded";
             request.Method = "POST";
@@ -38,6 +39,13 @@ namespace ClientServerInteraction
                     return request;
                 }).ContinueWith(req => (HttpWebResponse)req.Result.GetResponse()).ContinueWith(resp => ReadAsString(resp.Result));
 
+        }
+
+        public static Task<T> PostAndParseResponseAsync<T>(string url, string queryString, string content)
+        {
+            return PostAsync(url, queryString, content).ContinueWith(response =>
+                SerializationHelper.ParseResponse(response.Result)).
+                    ContinueWith(t => SerializationHelper.Deserialize<T>(t.Result.ToString()));
         }
 
         private static Task<HttpWebResponse> GetHttpResponseAsync(HttpWebRequest request)

@@ -14,44 +14,55 @@ namespace ClientServerInteraction
         // server url and controller suffixes
         private const string ServerBase = @"http://www.cardiomood.com/BaseProjectWeb/";
         private const string Resources = @"resources/";
-        private const string Authorization = @"auth/";
+        private const string Authorization = @"SecureAuth/";
+        private const string Token = @"token/";
         private const string Rates = @"rates/";
 
-        public static Task<bool> ValidateEmail(string email)
+        private static Task BaseRequest<T>(string urlSuffix, Dictionary<object, object> queryContent,
+            Object json, ResponseCallback<T> callback)
         {
-            const string url = ServerBase + Resources + Authorization + "check_existence";
-            var queryString = SerializationHelper.CreateQueryString(new Dictionary<object, object> {{"email", email}});
-            return
-                HttpHelper.PostAsync(url, queryString, null).ContinueWith(json => SerializationHelper.DeserializeValidationResponse(json.Result));
+            var url = ServerBase + Resources + urlSuffix;
+            var jsonString = json == null ? null : SerializationHelper.Serialize(json);
+            if (queryContent == null)
+                queryContent = new Dictionary<object, object>();
+            if (jsonString != null)
+                queryContent.Add("json", jsonString);
+            var content = SerializationHelper.CreateQueryString(queryContent);
+            return HttpHelper.PostAndParseResponseAsync<T>(url, null, content).
+                ContinueWith(task => CommonCallbackRoutine(task, callback));
+        }
+
+        public static Task LogIn(string email, string password, string deviceId, 
+            ResponseCallback<AccessToken> callback)
+        {
+            return BaseRequest(Token + "authorize",
+                               new Dictionary<object, object>
+                                   {{"email", email}, {"password", password}, {"deviceId", deviceId}}, null, callback);
+        }
+
+        public static Task ValidateEmail(string email, ResponseCallback<bool> callback)
+        {
+            return BaseRequest(Authorization + "check_existence", new Dictionary<object, object> {{"email", email}},
+                               null, callback);
         }   
         
-        public static Task<bool> Register(string email, string password)
+        public static Task Register(string email, string password, ResponseCallback<bool> callback)
         {
-            const string url = ServerBase + Resources + Authorization + "register";
-            var queryString = SerializationHelper.CreateQueryString(new Dictionary<object, object> {{"email", email}, {"password", password}});
-            return
-                HttpHelper.PostAsync(url, queryString, null).ContinueWith(
-                    json => SerializationHelper.DeserializeValidationResponse(json.Result));
+            return BaseRequest(Authorization + "register",
+                               new Dictionary<object, object> {{"email", email}, {"password", password}}, null, callback);
+
         }
 
-        public static Task<bool> CheckAuthorizationData(string email, string password)
+        public static Task CheckAuthorizationData(string email, string password, ResponseCallback<bool> callback)
         {
-            const string url = ServerBase + Resources + Authorization + "check_data";
-            var queryString = SerializationHelper.CreateQueryString(new Dictionary<object, object> { { "email", email }, { "password", password } });
-            return
-                HttpHelper.PostAsync(url, queryString, null).ContinueWith(
-                    json => SerializationHelper.DeserializeValidationResponse(json.Result));
+            return BaseRequest(Authorization + "register",
+                               new Dictionary<object, object> { { "email", email }, { "password", password } }, null, callback);
         }
 
-        public static Task<User> GetUserInfo(string email, string password)
+        public static Task GetUserInfo(string accessToken, ResponseCallback<User> callback)
         {
-            const string url = ServerBase + Resources + Authorization + "info";
-            var queryString =
-                SerializationHelper.CreateQueryString(new Dictionary<object, object>
-                    {{"email", email}, {"password", password}});
-            return
-                HttpHelper.PostAsync(url, queryString, null).ContinueWith(
-                    json => SerializationHelper.DeserializeUser(json.Result));
+            return BaseRequest(Authorization + "info", new Dictionary<object, object> {{"token", accessToken}},
+                               null, callback);
         }
 
         public static Task<bool> UpdateUserInfo(User user)
@@ -82,7 +93,23 @@ namespace ClientServerInteraction
                 HttpHelper.PostAsync(url, null, json).ContinueWith(
                     resp => SerializationHelper.DeserializeValidationResponse(resp.Result));
         }
-        
+
+        private static void CommonCallbackRoutine<T>(Task<T> task, ResponseCallback<T> callback)
+        {
+            var exception = task.Exception == null ? null : task.Exception.InnerException;
+            if (exception == null)
+            {
+                callback.Success.Invoke(task.Result);
+            }
+            else if (exception is ServerResponseException)
+            {
+                callback.ServerError.Invoke((ServerResponseException)exception);
+            }
+            else
+            {
+                callback.ClientError.Invoke(exception);
+            }
+        }
 
       
     }

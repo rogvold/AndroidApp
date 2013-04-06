@@ -11,10 +11,21 @@ namespace ClientServerInteraction
     public class SerializationHelper
     {
         private const string Secret = @"h7a7RaRtvAVwnMGq5BV6";
+        // response constants
+        private const int NormalCode = 1;
+        private const int ErrorCode = 0;
+        // error constants
 
         public static string CreateQueryString(IDictionary<object, object> parameters)
         {
-            return parameters.Keys.Aggregate("?secret=" + Secret, (current, parameter) => current + String.Format(@"&{0}={1}", parameter, parameters[parameter]));
+            var str = "";
+            foreach (var parameter in parameters.Keys)
+            {
+                if (!str.Equals(""))
+                    str += "&";
+                str += String.Format(@"{0}={1}", parameter, parameters[parameter]);
+            }
+            return str;
         }
 
         public static bool DeserializeValidationResponse(string json)
@@ -49,7 +60,50 @@ namespace ClientServerInteraction
         {
             var errorMessage = JToken.Parse(json).Value<string>("error");
             if (errorMessage != null)
-                throw new ServerResponseException(errorMessage);
+                throw new ServerResponseException(errorMessage, ServerResponseException.OtherError);
+        }
+
+        public static JToken ParseResponse(string json)
+        {
+            var response = JsonConvert.DeserializeObject<ServerResponse>(json);
+            switch (response.ResponseCode)
+            {
+                case NormalCode:
+                    return response.Data;
+                case ErrorCode:
+                    int errorCode;
+                    var errorMessage = DeserializeError(response.Error, out errorCode);
+                    throw new ServerResponseException(errorMessage, errorCode);
+            }
+            return null;
+        }
+
+        public static AccessToken DeserializeAccessToken(JToken response)
+        {
+            return JsonConvert.DeserializeObject<AccessToken>(response.ToString());
+        }
+
+        private static string DeserializeError(JToken error, out int errorCode)
+        {
+            errorCode = error.Value<int>("code");
+            return error.Value<string>("message");
+        }
+
+        public static T Deserialize<T>(string json)
+        {
+            return JsonConvert.DeserializeObject<T>(json);
+        }
+
+        public static string Serialize(Object obj)
+        {
+            return JsonConvert.SerializeObject(obj);
+        }
+
+        private class ServerResponse
+        {
+            public int ResponseCode { get; set; }
+            public JToken Error { get; set; }
+            public JToken Data { get; set; }
         }
     }
 }
