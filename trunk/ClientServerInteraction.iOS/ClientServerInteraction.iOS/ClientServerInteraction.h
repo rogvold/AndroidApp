@@ -14,10 +14,6 @@
 
 @interface ClientServerInteraction : NSObject
 
-
-
-//public
-
 +(void)authorizeWithEmail:(NSString*)email withPassword:(NSString*)password withDeviceId:(NSString*)deviceId completion:(void (^)(int code, AccessToken* response, NSError* error, ServerResponseError* serverError))completionBlock;
 
 +(void)validateEmail:(NSString*)email completion:(void (^)(int code, NSNumber* response, NSError* error, ServerResponseError* serverError))completionBlock;
@@ -30,12 +26,14 @@
 
 +(void)updateInfoForUser:(User*)user token:(NSString*)token completion:(void (^)(int code, NSNumber* response, NSError* error, ServerResponseError* serverError))completionBlock;
 
-+(void)upload:(NSString*)email withPassword:(NSString*)password rates:(NSArray*) rates start:(long long) start completion:(void (^)(NSNumber* response, NSError* error))completionBlock;
++(void)uploadRates:(NSArray*)rates start:(NSNumber*)start create:(NSNumber*)create token:(NSString*)token completion:(void (^)(int code, NSNumber* response, NSError* error, ServerResponseError* serverError))completionBlock;
 
-+(void)sync:(NSString*)email withPassword:(NSString*)password rates:(NSArray*) rates start:(long long) start completion:(void (^)(NSNumber* response, NSError* error))completionBlock;
++(void)syncRates:(NSArray*)rates start:(NSNumber*)start create:(NSNumber*)create token:(NSString*)token completion:(void (^)(int code, NSNumber* response, NSError* error, ServerResponseError* serverError))completionBlock;
 
 +(void)getAllSessions:(NSString*)token completion:(void (^)(int code, NSArray* response, NSError* error, ServerResponseError* serverError))completionBlock;
 
 +(void)getRatesForSessionId:(NSNumber*)sessionId token:(NSString*)token completion:(void (^)(int code, NSArray* response, NSError* error, ServerResponseError* serverError))completionBlock;
+
++(void)getTensionForSessionId:(NSNumber*)sessionId token:(NSString*)token completion:(void (^)(int code, NSDictionary* response, NSError* error, ServerResponseError* serverError))completionBlock;
 
 @end

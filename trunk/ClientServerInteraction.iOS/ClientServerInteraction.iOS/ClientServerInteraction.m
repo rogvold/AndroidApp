@@ -7,35 +7,12 @@
 //
 
 #import "ClientServerInteraction.h"
+#import "Serializer_FrameworkOnly.h"
+#import "HttpRequest_FrameworkOnly.h"
 
 @interface ClientServerInteraction()
 
-+(void)httpPostJsonWithUrl:(NSString*)url :(NSString*)content :(void (^)(int code, id response, NSError* error, ServerResponseError* serverError))completionBlock
-                          :(void (^)(NSURLResponse *urlResponse,NSData *responseData, NSError *error))handler;
-
-+(NSString*)prepareQueryString:(NSDictionary*)params;
-
-+(void (^)(NSURLResponse *urlResponse,NSData *responseData, NSError *error))createHandler :(void (^)(int code, id response, NSError* error, ServerResponseError* serverError))completionBlock :(Class)responseClass;
-
-+(NSString*)serialize:(id)obj;
-
-+(id)deserialize:(id)obj :(Class)class;
-
-+(void)deserializeResponse:(NSDictionary*)json :(Class)responseClass :(void (^)(int code, id response, NSError* error, ServerResponseError* serverError))completionBlock;
-
-+(NSString*)serializeUser:(User*) user;
-
-+(User*)deserializeUser:(NSDictionary*) dict;
-
-+(NSString*)serializeSession:(NSString*)email withPassword:(NSString*)password rates:(NSArray*) rates start:(long long) start create:(int)create;
-
 +(void)baseRequest:(NSString*)urlSuffix :(NSDictionary*)queryContent :(id)jsonObject :(void (^)(int code, id response, NSError* error, ServerResponseError* serverError))completionBlock :(Class)responseClass;
-
-+(NSNumber*)deserializeBool:(NSString*)value;
-
-+(AccessToken*)deserializeAccessToken:(NSDictionary*)dict;
-
-+(ServerResponseError*)deserializeServerError:(NSDictionary*)dict;
 
 @end
 
@@ -45,23 +22,11 @@ NSString* const kBaseUrl = @"http://www.cardiomood.com/BaseProjectWeb/";
 NSString* const kResources = @"resources/";
 NSString* const kAuth = @"SecureAuth/";
 NSString* const kSessions = @"SecureSessions/";
-NSString* const kRates = @"rates/";
+NSString* const kRates = @"SecureRatesUploading/";
 NSString* const kSecret = @"h7a7RaRtvAVwnMGq5BV6";
+NSString* const kIndicators = @"SecureIndicators/";
 NSString* const kToken = @"token/";
 
-+(void)baseRequest:(NSString*)urlSuffix :(NSDictionary*)queryContent :(id)jsonObject :(void (^)(int code, id response, NSError* error, ServerResponseError* serverError))completionBlock :(Class)responseClass{
-    NSString* url = [NSString stringWithFormat:@"%@%@%@", kBaseUrl, kResources, urlSuffix];
-    NSString* json = nil;
-    if (jsonObject != nil)
-        json = [ClientServerInteraction serialize:jsonObject];
-    NSMutableDictionary* cDict = [NSMutableDictionary dictionaryWithDictionary:queryContent];
-    if (json != nil) {
-        [cDict setObject:json forKey:@"json"];
-    }        
-    NSString* content = [ClientServerInteraction prepareQueryString:cDict];
-    [ClientServerInteraction httpPostJsonWithUrl:url :content :completionBlock :[ClientServerInteraction createHandler:completionBlock :responseClass]];
-    
-}
 
 +(void)authorizeWithEmail:(NSString*)email withPassword:(NSString*)password withDeviceId:(NSString*)deviceId completion:(void (^)(int code, AccessToken* response, NSError* error, ServerResponseError* serverError))completionBlock {
     [ClientServerInteraction baseRequest:[NSString stringWithFormat:@"%@%@", kToken, @"authorize"] :[NSDictionary dictionaryWithObjectsAndKeys:email, @"email", password, @"password", deviceId, @"deviceId", nil] :nil :completionBlock :[AccessToken class]];
@@ -87,188 +52,44 @@ NSString* const kToken = @"token/";
     [ClientServerInteraction baseRequest:[NSString stringWithFormat:@"%@%@", kAuth, @"update_info"] :[NSDictionary dictionaryWithObjectsAndKeys:token, @"token", nil] :user :completionBlock :[NSNumber class]];
 }
 
-+(void)upload:(NSString*)email withPassword:(NSString*)password rates:(NSArray*) rates start:(long long) start completion:(void (^)(NSNumber* response, NSError* error))completionBlock {
- 
-}
-
-+(void)sync:(NSString*)email withPassword:(NSString*)password rates:(NSArray*) rates start:(long long) start completion:(void (^)(NSNumber* response, NSError* error))completionBlock {
-
-}
-
 +(void)getAllSessions:(NSString*)token completion:(void (^)(int code, NSArray* response, NSError* error, ServerResponseError* serverError))completionBlock {
     [ClientServerInteraction baseRequest:[NSString stringWithFormat:@"%@%@", kSessions, @"all"] :[NSDictionary dictionaryWithObjectsAndKeys:token, @"token", nil] :nil :completionBlock :[Session class]];
 }
 
 +(void)getRatesForSessionId:(NSNumber*)sessionId token:(NSString*)token completion:(void (^)(int code, NSArray* response, NSError* error, ServerResponseError* serverError))completionBlock {
-    
+    [ClientServerInteraction baseRequest:[NSString stringWithFormat:@"%@%@", kSessions, @"rates"] :[NSDictionary dictionaryWithObjectsAndKeys:sessionId, @"sessionId", token, @"token", nil] :nil :completionBlock :[NSArray class]];
 }
 
++(void)getTensionForSessionId:(NSNumber*)sessionId token:(NSString*)token completion:(void (^)(int code, NSDictionary* response, NSError* error, ServerResponseError* serverError))completionBlock {
+    [ClientServerInteraction baseRequest:[NSString stringWithFormat:@"%@%@/tension", kIndicators, sessionId] :[NSDictionary dictionaryWithObjectsAndKeys:sessionId, @"sessionId", token, @"token", nil] :nil :completionBlock :[NSDictionary class]];
+}
 
++(void)uploadRates:(NSArray*)rates start:(NSNumber*)start create:(NSNumber*)create token:(NSString*)token completion:(void (^)(int code, NSNumber* response, NSError* error, ServerResponseError* serverError))completionBlock {
+    [ClientServerInteraction baseRequest:[NSString stringWithFormat:@"%@%@", kRates, @"upload"] :[NSDictionary dictionaryWithObjectsAndKeys:token, @"token", nil] :[NSDictionary dictionaryWithObjectsAndKeys:start, @"start", rates, @"rates", create, @"create", nil] :completionBlock :[NSNumber class]];
+}
 
++(void)syncRates:(NSArray*)rates start:(NSNumber*)start create:(NSNumber*)create token:(NSString*)token completion:(void (^)(int code, NSNumber* response, NSError* error, ServerResponseError* serverError))completionBlock {
+    [ClientServerInteraction baseRequest:[NSString stringWithFormat:@"%@%@", kRates, @"sync"] :[NSDictionary dictionaryWithObjectsAndKeys:token, @"token", nil] :[NSDictionary dictionaryWithObjectsAndKeys:start, @"start", rates, @"rates", create, @"create", nil] :completionBlock :[NSNumber class]];
+}
 
 // private
 
-+(void)httpPostJsonWithUrl:(NSString*)url :(NSString*)content :(void (^)(int code, id response, NSError* error, ServerResponseError* serverError))completionBlock
-                          :(void (^)(NSURLResponse *urlResponse,NSData *responseData, NSError *error))handler {
-    NSMutableURLRequest *request =
-    [[NSMutableURLRequest alloc] initWithURL:
-     [NSURL URLWithString:url]];
-    
-    [request setHTTPMethod:@"POST"];
-    [request setValue:@"application/x-www-form-urlencoded" forHTTPHeaderField:@"Content-Type"];
-    
-    
-    [request setHTTPBody:[content
-                          dataUsingEncoding:NSUTF8StringEncoding]];
-    
-    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:handler];
-}
 
-+(NSString*)prepareQueryString:(NSDictionary*)params {
-    if (params == nil)
-        return @"";
-    NSString* result = @"";    
-    for (id key in params) {
-        id value = [params objectForKey:key];
-        result = [NSString stringWithFormat:[result isEqual: @""] ? @"%@%@=%@" : @"%@&%@=%@", result, key, value];
++(void)baseRequest:(NSString*)urlSuffix :(NSDictionary*)queryContent :(id)jsonObject :(void (^)(int code, id response, NSError* error, ServerResponseError* serverError))completionBlock :(Class)responseClass{
+    NSString* url = [NSString stringWithFormat:@"%@%@%@", kBaseUrl, kResources, urlSuffix];
+    NSString* json = nil;
+    if (jsonObject != nil)
+        json = [Serializer serialize:jsonObject];
+    NSMutableDictionary* cDict = [NSMutableDictionary dictionaryWithDictionary:queryContent];
+    if (json != nil) {
+        [cDict setObject:json forKey:@"json"];
     }
-    return result;
-}
-
-
-+(void (^)(NSURLResponse *urlResponse,NSData *responseData, NSError *error))createHandler :(void (^)(int code, id response, NSError* error, ServerResponseError* serverError))completionBlock :(Class)responseClass {
-    return ^( NSURLResponse *urlResponse,NSData *responseData, NSError *error){
-        if (error != nil) {
-            completionBlock(CLIENT_ERROR, nil, error, nil);
-            return;
-        }
-        NSDictionary* json = [NSJSONSerialization
-                              JSONObjectWithData:responseData
-                              
-                              options:kNilOptions
-                              error:&error];
-        if (error != nil) {
-            completionBlock(CLIENT_ERROR, nil, error, nil);
-            return;
-        }
-        [ClientServerInteraction deserializeResponse:json :responseClass :completionBlock];
-    };
-}
-
-+(void)deserializeResponse:(NSDictionary*)json :(Class)responseClass :(void (^)(int code, id response, NSError* error, ServerResponseError* serverError))completionBlock {
-    int responseCode = [[json objectForKey:@"responseCode"] intValue];
-    if (responseCode == RESPONSE_ERROR) {
-        completionBlock(SERVER_ERROR, nil, nil, [ClientServerInteraction deserialize:[json objectForKey:@"error"] :[ServerResponseError class]]);
-        return;
-    }
-    if (responseCode == OK) {
-        completionBlock(OK, [ClientServerInteraction deserialize:[json objectForKey:@"data"] :responseClass], nil, nil);
-        return;
-    }
+    NSString* content = [Serializer prepareQueryString:cDict];
+    [HttpRequest httpPostJsonWithUrl:url :content :completionBlock :[HttpRequest createHandler:completionBlock :responseClass]];
     
 }
 
-+(id)deserialize:(id)obj :(Class)class {
-    if (class == [User class])
-        return [ClientServerInteraction deserializeUser:obj];
-    if (class == [NSNumber class])
-        return [ClientServerInteraction deserializeBool:obj];
-    if (class == [AccessToken class])
-        return [ClientServerInteraction deserializeAccessToken:obj];
-    if (class == [ServerResponseError class])
-        return [ClientServerInteraction deserializeServerError:obj];
-    if (class == [Session class])
-        return [ClientServerInteraction deserializeSessionsArray:obj];
-    if (class == [NSArray class])
-        return obj;
-    return nil;    
-}
 
-+(NSString*)serialize:(id)obj {
-    if ([obj class] == [User class])
-        return [ClientServerInteraction serializeUser:obj];
-    return nil;
-}
-
-+(NSString*)serializeUser:(User*) user {
-    NSArray* objects = [NSArray arrayWithObjects:user.about, user.birthDate, user.description, user.department, user.diagnosis, user.email, user.firstName, user.lastName, user.height, user.password, user.sex, user.statusMessage, user.weight, nil];
-                        
-    NSArray* keys = [NSArray arrayWithObjects:@"about", @"birthDate", @"description", @"department", @"diagnosis", @"email", @"firstName", @"lastName", @"height", @"password", @"sex", @"statusMessage", @"weight", nil];
-    NSData* data = [NSJSONSerialization dataWithJSONObject:[NSDictionary dictionaryWithObjects:objects forKeys:keys] options:NSJSONWritingPrettyPrinted error:nil];
-    NSString* jsonString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    
-    return jsonString;
-}
-
-+(NSArray*)deserializeRates:(NSArray*)rates {
-    return rates;
-}
-
-+(NSArray*)deserializeSessionsArray:(NSArray*) array {
-    NSMutableArray* sessions = [[NSMutableArray alloc] init];
-    for (id obj in array) {
-        [sessions addObject:[ClientServerInteraction deserializeSession:obj]];
-    }
-    return sessions;
-}
-
-+(Session*)deserializeSession:(NSDictionary*)dict
-{
-    Session* session = [Session alloc];
-    session.sessionId = dict[@"id"];
-    session.start = dict[@"start"];
-    session.end = dict[@"end"];
-    return session;
-}
-
-+(User*)deserializeUser:(NSDictionary*) dict {
-    User* user = [User alloc];
-    user.about = [dict objectForKey:@"about"];
-    user.birthDate = [dict objectForKey:@"birthDate"];
-    user.description = [dict objectForKey:@"description"];
-    user.department = [dict objectForKey:@"department"];
-    user.diagnosis = [dict objectForKey:@"diagnosis"];
-    user.email = [dict objectForKey:@"email"];
-    user.firstName = [dict objectForKey:@"firstName"];
-    user.lastName = [dict objectForKey:@"lastName"];
-    user.height = [dict objectForKey:@"height"];
-    user.password = [dict objectForKey:@"password"];
-    user.sex = [dict objectForKey:@"sex"];
-    user.statusMessage = [dict objectForKey:@"statusMessage"];
-    user.weight = [dict objectForKey:@"weight"];
-    user.userId = [dict objectForKey:@"userId"];
-    return user;
-}
-
-+(NSString*)serializeSession:(NSString*)email withPassword:(NSString*)password rates:(NSArray*) rates start:(long long) start create:(int)create {
-    NSArray* objects = [NSArray arrayWithObjects:email, password, rates, [NSString stringWithFormat:@"%lld", start], [NSNumber numberWithInt:create], nil];
-    
-    NSArray* keys = [NSArray arrayWithObjects:@"email", @"password", @"rates", @"start", @"create", nil];
-    NSData* data = [NSJSONSerialization dataWithJSONObject:[NSDictionary dictionaryWithObjects:objects forKeys:keys] options:NSJSONWritingPrettyPrinted error:nil];
-    NSString* json = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    return json;
-}
-
-+(NSNumber*)deserializeBool:(NSString*)value {
-    NSNumberFormatter * formatter = [[NSNumberFormatter alloc] init];
-    [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
-    NSNumber * boolNumber = [formatter numberFromString:value];
-    return boolNumber;
-}
-
-+(AccessToken*)deserializeAccessToken:(NSDictionary*)dict {
-    AccessToken* accessToken = [AccessToken alloc];
-    accessToken.token = [dict objectForKey:@"token"];
-    accessToken.expiredDate = [dict objectForKey:@"expiredDate"];
-    return accessToken;
-}
-
-+(ServerResponseError*)deserializeServerError:(NSDictionary*)dict {
-    ServerResponseError* error = [ServerResponseError alloc];
-    error.message = [dict objectForKey:@"message"];
-    error.errorCode = [[dict objectForKey:@"code"] intValue];
-    return error;
-}
                     
 
 

@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		5B6B655C170B3863004AC2AF /* User.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B6B655B170B3863004AC2AF /* User.m */; };
+		5B77534717118716008E429D /* Serializer.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B77534617118716008E429D /* Serializer.m */; };
+		5B77534B171187BF008E429D /* HttpRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B77534A171187BF008E429D /* HttpRequest.m */; };
 		5BDF36CC17104D6A0054473A /* ServerResponseError.m in Sources */ = {isa = PBXBuildFile; fileRef = 5BDF36CB17104D6A0054473A /* ServerResponseError.m */; };
 		5BDF36D217104E0B0054473A /* AccessToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 5BDF36D117104E0B0054473A /* AccessToken.m */; };
 		5BDF36D71710715B0054473A /* Session.m in Sources */ = {isa = PBXBuildFile; fileRef = 5BDF36D61710715B0054473A /* Session.m */; };
@@ -35,6 +37,12 @@
 /* Begin PBXFileReference section */
 		5B6B655A170B3863004AC2AF /* User.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = User.h; sourceTree = "<group>"; };
 		5B6B655B170B3863004AC2AF /* User.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = User.m; sourceTree = "<group>"; };
+		5B77534517118716008E429D /* Serializer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Serializer.h; sourceTree = "<group>"; };
+		5B77534617118716008E429D /* Serializer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Serializer.m; sourceTree = "<group>"; };
+		5B7753481711874A008E429D /* Serializer_FrameworkOnly.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Serializer_FrameworkOnly.h; sourceTree = "<group>"; };
+		5B775349171187BF008E429D /* HttpRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HttpRequest.h; sourceTree = "<group>"; };
+		5B77534A171187BF008E429D /* HttpRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HttpRequest.m; sourceTree = "<group>"; };
+		5B77534D17118820008E429D /* HttpRequest_FrameworkOnly.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HttpRequest_FrameworkOnly.h; sourceTree = "<group>"; };
 		5BDF36CA17104D6A0054473A /* ServerResponseError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ServerResponseError.h; sourceTree = "<group>"; };
 		5BDF36CB17104D6A0054473A /* ServerResponseError.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ServerResponseError.m; sourceTree = "<group>"; };
 		5BDF36D017104E0B0054473A /* AccessToken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AccessToken.h; sourceTree = "<group>"; };
@@ -71,6 +79,34 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5B77534E17118ABB008E429D /* Helpers */ = {
+			isa = PBXGroup;
+			children = (
+				5B77534517118716008E429D /* Serializer.h */,
+				5B7753481711874A008E429D /* Serializer_FrameworkOnly.h */,
+				5B77534617118716008E429D /* Serializer.m */,
+				5B775349171187BF008E429D /* HttpRequest.h */,
+				5B77534D17118820008E429D /* HttpRequest_FrameworkOnly.h */,
+				5B77534A171187BF008E429D /* HttpRequest.m */,
+			);
+			name = Helpers;
+			sourceTree = "<group>";
+		};
+		5B77534F17118ADD008E429D /* Serializables */ = {
+			isa = PBXGroup;
+			children = (
+				5B6B655A170B3863004AC2AF /* User.h */,
+				5B6B655B170B3863004AC2AF /* User.m */,
+				5BDF36CA17104D6A0054473A /* ServerResponseError.h */,
+				5BDF36CB17104D6A0054473A /* ServerResponseError.m */,
+				5BDF36D017104E0B0054473A /* AccessToken.h */,
+				5BDF36D117104E0B0054473A /* AccessToken.m */,
+				5BDF36D51710715B0054473A /* Session.h */,
+				5BDF36D61710715B0054473A /* Session.m */,
+			);
+			name = Serializables;
+			sourceTree = "<group>";
+		};
 		FA6AC5D317098631008C60F6 = {
 			isa = PBXGroup;
 			children = (
@@ -104,17 +140,11 @@
 		FAFD2AF717098E8F005DF533 /* ClientServerInteraction.iOS */ = {
 			isa = PBXGroup;
 			children = (
+				5B77534F17118ADD008E429D /* Serializables */,
+				5B77534E17118ABB008E429D /* Helpers */,
 				FAFD2AFC17098F71005DF533 /* Supporting files */,
 				FAFD2AF917098E8F005DF533 /* ClientServerInteraction.h */,
 				FAFD2AFA17098E8F005DF533 /* ClientServerInteraction.m */,
-				5B6B655A170B3863004AC2AF /* User.h */,
-				5B6B655B170B3863004AC2AF /* User.m */,
-				5BDF36CA17104D6A0054473A /* ServerResponseError.h */,
-				5BDF36CB17104D6A0054473A /* ServerResponseError.m */,
-				5BDF36D017104E0B0054473A /* AccessToken.h */,
-				5BDF36D117104E0B0054473A /* AccessToken.m */,
-				5BDF36D51710715B0054473A /* Session.h */,
-				5BDF36D61710715B0054473A /* Session.m */,
 			);
 			path = ClientServerInteraction.iOS;
 			sourceTree = "<group>";
@@ -184,6 +214,8 @@
 				5BDF36CC17104D6A0054473A /* ServerResponseError.m in Sources */,
 				5BDF36D217104E0B0054473A /* AccessToken.m in Sources */,
 				5BDF36D71710715B0054473A /* Session.m in Sources */,
+				5B77534717118716008E429D /* Serializer.m in Sources */,
+				5B77534B171187BF008E429D /* HttpRequest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
