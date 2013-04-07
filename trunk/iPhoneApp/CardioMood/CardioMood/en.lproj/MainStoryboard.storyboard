@@ -141,26 +141,46 @@
                                     <segue destination="V2j-iW-B7e" kind="push" id="uK8-rN-QBh"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="TIy-bB-LL1">
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                <state key="normal" title="Log out">
+                                    <color key="titleColor" red="0.19607843459999999" green="0.30980393290000002" blue="0.52156865600000002" alpha="1" colorSpace="calibratedRGB"/>
+                                    <color key="titleShadowColor" white="0.5" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <state key="highlighted">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="logOutButtonPressed:" destination="5ji-AL-8r2" eventType="touchUpInside" id="V3c-zS-EtM"/>
+                                    <segue destination="qmy-ab-KkG" kind="modal" identifier="logOutSegue" modalTransitionStyle="flipHorizontal" id="O7H-77-XsV"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="VQ5-cF-i51" firstAttribute="centerX" secondItem="wKO-fk-8gv" secondAttribute="centerX" type="default" id="VqT-LL-MKr"/>
+                            <constraint firstItem="VQ5-cF-i51" firstAttribute="centerX" secondItem="wKO-fk-8gv" secondAttribute="centerX" type="default" id="bS4-ne-ObS"/>
+                            <constraint firstItem="TIy-bB-LL1" firstAttribute="top" secondItem="VQ5-cF-i51" secondAttribute="bottom" constant="8" symbolic="YES" type="default" id="cJi-tY-Pb7"/>
+                            <constraint firstItem="TIy-bB-LL1" firstAttribute="leading" secondItem="VQ5-cF-i51" secondAttribute="leading" type="default" id="l31-yA-NRd"/>
                             <constraint firstItem="VQ5-cF-i51" firstAttribute="top" secondItem="wKO-fk-8gv" secondAttribute="top" constant="67" id="ltC-dw-KfR"/>
+                            <constraint firstItem="VQ5-cF-i51" firstAttribute="trailing" secondItem="TIy-bB-LL1" secondAttribute="trailing" type="default" id="vbc-R7-ZRi"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Information" id="2LA-lA-4r5"/>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics"/>
+                    <connections>
+                        <outlet property="logOutButton" destination="TIy-bB-LL1" id="98N-Ex-sBb"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ZXL-F3-pHi" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-3787" y="-2871"/>
+            <point key="canvasLocation" x="-3897" y="-3063"/>
         </scene>
         <!--User Settings View Controller - Settings-->
         <scene sceneID="Leu-7X-hJV">
             <objects>
                 <tableViewController id="V2j-iW-B7e" customClass="UserSettingsViewController" sceneMemberID="viewController">
                     <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="singleLineEtched" rowHeight="44" sectionHeaderHeight="10" sectionFooterHeight="10" id="lMa-pL-CVQ">
-                        <rect key="frame" x="0.0" y="64" width="320" height="367"/>
+                        <rect key="frame" x="0.0" y="20" width="320" height="460"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
                         <connections>
@@ -184,41 +204,15 @@
         <scene sceneID="hFb-Rj-iqc">
             <objects>
                 <viewController id="dRm-KZ-u2C" customClass="LoginViewController" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="oyR-vV-yt8">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="singleLineEtched" rowHeight="44" sectionHeaderHeight="10" sectionFooterHeight="10" id="BW2-qR-SpB">
                         <rect key="frame" x="0.0" y="64" width="320" height="416"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                        <subviews>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="e-mail" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="oRB-ej-qCC">
-                                <nil key="textColor"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits" keyboardType="emailAddress"/>
-                            </textField>
-                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="password" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="hpu-ZF-Tth">
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                                <textInputTraits key="textInputTraits" secureTextEntry="YES"/>
-                            </textField>
-                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="TMs-mR-mSe">
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="21" id="ItW-Ps-nta"/>
-                                </constraints>
-                                <fontDescription key="fontDescription" type="system" pointSize="11"/>
-                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                        </subviews>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
-                        <constraints>
-                            <constraint firstItem="oRB-ej-qCC" firstAttribute="leading" secondItem="oyR-vV-yt8" secondAttribute="leading" constant="20" symbolic="YES" type="default" id="65I-Is-SBE"/>
-                            <constraint firstAttribute="trailing" secondItem="hpu-ZF-Tth" secondAttribute="trailing" constant="20" symbolic="YES" type="default" id="6j7-F5-r4w"/>
-                            <constraint firstItem="oRB-ej-qCC" firstAttribute="top" secondItem="oyR-vV-yt8" secondAttribute="top" constant="138" id="CPP-xa-zxM"/>
-                            <constraint firstItem="hpu-ZF-Tth" firstAttribute="leading" secondItem="oyR-vV-yt8" secondAttribute="leading" constant="20" symbolic="YES" type="default" id="JKe-LA-Vui"/>
-                            <constraint firstItem="TMs-mR-mSe" firstAttribute="leading" secondItem="oyR-vV-yt8" secondAttribute="leading" constant="20" symbolic="YES" type="default" id="MoZ-d6-XDO"/>
-                            <constraint firstAttribute="trailing" secondItem="oRB-ej-qCC" secondAttribute="trailing" constant="20" symbolic="YES" type="default" id="Osk-OW-qrT"/>
-                            <constraint firstItem="hpu-ZF-Tth" firstAttribute="top" secondItem="oRB-ej-qCC" secondAttribute="bottom" constant="8" symbolic="YES" type="default" id="gEP-uA-C2n"/>
-                            <constraint firstAttribute="trailing" secondItem="TMs-mR-mSe" secondAttribute="trailing" constant="20" symbolic="YES" type="default" id="mZX-QH-awm"/>
-                            <constraint firstItem="TMs-mR-mSe" firstAttribute="top" secondItem="hpu-ZF-Tth" secondAttribute="bottom" constant="8" symbolic="YES" type="default" id="wGm-2L-D5N"/>
-                        </constraints>
-                    </view>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" cocoaTouchSystemColor="groupTableViewBackgroundColor"/>
+                        <connections>
+                            <outlet property="dataSource" destination="dRm-KZ-u2C" id="68o-Ew-zPB"/>
+                            <outlet property="delegate" destination="dRm-KZ-u2C" id="vQn-Mh-N0o"/>
+                        </connections>
+                    </tableView>
                     <navigationItem key="navigationItem" title="Sign in" id="REg-SB-R78">
                         <barButtonItem key="rightBarButtonItem" title="Sign in" id="hoT-QJ-FNf">
                             <color key="tintColor" red="0.0" green="0.50196081399917603" blue="1" alpha="1" colorSpace="calibratedRGB"/>
@@ -229,9 +223,6 @@
                     </navigationItem>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics"/>
                     <connections>
-                        <outlet property="authStatusLabel" destination="TMs-mR-mSe" id="mDz-lX-LKq"/>
-                        <outlet property="loginField" destination="oRB-ej-qCC" id="rMj-q8-gUz"/>
-                        <outlet property="passwordField" destination="hpu-ZF-Tth" id="91E-Lj-syX"/>
                         <outlet property="signInButton" destination="hoT-QJ-FNf" id="sCo-tf-Kfz"/>
                     </connections>
                 </viewController>
@@ -310,7 +301,6 @@
         <!--View Controller - Welcome-->
         <scene sceneID="zhs-c8-XGF">
             <objects>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="Q94-XP-cWP" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <viewController id="qng-o5-o50" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="SvB-0P-h1g">
                         <rect key="frame" x="0.0" y="64" width="320" height="416"/>
@@ -364,6 +354,7 @@
                     </navigationItem>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics"/>
                 </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Q94-XP-cWP" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-4327" y="-3803"/>
         </scene>
@@ -411,25 +402,47 @@
             </objects>
             <point key="canvasLocation" x="-2651" y="-4712"/>
         </scene>
-        <!--Table View Controller - Statistics-->
+        <!--Stat View Controller - Statistics-->
         <scene sceneID="LiG-Pc-hfM">
             <objects>
-                <tableViewController id="bDJ-2u-cQT" sceneMemberID="viewController">
+                <tableViewController id="bDJ-2u-cQT" customClass="StatViewController" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="yHJ-iY-jBM">
                         <rect key="frame" x="0.0" y="64" width="320" height="367"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <connections>
-                            <outlet property="dataSource" destination="bDJ-2u-cQT" id="UIk-9f-5eb"/>
-                            <outlet property="delegate" destination="bDJ-2u-cQT" id="xCb-5e-Te9"/>
+                            <outlet property="dataSource" destination="bDJ-2u-cQT" id="FEX-gY-X9j"/>
+                            <outlet property="delegate" destination="bDJ-2u-cQT" id="YUZ-gi-cLb"/>
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" title="Statistics" id="FNj-7h-R8F"/>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics"/>
+                    <connections>
+                        <segue destination="dtr-CE-qPV" kind="push" id="dMb-n4-Ilw"/>
+                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ita-t8-qEf" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="-2331" y="-3959"/>
+        </scene>
+        <!--Session Detail View Controller-->
+        <scene sceneID="W3k-hg-hQh">
+            <objects>
+                <tableViewController id="dtr-CE-qPV" customClass="SessionDetailViewController" sceneMemberID="viewController">
+                    <tableView key="view" opaque="NO" clipsSubviews="YES" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" id="EvS-wU-E1w">
+                        <rect key="frame" x="0.0" y="64" width="320" height="367"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <connections>
+                            <outlet property="dataSource" destination="dtr-CE-qPV" id="PFY-qB-G7o"/>
+                            <outlet property="delegate" destination="dtr-CE-qPV" id="b1l-gL-NwO"/>
+                        </connections>
+                    </tableView>
+                    <navigationItem key="navigationItem" id="40z-fe-S7U"/>
+                </tableViewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="TVi-uK-vnh" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-1852" y="-4005"/>
         </scene>
         <!--Navigation Controller - Statistics-->
         <scene sceneID="d1H-qm-BNP">
@@ -468,37 +481,46 @@
         </class>
         <class className="InfoViewController" superclassName="UIViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/InfoViewController.h"/>
+            <relationships>
+                <relationship kind="action" name="logOutButtonPressed:"/>
+                <relationship kind="outlet" name="logOutButton" candidateClass="UIButton"/>
+            </relationships>
         </class>
-        <class className="LoginViewController" superclassName="UIViewController">
+        <class className="LoginViewController" superclassName="UITableViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/LoginViewController.h"/>
             <relationships>
                 <relationship kind="action" name="signInButtonPressed:"/>
                 <relationship kind="outlet" name="authStatusLabel" candidateClass="UILabel"/>
-                <relationship kind="outlet" name="loginField" candidateClass="UITextField"/>
                 <relationship kind="outlet" name="passwordField" candidateClass="UITextField"/>
                 <relationship kind="outlet" name="signInButton" candidateClass="UIBarButtonItem"/>
+                <relationship kind="outlet" name="usernameField" candidateClass="UITextField"/>
             </relationships>
         </class>
         <class className="NSLayoutConstraint" superclassName="NSObject">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/NSLayoutConstraint.h"/>
         </class>
-        <class className="RegisterViewController" superclassName="UITableViewController">
+        <class className="RegisterViewController" superclassName="SettingsPageViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/RegisterViewController.h"/>
             <relationships>
-                <relationship kind="action" name="dateChanged:"/>
                 <relationship kind="action" name="saveButtonPressed:"/>
+            </relationships>
+        </class>
+        <class className="SessionDetailViewController" superclassName="UITableViewController">
+            <source key="sourceIdentifier" type="project" relativePath="./Classes/SessionDetailViewController.h"/>
+        </class>
+        <class className="SettingsPageViewController" superclassName="UITableViewController">
+            <source key="sourceIdentifier" type="project" relativePath="./Classes/SettingsPageViewController.h"/>
+            <relationships>
+                <relationship kind="action" name="dateChanged:"/>
                 <relationship kind="action" name="sexChanged:"/>
                 <relationship kind="outlet" name="saveButton" candidateClass="UIBarButtonItem"/>
             </relationships>
         </class>
-        <class className="UserSettingsViewController" superclassName="UITableViewController">
+        <class className="StatViewController" superclassName="UITableViewController">
+            <source key="sourceIdentifier" type="project" relativePath="./Classes/StatViewController.h"/>
+        </class>
+        <class className="UserSettingsViewController" superclassName="SettingsPageViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/UserSettingsViewController.h"/>
-            <relationships>
-                <relationship kind="action" name="dateChanged:"/>
-                <relationship kind="action" name="saveButtonPressed:"/>
-                <relationship kind="action" name="sexChanged:"/>
-                <relationship kind="outlet" name="saveButton" candidateClass="UIBarButtonItem"/>
-            </relationships>
         </class>
     </classes>
     <simulatedMetricsContainer key="defaultSimulatedMetrics">
@@ -507,6 +529,7 @@
         <simulatedScreenMetrics key="destination" type="retina4"/>
     </simulatedMetricsContainer>
     <inferredMetricsTieBreakers>
+        <segue reference="O7H-77-XsV"/>
         <segue reference="3VI-RP-j4F"/>
     </inferredMetricsTieBreakers>
 </document>

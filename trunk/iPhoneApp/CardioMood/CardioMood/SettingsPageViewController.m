@@ -34,8 +34,8 @@
 
 - (NSArray*)currentSettings:(NSInteger)index {
     NSArray *keys = [settings allKeys];
-    NSString *curentKey = [keys objectAtIndex:index];
-    NSArray *currentSettings = [settings objectForKey:curentKey];
+    NSString *curentKey = keys[index];
+    NSArray *currentSettings = settings[curentKey];
     return currentSettings;
 }
 
@@ -57,7 +57,7 @@
 - (void)initField:(UITextField *)textField section:(NSInteger)section row:(NSInteger)row
 {
     NSArray *currentSettings = [self currentSettings:section];
-    textField.text = [currentSettings objectAtIndex:row];
+    textField.text = currentSettings[row];
     textField.autocorrectionType = UITextAutocorrectionTypeNo; // no auto correction support
     textField.autocapitalizationType = UITextAutocapitalizationTypeNone; // no auto capitalization support
     
@@ -88,7 +88,7 @@
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section {
     
-    return [[settings allKeys] objectAtIndex:section];
+    return [settings allKeys][section];
 }
 
 // Customize the appearance of table view cells.
@@ -100,20 +100,21 @@
     
     NSString *stringFromDate = [formatter stringFromDate:[datePicker date]];
     textLabel.text = stringFromDate;
+    self.user.birthDate = stringFromDate;
     self.dateLabel = textLabel;
-    NSMutableArray *currentSettings = [settings objectForKey:@"Physical parameters"];
-    [currentSettings replaceObjectAtIndex:2 withObject:textLabel.text];
+    NSMutableArray *currentSettings = settings[@"Physical parameters"];
+    currentSettings[2] = textLabel.text;
     [textLabel endEditing:YES];
 }
 
 - (IBAction)sexChanged:(id)sender
 {
     CMLabel *textLabel = (CMLabel *)[self.tableView viewWithTag:7];
-    textLabel.text = [titleSex objectAtIndex:[sexPicker selectedRowInComponent:0]];
-    self.user.sex = [textLabel.text isEqual:@"Male"] ? 1 : 2;
+    textLabel.text = titleSex[[sexPicker selectedRowInComponent:0]];
+    self.user.sex = [NSNumber numberWithInt:[textLabel.text isEqual:@"Male"] ? 1 : 0];
     self.sexLabel = textLabel;
-    NSMutableArray *currentSettings = [settings objectForKey:@"Physical parameters"];
-    [currentSettings replaceObjectAtIndex:3 withObject:textLabel.text];
+    NSMutableArray *currentSettings = settings[@"Physical parameters"];
+    currentSettings[3] = textLabel.text;
     [textLabel endEditing:YES];
 }
 
@@ -134,11 +135,11 @@
 - (UIView *)pickerView:(UIPickerView *)pickerView viewForRow:(NSInteger)row forComponent:(NSInteger)component reusingView:(UIView *)view
 {
     UILabel *titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(100, 0, 100, 32)];
-    titleLabel.text = [titleSex objectAtIndex:row];
+    titleLabel.text = titleSex[row];
     [titleLabel setFont:[UIFont fontWithName:@"Arial-BoldMT" size:18]];
     titleLabel.backgroundColor = [UIColor clearColor];
     
-    UIImage *img = [UIImage imageNamed:[NSString stringWithFormat:@"%@",[imageSex objectAtIndex:row]]];
+    UIImage *img = [UIImage imageNamed:[NSString stringWithFormat:@"%@",imageSex[row]]];
     
     UIImageView *icon = [[UIImageView alloc] initWithImage:img];
     icon.frame = CGRectMake(30, 0, 30, 30);
@@ -242,7 +243,7 @@
         textLabel.tag = 6;
         [textLabel setBackgroundColor:[UIColor clearColor]];
         NSArray *currentSettings = [self currentSettings:indexPath.section];
-        textLabel.text = [currentSettings objectAtIndex:indexPath.row];
+        textLabel.text = currentSettings[indexPath.row];
         [textLabel setFont:[UIFont fontWithName:@"Arial-BoldMT" size:18]];
         datePicker = [[UIDatePicker alloc] initWithFrame:CGRectMake(0, 40, 0, 0)];
         datePicker.datePickerMode = UIDatePickerModeDate;
@@ -267,7 +268,7 @@
         textLabel.tag = 7;
         [textLabel setBackgroundColor:[UIColor clearColor]];
         NSArray *currentSettings = [self currentSettings:indexPath.section];
-        textLabel.text = [currentSettings objectAtIndex:indexPath.row];
+        textLabel.text = currentSettings[indexPath.row];
         [textLabel setFont:[UIFont fontWithName:@"Arial-BoldMT" size:18]];
         sexPicker = [[UIPickerView alloc] initWithFrame:CGRectMake(0, 44, 0, 0)];
         sexPicker.hidden = NO;
@@ -292,8 +293,8 @@
     
     if (indexPath.section != 2 || (indexPath.section == 2 && indexPath.row != 2 && indexPath.row != 3))
     {
-        [doneBar setItems:[NSArray arrayWithObjects:spacer,
-                           doneButton,nil ] animated:YES];
+        [doneBar setItems:@[spacer,
+                           doneButton] animated:YES];
         [doneButton setTarget:textField];
         [doneButton setAction:@selector(resignFirstResponder)];
         [textField setInputAccessoryView:doneBar];
@@ -304,8 +305,8 @@
     }
     else
     {
-        [doneBar setItems:[NSArray arrayWithObjects:spacer,
-                           doneButton,nil ] animated:YES];
+        [doneBar setItems:@[spacer,
+                           doneButton] animated:YES];
         [doneButton setTarget:self];
         if (indexPath.row == 2)
         {
@@ -330,33 +331,33 @@
     switch (textField.tag) {
         case 0:
             self.user.email = textField.text;
-            currentSettings = [settings objectForKey:@"Authorization data"];
-            [currentSettings replaceObjectAtIndex:0 withObject:textField.text];
+            currentSettings = settings[@"Authorization data"];
+            currentSettings[0] = textField.text;
             break;
         case 1:
             self.user.password = textField.text;
-            currentSettings = [settings objectForKey:@"Authorization data"];
-            [currentSettings replaceObjectAtIndex:1 withObject:textField.text];
+            currentSettings = settings[@"Authorization data"];
+            currentSettings[1] = textField.text;
             break;
         case 2:
             self.user.firstName = textField.text;
-            currentSettings = [settings objectForKey:@"Personal data"];
-            [currentSettings replaceObjectAtIndex:0 withObject:textField.text];
+            currentSettings = settings[@"Personal data"];
+            currentSettings[0] = textField.text;
             break;
         case 3:
             self.user.lastName = textField.text;
-            currentSettings = [settings objectForKey:@"Personal data"];
-            [currentSettings replaceObjectAtIndex:1 withObject:textField.text];
+            currentSettings = settings[@"Personal data"];
+            currentSettings[1] = textField.text;
             break;
         case 4:
-            self.user.height = [textField.text doubleValue];
-            currentSettings = [settings objectForKey:@"Physical parameters"];
-            [currentSettings replaceObjectAtIndex:0 withObject:textField.text];
+            self.user.height = [NSNumber numberWithInt:[textField.text intValue]];
+            currentSettings = settings[@"Physical parameters"];
+            currentSettings[0] = textField.text;
             break;
         case 5:
-            self.user.weight = [textField.text doubleValue];
-            currentSettings = [settings objectForKey:@"Physical parameters"];
-            [currentSettings replaceObjectAtIndex:1 withObject:textField.text];
+            self.user.weight = [NSNumber numberWithInt:[textField.text intValue]];
+            currentSettings = settings[@"Physical parameters"];
+            currentSettings[1] = textField.text;
             break;
         default:
             break;

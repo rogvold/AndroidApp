@@ -2,11 +2,12 @@
 //  InfoViewController.m
 //  CardioMood
 //
-//  Created by Alexander O. Taraymovich on 30.03.13.
+//  Created by Alexander O. Taraymovich on 06.04.13.
 //  Copyright (c) 2013 Alexander O. Taraymovich. All rights reserved.
 //
 
 #import "InfoViewController.h"
+#import "KeychainItemWrapper.h"
 
 @interface InfoViewController ()
 
@@ -33,6 +34,13 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+-(IBAction)logOutButtonPressed:(id)sender
+{
+    KeychainItemWrapper *keychainItem = [[KeychainItemWrapper alloc] initWithIdentifier:@"CardioMood" accessGroup:nil];
+    [keychainItem resetKeychainItem];
+    [self performSegueWithIdentifier:@"logOutSegue" sender:self];
 }
 
 @end

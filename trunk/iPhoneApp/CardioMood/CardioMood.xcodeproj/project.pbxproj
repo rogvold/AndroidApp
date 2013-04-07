@@ -10,20 +10,17 @@
 		FA4F915817074B7E006FF8D8 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FA4F915717074B7E006FF8D8 /* Icon@2x.png */; };
 		FA4F915A17074B83006FF8D8 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = FA4F915917074B83006FF8D8 /* Icon.png */; };
 		FA4F915C17084229006FF8D8 /* stat@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FA4F915B17084229006FF8D8 /* stat@2x.png */; };
-		FA79A9F1170F19DB007AC210 /* RegisterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FA79A9F0170F19DB007AC210 /* RegisterViewController.m */; };
 		FA79A9F4170F2906007AC210 /* SettingsPageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FA79A9F3170F2906007AC210 /* SettingsPageViewController.m */; };
 		FAA5F322170A2B5C00D7640D /* UserSettingsViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA5F321170A2B5C00D7640D /* UserSettingsViewController.m */; };
 		FAA5F32A170B02E500D7640D /* female@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FAA5F328170B02E500D7640D /* female@2x.png */; };
 		FAA5F32B170B02E500D7640D /* male@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FAA5F329170B02E500D7640D /* male@2x.png */; };
 		FAA91A0317074AB900999FCB /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA9199C17074AB900999FCB /* AppDelegate.m */; };
-		FAA91A0417074AB900999FCB /* CardioMood-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = FAA9199D17074AB900999FCB /* CardioMood-Info.plist */; };
 		FAA91A0517074AB900999FCB /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FAA919EF17074AB900999FCB /* Default-568h@2x.png */; };
 		FAA91A0617074AB900999FCB /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = FAA919F017074AB900999FCB /* Default.png */; };
 		FAA91A0717074AB900999FCB /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FAA919F117074AB900999FCB /* Default@2x.png */; };
 		FAA91A0817074AB900999FCB /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = FAA919F217074AB900999FCB /* InfoPlist.strings */; };
 		FAA91A0917074AB900999FCB /* MainStoryboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FAA919F417074AB900999FCB /* MainStoryboard.storyboard */; };
 		FAA91A0A17074AB900999FCB /* info@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FAA919F617074AB900999FCB /* info@2x.png */; };
-		FAA91A0B17074AB900999FCB /* InfoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA919F817074AB900999FCB /* InfoViewController.m */; };
 		FAA91A0C17074AB900999FCB /* KeychainItemWrapper.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA919FA17074AB900999FCB /* KeychainItemWrapper.m */; };
 		FAA91A0D17074AB900999FCB /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA919FC17074AB900999FCB /* LoginViewController.m */; };
 		FAA91A0E17074AB900999FCB /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = FAA919FD17074AB900999FCB /* main.m */; };
@@ -35,7 +32,11 @@
 		FACB18FE1621844300BF2D66 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FACB18FD1621844300BF2D66 /* CoreGraphics.framework */; };
 		FACB19351621866800BF2D66 /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FACB19341621866800BF2D66 /* CoreBluetooth.framework */; };
 		FACFD6E7170C98D200AF1B8F /* CMLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = FACFD6E6170C98D200AF1B8F /* CMLabel.m */; };
+		FAD96297171024F800771813 /* InfoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FAD96296171024F800771813 /* InfoViewController.m */; };
+		FAD9629D171070DF00771813 /* RegisterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FAD9629A171070DE00771813 /* RegisterViewController.m */; };
+		FAD962A51710D4B500771813 /* StatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FAD962A41710D4B500771813 /* StatViewController.m */; };
 		FAE1C871167E3941004F927B /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAE1C870167E3941004F927B /* Security.framework */; };
+		FAF4064E1710DA8C00478DF4 /* SessionDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FAF4064D1710DA8C00478DF4 /* SessionDetailViewController.m */; };
 		FAFD2B07170993AC005DF533 /* libClientServerInteraction.iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FAFD2B04170992E2005DF533 /* libClientServerInteraction.iOS.a */; };
 		FAFD2B0B17099623005DF533 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAFD2B0A17099623005DF533 /* MobileCoreServices.framework */; };
 		FAFD2B0D17099630005DF533 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAFD2B0C17099630005DF533 /* SystemConfiguration.framework */; };
@@ -64,8 +65,6 @@
 		FA4F915717074B7E006FF8D8 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon@2x.png"; path = "../Icon@2x.png"; sourceTree = "<group>"; };
 		FA4F915917074B83006FF8D8 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon.png; path = ../Icon.png; sourceTree = "<group>"; };
 		FA4F915B17084229006FF8D8 /* stat@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stat@2x.png"; sourceTree = "<group>"; };
-		FA79A9EF170F19DB007AC210 /* RegisterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RegisterViewController.h; path = ../RegisterViewController.h; sourceTree = "<group>"; };
-		FA79A9F0170F19DB007AC210 /* RegisterViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RegisterViewController.m; path = ../RegisterViewController.m; sourceTree = "<group>"; };
 		FA79A9F2170F2906007AC210 /* SettingsPageViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SettingsPageViewController.h; sourceTree = "<group>"; };
 		FA79A9F3170F2906007AC210 /* SettingsPageViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SettingsPageViewController.m; sourceTree = "<group>"; };
 		FAA5F320170A2B5C00D7640D /* UserSettingsViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserSettingsViewController.h; sourceTree = "<group>"; };
@@ -82,8 +81,6 @@
 		FAA919F317074AB900999FCB /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		FAA919F517074AB900999FCB /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard.storyboard; sourceTree = "<group>"; };
 		FAA919F617074AB900999FCB /* info@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "info@2x.png"; sourceTree = "<group>"; };
-		FAA919F717074AB900999FCB /* InfoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InfoViewController.h; sourceTree = "<group>"; };
-		FAA919F817074AB900999FCB /* InfoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InfoViewController.m; sourceTree = "<group>"; };
 		FAA919F917074AB900999FCB /* KeychainItemWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KeychainItemWrapper.h; sourceTree = "<group>"; };
 		FAA919FA17074AB900999FCB /* KeychainItemWrapper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KeychainItemWrapper.m; sourceTree = "<group>"; };
 		FAA919FB17074AB900999FCB /* LoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewController.h; sourceTree = "<group>"; };
@@ -101,7 +98,16 @@
 		FACB19341621866800BF2D66 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
 		FACFD6E5170C98D200AF1B8F /* CMLabel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CMLabel.h; sourceTree = "<group>"; };
 		FACFD6E6170C98D200AF1B8F /* CMLabel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CMLabel.m; sourceTree = "<group>"; };
+		FAD96295171024F800771813 /* InfoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InfoViewController.h; sourceTree = "<group>"; };
+		FAD96296171024F800771813 /* InfoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InfoViewController.m; sourceTree = "<group>"; };
+		FAD96299171070DE00771813 /* RegisterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RegisterViewController.h; sourceTree = "<group>"; };
+		FAD9629A171070DE00771813 /* RegisterViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RegisterViewController.m; sourceTree = "<group>"; };
+		FAD962A0171073D700771813 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
+		FAD962A31710D4B500771813 /* StatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StatViewController.h; sourceTree = "<group>"; };
+		FAD962A41710D4B500771813 /* StatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StatViewController.m; sourceTree = "<group>"; };
 		FAE1C870167E3941004F927B /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		FAF4064C1710DA8C00478DF4 /* SessionDetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SessionDetailViewController.h; sourceTree = "<group>"; };
+		FAF4064D1710DA8C00478DF4 /* SessionDetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SessionDetailViewController.m; sourceTree = "<group>"; };
 		FAFD2AFE170992E2005DF533 /* ClientServerInteraction.iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ClientServerInteraction.iOS.xcodeproj; path = ClientServerInteraction.iOS/ClientServerInteraction.iOS.xcodeproj; sourceTree = "<group>"; };
 		FAFD2B0A17099623005DF533 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
 		FAFD2B0C17099630005DF533 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
@@ -134,25 +140,19 @@
 		FAA9199A17074AB900999FCB /* CardioMood */ = {
 			isa = PBXGroup;
 			children = (
+				FAF4064F17116FE400478DF4 /* CMLabel */,
 				FAA91A1217074AF700999FCB /* Keychain Wrapper */,
 				FAA91A1117074AD800999FCB /* Supporting files */,
-				FAA9199B17074AB900999FCB /* AppDelegate.h */,
-				FAA9199C17074AB900999FCB /* AppDelegate.m */,
+				FAF406581711707600478DF4 /* AppDelegate */,
 				FAA919F417074AB900999FCB /* MainStoryboard.storyboard */,
-				FAA919F717074AB900999FCB /* InfoViewController.h */,
-				FAA919F817074AB900999FCB /* InfoViewController.m */,
-				FAA919FB17074AB900999FCB /* LoginViewController.h */,
-				FAA919FC17074AB900999FCB /* LoginViewController.m */,
-				FAA91A0117074AB900999FCB /* DeviceViewController.h */,
-				FAA91A0217074AB900999FCB /* DeviceViewController.m */,
-				FAA5F320170A2B5C00D7640D /* UserSettingsViewController.h */,
-				FAA5F321170A2B5C00D7640D /* UserSettingsViewController.m */,
-				FACFD6E5170C98D200AF1B8F /* CMLabel.h */,
-				FACFD6E6170C98D200AF1B8F /* CMLabel.m */,
-				FA79A9EF170F19DB007AC210 /* RegisterViewController.h */,
-				FA79A9F0170F19DB007AC210 /* RegisterViewController.m */,
-				FA79A9F2170F2906007AC210 /* SettingsPageViewController.h */,
-				FA79A9F3170F2906007AC210 /* SettingsPageViewController.m */,
+				FAF4065017116FF700478DF4 /* LoginViewController */,
+				FAF406511711700E00478DF4 /* DeviceViewController */,
+				FAF406521711701900478DF4 /* UserSettingsViewController */,
+				FAF406531711702C00478DF4 /* SettingsPageViewController */,
+				FAF406541711703A00478DF4 /* InfoViewController */,
+				FAF406551711704500478DF4 /* RegisterViewController */,
+				FAF406561711705B00478DF4 /* StatViewController */,
+				FAF406571711706700478DF4 /* SessionDetailViewController */,
 			);
 			path = CardioMood;
 			sourceTree = "<group>";
@@ -208,6 +208,7 @@
 		FACB18F81621844300BF2D66 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FAD962A0171073D700771813 /* CoreTelephony.framework */,
 				FAFD2B1017099682005DF533 /* CFNetwork.framework */,
 				FAFD2B0E17099678005DF533 /* CoreData.framework */,
 				FAFD2B0C17099630005DF533 /* SystemConfiguration.framework */,
@@ -221,6 +222,96 @@
 				FACB191D1621844300BF2D66 /* SenTestingKit.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		FAF4064F17116FE400478DF4 /* CMLabel */ = {
+			isa = PBXGroup;
+			children = (
+				FACFD6E5170C98D200AF1B8F /* CMLabel.h */,
+				FACFD6E6170C98D200AF1B8F /* CMLabel.m */,
+			);
+			name = CMLabel;
+			sourceTree = "<group>";
+		};
+		FAF4065017116FF700478DF4 /* LoginViewController */ = {
+			isa = PBXGroup;
+			children = (
+				FAA919FB17074AB900999FCB /* LoginViewController.h */,
+				FAA919FC17074AB900999FCB /* LoginViewController.m */,
+			);
+			name = LoginViewController;
+			sourceTree = "<group>";
+		};
+		FAF406511711700E00478DF4 /* DeviceViewController */ = {
+			isa = PBXGroup;
+			children = (
+				FAA91A0117074AB900999FCB /* DeviceViewController.h */,
+				FAA91A0217074AB900999FCB /* DeviceViewController.m */,
+			);
+			name = DeviceViewController;
+			sourceTree = "<group>";
+		};
+		FAF406521711701900478DF4 /* UserSettingsViewController */ = {
+			isa = PBXGroup;
+			children = (
+				FAA5F320170A2B5C00D7640D /* UserSettingsViewController.h */,
+				FAA5F321170A2B5C00D7640D /* UserSettingsViewController.m */,
+			);
+			name = UserSettingsViewController;
+			sourceTree = "<group>";
+		};
+		FAF406531711702C00478DF4 /* SettingsPageViewController */ = {
+			isa = PBXGroup;
+			children = (
+				FA79A9F2170F2906007AC210 /* SettingsPageViewController.h */,
+				FA79A9F3170F2906007AC210 /* SettingsPageViewController.m */,
+			);
+			name = SettingsPageViewController;
+			sourceTree = "<group>";
+		};
+		FAF406541711703A00478DF4 /* InfoViewController */ = {
+			isa = PBXGroup;
+			children = (
+				FAD96295171024F800771813 /* InfoViewController.h */,
+				FAD96296171024F800771813 /* InfoViewController.m */,
+			);
+			name = InfoViewController;
+			sourceTree = "<group>";
+		};
+		FAF406551711704500478DF4 /* RegisterViewController */ = {
+			isa = PBXGroup;
+			children = (
+				FAD96299171070DE00771813 /* RegisterViewController.h */,
+				FAD9629A171070DE00771813 /* RegisterViewController.m */,
+			);
+			name = RegisterViewController;
+			sourceTree = "<group>";
+		};
+		FAF406561711705B00478DF4 /* StatViewController */ = {
+			isa = PBXGroup;
+			children = (
+				FAD962A31710D4B500771813 /* StatViewController.h */,
+				FAD962A41710D4B500771813 /* StatViewController.m */,
+			);
+			name = StatViewController;
+			sourceTree = "<group>";
+		};
+		FAF406571711706700478DF4 /* SessionDetailViewController */ = {
+			isa = PBXGroup;
+			children = (
+				FAF4064C1710DA8C00478DF4 /* SessionDetailViewController.h */,
+				FAF4064D1710DA8C00478DF4 /* SessionDetailViewController.m */,
+			);
+			name = SessionDetailViewController;
+			sourceTree = "<group>";
+		};
+		FAF406581711707600478DF4 /* AppDelegate */ = {
+			isa = PBXGroup;
+			children = (
+				FAA9199B17074AB900999FCB /* AppDelegate.h */,
+				FAA9199C17074AB900999FCB /* AppDelegate.m */,
+			);
+			name = AppDelegate;
 			sourceTree = "<group>";
 		};
 		FAFD2AFF170992E2005DF533 /* Products */ = {
@@ -258,7 +349,7 @@
 		FACB18EC1621844300BF2D66 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0450;
+				LastUpgradeCheck = 0460;
 				ORGANIZATIONNAME = "Alexander O. Taraymovich";
 			};
 			buildConfigurationList = FACB18EF1621844300BF2D66 /* Build configuration list for PBXProject "CardioMood" */;
@@ -300,7 +391,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FAA91A0417074AB900999FCB /* CardioMood-Info.plist in Resources */,
 				FAA91A0517074AB900999FCB /* Default-568h@2x.png in Resources */,
 				FAA91A0617074AB900999FCB /* Default.png in Resources */,
 				FAA91A0717074AB900999FCB /* Default@2x.png in Resources */,
@@ -324,15 +414,17 @@
 			buildActionMask = 2147483647;
 			files = (
 				FAA91A0317074AB900999FCB /* AppDelegate.m in Sources */,
-				FAA91A0B17074AB900999FCB /* InfoViewController.m in Sources */,
 				FAA91A0C17074AB900999FCB /* KeychainItemWrapper.m in Sources */,
 				FAA91A0D17074AB900999FCB /* LoginViewController.m in Sources */,
 				FAA91A0E17074AB900999FCB /* main.m in Sources */,
 				FAA91A1017074AB900999FCB /* DeviceViewController.m in Sources */,
 				FAA5F322170A2B5C00D7640D /* UserSettingsViewController.m in Sources */,
 				FACFD6E7170C98D200AF1B8F /* CMLabel.m in Sources */,
-				FA79A9F1170F19DB007AC210 /* RegisterViewController.m in Sources */,
 				FA79A9F4170F2906007AC210 /* SettingsPageViewController.m in Sources */,
+				FAD96297171024F800771813 /* InfoViewController.m in Sources */,
+				FAD9629D171070DF00771813 /* RegisterViewController.m in Sources */,
+				FAD962A51710D4B500771813 /* StatViewController.m in Sources */,
+				FAF4064E1710DA8C00478DF4 /* SessionDetailViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -93,7 +93,7 @@
 // Request CBCentralManager to scan for heart rate peripherals using service UUID 0x180D
 - (void) startScan
 {
-    [manager scanForPeripheralsWithServices:[NSArray arrayWithObject:[CBUUID UUIDWithString:@"180D"]]
+    [manager scanForPeripheralsWithServices:@[[CBUUID UUIDWithString:@"180D"]]
                                          options:nil];
 }
 
@@ -123,7 +123,7 @@
     
     if([lastConnectedPeripheral UUID] != nil)
     {
-        [manager retrievePeripherals:[NSArray arrayWithObject:(id)lastConnectedPeripheral.UUID]];
+        [manager retrievePeripherals:@[(id)lastConnectedPeripheral.UUID]];
     }
     
     [sensorsTable reloadData];
@@ -131,17 +131,14 @@
 
 #pragma mark TableView delegate methods
 - (void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *) indexPath {
-    CBPeripheral *device = [heartRateMonitors objectAtIndex:[indexPath row]];
+    CBPeripheral *device = heartRateMonitors[[indexPath row]];
     if (![device isConnected]) {
         if ([currentlyConnectedPeripheral isConnected]) {
             [manager cancelPeripheralConnection:currentlyConnectedPeripheral];
         }
         currentlyConnectedPeripheral = device;
         [manager connectPeripheral:currentlyConnectedPeripheral
-                                options:[NSDictionary dictionaryWithObject:
-                                         [NSNumber numberWithBool:YES]
-                                                                    forKey:
-                                         CBConnectPeripheralOptionNotifyOnDisconnectionKey]];
+                                options:@{CBConnectPeripheralOptionNotifyOnDisconnectionKey: @YES}];
         connectedMonitor.text = [currentlyConnectedPeripheral name];
         connectedMonitor.enabled = TRUE;
         heartRateLabel.enabled = TRUE;
@@ -171,7 +168,7 @@
 	if (!cell)
 		cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:cellID];
     
-	device = [heartRateMonitors objectAtIndex:row];
+	device = heartRateMonitors[row];
     
     if ([[device name] length])
         [[cell textLabel] setText:[device name]];
@@ -199,12 +196,12 @@
     NSLog(@"Retrieved peripheral: %u - %@", [peripherals count], peripherals);
     [self stopScan];
     if([peripherals count] >= 1) {
-        [manager connectPeripheral:[peripherals objectAtIndex:0] options:[NSDictionary dictionaryWithObject:[NSNumber numberWithBool:YES] forKey:CBConnectPeripheralOptionNotifyOnDisconnectionKey]];
-        connectedMonitor.text = [[peripherals objectAtIndex:0] name];
+        [manager connectPeripheral:peripherals[0] options:@{CBConnectPeripheralOptionNotifyOnDisconnectionKey: @YES}];
+        connectedMonitor.text = [peripherals[0] name];
         connectedMonitor.enabled = TRUE;
         heartRateLabel.enabled = TRUE;
         bpm.enabled = TRUE;
-        currentlyConnectedPeripheral = [peripherals objectAtIndex:0];
+        currentlyConnectedPeripheral = peripherals[0];
         [sensorsTable reloadData];
     }
 }

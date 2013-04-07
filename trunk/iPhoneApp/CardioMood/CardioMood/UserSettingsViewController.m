@@ -33,25 +33,50 @@
     KeychainItemWrapper *keychainItem = [[KeychainItemWrapper alloc] initWithIdentifier:@"CardioMood" accessGroup:nil];
     NSString *password = [keychainItem objectForKey:CFBridgingRelease(kSecValueData)];
     NSString *username = [keychainItem objectForKey:CFBridgingRelease(kSecAttrAccount)];
-    [ClientServerInteraction getInfo:username withPassword:password completion:^(User *user, NSError *error){
-        self.user = user;
-        titleSex = [[NSMutableArray alloc] init];
-        [titleSex addObject:@"Male"];
-        [titleSex addObject:@"Female"];
-        imageSex = [[NSMutableArray alloc] init];
-        [imageSex addObject:@"male"];
-        [imageSex addObject:@"female"];
-        NSMutableArray *authorizationData = [NSMutableArray arrayWithObjects:username, password, nil];
-        NSMutableArray *personalData = [NSMutableArray arrayWithObjects:user.firstName, user.lastName, nil];
-        NSMutableArray *physicalParameters = [NSMutableArray arrayWithObjects:[NSString stringWithFormat:@"%d", (int)user.height], [NSString stringWithFormat:@"%d", (int)user.weight], @"08/24/1992", user.sex == 1 ? [titleSex objectAtIndex:0] : [titleSex objectAtIndex:1], nil];
-        
-        settings = [NSMutableDictionary dictionaryWithObjectsAndKeys:physicalParameters, @"Physical parameters", authorizationData, @"Authorization data", personalData, @"Personal data", nil];
-        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-        [[self navigationItem] setTitleView:nil];
-        [activityIndicator stopAnimating];
-        [self initializeData];
-        [self.tableView reloadData];
+    NSString *token = [keychainItem objectForKey:CFBridgingRelease(kSecAttrLabel)];
+    [ClientServerInteraction getInfo:token completion:^(int code, User *response, NSError *error, ServerResponseError *serverError) {
+        if (code == 1)
+        {
+            [self initUser:response];
+            [activityIndicator stopAnimating];
+        }
+        else if (code == 3)
+        {
+            if (serverError.errorCode == InvalidToken)
+            {
+                [ClientServerInteraction authorizeWithEmail:username withPassword:password withDeviceId:[[[UIDevice currentDevice] identifierForVendor] UUIDString] completion:^(int code, AccessToken *response, NSError *error, ServerResponseError *serverError) {
+                    [keychainItem setObject:[response token] forKey:CFBridgingRelease(kSecAttrLabel)];
+                    [ClientServerInteraction getInfo:token completion:^(int code, User *response, NSError *error, ServerResponseError *serverError) {
+                        if (code == 1)
+                        {
+                            [self initUser:response];
+                            [activityIndicator stopAnimating];
+                        }
+                    }];
+                }];
+            }
+        }
     }];
+}
+
+-(void)initUser:(User *)response
+{
+    self.user = response;
+    titleSex = [[NSMutableArray alloc] init];
+    [titleSex addObject:@"Male"];
+    [titleSex addObject:@"Female"];
+    imageSex = [[NSMutableArray alloc] init];
+    [imageSex addObject:@"male"];
+    [imageSex addObject:@"female"];
+    NSMutableArray *authorizationData = [NSMutableArray arrayWithObjects:response.email, response.password, nil];
+    NSMutableArray *personalData = [NSMutableArray arrayWithObjects:response.firstName, response.lastName, nil];
+    NSMutableArray *physicalParameters = [NSMutableArray arrayWithObjects:[response.height stringValue], [response.weight stringValue], response.birthDate, [response.sex intValue] == 1 ? titleSex[0] : titleSex[1], nil];
+    
+    settings = [NSMutableDictionary dictionaryWithObjectsAndKeys:physicalParameters, @"Physical parameters", authorizationData, @"Authorization data", personalData, @"Personal data", nil];
+    [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+    [[self navigationItem] setTitleView:nil];
+    [self initializeData];
+    [self.tableView reloadData];
 }
 
 - (IBAction)saveButtonPressed:(id)sender
@@ -61,11 +86,36 @@
     [[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
     [[self navigationItem] setTitleView:activityIndicator];
     [activityIndicator startAnimating];
-    [ClientServerInteraction updateInfo:self.user completion:^(NSNumber *response, NSError *error){
-        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-        [[self navigationItem] setTitleView:nil];
-        [activityIndicator stopAnimating];
-        [self.navigationController popToRootViewControllerAnimated:YES];
+    KeychainItemWrapper *keychainItem = [[KeychainItemWrapper alloc] initWithIdentifier:@"CardioMood" accessGroup:nil];
+    NSString *password = [keychainItem objectForKey:CFBridgingRelease(kSecValueData)];
+    NSString *username = [keychainItem objectForKey:CFBridgingRelease(kSecAttrAccount)];
+    NSString *token = [keychainItem objectForKey:CFBridgingRelease(kSecAttrLabel)];
+    [ClientServerInteraction updateInfoForUser:self.user token:token completion:^(int code, NSNumber *response, NSError *error, ServerResponseError *serverError) {
+        if (code == 1)
+        {
+            [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+            [[self navigationItem] setTitleView:nil];
+            [activityIndicator stopAnimating];
+            [self.navigationController popToRootViewControllerAnimated:YES];
+        }
+        else if (code == 3)
+        {
+            if (serverError.errorCode == InvalidToken)
+            {
+                [ClientServerInteraction authorizeWithEmail:username withPassword:password withDeviceId:[[[UIDevice currentDevice] identifierForVendor] UUIDString] completion:^(int code, AccessToken *response, NSError *error, ServerResponseError *serverError) {
+                    [keychainItem setObject:[response token] forKey:CFBridgingRelease(kSecAttrLabel)];
+                    [ClientServerInteraction updateInfoForUser:self.user token:[response token] completion:^(int code, NSNumber *response, NSError *error, ServerResponseError *serverError) {
+                        if (code == 1)
+                        {
+                            [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+                            [[self navigationItem] setTitleView:nil];
+                            [activityIndicator stopAnimating];
+                            [self.navigationController popToRootViewControllerAnimated:YES];
+                        }
+                    }];
+                }];
+            }
+        }
     }];
 }
 

@@ -8,7 +8,9 @@
 
 #import <UIKit/UIKit.h>
 
-@interface LoginViewController : UIViewController
+@interface LoginViewController : UITableViewController {
+    NSMutableDictionary *data;
+}
 
 - (IBAction)signInButtonPressed:(id)sender;
 
