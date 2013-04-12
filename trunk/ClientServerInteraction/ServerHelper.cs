@@ -15,8 +15,10 @@ namespace ClientServerInteraction
         private const string ServerBase = @"http://www.cardiomood.com/BaseProjectWeb/";
         private const string Resources = @"resources/";
         private const string Authorization = @"SecureAuth/";
+        private const string Sessions = @"SecureSessions/";
+        private const string Indicators = @"SecureIndicators/";
         private const string Token = @"token/";
-        private const string Rates = @"rates/";
+        private const string Rates = @"SecureRatesUploading/";
 
         private static Task BaseRequest<T>(string urlSuffix, Dictionary<object, object> queryContent,
             Object json, ResponseCallback<T> callback)
@@ -65,33 +67,48 @@ namespace ClientServerInteraction
                                null, callback);
         }
 
-        public static Task<bool> UpdateUserInfo(User user)
+        public static Task UpdateUserInfo(string accessToken, User user, ResponseCallback<User> callback)
         {
-            const string url = ServerBase + Resources + Authorization + "info";
-            var json = SerializationHelper.SerializeUser(user);
-            var queryString =
-                SerializationHelper.CreateQueryString(new Dictionary<object, object> { { "json", json } });
-            return
-                HttpHelper.PostAsync(url, queryString, null).ContinueWith(
-                    resp => SerializationHelper.DeserializeValidationResponse(resp.Result));
+            return BaseRequest(Authorization + "update_info", new Dictionary<object, object> {{"token", accessToken}},
+                               user, callback);
         }
 
-        public static Task<bool> Upload(string email, string password, long start, IEnumerable<int> rates)
+        public static Task Upload(string accessToken, long start, IEnumerable<int> rates, bool create, ResponseCallback<bool> callback)
         {
-            const string url = ServerBase + Resources + Rates + "upload";
-            var json = "json=" + SerializationHelper.SerializeRates(email, password, start, rates);
-            return
-                HttpHelper.PostAsync(url, null, json).ContinueWith(
-                    resp => SerializationHelper.DeserializeValidationResponse(resp.Result));
+            return BaseRequest(Rates + "upload", new Dictionary<object, object> {{"token", accessToken}}, new
+                {
+                    start,
+                    rates,
+                    create = create ? 1 : 0
+                }, callback);
         }
 
-        public static Task<bool> SynchronizeRates(string email, string password, long start, IEnumerable<int> rates)
+        public static Task SynchronizeRates(string accessToken, long start, IEnumerable<int> rates, bool create, ResponseCallback<bool> callback)
         {
-            const string url = ServerBase + Resources + Rates + "sync";
-            var json = "json=" + SerializationHelper.SerializeRates(email, password, start, rates);
-            return
-                HttpHelper.PostAsync(url, null, json).ContinueWith(
-                    resp => SerializationHelper.DeserializeValidationResponse(resp.Result));
+            return BaseRequest(Rates + "sync", new Dictionary<object, object> { { "token", accessToken } }, new
+            {
+                start,
+                rates,
+                create = create ? 1 : 0
+            }, callback);
+        }
+
+        public static Task GetAllSessions(string accessToken, ResponseCallback<IEnumerable<Session>> callback)
+        {
+            return BaseRequest(Sessions + "all", new Dictionary<object, object> {{"token", accessToken}}, null, callback);
+        }
+
+        public static Task GetTension(string accessToken, long sessionId, ResponseCallback<IEnumerable<double[]>> callback)
+        {
+            return BaseRequest(Indicators + sessionId + "/tension", new Dictionary<object, object> {{"token", accessToken}},
+                               null, callback);
+        }
+
+        public static Task GetRates(string accessToken, long sessionId, ResponseCallback<IEnumerable<int>> callback)
+        {
+            return BaseRequest(Sessions + "rates",
+                               new Dictionary<object, object> {{"sessionId", sessionId}, {"token", accessToken}}, null,
+                               callback);
         }
 
         private static void CommonCallbackRoutine<T>(Task<T> task, ResponseCallback<T> callback)
