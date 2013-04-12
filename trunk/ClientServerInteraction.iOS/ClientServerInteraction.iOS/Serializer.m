@@ -120,7 +120,7 @@
     user.sex = [dict objectForKey:@"sex"];
     user.statusMessage = [dict objectForKey:@"statusMessage"];
     user.weight = [dict objectForKey:@"weight"];
-    user.userId = [dict objectForKey:@"userId"];
+    user.userId = [dict objectForKey:@"id"];
     return user;
 }
 
