@@ -10,6 +10,7 @@
 		5B6B655C170B3863004AC2AF /* User.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B6B655B170B3863004AC2AF /* User.m */; };
 		5B77534717118716008E429D /* Serializer.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B77534617118716008E429D /* Serializer.m */; };
 		5B77534B171187BF008E429D /* HttpRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B77534A171187BF008E429D /* HttpRequest.m */; };
+		5B91C95B1718588200BC371E /* Reachability.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B91C95A1718588200BC371E /* Reachability.m */; };
 		5BDF36CC17104D6A0054473A /* ServerResponseError.m in Sources */ = {isa = PBXBuildFile; fileRef = 5BDF36CB17104D6A0054473A /* ServerResponseError.m */; };
 		5BDF36D217104E0B0054473A /* AccessToken.m in Sources */ = {isa = PBXBuildFile; fileRef = 5BDF36D117104E0B0054473A /* AccessToken.m */; };
 		5BDF36D71710715B0054473A /* Session.m in Sources */ = {isa = PBXBuildFile; fileRef = 5BDF36D61710715B0054473A /* Session.m */; };
@@ -43,6 +44,12 @@
 		5B775349171187BF008E429D /* HttpRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = HttpRequest.h; sourceTree = "<group>"; };
 		5B77534A171187BF008E429D /* HttpRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = HttpRequest.m; sourceTree = "<group>"; };
 		5B77534D17118820008E429D /* HttpRequest_FrameworkOnly.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = HttpRequest_FrameworkOnly.h; sourceTree = "<group>"; };
+		5B91C9591718588200BC371E /* Reachability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Reachability.h; sourceTree = "<group>"; };
+		5B91C95A1718588200BC371E /* Reachability.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Reachability.m; sourceTree = "<group>"; };
+		5BC8523817118B710094F672 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
+		5BC8523B17118B710094F672 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
+		5BC8523C17118B710094F672 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		5BC8523D17118B710094F672 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		5BDF36CA17104D6A0054473A /* ServerResponseError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ServerResponseError.h; sourceTree = "<group>"; };
 		5BDF36CB17104D6A0054473A /* ServerResponseError.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ServerResponseError.m; sourceTree = "<group>"; };
 		5BDF36D017104E0B0054473A /* AccessToken.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AccessToken.h; sourceTree = "<group>"; };
@@ -82,6 +89,8 @@
 		5B77534E17118ABB008E429D /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
+				5B91C9591718588200BC371E /* Reachability.h */,
+				5B91C95A1718588200BC371E /* Reachability.m */,
 				5B77534517118716008E429D /* Serializer.h */,
 				5B7753481711874A008E429D /* Serializer_FrameworkOnly.h */,
 				5B77534617118716008E429D /* Serializer.m */,
@@ -105,6 +114,16 @@
 				5BDF36D61710715B0054473A /* Session.m */,
 			);
 			name = Serializables;
+			sourceTree = "<group>";
+		};
+		5BC8523A17118B710094F672 /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5BC8523B17118B710094F672 /* AppKit.framework */,
+				5BC8523C17118B710094F672 /* CoreData.framework */,
+				5BC8523D17118B710094F672 /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
 			sourceTree = "<group>";
 		};
 		FA6AC5D317098631008C60F6 = {
@@ -133,6 +152,8 @@
 				FA6AC60117098945008C60F6 /* CoreData.framework */,
 				FA6AC5FF17098939008C60F6 /* CFNetwork.framework */,
 				FA6AC5DF17098631008C60F6 /* Foundation.framework */,
+				5BC8523817118B710094F672 /* Cocoa.framework */,
+				5BC8523A17118B710094F672 /* Other Frameworks */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -216,6 +237,7 @@
 				5BDF36D71710715B0054473A /* Session.m in Sources */,
 				5B77534717118716008E429D /* Serializer.m in Sources */,
 				5B77534B171187BF008E429D /* HttpRequest.m in Sources */,
+				5B91C95B1718588200BC371E /* Reachability.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

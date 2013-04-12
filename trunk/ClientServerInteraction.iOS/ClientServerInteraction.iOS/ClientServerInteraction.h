@@ -11,6 +11,7 @@
 #import "ServerResponseError.h"
 #import "AccessToken.h"
 #import "Session.h"
+#import "Reachability.h"
 
 @interface ClientServerInteraction : NSObject
 
@@ -35,5 +36,7 @@
 +(void)getRatesForSessionId:(NSNumber*)sessionId token:(NSString*)token completion:(void (^)(int code, NSArray* response, NSError* error, ServerResponseError* serverError))completionBlock;
 
 +(void)getTensionForSessionId:(NSNumber*)sessionId token:(NSString*)token completion:(void (^)(int code, NSDictionary* response, NSError* error, ServerResponseError* serverError))completionBlock;
+
++(void)checkIfServerIsReachable:(void(^)(bool response))callback;
 
 @end

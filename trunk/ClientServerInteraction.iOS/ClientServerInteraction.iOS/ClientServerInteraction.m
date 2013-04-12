@@ -89,6 +89,22 @@ NSString* const kToken = @"token/";
     
 }
 
++(void)checkIfServerIsReachable:(void(^)(bool response))callback {
+    Reachability* reach = [Reachability reachabilityWithHostname:kBaseUrl];
+
+    reach.reachableBlock = ^(Reachability*reach)
+    {
+        callback(true);
+    };
+    
+    reach.unreachableBlock = ^(Reachability*reach)
+    {
+        callback(false);
+    };
+    
+    [reach startNotifier];
+}
+
 
                     
 
