@@ -90,28 +90,14 @@ NSString* const kToken = @"token/";
 }
 
 +(void)checkIfServerIsReachable:(void(^)(bool response))callback {
-    Reachability* reach = [Reachability reachabilityWithHostname:kBaseUrl];
-
-    reach.reachableBlock = ^(Reachability*reach)
-    {
-        callback(true);
-    };
+    NSMutableURLRequest *request =
+    [[NSMutableURLRequest alloc] initWithURL:
+     [NSURL URLWithString:kBaseUrl]];
     
-    reach.unreachableBlock = ^(Reachability*reach)
-    {
-        callback(false);
-    };
-    
-    [reach startNotifier];
+    [request setHTTPMethod:@"GET"];
+    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse* response, NSData* data, NSError *error) {
+        callback(response != nil);
+    }];
 }
-
-
-                    
-
-
-
-
-
-
 
 @end

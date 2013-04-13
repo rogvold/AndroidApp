@@ -11,7 +11,6 @@
 #import "ServerResponseError.h"
 #import "AccessToken.h"
 #import "Session.h"
-#import "Reachability.h"
 
 @interface ClientServerInteraction : NSObject
 
