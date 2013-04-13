@@ -162,11 +162,11 @@
 {
     NSLog(@"Retrieved peripheral: %u - %@", [peripherals count], peripherals);
     [self stopScan];
-    if([peripherals count] >= 1) {
-        [manager connectPeripheral:peripherals[0] options:@{CBConnectPeripheralOptionNotifyOnDisconnectionKey: @YES}];
-        currentlyConnectedPeripheral = peripherals[0];
-        [sensorsTable reloadData];
-    }
+//    if([peripherals count] >= 1) {
+//        [manager connectPeripheral:peripherals[0] options:@{CBConnectPeripheralOptionNotifyOnDisconnectionKey: @YES}];
+//        currentlyConnectedPeripheral = peripherals[0];
+//        [sensorsTable reloadData];
+//    }
 }
 
 // Invoked when a connection is succesfully created with the peripheral.

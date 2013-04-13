@@ -62,8 +62,22 @@
 -(void) viewWillDisappear:(BOOL)animated {
     if ([self.navigationController.viewControllers indexOfObject:self]==NSNotFound) {
         [connectedPeripheral setDelegate:nil];
-        [self saveIntervalsLocally:intervalsToSend];
-        [intervalsToSend removeAllObjects];
+        if (self.localSave)
+        {
+            [self saveIntervalsLocally:intervalsToSend];
+            [intervalsToSend removeAllObjects];
+        }
+        else
+        {
+            [ClientServerInteraction uploadRates:intervalsToSend start:[NSNumber numberWithLongLong:(long long)[startTime timeIntervalSince1970] * 1000] create:create token:token completion:^(int code, NSNumber *response, NSError *error, ServerResponseError *serverError) {
+                if (code == 1)
+                {
+                    create = [NSNumber numberWithInt:0];
+                    [intervalsToSend removeAllObjects];
+                    startTime = [NSDate date];
+                }
+            }];
+        }
     }
     [super viewWillDisappear:animated];
 }
@@ -111,8 +125,8 @@
             rrByte += 2;
             rr = (CFSwapInt16LittleToHost(*(uint16_t *)(&reportData[rrByte])) * 1000) / 1024;
         }
-        [intervals addObjectsFromArray:rrs];
-        [intervalsToSend addObjectsFromArray:rrs];
+        [intervals addObjectsFromArray:[[rrs reverseObjectEnumerator] allObjects]];
+        [intervalsToSend addObjectsFromArray:[[rrs reverseObjectEnumerator] allObjects]];
         // Send every 10 intervals to server
         if ([intervalsToSend count] >= 10) {
             [ClientServerInteraction checkIfServerIsReachable:^(bool response) {

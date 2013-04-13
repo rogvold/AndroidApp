@@ -13,11 +13,11 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "133"
          endingLineNumber = "133"
-         landmarkName = "-tableView:didSelectRowAtIndexPath:"
+         landmarkName = "-tableView:cellForRowAtIndexPath:"
          landmarkType = "5">
       </FileBreakpoint>
       <FileBreakpoint
-         shouldBeEnabled = "Yes"
+         shouldBeEnabled = "No"
          ignoreCount = "0"
          continueAfterRunningActions = "No"
          filePath = "CardioMood/DeviceViewController.m"
@@ -26,8 +26,8 @@
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "236"
          endingLineNumber = "236"
-         landmarkName = "-centralManager:didDisconnectPeripheral:error:"
-         landmarkType = "5">
+         landmarkName = "@implementation DeviceViewController"
+         landmarkType = "3">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -142,9 +142,7 @@
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
          startingLineNumber = "368"
-         endingLineNumber = "368"
-         landmarkName = "-updateWithHRMData:"
-         landmarkType = "5">
+         endingLineNumber = "368">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
