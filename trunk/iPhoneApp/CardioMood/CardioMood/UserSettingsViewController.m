@@ -18,9 +18,9 @@
 
 @implementation UserSettingsViewController
 
-- (void)viewDidLoad
+- (void)viewDidAppear:(BOOL)animated
 {
-    [super viewDidLoad];
+    [super viewDidAppear:animated];
     [self.saveButton setTarget:self];
     [self.saveButton setAction:@selector(saveButtonPressed:)];
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
@@ -50,7 +50,9 @@
                         if (code == 1)
                         {
                             [self initUser:response];
+                            [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
                             [activityIndicator stopAnimating];
+                            [[self navigationItem] setTitleView:nil];
                         }
                     }];
                 }];

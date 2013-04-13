@@ -12,6 +12,7 @@
 #include <mach/mach.h>
 #import "KeychainItemWrapper.h"
 #import <ClientServerInteraction.h>
+#import "NewSessionViewController.h"
 
 @interface DeviceViewController () <CBCentralManagerDelegate, CBPeripheralDelegate, UITableViewDataSource, UITableViewDelegate>
 
@@ -21,42 +22,17 @@
 @implementation DeviceViewController
 
 @synthesize heartRateMonitors;
-@synthesize heartRateLabel;
-@synthesize connectedMonitor;
 @synthesize manager;
 @synthesize sensorsTable;
-@synthesize bpm;
 @synthesize currentlyConnectedPeripheral;
 @synthesize lastConnectedPeripheral;
 
-@synthesize RRs;
-@synthesize RRsToSend;
-@synthesize startTime;
-@synthesize create;
-@synthesize login;
-@synthesize password;
-
-- (void)loadView
+- (void)viewDidLoad
 {
-    [super loadView];
+    [super viewDidLoad];
     heartRateMonitors = [NSMutableArray array];
-    RRs = [NSMutableArray array];
-    RRsToSend = [NSMutableArray array];
-    startTime = nil;
-    create = 1;
     manager = [[CBCentralManager alloc] initWithDelegate:self queue:nil];
-    KeychainItemWrapper *keychainItem = [[KeychainItemWrapper alloc] initWithIdentifier:@"CardioMood" accessGroup:nil];
-    password = [keychainItem objectForKey:CFBridgingRelease(kSecValueData)];
-    login = [keychainItem objectForKey:CFBridgingRelease(kSecAttrAccount)];
     [self startScan];
-}
-
-- (void) viewDidUnload
-{
-    [self setCurrentlyConnectedPeripheral:nil];
-    [self setSensorsTable:nil];
-    
-    [super viewDidUnload];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
@@ -139,18 +115,9 @@
         currentlyConnectedPeripheral = device;
         [manager connectPeripheral:currentlyConnectedPeripheral
                                 options:@{CBConnectPeripheralOptionNotifyOnDisconnectionKey: @YES}];
-        connectedMonitor.text = [currentlyConnectedPeripheral name];
-        connectedMonitor.enabled = TRUE;
-        heartRateLabel.enabled = TRUE;
-        bpm.enabled = TRUE;
     }
     else {
         [manager cancelPeripheralConnection:currentlyConnectedPeripheral];
-        connectedMonitor.text = @"No Connected Device";
-        connectedMonitor.enabled = FALSE;
-        heartRateLabel.text = @"0";
-        heartRateLabel.enabled = FALSE;
-        bpm.enabled = FALSE;
         currentlyConnectedPeripheral = nil;
         [sensorsTable reloadData];
     }
@@ -197,10 +164,6 @@
     [self stopScan];
     if([peripherals count] >= 1) {
         [manager connectPeripheral:peripherals[0] options:@{CBConnectPeripheralOptionNotifyOnDisconnectionKey: @YES}];
-        connectedMonitor.text = [peripherals[0] name];
-        connectedMonitor.enabled = TRUE;
-        heartRateLabel.enabled = TRUE;
-        bpm.enabled = TRUE;
         currentlyConnectedPeripheral = peripherals[0];
         [sensorsTable reloadData];
     }
@@ -213,8 +176,8 @@
     NSLog(@"connected");
     [aPeripheral setDelegate:self];
     [aPeripheral discoverServices:nil];
+    [self.startButton setEnabled:YES];
     [self setLastConnectedPeripheral:aPeripheral];
-    startTime = [NSDate date];
     [sensorsTable reloadData];
 }
 
@@ -224,11 +187,6 @@
 didDisconnectPeripheral:(CBPeripheral *)aPeripheral
                   error:(NSError *)error
 {
-    connectedMonitor.text = @"No Connected Device";
-    connectedMonitor.enabled = FALSE;
-    heartRateLabel.text = @"0";
-    heartRateLabel.enabled = FALSE;
-    bpm.enabled = FALSE;
     currentlyConnectedPeripheral = nil;
     [sensorsTable reloadData];
     [self startScan];
@@ -250,17 +208,23 @@ didFailToConnectPeripheral:(CBPeripheral *)aPeripheral
 {
     for (CBService *aService in aPeripheral.services) {
         NSLog(@"Service found with UUID: %@", aService.UUID);
-        
+
         /* Heart Rate Service */
         if ([aService.UUID isEqual:[CBUUID UUIDWithString:@"180D"]]) {
             [aPeripheral discoverCharacteristics:nil forService:aService];
         }
-        
+
         /* Device Information Service */
         if ([aService.UUID isEqual:[CBUUID UUIDWithString:@"180A"]]) {
             [aPeripheral discoverCharacteristics:nil forService:aService];
         }
         
+        /* Battery Service */
+        if ([aService.UUID isEqual:[CBUUID UUIDWithString:@"180F"]])
+        {
+            [aPeripheral discoverCharacteristics:nil forService:aService];
+        }
+
         /* GAP (Generic Access Profile) for Device Name */
         if ([aService.UUID isEqual:[CBUUID UUIDWithString:CBUUIDGenericAccessProfileString]]) {
             [aPeripheral discoverCharacteristics:nil forService:aService];
@@ -282,13 +246,7 @@ didDiscoverCharacteristicsForService:(CBService *)service
                 [aPeripheral setNotifyValue:YES forCharacteristic:aChar];
                 NSLog(@"Found a Heart Rate Measurement Characteristic");
             }
-            
-            // Read body sensor location
-            if ([aChar.UUID isEqual:[CBUUID UUIDWithString:@"2A38"]]) {
-                [aPeripheral readValueForCharacteristic:aChar];
-                NSLog(@"Found a Body Sensor Location Characteristic");
-            }
-            
+
             // Write heart rate control point
             if ([aChar.UUID isEqual:[CBUUID UUIDWithString:@"2A39"]]) {
                 uint8_t val = 1;
@@ -298,76 +256,18 @@ didDiscoverCharacteristicsForService:(CBService *)service
         }
     }
     
-    if ([service.UUID isEqual:[CBUUID UUIDWithString:CBUUIDGenericAccessProfileString]]) {
-        for (CBCharacteristic *aChar in service.characteristics) {
-            // Read device name
-            if ([aChar.UUID isEqual:[CBUUID UUIDWithString:CBUUIDDeviceNameString]]) {
+    if ([service.UUID isEqual:[CBUUID UUIDWithString:@"180F"]])
+    {
+        for (CBCharacteristic *aChar in service.characteristics)
+        {
+            /* Set notification on battery level measurement */
+            if ([aChar.UUID isEqual:[CBUUID UUIDWithString:@"2A19"]])
+            {
                 [aPeripheral readValueForCharacteristic:aChar];
-                NSLog(@"Found a Device Name Characteristic");
+                NSLog(@"Found a Battery level Characteristic");
             }
         }
     }
-    
-    if ([service.UUID isEqual:[CBUUID UUIDWithString:@"180A"]]) {
-        for (CBCharacteristic *aChar in service.characteristics) {
-            // Read manufacturer name
-            if ([aChar.UUID isEqual:[CBUUID UUIDWithString:@"2A29"]]) {
-                [aPeripheral readValueForCharacteristic:aChar];
-                NSLog(@"Found a Device Manufacturer Name Characteristic");
-            }
-        }
-    }
-}
-
-// Update UI with heart rate data received from device
-- (void) updateWithHRMData:(NSData *)data
-{
-    const uint8_t *reportData = [data bytes];
-    uint16_t rate = 0;
-    // n of byte containing rr
-    int rrByte = 2;
-    if ((reportData[0] & 0x01) == 0)
-    {
-        /* uint8 bpm */
-        rate = reportData[1];
-    }
-    else
-    {
-        /* uint16 bpm */
-        rate = CFSwapInt16LittleToHost(*(uint16_t *)(&reportData[1]));
-        rrByte++;
-    }
-    if ((reportData[0] & 0x04) == 1){
-        // Energy field is present
-        rrByte += 2;
-    }
-    
-    if ((reportData[0] & 0x05) == 0) {
-        NSLog(@"RR intervals aren't present");
-    } else {
-        NSLog(@"RR intervals are present");
-        NSMutableArray* rrs = [NSMutableArray array];
-        uint16_t rr = (CFSwapInt16LittleToHost(*(uint16_t *)(&reportData[rrByte])) * 1000) / 1024;
-        while (rr != 0) {
-            NSLog(@"%@", [NSString stringWithFormat:@"RR: %d", rr]);
-            [rrs addObject:[NSNumber numberWithInt:rr]];
-            rrByte += 2;
-            rr = (CFSwapInt16LittleToHost(*(uint16_t *)(&reportData[rrByte])) * 1000) / 1024;
-        }
-        [RRs addObjectsFromArray:rrs];
-        [RRsToSend addObjectsFromArray:rrs];
-        // Send every 10 intervals to server
-        if ([RRsToSend count] >= 10) {
-            //[self sendRRs:RRsToSend];
-            [ClientServerInteraction upload:login withPassword:password rates:RRsToSend start:(long long)round([startTime timeIntervalSince1970] * 1000) completion:^(NSNumber* response, NSError* error){
-                if (error)
-                    NSLog(@"%@", error.userInfo);
-            }];
-            [RRsToSend removeAllObjects];
-            startTime = [NSDate date];
-        }
-    }
-    heartRateLabel.text = [NSString stringWithFormat:@"%d", rate];
 }
 
 // Invoked upon completion of a -[readValueForCharacteristic:] request
@@ -376,62 +276,27 @@ didDiscoverCharacteristicsForService:(CBService *)service
 didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic
               error:(NSError *)error
 {
-    
-    // Updated value for heart rate measurement received
-    if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:@"2A37"]]) {
-        if(characteristic.value || !error) {
-            NSLog(@"received value: %@", characteristic.value);
-            // Update UI with heart rate data
-            [self updateWithHRMData:characteristic.value];
+    if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:@"2A19"]])
+    {
+        if( (characteristic.value)  || !error )
+        {
+            /* Update UI with heart rate data */
+            //[self updateHRMData:aPeripheral withData:characteristic.value];
+            const uint8_t *reportData = [characteristic.value bytes];
+            int level = reportData[0];
+            self.batteryLevel.hidden = false;
+            self.batteryLevelLabel.hidden = false;
+            [self.batteryLevel setProgress:level / (double) 100];
+            NSLog(@"Battery level: %d", level);
         }
     }
-    // Value for body sensor location received
-    else if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:@"2A38"]]) {
-        NSData * updatedValue = characteristic.value;
-        uint8_t* dataPointer = (uint8_t*)[updatedValue bytes];
-        if (dataPointer) {
-            uint8_t location = dataPointer[0];
-            NSString*  locationString;
-            switch (location) {
-                case 0:
-                    locationString = @"Other";
-                    break;
-                case 1:
-                    locationString = @"Chest";
-                    break;
-                case 2:
-                    locationString = @"Wrist";
-                    break;
-                case 3:
-                    locationString = @"Finger";
-                    break;
-                case 4:
-                    locationString = @"Hand";
-                    break;
-                case 5:
-                    locationString = @"Ear Lobe";
-                    break;
-                case 6:
-                    locationString = @"Foot";
-                    break;
-                default:
-                    locationString = @"Reserved";
-                    break;
-            }
-            NSLog(@"Body Sensor Location = %@ (%d)", locationString, location);
-        }
-    }
-    // Value for device Name received
-    else if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:CBUUIDDeviceNameString]]) {
-        NSString * deviceName = [[NSString alloc] initWithData:characteristic.value
-                                                      encoding:NSUTF8StringEncoding];
-        NSLog(@"Device Name = %@", deviceName);
-    }
-    // Value for manufacturer name received
-    else if ([characteristic.UUID isEqual:[CBUUID UUIDWithString:@"2A29"]]) {
-        NSString *manufacturer = [[NSString alloc] initWithData:characteristic.value
-                                                       encoding:NSUTF8StringEncoding];
-        NSLog(@"Manufacturer Name = %@", manufacturer);
+}
+
+-(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender{
+    if([segue.identifier isEqualToString:@"startSessionSegue"]){
+        NewSessionViewController *detailViewController = (NewSessionViewController *)segue.destinationViewController;
+        detailViewController.connectedPeripheral = self.currentlyConnectedPeripheral;
+        detailViewController.manager = manager;
     }
 }
 

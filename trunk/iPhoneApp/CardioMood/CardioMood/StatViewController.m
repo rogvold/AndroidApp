@@ -10,12 +10,18 @@
 #import "KeychainItemWrapper.h"
 #import <ClientServerInteraction.h>
 #import "SessionDetailViewController.h"
+#import "AppDelegate.h"
 
 @interface StatViewController ()
 
 @end
 
 @implementation StatViewController
+
+@synthesize keychainItem;
+@synthesize username;
+@synthesize password;
+@synthesize token;
 
 - (id)initWithStyle:(UITableViewStyle)style
 {
@@ -26,23 +32,69 @@
     return self;
 }
 
-- (void)viewDidLoad
+- (void)viewDidAppear:(BOOL)animated
 {
-    [super viewDidLoad];
+    [super viewDidAppear:animated];
+    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+    managedObjectContext = appDelegate.managedObjectContext;
+    self.user = (LocalUser *)[NSEntityDescription insertNewObjectForEntityForName:@"LocalUser" inManagedObjectContext:managedObjectContext];
+    keychainItem = [[KeychainItemWrapper alloc] initWithIdentifier:@"CardioMood" accessGroup:nil];
+    password = [keychainItem objectForKey:CFBridgingRelease(kSecValueData)];
+    username = [keychainItem objectForKey:CFBridgingRelease(kSecAttrAccount)];
+    token = [keychainItem objectForKey:CFBridgingRelease(kSecAttrLabel)];
+    [self updateUI];
+    [ClientServerInteraction checkIfServerIsReachable:^(bool response) {
+        if (response)
+        {
+            [ClientServerInteraction getInfo:token completion:^(int code, User *response, NSError *error, ServerResponseError *serverError) {
+                if (code == 1)
+                {
+                    [self.user setUserId:response.userId];
+                    if ([self fetchSessions])
+                    {
+                        [self performSelectorInBackground:@selector(syncLocalData) withObject:nil];
+                        
+                    }
+                }
+                else if (code == 3)
+                {
+                    if (serverError.errorCode == InvalidToken)
+                    {
+                        [ClientServerInteraction authorizeWithEmail:username withPassword:password withDeviceId:[[[UIDevice currentDevice] identifierForVendor] UUIDString] completion:^(int code, AccessToken *response, NSError *error, ServerResponseError *serverError) {
+                            [keychainItem setObject:[response token] forKey:CFBridgingRelease(kSecAttrLabel)];
+                            [ClientServerInteraction getInfo:token completion:^(int code, User *response, NSError *error, ServerResponseError *serverError) {
+                                if (code == 1)
+                                {
+                                    [self.user setUserId:response.userId];
+                                    if ([self fetchSessions])
+                                    {
+                                        [self performSelectorInBackground:@selector(syncLocalData) withObject:nil];
+                                    }
+                                }
+                            }];
+                        }];
+                    }
+                }
+            }];
+        }
+    }];
+}
+
+-(void)updateUI
+{
     [UIApplication sharedApplication].networkActivityIndicatorVisible = YES;
     UIActivityIndicatorView *activityIndicator =
     [[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
     [[self navigationItem] setTitleView:activityIndicator];
     [activityIndicator startAnimating];
-    KeychainItemWrapper *keychainItem = [[KeychainItemWrapper alloc] initWithIdentifier:@"CardioMood" accessGroup:nil];
-    NSString *password = [keychainItem objectForKey:CFBridgingRelease(kSecValueData)];
-    NSString *username = [keychainItem objectForKey:CFBridgingRelease(kSecAttrAccount)];
-    NSString *token = [keychainItem objectForKey:CFBridgingRelease(kSecAttrLabel)];
+    token = [keychainItem objectForKey:CFBridgingRelease(kSecAttrLabel)];
     [ClientServerInteraction getAllSessions:token completion:^(int code, NSArray *response, NSError *error, ServerResponseError *serverError) {
         if (code == 1)
         {
             sessions = response;
+            [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
             [activityIndicator stopAnimating];
+            [[self navigationItem] setTitleView:nil];
             [self.tableView reloadData];
         }
         else if (code == 3)
@@ -55,7 +107,9 @@
                         if (code == 1)
                         {
                             sessions = response;
+                            [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
                             [activityIndicator stopAnimating];
+                            [[self navigationItem] setTitleView:nil];
                             [self.tableView reloadData];
                         }
                     }];
@@ -63,6 +117,7 @@
             }
         }
     }];
+
 }
 
 - (void)didReceiveMemoryWarning
@@ -153,6 +208,83 @@
     SessionDetailViewController *detailViewController = [[SessionDetailViewController alloc] initWithStyle:UITableViewStyleGrouped];
     detailViewController.session = sessions[indexPath.row];
     [self.navigationController pushViewController:detailViewController animated:YES];
+}
+
+- (BOOL)fetchSessions
+{
+    // Define our table/entity to use
+    NSEntityDescription *entity = [NSEntityDescription entityForName:@"LocalSession" inManagedObjectContext:managedObjectContext];
+    // Setup the fetch request
+    NSFetchRequest *request = [[NSFetchRequest alloc] init];
+    [request setEntity:entity];
+    // Fetch the records and handle an error
+    NSError *error;
+    NSMutableArray *mutableFetchResults = [[managedObjectContext executeFetchRequest:request error:&error] mutableCopy];
+    if (!mutableFetchResults) {
+        // Handle the error.
+        // This is a serious error and should advise the user to restart the application
+    }
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"self.user.userId == %@", self.user.userId];
+    NSArray *fetchResults = [mutableFetchResults filteredArrayUsingPredicate:predicate];
+    // Save our fetched data to an array
+    [self setLocalUserSessions: fetchResults];
+    if ([fetchResults count] > 0)
+    {
+        return YES;
+    }
+    else
+    {
+        return NO;
+    }
+}
+
+-(void)syncLocalData
+{
+    for (LocalSession *session in self.localUserSessions)
+    {
+        token = [keychainItem objectForKey:CFBridgingRelease(kSecAttrLabel)];
+        [ClientServerInteraction syncRates:[session.rates componentsSeparatedByString:@","] start:[NSNumber numberWithLongLong:(long long)[session.startTime timeIntervalSince1970] * 1000] create:[NSNumber numberWithInt:1] token:token completion:^(int code, NSNumber *response, NSError *error, ServerResponseError *serverError) {
+            if (code == 1)
+            {
+                [managedObjectContext deleteObject:session];
+                NSError *error;
+                @synchronized(self.managedObjectContext)
+                {
+                    if(![self.managedObjectContext save:&error]){
+                        //This is a serious error saying the record
+                        //could not be saved. Advise the user to
+                        //try again or restart the application.
+                    }
+                }
+                [self updateUI];
+            }
+            else if (code == 3)
+            {
+                if (serverError.errorCode == InvalidToken)
+                {
+                    [ClientServerInteraction authorizeWithEmail:username withPassword:password withDeviceId:[[[UIDevice currentDevice] identifierForVendor] UUIDString] completion:^(int code, AccessToken *response, NSError *error, ServerResponseError *serverError) {
+                        [keychainItem setObject:[response token] forKey:CFBridgingRelease(kSecAttrLabel)];
+                        [ClientServerInteraction syncRates:[session.rates componentsSeparatedByString:@","] start:[NSNumber numberWithLongLong:(long long)[session.startTime timeIntervalSince1970] * 1000] create:[NSNumber numberWithInt:1] token:token completion:^(int code, NSNumber *response, NSError *error, ServerResponseError *serverError) {
+                            if (code == 1)
+                            {
+                                [managedObjectContext deleteObject:session];
+                                NSError *error;
+                                @synchronized(self.managedObjectContext)
+                                {
+                                    if(![self.managedObjectContext save:&error]){
+                                        //This is a serious error saying the record
+                                        //could not be saved. Advise the user to
+                                        //try again or restart the application.
+                                    }
+                                }
+                                [self updateUI];
+                            }
+                        }];
+                    }];
+                }
+            }
+        }];
+    }
 }
 
 @end

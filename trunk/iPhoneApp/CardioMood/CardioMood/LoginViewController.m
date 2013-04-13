@@ -152,37 +152,15 @@
                             [self.keychainItem setObject:self.passwordField.text forKey:CFBridgingRelease(kSecValueData)];
                             [self.keychainItem setObject:self.usernameField.text forKey:CFBridgingRelease(kSecAttrAccount)];
                             [self.keychainItem setObject:[response token] forKey:CFBridgingRelease(kSecAttrLabel)];
+                            [ClientServerInteraction getInfo:[response token] completion:^(int code, User *response, NSError *error, ServerResponseError *serverError) {
+                                [self.keychainItem setObject:[response userId] forKey:CFBridgingRelease(kSecAttrComment)];
+                            }];
                             [self performSegueWithIdentifier:@"signInSegue" sender:self];
                         }];
                     }
                 }];
             }
         }];
-        /*[ClientServerInteraction validateEmail:self.usernameField.text completion:^(NSNumber *response, NSError *error) {
-            if ([response intValue] == 1)
-            {
-                [ClientServerInteraction checkData:self.usernameField.text withPassword:self.passwordField.text completion:^(NSNumber *response, NSError *error) {
-                    if ([response intValue] == 1)
-                    {
-                        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-                        [self.keychainItem resetKeychainItem];
-                        [self.keychainItem setObject:self.passwordField.text forKey:CFBridgingRelease(kSecValueData)];
-                        [self.keychainItem setObject:self.usernameField.text forKey:CFBridgingRelease(kSecAttrAccount)];
-                        [self performSegueWithIdentifier:@"signInSegue" sender:self];
-                    }
-                    else
-                    {
-                        [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-                        
-                    }
-                }];
-            }
-            else
-            {
-                [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-                
-            }
-        }];*/
     }
 }
 

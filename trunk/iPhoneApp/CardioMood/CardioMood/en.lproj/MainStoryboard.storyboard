@@ -4,7 +4,7 @@
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="2083"/>
     </dependencies>
     <scenes>
-        <!--Device View Controller - New record-->
+        <!--Device View Controller - Select sensor-->
         <scene sceneID="co1-wm-Gmk">
             <objects>
                 <viewController id="Rmj-hP-rHd" customClass="DeviceViewController" sceneMemberID="viewController">
@@ -15,7 +15,7 @@
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" rowHeight="44" sectionHeaderHeight="22" sectionFooterHeight="22" translatesAutoresizingMaskIntoConstraints="NO" id="lxG-fK-YbR">
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="168" id="gSK-ca-xMj"/>
+                                    <constraint firstAttribute="height" constant="248" id="L8n-m0-YMu"/>
                                 </constraints>
                                 <prototypes>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="kSensorCell" id="LeO-tv-3Og">
@@ -33,69 +33,119 @@
                                     <outlet property="delegate" destination="Rmj-hP-rHd" id="mEn-cX-Rmn"/>
                                 </connections>
                             </tableView>
-                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="bpm" textAlignment="center" lineBreakMode="tailTruncation" minimumFontSize="10" enabled="NO" translatesAutoresizingMaskIntoConstraints="NO" id="bcZ-YV-SOJ">
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Tap a discovered sensor to connect." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" minimumFontSize="10" preferredMaxLayoutWidth="283" translatesAutoresizingMaskIntoConstraints="NO" id="Jne-cV-2TW">
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="37" id="7w0-Nc-eYI"/>
-                                    <constraint firstAttribute="width" constant="133" id="wtr-G7-Lic"/>
+                                    <constraint firstAttribute="height" constant="34" id="Xxw-74-WUp"/>
+                                    <constraint firstAttribute="width" constant="283" id="rRP-lu-aIr"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <label hidden="YES" opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Battery level" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="5pm-lZ-OMm">
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="113" id="Qcp-8V-v2n"/>
+                                    <constraint firstAttribute="height" constant="21" id="zpb-Fx-QUL"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="Helvetica" family="Helvetica" pointSize="14"/>
+                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <progressView hidden="YES" opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gl1-q6-TUC">
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="150" id="Olx-sx-5Wi"/>
+                                </constraints>
+                            </progressView>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="gl1-q6-TUC" firstAttribute="centerY" secondItem="5pm-lZ-OMm" secondAttribute="centerY" type="default" id="7mB-ZQ-uHA"/>
+                            <constraint firstItem="lxG-fK-YbR" firstAttribute="leading" secondItem="mwk-gH-eQ9" secondAttribute="leading" type="default" id="S9e-LY-Mrh"/>
+                            <constraint firstItem="5pm-lZ-OMm" firstAttribute="top" secondItem="lxG-fK-YbR" secondAttribute="bottom" constant="8" symbolic="YES" type="default" id="U0P-Ti-iX0"/>
+                            <constraint firstAttribute="trailing" secondItem="Jne-cV-2TW" secondAttribute="trailing" constant="20" symbolic="YES" type="default" id="XSU-he-FvC"/>
+                            <constraint firstItem="lxG-fK-YbR" firstAttribute="top" secondItem="mwk-gH-eQ9" secondAttribute="top" type="default" id="dRh-nn-tY5"/>
+                            <constraint firstAttribute="bottom" secondItem="Jne-cV-2TW" secondAttribute="bottom" constant="39" id="eOy-bX-Sis"/>
+                            <constraint firstItem="5pm-lZ-OMm" firstAttribute="leading" secondItem="mwk-gH-eQ9" secondAttribute="leading" constant="20" symbolic="YES" type="default" id="g31-Uj-PLu"/>
+                            <constraint firstAttribute="trailing" secondItem="gl1-q6-TUC" secondAttribute="trailing" constant="20" symbolic="YES" type="default" id="sDw-MJ-lkj"/>
+                            <constraint firstItem="lxG-fK-YbR" firstAttribute="trailing" secondItem="mwk-gH-eQ9" secondAttribute="trailing" type="default" id="xlr-tm-IcT"/>
+                        </constraints>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="New record" image="new" id="aFG-13-abu"/>
+                    <navigationItem key="navigationItem" title="Select sensor" id="pkb-2w-gq5">
+                        <barButtonItem key="backBarButtonItem" title="Cancel" id="xPP-r1-FFu"/>
+                        <barButtonItem key="rightBarButtonItem" enabled="NO" title="Start" id="kyB-6l-f1s">
+                            <color key="tintColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                            <connections>
+                                <segue destination="D3f-T1-NQ8" kind="push" identifier="startSessionSegue" id="qyU-4L-ELj"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <simulatedScreenMetrics key="simulatedDestinationMetrics"/>
+                    <connections>
+                        <outlet property="batteryLevel" destination="gl1-q6-TUC" id="mbW-KC-zT7"/>
+                        <outlet property="batteryLevelLabel" destination="5pm-lZ-OMm" id="VQz-Ll-mb9"/>
+                        <outlet property="sensorsTable" destination="lxG-fK-YbR" id="46i-LQ-gIy"/>
+                        <outlet property="startButton" destination="kyB-6l-f1s" id="fsc-Yb-jx3"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="vMJ-WF-k4u" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-2143" y="-4736"/>
+        </scene>
+        <!--New Session View Controller - New record-->
+        <scene sceneID="UWk-in-nSd">
+            <objects>
+                <viewController id="D3f-T1-NQ8" customClass="NewSessionViewController" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="dgF-LS-Mok">
+                        <rect key="frame" x="0.0" y="64" width="320" height="367"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                        <subviews>
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="bpm" textAlignment="center" lineBreakMode="tailTruncation" minimumFontSize="10" translatesAutoresizingMaskIntoConstraints="NO" id="YzN-sg-Rke">
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="133" id="5Y3-1h-exS"/>
+                                    <constraint firstAttribute="height" constant="37" id="69S-dA-3zz"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="25"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="0" textAlignment="center" lineBreakMode="tailTruncation" minimumFontSize="10" enabled="NO" translatesAutoresizingMaskIntoConstraints="NO" id="AQd-xd-DBT">
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="0" textAlignment="center" lineBreakMode="tailTruncation" minimumFontSize="10" translatesAutoresizingMaskIntoConstraints="NO" id="I8l-4a-uZb">
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="280" id="pRL-5M-KFb"/>
+                                    <constraint firstAttribute="width" constant="280" id="3uy-JL-44K"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="80"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="No Connected Device" textAlignment="center" lineBreakMode="tailTruncation" minimumFontSize="10" enabled="NO" translatesAutoresizingMaskIntoConstraints="NO" id="HAs-oO-EEG">
-                                <fontDescription key="fontDescription" type="boldSystem" pointSize="26"/>
-                                <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="Tap a discovered sensor to start recording." textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" minimumFontSize="10" preferredMaxLayoutWidth="280" translatesAutoresizingMaskIntoConstraints="NO" id="Jne-cV-2TW">
+                            <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" text="" textAlignment="center" lineBreakMode="tailTruncation" minimumFontSize="10" translatesAutoresizingMaskIntoConstraints="NO" id="goM-Pp-9bF">
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="34" id="Xxw-74-WUp"/>
+                                    <constraint firstAttribute="height" constant="31" id="qIq-aW-sTp"/>
                                 </constraints>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="26"/>
                                 <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstAttribute="trailing" secondItem="bcZ-YV-SOJ" secondAttribute="trailing" constant="20" symbolic="YES" type="default" id="Ebz-4n-Lf8"/>
-                            <constraint firstAttribute="trailing" secondItem="Jne-cV-2TW" secondAttribute="trailing" constant="20" symbolic="YES" type="default" id="Juw-p1-ENe"/>
-                            <constraint firstItem="Jne-cV-2TW" firstAttribute="leading" secondItem="mwk-gH-eQ9" secondAttribute="leading" constant="20" symbolic="YES" type="default" id="OuO-bq-DMe"/>
-                            <constraint firstItem="lxG-fK-YbR" firstAttribute="leading" secondItem="mwk-gH-eQ9" secondAttribute="leading" type="default" id="S9e-LY-Mrh"/>
-                            <constraint firstAttribute="trailing" secondItem="HAs-oO-EEG" secondAttribute="trailing" constant="20" symbolic="YES" type="default" id="Xrc-pM-Jpp"/>
-                            <constraint firstItem="AQd-xd-DBT" firstAttribute="leading" secondItem="mwk-gH-eQ9" secondAttribute="leading" type="default" id="Yvi-Q6-13q"/>
-                            <constraint firstItem="Jne-cV-2TW" firstAttribute="top" secondItem="AQd-xd-DBT" secondAttribute="bottom" constant="8" symbolic="YES" type="default" id="cqC-vE-gsA"/>
-                            <constraint firstItem="bcZ-YV-SOJ" firstAttribute="centerY" secondItem="AQd-xd-DBT" secondAttribute="centerY" type="default" id="hdo-mB-8lo"/>
-                            <constraint firstItem="AQd-xd-DBT" firstAttribute="top" secondItem="HAs-oO-EEG" secondAttribute="bottom" constant="8" symbolic="YES" type="default" id="oHD-le-KL4"/>
-                            <constraint firstItem="HAs-oO-EEG" firstAttribute="leading" secondItem="mwk-gH-eQ9" secondAttribute="leading" constant="20" symbolic="YES" type="default" id="ptH-Dc-9Cs"/>
-                            <constraint firstItem="lxG-fK-YbR" firstAttribute="top" secondItem="Jne-cV-2TW" secondAttribute="bottom" constant="8" symbolic="YES" type="default" id="sla-AE-eJL"/>
-                            <constraint firstItem="lxG-fK-YbR" firstAttribute="bottom" secondItem="mwk-gH-eQ9" secondAttribute="bottom" type="default" id="uEn-rF-ktU"/>
-                            <constraint firstItem="lxG-fK-YbR" firstAttribute="trailing" secondItem="mwk-gH-eQ9" secondAttribute="trailing" type="default" id="xlr-tm-IcT"/>
+                            <constraint firstItem="I8l-4a-uZb" firstAttribute="centerY" secondItem="YzN-sg-Rke" secondAttribute="centerY" type="default" id="3OV-KB-Xyc"/>
+                            <constraint firstAttribute="trailing" secondItem="goM-Pp-9bF" secondAttribute="trailing" constant="20" symbolic="YES" type="default" id="9nt-YM-oMB"/>
+                            <constraint firstAttribute="trailing" secondItem="YzN-sg-Rke" secondAttribute="trailing" constant="10" id="Cxo-7b-cqf"/>
+                            <constraint firstItem="goM-Pp-9bF" firstAttribute="top" secondItem="dgF-LS-Mok" secondAttribute="top" constant="20" symbolic="YES" type="default" id="UHJ-rC-ZaL"/>
+                            <constraint firstItem="goM-Pp-9bF" firstAttribute="leading" secondItem="dgF-LS-Mok" secondAttribute="leading" constant="20" symbolic="YES" type="default" id="Wu7-YB-2gO"/>
+                            <constraint firstItem="I8l-4a-uZb" firstAttribute="leading" secondItem="dgF-LS-Mok" secondAttribute="leading" type="default" id="imv-9U-QIt"/>
+                            <constraint firstItem="I8l-4a-uZb" firstAttribute="top" secondItem="goM-Pp-9bF" secondAttribute="bottom" constant="8" symbolic="YES" type="default" id="zL3-ef-3Dp"/>
                         </constraints>
                     </view>
-                    <tabBarItem key="tabBarItem" title="New record" image="new" id="aFG-13-abu"/>
-                    <navigationItem key="navigationItem" title="New record" id="pkb-2w-gq5">
-                        <barButtonItem key="rightBarButtonItem" systemItem="save" id="kyB-6l-f1s"/>
-                    </navigationItem>
-                    <simulatedScreenMetrics key="simulatedDestinationMetrics"/>
+                    <navigationItem key="navigationItem" title="New record" id="Kv5-VH-XHl"/>
                     <connections>
-                        <outlet property="bpm" destination="bcZ-YV-SOJ" id="gXx-Y6-DRV"/>
-                        <outlet property="connectedMonitor" destination="HAs-oO-EEG" id="9Xu-4v-F2N"/>
-                        <outlet property="heartRateLabel" destination="AQd-xd-DBT" id="vPL-fw-y4u"/>
-                        <outlet property="sensorsTable" destination="lxG-fK-YbR" id="46i-LQ-gIy"/>
+                        <outlet property="connectedDeviceLabel" destination="goM-Pp-9bF" id="Lii-Q8-NmO"/>
+                        <outlet property="heartRateLabel" destination="I8l-4a-uZb" id="knn-gJ-B0d"/>
                     </connections>
                 </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="vMJ-WF-k4u" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="TcI-f0-8YU" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-2143" y="-4736"/>
+            <point key="canvasLocation" x="-1734" y="-4773"/>
         </scene>
         <!--Navigation Controller - Information-->
         <scene sceneID="yem-Dd-4b1">
@@ -415,10 +465,12 @@
                             <outlet property="delegate" destination="bDJ-2u-cQT" id="YUZ-gi-cLb"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" title="Statistics" id="FNj-7h-R8F"/>
+                    <navigationItem key="navigationItem" title="Statistics" id="FNj-7h-R8F">
+                        <barButtonItem key="rightBarButtonItem" systemItem="refresh" id="82P-NT-34g"/>
+                    </navigationItem>
                     <simulatedScreenMetrics key="simulatedDestinationMetrics"/>
                     <connections>
-                        <segue destination="dtr-CE-qPV" kind="push" id="dMb-n4-Ilw"/>
+                        <segue destination="dtr-CE-qPV" kind="push" identifier="" id="dMb-n4-Ilw"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ita-t8-qEf" userLabel="First Responder" sceneMemberID="firstResponder"/>
@@ -473,10 +525,10 @@
         <class className="DeviceViewController" superclassName="UIViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/DeviceViewController.h"/>
             <relationships>
-                <relationship kind="outlet" name="bpm" candidateClass="UILabel"/>
-                <relationship kind="outlet" name="connectedMonitor" candidateClass="UILabel"/>
-                <relationship kind="outlet" name="heartRateLabel" candidateClass="UILabel"/>
+                <relationship kind="outlet" name="batteryLevel" candidateClass="UIProgressView"/>
+                <relationship kind="outlet" name="batteryLevelLabel" candidateClass="UILabel"/>
                 <relationship kind="outlet" name="sensorsTable" candidateClass="UITableView"/>
+                <relationship kind="outlet" name="startButton" candidateClass="UIBarButtonItem"/>
             </relationships>
         </class>
         <class className="InfoViewController" superclassName="UIViewController">
@@ -499,11 +551,15 @@
         <class className="NSLayoutConstraint" superclassName="NSObject">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/NSLayoutConstraint.h"/>
         </class>
+        <class className="NewSessionViewController" superclassName="UIViewController">
+            <source key="sourceIdentifier" type="project" relativePath="./Classes/NewSessionViewController.h"/>
+            <relationships>
+                <relationship kind="outlet" name="connectedDeviceLabel" candidateClass="UILabel"/>
+                <relationship kind="outlet" name="heartRateLabel" candidateClass="UILabel"/>
+            </relationships>
+        </class>
         <class className="RegisterViewController" superclassName="SettingsPageViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/RegisterViewController.h"/>
-            <relationships>
-                <relationship kind="action" name="saveButtonPressed:"/>
-            </relationships>
         </class>
         <class className="SessionDetailViewController" superclassName="UITableViewController">
             <source key="sourceIdentifier" type="project" relativePath="./Classes/SessionDetailViewController.h"/>

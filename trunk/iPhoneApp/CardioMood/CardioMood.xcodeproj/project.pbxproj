@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FA2786A5171836090034AAE1 /* libsqlite3.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = FA2786A4171836090034AAE1 /* libsqlite3.0.dylib */; };
+		FA2786AC1718393B0034AAE1 /* LocalStorage.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = FA2786AA1718393B0034AAE1 /* LocalStorage.xcdatamodeld */; };
+		FA27876417184EFC0034AAE1 /* LocalSession.m in Sources */ = {isa = PBXBuildFile; fileRef = FA27876317184EFC0034AAE1 /* LocalSession.m */; };
+		FA27876717184EFC0034AAE1 /* LocalUser.m in Sources */ = {isa = PBXBuildFile; fileRef = FA27876617184EFC0034AAE1 /* LocalUser.m */; };
+		FA2DB94E1711881B00A9EE3F /* NewSessionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FA2DB94D1711881B00A9EE3F /* NewSessionViewController.m */; };
 		FA4F915817074B7E006FF8D8 /* Icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FA4F915717074B7E006FF8D8 /* Icon@2x.png */; };
 		FA4F915A17074B83006FF8D8 /* Icon.png in Resources */ = {isa = PBXBuildFile; fileRef = FA4F915917074B83006FF8D8 /* Icon.png */; };
 		FA4F915C17084229006FF8D8 /* stat@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = FA4F915B17084229006FF8D8 /* stat@2x.png */; };
@@ -62,6 +67,14 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		FA2786A4171836090034AAE1 /* libsqlite3.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsqlite3.0.dylib; path = usr/lib/libsqlite3.0.dylib; sourceTree = SDKROOT; };
+		FA2786AB1718393B0034AAE1 /* LocalStorage.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = LocalStorage.xcdatamodel; sourceTree = "<group>"; };
+		FA27876217184EFC0034AAE1 /* LocalSession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocalSession.h; sourceTree = "<group>"; };
+		FA27876317184EFC0034AAE1 /* LocalSession.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocalSession.m; sourceTree = "<group>"; };
+		FA27876517184EFC0034AAE1 /* LocalUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocalUser.h; sourceTree = "<group>"; };
+		FA27876617184EFC0034AAE1 /* LocalUser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocalUser.m; sourceTree = "<group>"; };
+		FA2DB94C1711881B00A9EE3F /* NewSessionViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NewSessionViewController.h; sourceTree = "<group>"; };
+		FA2DB94D1711881B00A9EE3F /* NewSessionViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NewSessionViewController.m; sourceTree = "<group>"; };
 		FA4F915717074B7E006FF8D8 /* Icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon@2x.png"; path = "../Icon@2x.png"; sourceTree = "<group>"; };
 		FA4F915917074B83006FF8D8 /* Icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Icon.png; path = ../Icon.png; sourceTree = "<group>"; };
 		FA4F915B17084229006FF8D8 /* stat@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "stat@2x.png"; sourceTree = "<group>"; };
@@ -102,7 +115,6 @@
 		FAD96296171024F800771813 /* InfoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InfoViewController.m; sourceTree = "<group>"; };
 		FAD96299171070DE00771813 /* RegisterViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RegisterViewController.h; sourceTree = "<group>"; };
 		FAD9629A171070DE00771813 /* RegisterViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RegisterViewController.m; sourceTree = "<group>"; };
-		FAD962A0171073D700771813 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
 		FAD962A31710D4B500771813 /* StatViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StatViewController.h; sourceTree = "<group>"; };
 		FAD962A41710D4B500771813 /* StatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StatViewController.m; sourceTree = "<group>"; };
 		FAE1C870167E3941004F927B /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
@@ -120,8 +132,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FAFD2B1117099682005DF533 /* CFNetwork.framework in Frameworks */,
 				FAFD2B0F17099678005DF533 /* CoreData.framework in Frameworks */,
+				FA2786A5171836090034AAE1 /* libsqlite3.0.dylib in Frameworks */,
+				FAFD2B1117099682005DF533 /* CFNetwork.framework in Frameworks */,
 				FAE1C871167E3941004F927B /* Security.framework in Frameworks */,
 				FAFD2B0D17099630005DF533 /* SystemConfiguration.framework in Frameworks */,
 				FAFD2B0B17099623005DF533 /* MobileCoreServices.framework in Frameworks */,
@@ -137,6 +150,26 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		FA278734171840460034AAE1 /* ManagedObjects */ = {
+			isa = PBXGroup;
+			children = (
+				FA27876517184EFC0034AAE1 /* LocalUser.h */,
+				FA27876617184EFC0034AAE1 /* LocalUser.m */,
+				FA27876217184EFC0034AAE1 /* LocalSession.h */,
+				FA27876317184EFC0034AAE1 /* LocalSession.m */,
+			);
+			name = ManagedObjects;
+			sourceTree = "<group>";
+		};
+		FA2DB9511711D02D00A9EE3F /* NewSessionViewController */ = {
+			isa = PBXGroup;
+			children = (
+				FA2DB94C1711881B00A9EE3F /* NewSessionViewController.h */,
+				FA2DB94D1711881B00A9EE3F /* NewSessionViewController.m */,
+			);
+			name = NewSessionViewController;
+			sourceTree = "<group>";
+		};
 		FAA9199A17074AB900999FCB /* CardioMood */ = {
 			isa = PBXGroup;
 			children = (
@@ -153,6 +186,9 @@
 				FAF406551711704500478DF4 /* RegisterViewController */,
 				FAF406561711705B00478DF4 /* StatViewController */,
 				FAF406571711706700478DF4 /* SessionDetailViewController */,
+				FA2DB9511711D02D00A9EE3F /* NewSessionViewController */,
+				FA2786AA1718393B0034AAE1 /* LocalStorage.xcdatamodeld */,
+				FA278734171840460034AAE1 /* ManagedObjects */,
 			);
 			path = CardioMood;
 			sourceTree = "<group>";
@@ -208,7 +244,7 @@
 		FACB18F81621844300BF2D66 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				FAD962A0171073D700771813 /* CoreTelephony.framework */,
+				FA2786A4171836090034AAE1 /* libsqlite3.0.dylib */,
 				FAFD2B1017099682005DF533 /* CFNetwork.framework */,
 				FAFD2B0E17099678005DF533 /* CoreData.framework */,
 				FAFD2B0C17099630005DF533 /* SystemConfiguration.framework */,
@@ -425,6 +461,10 @@
 				FAD9629D171070DF00771813 /* RegisterViewController.m in Sources */,
 				FAD962A51710D4B500771813 /* StatViewController.m in Sources */,
 				FAF4064E1710DA8C00478DF4 /* SessionDetailViewController.m in Sources */,
+				FA2DB94E1711881B00A9EE3F /* NewSessionViewController.m in Sources */,
+				FA2786AC1718393B0034AAE1 /* LocalStorage.xcdatamodeld in Sources */,
+				FA27876417184EFC0034AAE1 /* LocalSession.m in Sources */,
+				FA27876717184EFC0034AAE1 /* LocalUser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -590,6 +630,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		FA2786AA1718393B0034AAE1 /* LocalStorage.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				FA2786AB1718393B0034AAE1 /* LocalStorage.xcdatamodel */,
+			);
+			currentVersion = FA2786AB1718393B0034AAE1 /* LocalStorage.xcdatamodel */;
+			path = LocalStorage.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = FACB18EC1621844300BF2D66 /* Project object */;
 }
