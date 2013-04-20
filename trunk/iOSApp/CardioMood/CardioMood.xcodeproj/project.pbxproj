@@ -7,6 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5B00E8F01722C76900BCED95 /* ConnectingDeviceViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B00E8EF1722C76900BCED95 /* ConnectingDeviceViewController.m */; };
+		5B00E8F41722C83100BCED95 /* omnihealthlogo.png in Resources */ = {isa = PBXBuildFile; fileRef = 5B00E8F31722C83100BCED95 /* omnihealthlogo.png */; };
+		5B00E8F71722CE7500BCED95 /* NewSessionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B00E8F61722CE7500BCED95 /* NewSessionViewController.m */; };
+		5B00E8FA1722D4CD00BCED95 /* HistoryViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B00E8F91722D4CD00BCED95 /* HistoryViewController.m */; };
+		5B00E8FD1722D51D00BCED95 /* InfoViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B00E8FC1722D51D00BCED95 /* InfoViewController.m */; };
+		5B00E9001722D79900BCED95 /* SessionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5B00E8FF1722D79900BCED95 /* SessionViewController.m */; };
+		5BE3A1ED1722AEF200AE9937 /* RecentSessionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5BE3A1EC1722AEF200AE9937 /* RecentSessionViewController.m */; };
 		FAE11F3E1721869100374D47 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAE11F3D1721869100374D47 /* UIKit.framework */; };
 		FAE11F401721869100374D47 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAE11F3F1721869100374D47 /* Foundation.framework */; };
 		FAE11F421721869100374D47 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FAE11F411721869100374D47 /* CoreGraphics.framework */; };
@@ -31,6 +38,19 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		5B00E8EE1722C76900BCED95 /* ConnectingDeviceViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ConnectingDeviceViewController.h; path = ViewControllers/ConnectingDeviceViewController.h; sourceTree = "<group>"; };
+		5B00E8EF1722C76900BCED95 /* ConnectingDeviceViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ConnectingDeviceViewController.m; path = ViewControllers/ConnectingDeviceViewController.m; sourceTree = "<group>"; };
+		5B00E8F31722C83100BCED95 /* omnihealthlogo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = omnihealthlogo.png; sourceTree = "<group>"; };
+		5B00E8F51722CE7500BCED95 /* NewSessionViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = NewSessionViewController.h; path = ViewControllers/NewSessionViewController.h; sourceTree = "<group>"; };
+		5B00E8F61722CE7500BCED95 /* NewSessionViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = NewSessionViewController.m; path = ViewControllers/NewSessionViewController.m; sourceTree = "<group>"; };
+		5B00E8F81722D4CD00BCED95 /* HistoryViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HistoryViewController.h; path = ViewControllers/HistoryViewController.h; sourceTree = "<group>"; };
+		5B00E8F91722D4CD00BCED95 /* HistoryViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = HistoryViewController.m; path = ViewControllers/HistoryViewController.m; sourceTree = "<group>"; };
+		5B00E8FB1722D51D00BCED95 /* InfoViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InfoViewController.h; path = ViewControllers/InfoViewController.h; sourceTree = "<group>"; };
+		5B00E8FC1722D51D00BCED95 /* InfoViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = InfoViewController.m; path = ViewControllers/InfoViewController.m; sourceTree = "<group>"; };
+		5B00E8FE1722D79900BCED95 /* SessionViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SessionViewController.h; path = ViewControllers/SessionViewController.h; sourceTree = "<group>"; };
+		5B00E8FF1722D79900BCED95 /* SessionViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SessionViewController.m; path = ViewControllers/SessionViewController.m; sourceTree = "<group>"; };
+		5BE3A1EB1722AEF200AE9937 /* RecentSessionViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RecentSessionViewController.h; path = ViewControllers/RecentSessionViewController.h; sourceTree = "<group>"; };
+		5BE3A1EC1722AEF200AE9937 /* RecentSessionViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RecentSessionViewController.m; path = ViewControllers/RecentSessionViewController.m; sourceTree = "<group>"; };
 		FAE11F3A1721869100374D47 /* CardioMood.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CardioMood.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FAE11F3D1721869100374D47 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		FAE11F3F1721869100374D47 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -63,6 +83,33 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5B00E8F21722C81500BCED95 /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				5B00E8F31722C83100BCED95 /* omnihealthlogo.png */,
+			);
+			name = Images;
+			sourceTree = "<group>";
+		};
+		5BE3A1EF1722AF0100AE9937 /* ViewControllers */ = {
+			isa = PBXGroup;
+			children = (
+				5BE3A1EB1722AEF200AE9937 /* RecentSessionViewController.h */,
+				5BE3A1EC1722AEF200AE9937 /* RecentSessionViewController.m */,
+				5B00E8EE1722C76900BCED95 /* ConnectingDeviceViewController.h */,
+				5B00E8EF1722C76900BCED95 /* ConnectingDeviceViewController.m */,
+				5B00E8F51722CE7500BCED95 /* NewSessionViewController.h */,
+				5B00E8F61722CE7500BCED95 /* NewSessionViewController.m */,
+				5B00E8F81722D4CD00BCED95 /* HistoryViewController.h */,
+				5B00E8F91722D4CD00BCED95 /* HistoryViewController.m */,
+				5B00E8FB1722D51D00BCED95 /* InfoViewController.h */,
+				5B00E8FC1722D51D00BCED95 /* InfoViewController.m */,
+				5B00E8FE1722D79900BCED95 /* SessionViewController.h */,
+				5B00E8FF1722D79900BCED95 /* SessionViewController.m */,
+			);
+			name = ViewControllers;
+			sourceTree = "<group>";
+		};
 		FAE11F311721869100374D47 = {
 			isa = PBXGroup;
 			children = (
@@ -94,6 +141,7 @@
 		FAE11F431721869100374D47 /* CardioMood */ = {
 			isa = PBXGroup;
 			children = (
+				5BE3A1EF1722AF0100AE9937 /* ViewControllers */,
 				FAE11F4C1721869100374D47 /* CMAppDelegate.h */,
 				FAE11F4D1721869100374D47 /* CMAppDelegate.m */,
 				FAE11F551721869100374D47 /* MainStoryboard_iPhone.storyboard */,
@@ -106,6 +154,7 @@
 		FAE11F441721869100374D47 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				5B00E8F21722C81500BCED95 /* Images */,
 				FAE11F451721869100374D47 /* CardioMood-Info.plist */,
 				FAE11F461721869100374D47 /* InfoPlist.strings */,
 				FAE11F491721869100374D47 /* main.m */,
@@ -199,6 +248,7 @@
 				FAE11F541721869100374D47 /* Default-568h@2x.png in Resources */,
 				FAE11F571721869200374D47 /* MainStoryboard_iPhone.storyboard in Resources */,
 				FAE11F5A1721869200374D47 /* MainStoryboard_iPad.storyboard in Resources */,
+				5B00E8F41722C83100BCED95 /* omnihealthlogo.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -211,6 +261,12 @@
 			files = (
 				FAE11F4A1721869100374D47 /* main.m in Sources */,
 				FAE11F4E1721869100374D47 /* CMAppDelegate.m in Sources */,
+				5BE3A1ED1722AEF200AE9937 /* RecentSessionViewController.m in Sources */,
+				5B00E8F01722C76900BCED95 /* ConnectingDeviceViewController.m in Sources */,
+				5B00E8F71722CE7500BCED95 /* NewSessionViewController.m in Sources */,
+				5B00E8FA1722D4CD00BCED95 /* HistoryViewController.m in Sources */,
+				5B00E8FD1722D51D00BCED95 /* InfoViewController.m in Sources */,
+				5B00E9001722D79900BCED95 /* SessionViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -314,6 +370,7 @@
 					"-ObjC",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos6.1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Debug;
@@ -330,6 +387,7 @@
 					"-ObjC",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos6.1;
 				WRAPPER_EXTENSION = app;
 			};
 			name = Release;
@@ -353,6 +411,7 @@
 				FAE11F6D1721869200374D47 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "FAE11F391721869100374D47"
-               BuildableName = "CardioMood.app"
-               BlueprintName = "CardioMood"
-               ReferencedContainer = "container:CardioMood.xcodeproj">
+               BlueprintIdentifier = "FA6AC5DB17098631008C60F6"
+               BuildableName = "libClientServerInteraction.iOS.a"
+               BlueprintName = "ClientServerInteraction.iOS"
+               ReferencedContainer = "container:ClientServerInteraction.iOS.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -29,15 +29,6 @@
       buildConfiguration = "Debug">
       <Testables>
       </Testables>
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "FAE11F391721869100374D47"
-            BuildableName = "CardioMood.app"
-            BlueprintName = "CardioMood"
-            ReferencedContainer = "container:CardioMood.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
    </TestAction>
    <LaunchAction
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
@@ -48,15 +39,6 @@
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       allowLocationSimulation = "YES">
-      <BuildableProductRunnable>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "FAE11F391721869100374D47"
-            BuildableName = "CardioMood.app"
-            BlueprintName = "CardioMood"
-            ReferencedContainer = "container:CardioMood.xcodeproj">
-         </BuildableReference>
-      </BuildableProductRunnable>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
@@ -66,15 +48,6 @@
       useCustomWorkingDirectory = "NO"
       buildConfiguration = "Release"
       debugDocumentVersioning = "YES">
-      <BuildableProductRunnable>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "FAE11F391721869100374D47"
-            BuildableName = "CardioMood.app"
-            BlueprintName = "CardioMood"
-            ReferencedContainer = "container:CardioMood.xcodeproj">
-         </BuildableReference>
-      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">
