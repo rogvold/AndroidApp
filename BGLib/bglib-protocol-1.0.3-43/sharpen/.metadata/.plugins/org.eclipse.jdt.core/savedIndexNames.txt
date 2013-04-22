@@ -1,1 +1,0 @@
-INDEX VERSION 1.126+C:\Users\Alexander\workspace\bglib-master\bglib-protocol-1.0.3-43\sharpen\.metadata\.plugins\org.eclipse.jdt.core
