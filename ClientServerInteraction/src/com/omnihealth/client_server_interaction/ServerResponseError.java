@@ -18,4 +18,8 @@ public class ServerResponseError extends Exception {
         super(message);
         this.errorCode = errorCode;
     }
+
+    public int getErrorCode() {
+        return errorCode;
+    }
 }
