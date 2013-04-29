@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="title_activity_registeration">Sign up</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in_register"><b>Sign in</b></string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="menu_forgot_password">Recover lost password</string>
+    <string name="login_progress_signing_in">Signing in&#8230;</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">Incorrect password or connection problem.</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="app_name">CardioMood</string>
+    <string name="dont_have_an_account">Don\'t have an account?</string>
+    <string name="register">Register new account&#8230;</string>
+    <string name="action_sign_up">Sign up</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="first_name">First name</string>
+    <string name="last_name">Last name</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_main">CardioMood Home</string>
+    <string name="preference_file_key">com.cardiomood.amdroid.PREFERENCE_FILE_KEY</string>
+    <string name="menu_log_out">Log out</string>
+    <string name="registration_progress_signing_up">Signing up&#8230;</string>
+    <string name="error_passwords_dont_match">Passwords must be equal!</string>
+    <string name="my_profile">My Profile&#8230;</string>
+    <string name="my_sessions">My Sessions</string>
+    <string name="new_session">Start New Session</string>
+    <string name="error_registration">Registration failed. Check server settings or Internet connection.</string>
+    <string name="title_activity_service_settings">Service Settings</string>
+    <string name="title_activity_my_profile">My Profile</string>
+    <string name="menu_change_password">Change password&#8230;</string>
+    <string name="menu_refresh">Refresh</string>
+    <string name="title_activity_session_list">SessionListActivity</string>
+    <string name="title_session_detail">Session Detail</string>
+    <string name="title_session_list">Sessions</string>
+    <string name="menu_sync">Sync</string>
+    <string name="synchronize_session">Synchronize session</string>
+    <string name="title_activity_monitor">MonitorActivity</string>
+    <string name="device">Device</string>
+    <string name="device_location">Device Location</string>
+    <string name="get_location">Get Location</string>
+    <string name="connect">Connect&#8230;</string>
+    <string name="status">Status</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="menu_sync_sessions">Sync sessions</string>
+    <string name="title_activity_test_web">TestWebActivity</string>
+    <string name="title_activity_web_main">CardioMood Home</string>
+    <string name="title_activity_web_monitor">WebMonitorActivity</string>
+
+</resources>

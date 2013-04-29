@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.cardiomood.android"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="15"
+        android:targetSdkVersion="17" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
+    <application
+        android:name="android.app.Application"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="com.cardiomood.android.LoginActivity"
+            android:label="@string/app_name"
+            android:noHistory="true"
+            android:windowSoftInputMode="adjustResize|stateVisible" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.cardiomood.android.RegistrationActivity"
+            android:label="@string/title_activity_registeration"
+            android:noHistory="true"
+            android:parentActivityName="com.cardiomood.android.LoginActivity"
+            android:windowSoftInputMode="adjustResize|stateVisible" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.cardiomood.android.LoginActivity" />
+        </activity>
+        <activity
+            android:name="com.cardiomood.android.MainActivity"
+            android:label="@string/title_activity_main" >
+        </activity>
+        <activity
+            android:name="com.cardiomood.android.UserSettingsActivity"
+            android:label="@string/title_activity_user_settings"
+            android:parentActivityName="com.cardiomood.android.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.cardiomood.android.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.cardiomood.android.ServiceSettingsActivity"
+            android:label="@string/title_activity_service_settings"
+            android:noHistory="true"
+            android:parentActivityName="com.cardiomood.android.LoginActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.cardiomood.android.LoginActivity" />
+        </activity>
+        <activity
+            android:name="com.cardiomood.android.MyProfileActivity"
+            android:label="@string/title_activity_my_profile"
+            android:parentActivityName="com.cardiomood.android.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.cardiomood.android.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.cardiomood.android.SessionListActivity"
+            android:label="@string/title_session_list"
+            android:parentActivityName="com.cardiomood.android.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.cardiomood.android.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.cardiomood.android.SessionDetailActivity"
+            android:label="@string/title_session_detail"
+            android:parentActivityName=".SessionListActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".SessionListActivity" />
+        </activity>
+        <activity
+            android:name="com.cardiomood.android.MonitorActivity"
+            android:label="@string/title_activity_monitor"
+            android:launchMode="singleTop"
+            android:parentActivityName="com.cardiomood.android.MainActivity"
+            android:screenOrientation="portrait" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.cardiomood.android.MainActivity" />
+        </activity>
+        <activity
+            android:name="com.cardiomood.android.TestWebActivity"
+            android:label="@string/title_activity_test_web" >
+        </activity>
+        <activity
+            android:name="com.cardiomood.android.WebMainActivity"
+            android:label="@string/title_activity_web_main" >
+        </activity>
+        <activity
+            android:name="com.cardiomood.android.WebMonitorActivity"
+            android:label="@string/title_activity_web_monitor"
+            android:parentActivityName="com.cardiomood.android.WebMainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.cardiomood.android.WebMainActivity" />
+        </activity>
+    </application>
+
+</manifest>

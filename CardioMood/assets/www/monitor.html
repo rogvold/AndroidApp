@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link media="screen" href="./css/application.css" rel="stylesheet" />
+	</head>
+	<body>
+		<h3><span><button onclick="Android.disconnectAndCleanup(); window.location.href = './main.html';">< Home</button></span> Monitor Screen Mock</h3>
+		<p>
+			<table>
+				<tr>
+					<td><b>E-mail:</b></td><td><span id="email"></span></td>
+				</tr>
+			</table>
+		</p>
+		<hr />
+		<div style="margin: 0 auto;">
+            <p>
+                <table>
+                    <tr>
+                        <td>
+                            <table>
+                                <tr><td><span id="device"></span></td></tr>
+                                <tr><td><span id="deviceLocation"></span></td></tr>
+                                <tr><td><span id="status"></span></td></tr>
+                                <tr><td><span id="charge_level"></span></td></tr>
+                            </table>
+                        </td>
+                        <td rowspan="4">
+                            <span id="heartRate"></span>
+                        </td>
+                    </tr>
+                </table>
+            </p>
+            <p style="text-align: center;">&lt;Graph here&gt;</p>
+            <p></p>
+            <hr />
+            <div style="margin: 0 auto; width: 90%;">
+                <p>
+                    <button class="btn" onclick="Android.connect();">Connect...</button><br />
+                    <button class="btn" onclick="Android.disconnect();">Disconnect</button><br />
+                </p>
+            </div>
+		</div>
+		
+		<!-- scripts -->
+		<script type="text/javascript" src="./js/jquery-1.9.1.min.js"></script>
+		<script type="text/javascript" src="./js/androidtools.js"></script>
+		<script type="text/javascript">
+			$(function () {
+				$('#email').html(Android.getConfigValue("user.email", "N/A"));
+                setTimeout(updateData, 500);
+                setInterval(updateHeartRate, 500);
+			});
+
+            function updateDeviceLocation(oldLocation, newLocation) {
+            }
+
+            function updateConnectionStatus(oldStatus, newStatus) {
+                if (newStatus != -1) {
+                    updateData()
+                }
+            }
+
+            function updateHeartRate() {
+                $('#heartRate').html(Android.getCurrentHeartRate() + ' bpm');
+            }
+
+            function updateData() {
+                $('#device').html(Android.getCurrentDeviceName());
+                $('#deviceLocation').html(Android.getCurrentDeviceLocation());
+                $('#status').html(Android.getCurrentDeviceStatus());
+                $('#chargeLevel').html(Android.getCurrentDeviceChargeLevel());
+                $('#heartRate').html(Android.getCurrentHeartRate() + ' bpm');
+            }
+		</script>
+	</body>
+</html>
