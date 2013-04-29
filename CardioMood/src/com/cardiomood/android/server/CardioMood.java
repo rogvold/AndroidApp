@@ -4,6 +4,7 @@ import android.util.Log;
 import com.omnihealth.client_server_interaction.*;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Project: CardioMood for Android
@@ -51,7 +52,7 @@ public class CardioMood implements Serializable {
         Server.getInfo(accessToken.getToken(), new HandleTokenExpiredCallback(callback));
     }
 
-    public void getAllSessions(ServerResponseCallbackRetry<>) {
+    public void getAllSessions(ServerResponseCallbackRetry<List<Session>> callback) {
         Server.getAllSessions(accessToken.getToken(), new HandleTokenExpiredCallback(callback));
     }
 
