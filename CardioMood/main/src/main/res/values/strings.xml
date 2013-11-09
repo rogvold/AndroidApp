@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">CardioMood</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_splash_screen">CardioMood</string>
+    <string name="dummy_button">Press to skip</string>
+    <string name="dummy_content">CardioMood.Com</string>
+    <string name="title_activity_main">CardioMood</string>
+    <string name="title_section1">Profile</string>
+    <string name="title_section2">New Session</string>
+    <string name="title_section3">History</string>
+    <string name="menu_settings">Settings</string>
+    <string name="refresh">Refresh</string>
+    <string name="menu_log_out">Exit</string>
+    <string name="connect">Connect...</string>
+    <string name="refreshing">Refreshing...</string>
+    <string name="phone_number_hint">Phone Number</string>
+    <string name="your_profile">Personal Info</string>
+    <string name="email">Email</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="birth_date">Birth date</string>
+    <string name="your_weight">Weight (kg))</string>
+    <string name="save">Save</string>
+    <string name="title_activity_session_details">Measurement</string>
+    <string name="connecting">Connecting...</string>
+    <string name="connected">Connected</string>
+    <string name="device_was_disconnected">Not enough data were collected due to device disconnection.</string>
+    <string name="please_wait">Please wait...</string>
+    <string name="saving_data">Saving data..</string>
+    <string name="menu_disconnect">Disconnect</string>
+    <string name="preparing_report">Preparing report...</string>
+    <string name="menu_refresh">Refresh</string>
+    <string name="menu_rename">Rename...</string>
+    <string name="stop">Stop</string>
+    <string name="menu_bt_settings">Bluetooth Settings...</string>
+    <string name="dafault_measurement_name">Measurement</string>
+    <string name="item_removed">Item has been removed.</string>
+    <string name="undo_deletion">Undo</string>
+    <string name="cancel">Cancel</string>
+    <string name="swipe_again_to_remove">Swipe to remove</string>
+    <string name="nothing_to_view">Nothing to view.</string>
+    <string name="session_doesnt_exist">Session #{0} doesn\'t exist.</string>
+    <string name="session_renamed">Session has been renamed</string>
+    <string name="type_new_name">Specify name for this measurement:</string>
+    <string name="rename_session">Rename</string>
+    <string name="failed_to_romove_session">Failed to remove item. Try refreshing data.</string>
+    <string name="profile_saved_locally">Profile has been saved locally.</string>
+    <string name="unsupported_operation">Unsupported operation</string>
+    <string name="select_device_to_connect">Select your Polar H7</string>
+    <string name="pair_and_tap_connect">Pair your phone with Polar H7 heart rate monitor and tap Connect Device to start.</string>
+    <string name="menu_about">About CardioMood</string>
+    <string name="menu_about_condensed">About...</string>
+    <string name="about_dialog_title">About CardioMood...</string>
+    <string name="monitoring_is_in_progress">Viewing results is not allowed when connected to the heart rate monitor.</string>
+    <string name="press_back_to_close">Tap BACK again to disconnect and exit.</string>
+    <string name="opening_measurement">Wait a few seconds for the report generation.</string>
+    <string name="connect_device">Connect device</string>
+    <string name="loading_data_for_measurement">Loading data for measurement #</string>
+    <string name="asset_countdown_html">file:///android_asset/www/countdown.html</string>
+    <string name="asset_details_html">file:///android_asset/www/details.html</string>
+
+</resources>

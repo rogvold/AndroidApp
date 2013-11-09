@@ -1,0 +1,6 @@
+<h3>CardioMood</h3>
+Version 1.0<br>
+Copyright 2013<br>
+<br>
+<b><a href="http://goo.gl/ZLmHhJ">www.cardiomood.com</a></b><br><br>
+<b>support@cariomood.com</b>

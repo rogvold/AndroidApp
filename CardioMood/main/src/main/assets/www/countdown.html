@@ -1,0 +1,230 @@
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <meta name="format-detection" content="telephone=no" />
+        <meta id="Viewport" name="viewport" width="initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no"/>
+
+        <script src="./js/jquery.min.js" type="text/javascript"></script>
+        <script src="./js/jquery.knob.js" type="text/javascript"></script>
+        <script src="./js/easyslider.js" type="text/javascript"></script>
+
+        <style>
+            body{
+                margin: 0px;
+            }
+
+
+            #slider ul, #slider li,
+            #slider2 ul, #slider2 li{
+                margin:0;
+                padding:0;
+                list-style:none;
+            }
+            #slider2{margin-top:1em;}
+            #slider li, #slider2 li{ 
+                overflow:hidden; 
+            }	
+
+            .sliderText{
+                height: 100%; 
+                width: 100%;
+                padding-left: 8px;
+                padding-right: 8px;
+                text-align: justify;
+            }
+
+            #slider ul li{
+                height: 100%; 
+                width: 460px;
+            }
+            #slider ul li div{
+                height: 100%; 
+                width: 100%;
+            }
+
+
+            #preloader {
+                position:absolute;
+                top:0;
+                left:0;
+                right:0;
+                bottom:0;
+                background-color:#fff;  
+                
+                /*    background-color: firebrick;  change if the mask should have another color then white */
+                z-index:99999; /* makes sure it stays on top */
+            }
+
+            #status {
+                width:200px;
+                height:200px;
+                position:absolute;
+                left:50%; /* centers the loading animation horizontally one the screen */
+                top:400px; /* centers the loading animation vertically one the screen */
+                background-image:url('./images/status.gif'); /* path to your loading animation */
+                background-repeat:no-repeat;
+                background-position:center;
+                margin:-100px 0 0 -100px; /* is width and height divided by two */
+            }
+            #statusText {
+                width:40%;
+                height:200px;
+                position:absolute;
+                left:30%; /* centers the loading animation horizontally one the screen */
+                top:50%; /* centers the loading animation vertically one the screen */
+                background-repeat:no-repeat;
+                background-position:center;
+                text-align: center;
+                margin-top: 20px;
+                /*    margin:0px 0 0 0px; */
+            }
+
+        </style>
+
+    </head>
+    <body style="background: url('images/texture.png'); width: 99%; height: 99%; overflow: hidden;">
+
+        <div style="display: block; height: 40%; width: 100%; margin-top: 2%; position: relative;">
+
+            <div style="display: block; margin: 0 auto; position: relative;" id="knob" >
+                <!--                bad style-->
+                <center>
+                    <input type="text" data-readOnly=true value="100" data-displayInput="false" data-fgColor="#ff4e4e" style="display: block; margin: 0 auto;" class="dial" />
+                </center>
+            </div>
+
+            <div style="text-align: center; position: absolute; top: 30%; font-size: 30px; display: block; height: 10%; width: 40%; left: 30%;">
+                <div style="font-size: 38px;"><b id="pulseId" >N/A</b></div>
+                <span style="font-size: 30px;">
+                    bpm
+                </span>
+            </div>
+
+        </div>
+
+        <div style="display: block; height: 40%; width: 100%; font-size: 24px; margin-top: 15%;">
+            <div id="slider" style="display: block; margin: 0 auto;">
+                <ul style="height: 100%; width: 100%;">
+                    <li style="">
+                        <div>
+                            <div class="sliderText" id="sliderText1" >
+                                Have you ever felt overworked or exhausted?<br/>
+                                Often experience stress and headaches?<br/>
+                                Constantly feel lack of sleep?
+                            </div>
+                        </div>
+                    </li>
+                    <li style="">
+                        <div>
+                            <div class="sliderText" id="sliderText2" >
+                                <a href="http://goo.gl/ZLmHhJ">CardioMood.com</a> helps to solve
+                                all these problems and organize your life in a right way.
+                            </div>
+                        </div>
+                    </li>
+                    <li style="">
+                        <div>
+                            <div class="sliderText" id="sliderText3" >
+                                We will teach you to properly organize your day, to wisely choose a time for work and rest,
+                                to balance your activities.
+                            </div>
+                        </div>
+                    </li>
+                    <li style="">
+                        <div>
+                            <div class="sliderText" id="sliderText4" >
+                                At the core of <a href="http://goo.gl/ZLmHhJ">CardioMood</a> is
+                                a modern heart rate variability methodology, actively﻿ used throughout the world.
+                            </div>
+                        </div>
+                    </li>
+                    <li style="">
+                        <div>
+                            <div id="sliderText5" class="sliderText" >
+                                With the help of advanced algorithms developed by our team,
+                                we give you the most customized and personalized advice.
+                            </div>
+                        </div>
+                    </li>
+                    <li style="">
+                        <div>
+                            <div id="sliderText6" class="sliderText" >
+                                Our goal is to teach people to take care of their emotional health,
+                                to live life to the fullest and enjoy every moment!
+                            </div>
+                        </div>
+                    </li>
+                    <li style="">
+                        <div>
+                            <div id="sliderText7" class="sliderText" >
+                                By the way, we are almost finished! The results will appear in a few seconds.<br/>
+                                Have a good CardioMood!
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+
+        <script type="text/javascript">
+
+            function setSliderText(index, text) {
+                $("#sliderText"+index).html(text);
+            }
+
+            function setPulse(p){
+                $('#pulseId').text(p);
+            }
+            
+            function setProgress(p){
+                $('.dial').val(p).trigger('change');
+//                disablePreloader();
+            }
+            
+                                        
+            function enablePreloader(){
+                $("#status").delay(350).fadeIn(); // will first fade out the loading animation
+                $("#preloader").fadeIn("slow"); 
+            }
+
+            function disablePreloader(){
+                $("#status").fadeOut(); // will first fade out the loading animation
+                $("#preloader").delay(350).fadeOut("slow"); 
+            }
+            
+            $(function(){
+//                var w = $(window).width();
+//                var h = $(window).height();
+//                var kw = Math.floor(0.5 * Math.min(w, h));
+                var kw = 260;
+                
+                $(function() {
+                    knob = $(".dial").knob({
+                        width: kw,
+                        height: kw
+                    });
+                });
+                
+                $("#slider").easySlider({
+                    auto: true,
+                    pause: 17500,
+                    speed: 1000,
+                    controlsShow: false
+                });
+                
+                //use this method for setting bpm
+//                setPulse(103);
+                //use this method for setting progress
+//                setProgress(33);
+                
+            });
+            
+        </script>
+
+    </body>
+</html>
+
