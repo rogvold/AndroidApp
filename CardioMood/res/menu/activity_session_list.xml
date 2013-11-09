@@ -1,8 +1,0 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android" >
-
-    <item
-        android:id="@+id/menu_sync_sessions"
-        android:showAsAction="ifRoom"
-        android:title="@string/menu_sync_sessions" android:titleCondensed="@string/menu_sync" android:orderInCategory="1"/>
-
-</menu>
