@@ -63,5 +63,8 @@
     <string name="asset_details_html">file:///android_asset/www/details.html</string>
     <string name="good_session_name">Ideal results</string>
     <string name="stressed_session_name">Example of stress</string>
+    <string name="athlete_session_name">Athlete at rest</string>
+    <string name="bad_session_name">Bad results example</string>
+    <string name="cannot_delete_predefined_data">Predefined data cannot be deleted.</string>
 
 </resources>

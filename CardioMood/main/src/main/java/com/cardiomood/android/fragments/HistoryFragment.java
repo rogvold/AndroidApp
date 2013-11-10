@@ -19,9 +19,13 @@ import com.cardiomood.android.R;
 import com.cardiomood.android.SessionDetailsActivity;
 import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.model.HeartRateSession;
+import com.cardiomood.android.tools.config.ConfigurationConstants;
+import com.cardiomood.android.tools.config.PreferenceHelper;
 import com.haarman.listviewanimations.itemmanipulation.contextualundo.ContextualUndoAdapter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by danshin on 01.11.13.
@@ -32,9 +36,13 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
     private View root;
     private ArrayAdapter<HeartRateSession> listAdapter = null;
     private ContextualUndoAdapter undoAdapter = null;
+    private PreferenceHelper pHelper;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        pHelper = new PreferenceHelper(getActivity().getApplicationContext());
+        pHelper.setPersistent(true);
+
         root = inflater.inflate(R.layout.fragment_history, container, false);
         listView = (ListView) root.findViewById(R.id.sessionList);
         listView.setOnItemClickListener(this);
@@ -69,9 +77,23 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
         return super.onOptionsItemSelected(item);
     }
 
+    private boolean isPredefinedSession(long sessionId) {
+        List<Long> ids = Arrays.asList(
+                pHelper.getLong(ConfigurationConstants.DB_GOOD_SESSION_ID),
+                pHelper.getLong(ConfigurationConstants.DB_BAD_SESSION_ID),
+                pHelper.getLong(ConfigurationConstants.DB_ATHLETE_SESSION_ID),
+                pHelper.getLong(ConfigurationConstants.DB_STRESSED_SESSION_ID)
+        );
+        return ids.contains(sessionId);
+    }
+
     @Override
     public void deleteItem(int i) {
         HeartRateSession session = listAdapter.getItem(i);
+        if (isPredefinedSession(session.getId())) {
+            Toast.makeText(getActivity(), R.string.cannot_delete_predefined_data, Toast.LENGTH_SHORT).show();
+            return;
+        }
         new DeleteItemTask().execute(session.getId());
         listAdapter.remove(session);
         Toast.makeText(getActivity(), getText(R.string.item_removed), Toast.LENGTH_SHORT).show();

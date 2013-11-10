@@ -39,7 +39,7 @@
     <string name="dafault_measurement_name">Измерение</string>
     <string name="item_removed">Элемент был удален.</string>
     <string name="undo_deletion">Отмена</string>
-    <string name="cancel">Отменить</string>
+    <string name="cancel">Отмена</string>
     <string name="swipe_again_to_remove">Помечено к удалению.</string>
     <string name="nothing_to_view">Нет данных для просмотра.</string>
     <string name="session_doesnt_exist">Сессия #{0} отсутствует в базе.</string>
@@ -63,4 +63,7 @@
     <string name="asset_details_html">file:///android_asset/www-ru/details.html</string>
     <string name="good_session_name">Пример хороших показателей</string>
     <string name="stressed_session_name">Пример состояния стресса</string>
+    <string name="athlete_session_name">Спортсмен в покое</string>
+    <string name="bad_session_name">Пример плохих показателей</string>
+    <string name="cannot_delete_predefined_data">Эталонные данные нельзя удалить.</string>
 </resources>

@@ -49,4 +49,6 @@ public interface ConfigurationConstants {
     // Special DB constants
     String DB_GOOD_SESSION_ID       = "db.good_session_id";
     String DB_STRESSED_SESSION_ID   = "db.stressed_session_id";
+    String DB_ATHLETE_SESSION_ID    = "db.athlete_session_id";
+    String DB_BAD_SESSION_ID        = "db.bad_session_id";
 }
