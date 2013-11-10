@@ -4,9 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".SessionDetailsActivity"
-    android:scrollbars="vertical"
-    android:paddingBottom="8dp"
-    android:paddingLeft="8dp"
     android:paddingRight="8dp"
     android:paddingTop="0dp"
     android:background="@drawable/background_texture">

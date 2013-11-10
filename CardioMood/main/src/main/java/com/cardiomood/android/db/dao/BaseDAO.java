@@ -16,6 +16,10 @@ public abstract class BaseDAO<T extends Entity> implements BaseColumns {
 
     private final SQLiteDatabase database;
 
+    protected BaseDAO(SQLiteDatabase database) {
+        this.database = database;
+    }
+
     public BaseDAO() {
         database = CardioMoodApplication.getOpenDatabase();
     }

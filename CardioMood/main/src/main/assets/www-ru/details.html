@@ -442,13 +442,15 @@
             function getTension(points){
                 var amo = getAmo(points);
                 var mo = getMo(points);
-                var vp = getBP(points);
-                
+                //var x = getAvg(points);
+                var BP = getMax(points) - getMin(points);
+
                 console.log('amo = ' + amo);
                 console.log('mo = ' + mo);
-                console.log('vp = ' + vp);
-                
-                return Math.floor(amo * 1000.0 * 1000.0 / (2.0 * mo * vp));
+                //console.log('x = ' + x);
+                console.log('BP = ' + BP);
+
+                return Math.floor(2*mo*1000 / (amo * BP));
             }
             
             

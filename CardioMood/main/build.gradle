@@ -29,7 +29,7 @@ dependencies {
     compile 'org.codegist.crest:codegist-crest:2.0.0-RC1'
     compile files('lib/BluetoothGatt.jar')
     compile files('lib/BluetoothGattService.jar')
-    compile files('lib/com.haarman.listviewanimations-2.5.1.jar')
+    compile files('lib/com.haarman.listviewanimations-2.5.1.jar', 'lib/nineoldandroids-2.4.0.jar')
     compile files('lib/CWAC-AdapterWrapper.jar')
     compile files('lib/CWAC-EndlessAdapter.jar')
     compile files('lib/clientserverinteraction.jar')

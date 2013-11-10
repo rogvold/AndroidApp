@@ -61,4 +61,6 @@
     <string name="loading_data_for_measurement">Загрузка даных измерения #</string>
     <string name="asset_countdown_html">file:///android_asset/www-ru/countdown.html</string>
     <string name="asset_details_html">file:///android_asset/www-ru/details.html</string>
+    <string name="good_session_name">Пример хороших показателей</string>
+    <string name="stressed_session_name">Пример состояния стресса</string>
 </resources>

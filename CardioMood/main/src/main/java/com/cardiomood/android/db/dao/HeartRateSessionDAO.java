@@ -20,6 +20,13 @@ public class HeartRateSessionDAO extends BaseDAO<HeartRateSession> implements He
 	};
 
 
+    public HeartRateSessionDAO(SQLiteDatabase database) {
+        super(database);
+    }
+
+    public HeartRateSessionDAO() {
+    }
+
     @Override
     public ContentValues getContentValues(HeartRateSession item) {
         ContentValues values = new ContentValues();
@@ -105,7 +112,7 @@ public class HeartRateSessionDAO extends BaseDAO<HeartRateSession> implements He
                 for (HeartRateDataItem item: items) {
                     item.setSessionId(session.getId());
                 }
-                new HeartRateDataItemDAO().bulkInsert(items);
+                new HeartRateDataItemDAO(getDatabase()).bulkInsert(items);
                 db.setTransactionSuccessful();
             } catch (Exception ex) {
                 Log.e("HeartRateSessionDAO", "insert() failed", ex);

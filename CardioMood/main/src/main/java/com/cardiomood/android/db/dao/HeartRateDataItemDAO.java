@@ -11,8 +11,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HeartRateDataItemDAO extends BaseDAO<HeartRateDataItem> implements HeartRateDBContract.HeartRateData {
-	
-	private static final String[] ALL_COLUMNS = new String[] {
+
+    public HeartRateDataItemDAO() {
+    }
+
+    public HeartRateDataItemDAO(SQLiteDatabase database) {
+        super(database);
+    }
+
+    private static final String[] ALL_COLUMNS = new String[] {
 		_ID, COLUMN_NAME_SESSION_ID, COLUMN_NAME_BPM, COLUMN_NAME_RR_TIME, COLUMN_NAME_TIME_STAMP
 	};
 

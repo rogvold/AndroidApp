@@ -45,4 +45,8 @@ public interface ConfigurationConstants {
 
     // General app parameters
     String APP_DATE_FORMAT          = "app.date_format";
+
+    // Special DB constants
+    String DB_GOOD_SESSION_ID       = "db.good_session_id";
+    String DB_STRESSED_SESSION_ID   = "db.stressed_session_id";
 }
