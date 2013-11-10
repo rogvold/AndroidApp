@@ -409,7 +409,7 @@ public class HeartRateMonitor {
 
                 String info = ((TextView) v).getText().toString();
                 //Log.d(TAG, "mPairedListClickListener.onItemClick(): the total length is " + info.length());
-                String deviceAddress = info.substring(info.length() - 17);
+                String deviceAddress = info.substring(info.lastIndexOf("\n")+1);
 
                 device = bluetoothAdapter.getRemoteDevice(deviceAddress);
 
