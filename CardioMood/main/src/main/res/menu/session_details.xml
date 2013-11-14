@@ -1,5 +1,5 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/menu_refresh" android:showAsAction="always" android:title="@string/menu_refresh"></item>
     <item android:id="@+id/menu_rename" android:showAsAction="always" android:title="@string/menu_rename"></item>
-    <item android:id="@+id/menu_save_as_image" android:title="@string/menu_save_as_image"></item>
+    <item android:id="@+id/menu_save_as_image" android:showAsAction="always" android:title="@string/menu_save_as_image" android:titleCondensed="@string/menu_save_as_image_short"></item>
+    <item android:id="@+id/menu_refresh" android:showAsAction="never" android:title="@string/menu_refresh"></item>
 </menu>

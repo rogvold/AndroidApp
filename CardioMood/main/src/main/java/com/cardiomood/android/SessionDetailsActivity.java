@@ -51,6 +51,7 @@ public class SessionDetailsActivity extends Activity {
     private HeartRateDataItemDAO hrDAO;
     private ProgressDialog pDialog;
     private DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.MEDIUM);
+    private boolean savingInProgress = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -225,8 +226,19 @@ public class SessionDetailsActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem saveAsImageItem = menu.findItem(R.id.menu_save_as_image);
+        saveAsImageItem.setEnabled(!savingInProgress);
+        return super.onPrepareOptionsMenu(menu);
+    }
+
     private void saveWebViewToPicture() {
-        new SaveWebViewTask().execute(webView.capturePicture());
+        if (!savingInProgress) {
+            savingInProgress = true;
+            invalidateOptionsMenu();
+            new SaveWebViewTask().execute(webView.capturePicture());
+        }
     }
 
     private File getPictureStorageDirectory() {
@@ -318,6 +330,8 @@ public class SessionDetailsActivity extends Activity {
 
         @Override
         protected void onPostExecute(String result) {
+            savingInProgress = false;
+            invalidateOptionsMenu();
             if (result != null)
                 Toast.makeText(SessionDetailsActivity.this, result, Toast.LENGTH_SHORT).show();
         }

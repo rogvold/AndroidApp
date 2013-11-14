@@ -38,6 +38,9 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
     private ContextualUndoAdapter undoAdapter = null;
     private PreferenceHelper pHelper;
 
+    // work around for 'view already has a parent...'
+    private boolean initial = true;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         pHelper = new PreferenceHelper(getActivity().getApplicationContext());
@@ -47,6 +50,7 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
         listView = (ListView) root.findViewById(R.id.sessionList);
         listView.setOnItemClickListener(this);
         setHasOptionsMenu(true);
+
         return root;
     }
 
@@ -59,12 +63,17 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
     public void onStart() {
         super.onStart();
         // work around for app crash due to 'view already has a parent...' - bug in EndlessAdapter
-        new android.os.Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                refresh();
-            }
-        }, 1000);
+        if (initial) {
+            new android.os.Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    refresh();
+                }
+            }, 1000);
+            initial = false;
+        } else {
+            refresh();
+        }
     }
 
     @Override

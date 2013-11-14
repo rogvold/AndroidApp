@@ -5,7 +5,7 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_splash_screen">CardioMood</string>
-    <string name="dummy_button">Press to skip</string>
+    <string name="dummy_button">Tap to skip</string>
     <string name="dummy_content">CardioMood.Com</string>
     <string name="title_activity_main">CardioMood</string>
     <string name="title_section1">Profile</string>
@@ -68,5 +68,6 @@
     <string name="cannot_delete_predefined_data">Predefined data cannot be deleted.</string>
     <string name="failed_to_save_file">Failed to save file</string>
     <string name="menu_save_as_image">Save as image</string>
+    <string name="menu_save_as_image_short">Save picture</string>
 
 </resources>
