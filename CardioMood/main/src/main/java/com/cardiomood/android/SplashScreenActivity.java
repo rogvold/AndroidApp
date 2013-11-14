@@ -122,7 +122,6 @@ public class SplashScreenActivity extends Activity {
             @Override
             public void onClick(View v) {
                 timeToStart = 0;
-                startMainActivity();
             }
         });
     }
@@ -160,7 +159,7 @@ public class SplashScreenActivity extends Activity {
                 @Override
                 protected Object doInBackground(Object[] params) {
                     Log.e("SplahScreenActivity", "Timer started");
-                    while (timeToStart >= 0) {
+                    while (timeToStart > 0) {
                         try {
                             timeToStart -= 100;
                             Thread.currentThread().sleep(100);

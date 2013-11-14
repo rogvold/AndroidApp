@@ -66,4 +66,6 @@
     <string name="athlete_session_name">Спортсмен в покое</string>
     <string name="bad_session_name">Пример плохих показателей</string>
     <string name="cannot_delete_predefined_data">Эталонные данные нельзя удалить.</string>
+    <string name="failed_to_save_file">Ошибка сохранения файла.</string>
+    <string name="menu_save_as_image">Сохранить в PNG</string>
 </resources>

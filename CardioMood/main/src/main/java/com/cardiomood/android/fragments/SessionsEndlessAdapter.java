@@ -28,15 +28,15 @@ public class SessionsEndlessAdapter extends EndlessAdapter {
 
     public SessionsEndlessAdapter(ListAdapter wrapped) {
         super(wrapped);
-        setSerialized(true) ;
         sessionDAO = new HeartRateSessionDAO();
     }
 
     @Override
     protected View getPendingView(ViewGroup parent) {
-        View row = LayoutInflater.from(parent.getContext()).inflate(R.layout.history_item, null);
+        View row = LayoutInflater.from(parent.getContext()).inflate(R.layout.history_item, parent, false);
         ((TextView) row.findViewById(android.R.id.text1)).setText("Loading content...");
         ((TextView) row.findViewById(android.R.id.text2)).setText("Please wait.");
+        parent.removeView(row);
         return row;
     }
 

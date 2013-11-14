@@ -448,8 +448,7 @@ public class HeartRateMonitor {
         pairedListView.setOnItemClickListener(mPairedListClickListener);
 
 
-        Set<BluetoothDevice> pairedDevices = bluetoothAdapter
-                .getBondedDevices();
+        Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
 
         if (pairedDevices.size() > 0) {
             boolean foundDevices = false;

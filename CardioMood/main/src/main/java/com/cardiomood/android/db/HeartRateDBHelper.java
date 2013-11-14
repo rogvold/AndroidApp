@@ -3,6 +3,8 @@ package com.cardiomood.android.db;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.Environment;
+import android.util.Log;
 
 import com.cardiomood.android.R;
 import com.cardiomood.android.db.dao.HeartRateSessionDAO;
@@ -12,6 +14,9 @@ import com.cardiomood.android.db.model.SessionStatus;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.android.tools.config.PreferenceHelper;
 
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -38,7 +43,21 @@ public class HeartRateDBHelper extends SQLiteOpenHelper implements HeartRateDBCo
         this.context = context;
         pHelper = new PreferenceHelper(context);
         pHelper.setPersistent(true);
+
+        backupDB();
 	}
+
+    private void backupDB() {
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+            File dbFile = context.getDatabasePath(DATABASE_NAME);
+            File outFile = new File(Environment.getExternalStorageDirectory(), "cardiomood.sqlite.db");
+            try {
+                FileUtils.copyFile(dbFile, outFile);
+            } catch (Exception ex) {
+                Log.e("HeartRateDBHelper", "backupDB() failed", ex);
+            }
+        }
+    }
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {

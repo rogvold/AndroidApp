@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="BluetoothGattService">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/main/lib/BluetoothGattService.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

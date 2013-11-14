@@ -4,8 +4,12 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Picture;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,8 +26,12 @@ import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.model.HeartRateDataItem;
 import com.cardiomood.android.db.model.HeartRateSession;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.text.DateFormat;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 public class SessionDetailsActivity extends Activity {
@@ -210,8 +218,27 @@ public class SessionDetailsActivity extends Activity {
             case R.id.menu_rename:
                 showRenameSessionDialog();
                 return true;
+            case R.id.menu_save_as_image:
+                saveWebViewToPicture();
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void saveWebViewToPicture() {
+        new SaveWebViewTask().execute(webView.capturePicture());
+    }
+
+    private File getPictureStorageDirectory() {
+        String status = Environment.getExternalStorageState();
+        if (!Environment.MEDIA_MOUNTED.equals(status)) {
+            return getFilesDir();
+        } else {
+            File dir = null;
+            dir = new File(Environment.getExternalStorageDirectory(), "CardioMood");
+            dir.mkdirs();
+            return dir;
+        }
     }
 
     private class DataLoadingTask extends AsyncTask<Long, Void, String> {
@@ -247,6 +274,52 @@ public class SessionDetailsActivity extends Activity {
             webView.loadUrl(s);
             Log.d(TAG, "execJS: " + s);
             removeProgressDialog();
+        }
+    }
+
+    private class SaveWebViewTask extends AsyncTask<Picture, Void, String> {
+
+        private String generateFileName() {
+            Date date = new Date() ;
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss") ;
+            return  dateFormat.format(date)+"_s" + String.format("%03d", sessionId) + ".png";
+        }
+
+        @Override
+        protected String doInBackground(Picture... params) {
+            Picture picture = params[0];
+            Bitmap bitmap = Bitmap.createBitmap(picture.getWidth(), picture.getHeight(), Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            picture.draw(canvas);
+            FileOutputStream fos = null;
+            try {
+                File directory = getPictureStorageDirectory();
+                Log.d(TAG, "saveWebViewToPicture(): directory = " + directory.getAbsolutePath());
+
+                File outFile = new File(directory, generateFileName());
+
+                fos = new FileOutputStream(outFile);
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                return outFile.getAbsolutePath();
+            } catch (Exception e) {
+                Log.e(TAG, "saveWebViewToImage(): failed to save!", e);
+                Toast.makeText(SessionDetailsActivity.this, R.string.failed_to_save_file, Toast.LENGTH_SHORT).show();
+            } finally {
+                try {
+                    if (fos != null) {
+                        fos.close();
+                    }
+                } catch (Exception ex) {
+
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            if (result != null)
+                Toast.makeText(SessionDetailsActivity.this, result, Toast.LENGTH_SHORT).show();
         }
     }
 

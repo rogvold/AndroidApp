@@ -58,7 +58,13 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
     @Override
     public void onStart() {
         super.onStart();
-        refresh();
+        // work around for app crash due to 'view already has a parent...' - bug in EndlessAdapter
+        new android.os.Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                refresh();
+            }
+        }, 1000);
     }
 
     @Override

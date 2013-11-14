@@ -66,5 +66,7 @@
     <string name="athlete_session_name">Athlete at rest</string>
     <string name="bad_session_name">Bad results example</string>
     <string name="cannot_delete_predefined_data">Predefined data cannot be deleted.</string>
+    <string name="failed_to_save_file">Failed to save file</string>
+    <string name="menu_save_as_image">Save as image</string>
 
 </resources>
