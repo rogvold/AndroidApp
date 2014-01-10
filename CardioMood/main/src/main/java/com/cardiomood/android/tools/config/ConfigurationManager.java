@@ -38,8 +38,8 @@ public class ConfigurationManager implements ConfigurationConstants {
 				for(Entry<Object, Object> entry: props.entrySet()) {
 					config.put(entry.getKey().toString(), entry.getValue());
 				}
+                in.close();
 			}
-			in.close();
 		} catch (Exception ex) {
             Log.e(TAG, "Failed to load property file: " + resourceName, ex);
 		}

@@ -69,4 +69,5 @@
     <string name="failed_to_save_file">Ошибка сохранения файла.</string>
     <string name="menu_save_as_image">Сохранить в PNG</string>
     <string name="menu_save_as_image_short">Сохранить</string>
+    <string name="title_other_devices">Other devices</string>
 </resources>

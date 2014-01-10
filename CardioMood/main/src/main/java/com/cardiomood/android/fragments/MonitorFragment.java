@@ -1,12 +1,19 @@
 package com.cardiomood.android.fragments;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,24 +24,32 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.ScrollView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cardiomood.android.R;
 import com.cardiomood.android.SessionDetailsActivity;
-import com.cardiomood.android.bluetooth.HeartRateMonitor;
+import com.cardiomood.android.bluetooth.HeartRateLeService;
+import com.cardiomood.android.bluetooth.LeHRMonitor;
 import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.model.HeartRateDataItem;
 import com.cardiomood.android.db.model.HeartRateSession;
 import com.cardiomood.android.db.model.SessionStatus;
+import com.cardiomood.android.tools.IMonitors;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.regex.Pattern;
 
 /**
  * Project: CardioMood
@@ -57,85 +72,109 @@ public class MonitorFragment extends Fragment {
     private Button connectDeviceButton;
     private ScrollView scrollView;
 
-    private HeartRateMonitor hrMonitor;
+    private AlertDialog alertSelectDevice;
+
     private List<HeartRateDataItem> collectedData;
 
     private ProgressDialog sessionSavingDialog;
     public static boolean isMonitoring = false;
 
-    private Handler mUIUpdateHandler = new Handler(new Handler.Callback() {
+    private HeartRateLeService mBluetoothLeService;
+
+    // Code to manage Service lifecycle.
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+
         @Override
-        public boolean handleMessage(Message msg) {
-            try {
-                if (msg.what == HR_DATA_EVENT) {
-                    saveHeartRateData(msg.arg1, 0, (short[])msg.obj);
-                    execJS("setPulse(" + msg.arg1 + ")");
-                }
-
-                if (msg.what == CONNECTION_STATUS_CHANGE_EVENT) {
-                    final int newStatus = msg.arg2;
-
-                    if (getActivity() != null) {
-                        getActivity().invalidateOptionsMenu();
-                    }
-
-                    // update button ui state
-                    connectDeviceButton.setEnabled(newStatus == HeartRateMonitor.DISCONNECTED || newStatus == HeartRateMonitor.INIT);
-                    if (newStatus == HeartRateMonitor.CONNECTING) {
-                        connectDeviceButton.setText(R.string.connecting);
-                    } else if (newStatus == HeartRateMonitor.CONNECTED) {
-                       connectDeviceButton.setText(R.string.connected);
-                    } else {
-                        connectDeviceButton.setText(R.string.connect);
-                    }
-
-                    // update timer
-                    if (newStatus == HeartRateMonitor.CONNECTED) {
-                        monitorTime = 0;
-                        if (timer != null) {
-                            timer.cancel();
-                            timer.purge();
-                        }
-                        timer = new Timer();
-                        timer.scheduleAtFixedRate(new TimerTask() {
-                            @Override
-                            public void run() {
-                                monitorTime += 1;
-                                if (monitorTime > 120) {
-                                    performDisconnect();
-                                    saveAndOpenSessionView();
-                                } else {
-                                    execJS("setProgress(" + (float)monitorTime/120*100 + ");");
-                                    execJS("setPulse(" + hrMonitor.getHeartBeatsPerMinute() + ");");
-                                }
-
-                            }
-                        }, 0, 1000);
-                        if (collectedData!= null) {
-                            collectedData.clear();
-                        }
-
-                        collectedData = Collections.synchronizedList(new ArrayList<HeartRateDataItem>());
-
-                        setConnectedView();
-                    } else if (newStatus == HeartRateMonitor.DISCONNECTED) {
-                        if (timer != null) {
-                            timer.cancel();
-                            timer.purge();
-                            timer = null;
-                        }
-                        if (monitorTime <=120) {
-                            Toast.makeText(getActivity(), R.string.device_was_disconnected, Toast.LENGTH_SHORT).show();
-                        }
-                        setDisconnectedView();
-                    }
-                }
-            } catch (Exception ex) {
-                Log.e(TAG, "handle message failed", ex);
-            }
-            return true;
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mBluetoothLeService = ((HeartRateLeService.LocalBinder) service).getService();
         }
-    });
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mBluetoothLeService = null;
+        }
+    };
+
+
+    private final BroadcastReceiver dataReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (LeHRMonitor.ACTION_BPM_CHANGED.equals(action)) {
+                int bpm = intent.getIntExtra(LeHRMonitor.EXTRA_NEW_BPM, 0);
+                execJS("setPulse(" + bpm + ")");
+            }
+            if (LeHRMonitor.ACTION_CONNECTION_STATUS_CHANGED.equals(action)) {
+                final int newStatus = intent.getIntExtra(LeHRMonitor.EXTRA_NEW_STATUS, -100);
+                final int oldStatus = intent.getIntExtra(LeHRMonitor.EXTRA_OLD_STATUS, -100);
+
+                if (getActivity() != null) {
+                    getActivity().invalidateOptionsMenu();
+                }
+
+                // update button ui state
+                connectDeviceButton.setEnabled(newStatus == LeHRMonitor.CONNECTED_STATUS || newStatus == LeHRMonitor.INITIAL_STATUS);
+                if (newStatus == LeHRMonitor.CONNECTING_STATUS) {
+                    connectDeviceButton.setText(R.string.connecting);
+                } else if (newStatus == LeHRMonitor.CONNECTED_STATUS) {
+                    connectDeviceButton.setText(R.string.connected);
+                } else {
+                    connectDeviceButton.setText(R.string.connect);
+                }
+
+                // update timer
+                if (newStatus == LeHRMonitor.CONNECTED_STATUS) {
+                    monitorTime = 0;
+                    if (timer != null) {
+                        timer.cancel();
+                        timer.purge();
+                    }
+                    timer = new Timer();
+                    timer.scheduleAtFixedRate(new TimerTask() {
+                        @Override
+                        public void run() {
+                            monitorTime += 1;
+                            if (monitorTime > 120) {
+                                timer.cancel();
+                                timer.purge();
+                                timer = null;
+                                performDisconnect();
+                                saveAndOpenSessionView();
+                            } else {
+                                execJS("setProgress(" + (float)monitorTime/120*100 + ");");
+                            }
+
+                        }
+                    }, 0, 1000);
+                    if (collectedData!= null) {
+                        collectedData.clear();
+                    }
+
+                    collectedData = Collections.synchronizedList(new ArrayList<HeartRateDataItem>());
+
+                    setConnectedView();
+                }
+                if (newStatus == LeHRMonitor.DISCONNECTING_STATUS || newStatus == LeHRMonitor.READY_STATUS && oldStatus != LeHRMonitor.INITIAL_STATUS) {
+                    if (timer != null) {
+                        timer.cancel();
+                        timer.purge();
+                        timer = null;
+                    }
+                    if (monitorTime <=120) {
+                        Toast.makeText(getActivity(), R.string.device_was_disconnected, Toast.LENGTH_SHORT).show();
+                    }
+                    setDisconnectedView();
+                }
+            }
+            if (LeHRMonitor.ACTION_HEART_RATE_DATA_RECEIVED.equals(action)) {
+                int bpm = intent.getIntExtra(LeHRMonitor.EXTRA_BPM, 0);
+                short[] rr = intent.getShortArrayExtra(LeHRMonitor.EXTRA_INTERVALS);
+                // this should be always invoked!!!
+                saveHeartRateData(bpm, 0, rr);
+                execJS("setPulse(" + bpm + ")");
+            }
+        }
+    };
 
     private long monitorTime = 0;
     private Timer timer = new Timer();
@@ -144,7 +183,22 @@ public class MonitorFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         Log.d(TAG, "onCreate()");
         super.onCreate(savedInstanceState);
+
+        Intent gattServiceIntent = new Intent(getActivity(), HeartRateLeService.class);
+        getActivity().bindService(gattServiceIntent, mServiceConnection, Activity.BIND_AUTO_CREATE);
+
         setHasOptionsMenu(true);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        getActivity().registerReceiver(dataReceiver, makeGattUpdateIntentFilter());
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
     }
 
     private void initWebView() {
@@ -218,12 +272,16 @@ public class MonitorFragment extends Fragment {
     public void performConnect() {
         try {
             try {
-                hrMonitor.initBLEService();
+                if (!mBluetoothLeService.initialize()) {
+                    Log.e(TAG, "Unable to initialize Bluetooth");
+                    return;
+                }
             } catch (Exception ex) {
+                Log.e(TAG, "Failed to initialize service.", ex);
                 Toast.makeText(getActivity(), "Cannot start Bluetooth.", Toast.LENGTH_SHORT);
                 return;
             }
-            hrMonitor.attemptConnection();
+            showConnectionDialog();
         } catch (Exception ex) {
             Log.d(TAG, "performConnect(): "+ex);
             ex.printStackTrace();
@@ -231,8 +289,79 @@ public class MonitorFragment extends Fragment {
     }
 
     public void performDisconnect() {
-        hrMonitor.disconnect();
-        hrMonitor.cleanup();
+        if (mBluetoothLeService != null) {
+            mBluetoothLeService.disconnect();
+            mBluetoothLeService.close();
+        }
+    }
+
+    private void showConnectionDialog() {
+        Log.d(TAG, "showConnectionDialog()");
+        final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        AdapterView.OnItemClickListener mPairedListClickListener = new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
+                bluetoothAdapter.cancelDiscovery();
+
+                String info = ((TextView) v).getText().toString();
+                //Log.d(TAG, "mPairedListClickListener.onItemClick(): the total length is " + info.length());
+                String deviceAddress = info.substring(info.lastIndexOf("\n")+1);
+
+                mBluetoothLeService.connect(deviceAddress);
+                alertSelectDevice.hide();
+                alertSelectDevice = null;
+            }
+        };
+
+        LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        final View layout_listview = inflater.inflate(R.layout.device_list, (ViewGroup) getActivity().findViewById(R.id.root_device_list));
+
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
+        dialogBuilder.setView(layout_listview);
+
+        ArrayAdapter<String> mPairedDevicesArrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.device_name);
+        ListView pairedListView = (ListView) layout_listview.findViewById(R.id.paired_devices);
+        mPairedDevicesArrayAdapter.clear();
+        pairedListView.setAdapter(mPairedDevicesArrayAdapter);
+        pairedListView.setOnItemClickListener(mPairedListClickListener);
+
+        Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
+
+        if (pairedDevices.size() > 0) {
+            boolean foundDevices = false;
+
+            if (pairedDevices.size() > 0) {
+
+                // foundDevices = false;
+                for (BluetoothDevice device : pairedDevices) {
+                    for (String s : IMonitors.MonitorNamesPatternLE) {
+                        Pattern p_le = Pattern.compile(s);
+                        if (device.getName().matches(p_le.pattern())) {
+                            mPairedDevicesArrayAdapter.add(device.getName()
+                                    + "\n" + device.getAddress());
+                            foundDevices = true;
+                        }
+                    }
+                }
+            }
+
+            if (foundDevices) {
+                layout_listview.findViewById(R.id.title_paired_devices)
+                        .setVisibility(View.VISIBLE);
+            } else {
+                layout_listview.findViewById(R.id.title_paired_devices)
+                        .setVisibility(View.GONE);
+                String noDevices = "None devices have been paired";
+                mPairedDevicesArrayAdapter.add(noDevices);
+            }
+        } else {
+            layout_listview.findViewById(R.id.title_paired_devices)
+                    .setVisibility(View.GONE);
+            String noDevices ="None devices have been paired";
+            mPairedDevicesArrayAdapter.add(noDevices);
+        }
+        dialogBuilder.setTitle(getText(R.string.select_device_to_connect));
+        alertSelectDevice = dialogBuilder.show();
     }
 
     private void execJS(final String js) {
@@ -250,27 +379,6 @@ public class MonitorFragment extends Fragment {
         Log.d(TAG, "onActivityCreated()");
         super.onActivityCreated(savedInstanceState);
         getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
-
-        this.hrMonitor = new HeartRateMonitor(getActivity());
-        this.hrMonitor.setCallback(new HeartRateMonitor.Callback() {
-
-            @Override
-            public void onSensorLocationChange(int oldLocation, int newLocation) {
-                //execJS("updateDeviceLocation(" + oldLocation + "," + newLocation +")");
-                //mUIUpdateHandler.sendEmptyMessage(0);
-            }
-
-            @Override
-            public void onHRDataRecieved(int heartBeatsPerMinute, int energyExpended, short[] rrIntervals) {
-                mUIUpdateHandler.sendMessage(mUIUpdateHandler.obtainMessage(HR_DATA_EVENT, heartBeatsPerMinute, 0, rrIntervals));
-            }
-
-            @Override
-            public void onConnectionStateChange(int oldState, int newState) {
-                Log.d(TAG, "connectionStateChanged(): oldState= " + oldState + "; newState = " + newState);
-                mUIUpdateHandler.sendMessage(mUIUpdateHandler.obtainMessage(CONNECTION_STATUS_CHANGE_EVENT, oldState, newState));
-            }
-        });
     }
 
     private void showSavingSessionDialog() {
@@ -348,6 +456,9 @@ public class MonitorFragment extends Fragment {
         super.onDestroy();
 
         performDisconnect();
+        getActivity().unbindService(mServiceConnection);
+        mBluetoothLeService = null;
+        getActivity().unregisterReceiver(dataReceiver);
     }
 
     private void saveHeartRateData(int heartBeatsPerMinute, int energyExpended, short[] rrIntervals) {
@@ -369,11 +480,11 @@ public class MonitorFragment extends Fragment {
 
     @Override
     public void onPrepareOptionsMenu(Menu menu) {
-        super.onPrepareOptionsMenu(menu);
         MenuItem item = menu.findItem(R.id.menu_disconnect);
-        if (item != null && hrMonitor != null) {
-            int c = hrMonitor.getConnectionStatus();
-            if (c == HeartRateMonitor.CONNECTED) {
+        LeHRMonitor monitor = mBluetoothLeService == null ? null : mBluetoothLeService.getMonitor();
+        if (item != null && monitor != null) {
+            int c = monitor.getConnectionStatus();
+            if (c == LeHRMonitor.CONNECTED_STATUS) {
                 item.setEnabled(true);
                 //item.setVisible(true);
             } else {
@@ -381,6 +492,15 @@ public class MonitorFragment extends Fragment {
                 //item.setVisible(false);
             }
         }
+        super.onPrepareOptionsMenu(menu);
+    }
+
+    private static IntentFilter makeGattUpdateIntentFilter() {
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(LeHRMonitor.ACTION_HEART_RATE_DATA_RECEIVED);
+        intentFilter.addAction(LeHRMonitor.ACTION_BPM_CHANGED);
+        intentFilter.addAction(LeHRMonitor.ACTION_CONNECTION_STATUS_CHANGED);
+        return intentFilter;
     }
 
 }

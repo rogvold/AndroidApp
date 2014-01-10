@@ -46,6 +46,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="MainActivity" />
         </activity>
+        <service android:name=".bluetooth.HeartRateLeService" android:enabled="true"/>
     </application>
 
 </manifest>

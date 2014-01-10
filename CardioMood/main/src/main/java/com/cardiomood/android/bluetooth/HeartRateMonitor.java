@@ -38,7 +38,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-public class HeartRateMonitor {
+class HeartRateMonitor {
 
     public static final ParcelUuid HRM = ParcelUuid.fromString("0000180D-0000-1000-8000-00805f9b34fb");
     //public static final ParcelUuid BATTERY = ParcelUuid.fromString("0000180F-0000-1000-8000-00805f9b34fb");
@@ -163,13 +163,6 @@ public class HeartRateMonitor {
                     Toast.makeText(context, "Notification enabling failed! ",
                             Toast.LENGTH_LONG).show();
                 }
-            } else if(BluetoothHeadset.ACTION_VENDOR_SPECIFIC_HEADSET_EVENT.equals(action)) {
-//				String[] args = intent.getStringArrayExtra(BluetoothHeadset.EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_ARGS);
-//				if (args != null) {
-//					for (String arg: args) {
-//						Log.i("HeartRateMonitor", "extra_arg: args" + arg);
-//					}
-//				}
             }
         }
 
@@ -446,7 +439,6 @@ public class HeartRateMonitor {
         mPairedDevicesArrayAdapter.clear();
         pairedListView.setAdapter(mPairedDevicesArrayAdapter);
         pairedListView.setOnItemClickListener(mPairedListClickListener);
-
 
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
 

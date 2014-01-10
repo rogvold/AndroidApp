@@ -3,7 +3,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.6.+'
+        classpath 'com.android.tools.build:gradle:0.7.1'
     }
 }
 apply plugin: 'android'
@@ -13,22 +13,29 @@ repositories {
 }
 
 android {
-    compileSdkVersion 18
-    buildToolsVersion '18.1.0'
+    compileSdkVersion 19
+    buildToolsVersion '19'
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 18
+        targetSdkVersion 19
+    }
+
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
     }
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:18.0.0'
-    compile 'com.android.support:support-v4:18.0.0'
+    compile 'com.android.support:appcompat-v7:19.0.0'
+    compile 'com.android.support:support-v4:19.0.0'
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'org.codegist.crest:codegist-crest:2.0.0-RC1'
     compile files('lib/BluetoothGatt.jar')
-    compile files('lib/BluetoothGattService.jar')
     compile files('lib/com.haarman.listviewanimations-2.5.2.jar')
     compile files('lib/nineoldandroids-2.4.0.jar')
     compile files('lib/CWAC-AdapterWrapper.jar')

@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Gradle: clientserverinteraction">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/main/lib/clientserverinteraction.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

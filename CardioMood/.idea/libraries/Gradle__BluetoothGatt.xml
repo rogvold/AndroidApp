@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Gradle: BluetoothGatt">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/main/lib/BluetoothGatt.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

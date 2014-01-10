@@ -69,5 +69,6 @@
     <string name="failed_to_save_file">Failed to save file</string>
     <string name="menu_save_as_image">Save as image</string>
     <string name="menu_save_as_image_short">Save picture</string>
+    <string name="title_other_devices">Other devices</string>
 
 </resources>
