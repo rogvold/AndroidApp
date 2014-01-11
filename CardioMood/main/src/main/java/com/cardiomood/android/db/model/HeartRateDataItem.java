@@ -26,6 +26,7 @@ public class HeartRateDataItem extends Entity implements HeartRateDBContract.Hea
 
     public HeartRateDataItem(Cursor cursor) {
         super(cursor);
+        this.timeStamp = new Date(cursor.getLong(cursor.getColumnIndex(COLUMN_NAME_TIME_STAMP)));
         heartBeatsPerMinute = cursor.getInt(cursor.getColumnIndex(COLUMN_NAME_BPM));
         rrTime = cursor.getDouble(cursor.getColumnIndex(COLUMN_NAME_RR_TIME));
         sessionId = cursor.getLong(cursor.getColumnIndex(COLUMN_NAME_SESSION_ID));

@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattDescriptor;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
@@ -47,7 +48,7 @@ public class AndroidLeHRMonitor extends LeHRMonitor {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             if (newState == BluetoothProfile.STATE_CONNECTED) {
-                mBluetoothGatt.discoverServices();
+                gatt.discoverServices();
                 Log.i(TAG, "Connected to GATT server.");
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 setConnectionStatus(READY_STATUS);
@@ -58,14 +59,39 @@ public class AndroidLeHRMonitor extends LeHRMonitor {
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                BluetoothGattCharacteristic characteristic = mBluetoothGatt.getService(UUID_HEART_RATE_SERVICE)
-                        .getCharacteristic(UUID_HEART_RATE_MEASUREMENT_CHARACTERISTIC);
-                mBluetoothGatt.setCharacteristicNotification(characteristic, true);
-                // This is specific to Heart Rate Measurement.
-                BluetoothGattDescriptor descriptor = characteristic.getDescriptor(UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG));
-                descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
-                mBluetoothGatt.writeDescriptor(descriptor);
+                // Enable Heart Rate Measurement notification
+                BluetoothGattService heartRateService = gatt.getService(UUID_HEART_RATE_SERVICE);
+                if (heartRateService != null) {
+                    BluetoothGattCharacteristic characteristic = heartRateService
+                            .getCharacteristic(UUID_HEART_RATE_MEASUREMENT_CHARACTERISTIC);
+                    if (characteristic == null) {
+                        Log.wtf(TAG, "onServicesDiscovered(): Heart Rate Service doesn't have Heart Rate Measurement Characteristic!!! O_o");
+                        return;
+                    }
+                    gatt.setCharacteristicNotification(characteristic, true);
+                    // This is specific to Heart Rate Measurement.
+                    BluetoothGattDescriptor descriptor = characteristic.getDescriptor(UUID.fromString(CLIENT_CHARACTERISTIC_CONFIG));
+                    descriptor.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+                    gatt.writeDescriptor(descriptor);
+                } else {
+                    Log.e(TAG, "onServicesDiscovered(): Heart Rate Service was not discovered.");
+                    setConnectionStatus(READY_STATUS);
+                    return;
+                }
                 setConnectionStatus(CONNECTED_STATUS);
+
+                // Request battery level if supported
+                BluetoothGattService batteryService = mBluetoothGatt.getService(UUID_BATTERY_SERVICE);
+                if (batteryService != null) {
+                    Log.i(TAG, "onServicesDiscovered(): Battery service has been dicovered.");
+                    BluetoothGattCharacteristic characteristic = batteryService.getCharacteristic(UUID_BATTERY_LEVEL_CHARACTERISTIC);
+                    if (characteristic != null)
+                        gatt.readCharacteristic(characteristic);
+                } else {
+                    Log.i(TAG, "onServicesDiscovered(): Battery Service is not supported. :(");
+                }
+            } else {
+                setConnectionStatus(READY_STATUS);
             }
         }
 

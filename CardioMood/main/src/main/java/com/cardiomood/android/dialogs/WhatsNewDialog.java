@@ -16,27 +16,34 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 /**
- * Created by danshin on 06.11.13.
+ * Created by danon on 10.01.14.
  */
-public class AboutDialog extends Dialog {
+public class WhatsNewDialog extends Dialog {
+
+    private static final String TAG = WhatsNewDialog.class.getSimpleName();
+
+    public static final String CONFIG_SHOW_DIALOG_ON_STARTUP = "app.whats_new.show_on_startup";
 
     private Context mContext;
 
-    public AboutDialog(Context context) {
+    public WhatsNewDialog(Context context) {
         super(context, android.R.style.Theme_Holo_Dialog);
         mContext = context;
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.dialog_about);
-        TextView tv = (TextView) findViewById(R.id.legal_text);
-        tv.setText(readRawTextFile(R.raw.legal));
-        tv = (TextView) findViewById(R.id.info_text);
+
+        setContentView(R.layout.dialog_whats_new);
+        TextView tv = (TextView) findViewById(R.id.info_text);
         tv.setText(Html.fromHtml(readRawTextFile(R.raw.info)));
         tv.setLinkTextColor(Color.WHITE);
         Linkify.addLinks(tv, Linkify.ALL);
+
+        tv = (TextView) findViewById(R.id.whats_new_text);
+        tv.setText(Html.fromHtml(readRawTextFile(R.raw.whats_new)));
+        tv.setLinkTextColor(Color.WHITE);
     }
 
     public String readRawTextFile(int id) {

@@ -1,5 +1,7 @@
 package com.cardiomood.android;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -14,9 +16,11 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.cardiomood.android.dialogs.AboutDialog;
+import com.cardiomood.android.dialogs.WhatsNewDialog;
 import com.cardiomood.android.fragments.HistoryFragment;
 import com.cardiomood.android.fragments.MonitorFragment;
 import com.cardiomood.android.fragments.ProfileFragment;
+import com.cardiomood.android.tools.config.PreferenceHelper;
 
 import java.util.Locale;
 
@@ -24,6 +28,9 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
     private Toast toast;
     private long lastBackPressTime = 0;
+
+    private PreferenceHelper mPrefHelper;
+    private boolean showWhatsNewDialog = false;
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -44,6 +51,11 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mPrefHelper = new PreferenceHelper(getApplicationContext());
+        mPrefHelper.setPersistent(true);
+        showWhatsNewDialog = mPrefHelper.getBoolean(WhatsNewDialog.CONFIG_SHOW_DIALOG_ON_STARTUP, true, true);
+
 
         // Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
@@ -88,6 +100,32 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.activity_main, menu);
         return true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (showWhatsNewDialog) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    showWhatsNewDialog();
+                }
+            });
+        }
+    }
+
+    private void showWhatsNewDialog() {
+        Dialog dialog = new WhatsNewDialog(this);
+        dialog.setTitle(R.string.whats_new_dialog_title);
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                mPrefHelper.putBoolean(WhatsNewDialog.CONFIG_SHOW_DIALOG_ON_STARTUP, false);
+            }
+        });
+        dialog.show();
     }
 
     private void openBluetoothSettings() {

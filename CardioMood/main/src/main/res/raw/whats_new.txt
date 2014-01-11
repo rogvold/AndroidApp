@@ -1,0 +1,11 @@
+<p><b>New in CardioMood 1.1.0 (current):</b><p>
+<p>
++++ Added support for Android 4.3!
+<br/>
++++ Export data to a text file!
+<br/>
+=== Fixed crashes when connecting.
+</p>
+<br/>
+<p>Soon we are going to add a continuous monitoring! :)</p>
+<p>Stay with <b><a href="http://goo.gl/ZLmHhJ">www.CardioMood.com</a></b>!</p>
