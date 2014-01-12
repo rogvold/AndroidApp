@@ -1,6 +1,8 @@
 package com.cardiomood.android.bluetooth;
 
+import android.app.Activity;
 import android.app.Service;
+import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +16,8 @@ import android.util.Log;
 public class HeartRateLeService extends Service {
 
     private final static String TAG = HeartRateLeService.class.getSimpleName();
+
+    public static final int REQUEST_ENABLE_BT = 2;
 
     private final IBinder mBinder = new LocalBinder();
     private LeHRMonitor monitor;
@@ -49,11 +53,19 @@ public class HeartRateLeService extends Service {
 
     // -------------- API methods ----------------------------------------------
 
-    public boolean initialize() {
+    public boolean initialize(Activity owner) {
         if (monitor == null) {
             monitor = LeHRMonitor.getMonitor(this);
             if (monitor == null)
                 return false;
+        }
+        BluetoothAdapter bluetoothAdapter = monitor.getBluetoothAdapter();
+        if (bluetoothAdapter == null) {
+            Log.w(TAG, "initialize(): bluetooth adapter is not available");
+            return false;
+        }
+        if (!bluetoothAdapter.isEnabled()) {
+            Log.w(TAG, "initialize(): bluetooth adapter is not enabled");
         }
         return monitor.initialize();
     }
@@ -106,6 +118,6 @@ public class HeartRateLeService extends Service {
         }
 
         monitor.close();
-        monitor = null;
+        monitor = LeHRMonitor.getMonitor(this);
     }
 }

@@ -1,5 +1,6 @@
 package com.cardiomood.android.bluetooth;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 
@@ -51,6 +52,11 @@ public abstract class LeHRMonitor {
     public abstract boolean connect(String deviceAddress);
     public abstract void disconnect();
     public abstract void close();
+    public abstract BluetoothAdapter getCurrentBluetoothAdapter();
+
+    public BluetoothAdapter getBluetoothAdapter() {
+        return BluetoothAdapter.getDefaultAdapter();
+    }
 
     public Context getContext() {
         return context;

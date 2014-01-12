@@ -258,6 +258,11 @@ public class MotorolaLeHRMonitor extends LeHRMonitor {
         setConnectionStatus(INITIAL_STATUS);
     }
 
+    @Override
+    public BluetoothAdapter getCurrentBluetoothAdapter() {
+        return bluetoothAdapter;
+    }
+
     private void parseData(int length, byte[] data) {
         if (length > 4 && Arrays.equals(data, previousData)) {
             Log.w(TAG, "RR-Intervals ignore???");

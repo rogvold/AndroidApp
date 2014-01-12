@@ -8,6 +8,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -114,13 +115,6 @@ public class MonitorFragment extends Fragment {
 
                 // update button ui state
                 connectDeviceButton.setEnabled(newStatus == LeHRMonitor.CONNECTED_STATUS || newStatus == LeHRMonitor.INITIAL_STATUS);
-                if (newStatus == LeHRMonitor.CONNECTING_STATUS) {
-                    connectDeviceButton.setText(R.string.connecting);
-                } else if (newStatus == LeHRMonitor.CONNECTED_STATUS) {
-                    connectDeviceButton.setText(R.string.connected);
-                } else {
-                    connectDeviceButton.setText(R.string.connect);
-                }
 
                 // update timer
                 if (newStatus == LeHRMonitor.CONNECTED_STATUS) {
@@ -163,6 +157,9 @@ public class MonitorFragment extends Fragment {
                     if (monitorTime <=120) {
                         Toast.makeText(getActivity(), R.string.device_was_disconnected, Toast.LENGTH_SHORT).show();
                     }
+                    setDisconnectedView();
+                }
+                if (newStatus == LeHRMonitor.INITIAL_STATUS) {
                     setDisconnectedView();
                 }
             }
@@ -269,10 +266,28 @@ public class MonitorFragment extends Fragment {
         isMonitoring = false;
     }
 
+    public boolean requestEnableBluetooth() {
+        LeHRMonitor monitor = mBluetoothLeService.getMonitor();
+        if (monitor == null)
+            return false;
+        BluetoothAdapter bluetoothAdapter = monitor.getBluetoothAdapter();
+        if (bluetoothAdapter == null) {
+            Toast.makeText(getActivity(), "Bluetooth adapter is not available.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (!bluetoothAdapter.isEnabled()) {
+            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
+            return false;
+        } return true;
+    }
+
     public void performConnect() {
         try {
             try {
-                if (!mBluetoothLeService.initialize()) {
+                if (!requestEnableBluetooth())
+                    return;
+                if (!mBluetoothLeService.initialize(getActivity())) {
                     Log.e(TAG, "Unable to initialize Bluetooth");
                     return;
                 }
@@ -297,7 +312,7 @@ public class MonitorFragment extends Fragment {
 
     private void showConnectionDialog() {
         Log.d(TAG, "showConnectionDialog()");
-        final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        final BluetoothAdapter bluetoothAdapter = mBluetoothLeService.getMonitor().getCurrentBluetoothAdapter();
 
         AdapterView.OnItemClickListener mPairedListClickListener = new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
@@ -308,7 +323,7 @@ public class MonitorFragment extends Fragment {
                 String deviceAddress = info.substring(info.lastIndexOf("\n")+1);
 
                 mBluetoothLeService.connect(deviceAddress);
-                alertSelectDevice.hide();
+                alertSelectDevice.dismiss();
                 alertSelectDevice = null;
             }
         };
@@ -362,6 +377,21 @@ public class MonitorFragment extends Fragment {
         }
         dialogBuilder.setTitle(getText(R.string.select_device_to_connect));
         alertSelectDevice = dialogBuilder.show();
+        alertSelectDevice.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                if (mBluetoothLeService == null)
+                    return;
+                LeHRMonitor monitor = mBluetoothLeService.getMonitor();
+                if (monitor == null)
+                    return;
+                int status = monitor.getConnectionStatus();
+                if (status == LeHRMonitor.READY_STATUS || status == LeHRMonitor.INITIAL_STATUS) {
+                    mBluetoothLeService.close();
+                    setDisconnectedView();
+                }
+            }
+        });
     }
 
     private void execJS(final String js) {
@@ -440,12 +470,10 @@ public class MonitorFragment extends Fragment {
 
             case REQUEST_ENABLE_BT:
                 if (resultCode == Activity.RESULT_OK) {
-                    // TODO: Set up BT HR Monitor
+                    Log.e(TAG, "onActivityResult(): BT enabled");
+                    performConnect();
                 } else {
                     Log.e(TAG, "onActivityResult(): BT not enabled");
-                    Toast.makeText(getActivity(), "Bluetooth is not enabled. Leaving...",
-                            Toast.LENGTH_SHORT).show();
-                    getActivity().finish();
                 }
                 break;
         }

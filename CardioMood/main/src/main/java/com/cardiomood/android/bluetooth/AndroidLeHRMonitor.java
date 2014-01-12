@@ -51,7 +51,8 @@ public class AndroidLeHRMonitor extends LeHRMonitor {
                 gatt.discoverServices();
                 Log.i(TAG, "Connected to GATT server.");
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                setConnectionStatus(READY_STATUS);
+                if (getConnectionStatus() == DISCONNECTING_STATUS || getConnectionStatus() == CONNECTED_STATUS)
+                    setConnectionStatus(READY_STATUS);
                 Log.i(TAG, "Disconnected from GATT server.");
             }
         }
@@ -173,6 +174,14 @@ public class AndroidLeHRMonitor extends LeHRMonitor {
         return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2);
     }
 
+    @Override
+    public BluetoothAdapter getBluetoothAdapter() {
+        BluetoothManager bluetoothManager = (BluetoothManager) mContext.getSystemService(Context.BLUETOOTH_SERVICE);
+        if (bluetoothManager == null)
+            return null;
+        return bluetoothManager.getAdapter();
+    }
+
     public boolean initialize() {
         // For API level 18 and above, get a reference to BluetoothAdapter through
         // BluetoothManager.
@@ -191,7 +200,6 @@ public class AndroidLeHRMonitor extends LeHRMonitor {
         }
 
         setConnectionStatus(READY_STATUS);
-
         return true;
     }
 
@@ -205,36 +213,47 @@ public class AndroidLeHRMonitor extends LeHRMonitor {
         // Previously connected device.  Try to reconnect.
         if (mBluetoothDeviceAddress != null && deviceAddress.equals(mBluetoothDeviceAddress) && mBluetoothGatt != null) {
             Log.d(TAG, "Trying to use an existing mBluetoothGatt for connection.");
+            setConnectionStatus(CONNECTING_STATUS);
             if (mBluetoothGatt.connect()) {
                 mBluetoothGatt.discoverServices();
                 return true;
             } else {
+                setConnectionStatus(READY_STATUS);
                 return false;
             }
         }
 
-        final BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceAddress);
-        if (device == null) {
-            Log.w(TAG, "Device not found.  Unable to connect.");
+        setConnectionStatus(CONNECTING_STATUS);
+        try {
+            final BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceAddress);
+            if (device == null) {
+                Log.w(TAG, "Device not found.  Unable to connect.");
+                return false;
+            }
+            // We want to directly connect to the device, so we are setting the autoConnect
+            // parameter to false.
+            mBluetoothGatt = device.connectGatt(mContext, false, mGattCallback);
+            Log.d(TAG, "Trying to create a new connection.");
+            mBluetoothDeviceAddress = deviceAddress;
+            return true;
+        } catch (Exception ex) {
+            Log.e(TAG, "connect(): unable to connect due to Exception", ex);
+            setConnectionStatus(READY_STATUS);
             return false;
         }
-        // We want to directly connect to the device, so we are setting the autoConnect
-        // parameter to false.
-        mBluetoothGatt = device.connectGatt(mContext, false, mGattCallback);
-        Log.d(TAG, "Trying to create a new connection.");
-        mBluetoothDeviceAddress = deviceAddress;
-
-        setConnectionStatus(CONNECTING_STATUS);
-        return true;
     }
 
     @Override
     public void disconnect() {
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
+            if (getConnectionStatus() != INITIAL_STATUS) {
+                setConnectionStatus(INITIAL_STATUS);
+            }
             Log.w(TAG, "BluetoothAdapter not initialized");
             return;
         }
         mBluetoothGatt.disconnect();
+        setConnectionStatus(DISCONNECTING_STATUS);
     }
 
     @Override
@@ -248,5 +267,10 @@ public class AndroidLeHRMonitor extends LeHRMonitor {
         mBluetoothGatt = null;
         mBluetoothDeviceAddress = null;
         setConnectionStatus(INITIAL_STATUS);
+    }
+
+    @Override
+    public BluetoothAdapter getCurrentBluetoothAdapter() {
+        return mBluetoothAdapter;
     }
 }

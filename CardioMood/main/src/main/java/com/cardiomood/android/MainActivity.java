@@ -30,7 +30,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     private long lastBackPressTime = 0;
 
     private PreferenceHelper mPrefHelper;
-    private boolean showWhatsNewDialog = false;
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -54,8 +53,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         mPrefHelper = new PreferenceHelper(getApplicationContext());
         mPrefHelper.setPersistent(true);
-        showWhatsNewDialog = mPrefHelper.getBoolean(WhatsNewDialog.CONFIG_SHOW_DIALOG_ON_STARTUP, true, true);
-
 
         // Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
@@ -106,7 +103,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     protected void onResume() {
         super.onResume();
 
-        if (showWhatsNewDialog) {
+        if (mPrefHelper.getBoolean(WhatsNewDialog.CONFIG_SHOW_DIALOG_ON_STARTUP, true)) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
