@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
     <head>
@@ -34,15 +33,18 @@
                 padding-left: 8px;
                 padding-right: 8px;
                 text-align: justify;
+                font-size: 20px;
             }
 
-            #slider ul li{
-                height: 100%; 
-                width: 460px;
+            .sliderText p {
+                padding: 0 0;
+            }
+
+            #slider ul li {
+                height: 100%;
             }
             #slider ul li div{
-                height: 100%; 
-                width: 100%;
+                height: 100%;
             }
 
 
@@ -84,6 +86,13 @@
 
         </style>
 
+        <script>
+
+            var ww = Math.min($(window).width(),window.screen.width); //get proper width
+            var wh = Math.min($(window).height(),window.screen.height);
+
+        </script>
+
     </head>
     <body style="background: url('images/texture.png'); width: 99%; height: 99%; overflow: hidden;">
 
@@ -105,14 +114,14 @@
 
         </div>
 
-        <div style="display: block; height: 40%; width: 100%; font-size: 24px; margin-top: 15%;">
+        <div style="display: block; height: 40%; width: 100%; font-size: 24px; margin-top: 10%;">
             <div id="slider" style="display: block; margin: 0 auto;">
                 <ul style="height: 100%; width: 100%;">
                     <li style="">
                         <div>
                             <div class="sliderText" id="sliderText1" >
                                 Чувствуете упадок сил, словно переработали?<br/>
-                                Испатываете частые головные боли?<br/>
+                                Испытываете частые головные боли?<br/>
                                 Постоянно недосыпаете?
                             </div>
                         </div>
@@ -172,6 +181,11 @@
 
         <script type="text/javascript">
 
+            $(function() {
+                $('#slider ul li').css('width', (ww) +'px');
+                $('#slider ul li div').css('width', (ww-20)+'px');
+            });
+
             function setSliderText(index, text) {
                 $("#sliderText"+index).html(text);
             }
@@ -197,16 +211,16 @@
             }
             
             $(function(){
-//                var w = $(window).width();
-//                var h = $(window).height();
-//                var kw = Math.floor(0.5 * Math.min(w, h));
-                var kw = 260;
-                
-                $(function() {
-                    knob = $(".dial").knob({
+                var a = ww*0.6;
+                var b = wh*0.5;
+                var kw = a;
+                if (kw > b)
+                    kw = b;
+                if (!kw)
+                    kw = 180;
+                knob = $(".dial").knob({
                         width: kw,
                         height: kw
-                    });
                 });
                 
                 $("#slider").easySlider({

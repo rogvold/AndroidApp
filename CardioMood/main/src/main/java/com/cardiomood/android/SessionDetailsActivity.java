@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -99,9 +101,15 @@ public class SessionDetailsActivity extends Activity {
                 return (event.getAction() == MotionEvent.ACTION_MOVE);
             }
         });
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                if (getString(R.string.asset_details_html).equals(url)) {
+                    new DataLoadingTask().execute(sessionId);
+                }
+            }
+        });
         webView.loadUrl(getString(R.string.asset_details_html));
-
-        new DataLoadingTask().execute(sessionId);
     }
 
     private void executePostRenderAction() {
@@ -149,7 +157,7 @@ public class SessionDetailsActivity extends Activity {
                                     name = getText(R.string.dafault_measurement_name) + "#" + sessionId;
                                 }
                                 name = name.replace("\\", "\\\\").replace("\"", "&quote;").replace("<", "&lt;").replace(">", "&gt;");
-                                webView.loadUrl("javascript:setTitle(\""+name+"\", \""+dateFormat.format(session.getDateStarted())+"\")");
+                                execJS("setTitle(\"" + name + "\", \"" + dateFormat.format(session.getDateStarted()) + "\")");
                             }
                         })
                 .setNegativeButton("Cancel",
@@ -264,7 +272,7 @@ public class SessionDetailsActivity extends Activity {
         @Override
         protected String doInBackground(Long... params) {
             List<HeartRateDataItem> items = hrDAO.getItemsBySessionId(sessionId);
-            StringBuffer sb = new StringBuffer("javascript:$(document).ready(function(){");
+            StringBuffer sb = new StringBuffer("$(document).ready(function(){");
             HeartRateSession session = sessionDAO.findById(sessionId);
             String name = session.getName();
             if (name == null || name.isEmpty()) {
@@ -283,10 +291,25 @@ public class SessionDetailsActivity extends Activity {
 
         @Override
         protected void onPostExecute(String s) {
-            webView.loadUrl(s);
+            execJS(s);
             Log.d(TAG, "execJS: " + s);
             removeProgressDialog();
         }
+    }
+
+    private void execJS(final String js) {
+        runOnUiThread(new Runnable() {
+            @Override
+            @SuppressWarnings("NewApi")
+            public void run() {
+                Log.d(TAG, "execJS(): js = " + js);
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                    webView.evaluateJavascript(js, null);
+                } else {
+                    webView.loadUrl("javascript:" + js);
+                }
+            }
+        });
     }
 
 }

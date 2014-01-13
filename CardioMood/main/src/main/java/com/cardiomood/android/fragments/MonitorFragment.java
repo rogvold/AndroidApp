@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
@@ -395,11 +396,19 @@ public class MonitorFragment extends Fragment {
     }
 
     private void execJS(final String js) {
-        getActivity().runOnUiThread(new Runnable() {
+        final Activity activity = getActivity();
+        if (activity == null)
+            return;
+        activity.runOnUiThread(new Runnable() {
             @Override
+            @SuppressWarnings("NewApi")
             public void run() {
                 Log.d(TAG, "execJS(): js = " + js);
-                webView.loadUrl("javascript:"+js);
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                    webView.evaluateJavascript(js, null);
+                } else {
+                    webView.loadUrl("javascript:" + js);
+                }
             }
         });
     }
