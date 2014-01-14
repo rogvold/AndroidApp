@@ -1,5 +1,6 @@
 package com.cardiomood.android.fragments;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -15,6 +16,7 @@ import android.content.ServiceConnection;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -26,6 +28,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -47,10 +50,14 @@ import com.cardiomood.android.tools.IMonitors;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
@@ -68,11 +75,17 @@ public class MonitorFragment extends Fragment {
     private static final int HR_DATA_EVENT = 1;
     private static final int CONNECTION_STATUS_CHANGE_EVENT = 2;
 
+    // Stops scanning after 10 seconds.
+    private static final long SCAN_PERIOD = 10000;
+
     private View container;
     private WebView webView;
     private View initialView;
     private Button connectDeviceButton;
     private ScrollView scrollView;
+
+    private Handler mHandler;
+    private boolean mScanning = false;
 
     private AlertDialog alertSelectDevice;
 
@@ -80,6 +93,7 @@ public class MonitorFragment extends Fragment {
 
     private ProgressDialog sessionSavingDialog;
     public static boolean isMonitoring = false;
+    private boolean isConnectedView = false;
 
     private HeartRateLeService mBluetoothLeService;
 
@@ -182,6 +196,8 @@ public class MonitorFragment extends Fragment {
         Log.d(TAG, "onCreate()");
         super.onCreate(savedInstanceState);
 
+        mHandler = new Handler();
+
         Intent gattServiceIntent = new Intent(getActivity(), HeartRateLeService.class);
         getActivity().bindService(gattServiceIntent, mServiceConnection, Activity.BIND_AUTO_CREATE);
 
@@ -248,18 +264,48 @@ public class MonitorFragment extends Fragment {
     }
 
     private void setConnectedView() {
+        isConnectedView = false;
+        final Semaphore mutex = new Semaphore(1);
         isMonitoring = true;
         initWebView();
         scrollView.setVisibility(View.VISIBLE);
+        try {
+            mutex.acquire();
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            return;
+        }
         webView.loadUrl(getString(R.string.asset_countdown_html));
+
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                if (getString(R.string.asset_countdown_html).equals(url)) {
+                    mutex.release();
+                    isConnectedView = true;
+                }
+            }
+        });
         connectDeviceButton.setEnabled(false);
 //        execJS("setSliderText(1, \"" + getString(R.string.monitor_slider_text1) + "\")");
 //        execJS("setSliderText(2, \"" + getString(R.string.monitor_slider_text2) + "\")");
 //        execJS("setSliderText(3, \"" + getString(R.string.monitor_slider_text3) + "\")");
 //        execJS("setSliderText(4, \"" + getString(R.string.monitor_slider_text4) + "\")");
+
+        // Wait for the page to load
+        try {
+            while (true) {
+                if (mutex.tryAcquire(100L, TimeUnit.MILLISECONDS));
+                    mutex.release();
+                    return;
+            }
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     private void setDisconnectedView() {
+        isConnectedView = false;
         scrollView.setVisibility(View.GONE);
         webView.stopLoading();
         connectDeviceButton.setEnabled(true);
@@ -311,23 +357,10 @@ public class MonitorFragment extends Fragment {
         }
     }
 
+    @SuppressWarnings("NewApi")
     private void showConnectionDialog() {
         Log.d(TAG, "showConnectionDialog()");
         final BluetoothAdapter bluetoothAdapter = mBluetoothLeService.getMonitor().getCurrentBluetoothAdapter();
-
-        AdapterView.OnItemClickListener mPairedListClickListener = new AdapterView.OnItemClickListener() {
-            public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
-                bluetoothAdapter.cancelDiscovery();
-
-                String info = ((TextView) v).getText().toString();
-                //Log.d(TAG, "mPairedListClickListener.onItemClick(): the total length is " + info.length());
-                String deviceAddress = info.substring(info.lastIndexOf("\n")+1);
-
-                mBluetoothLeService.connect(deviceAddress);
-                alertSelectDevice.dismiss();
-                alertSelectDevice = null;
-            }
-        };
 
         LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         final View layout_listview = inflater.inflate(R.layout.device_list, (ViewGroup) getActivity().findViewById(R.id.root_device_list));
@@ -335,16 +368,17 @@ public class MonitorFragment extends Fragment {
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
         dialogBuilder.setView(layout_listview);
 
-        ArrayAdapter<String> mPairedDevicesArrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.device_name);
-        ListView pairedListView = (ListView) layout_listview.findViewById(R.id.paired_devices);
+        final ArrayList<String> discoveredDeviceNames = new ArrayList<String>();
+        final ArrayAdapter<String> mPairedDevicesArrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.device_name, discoveredDeviceNames);
+        final ListView pairedListView = (ListView) layout_listview.findViewById(R.id.paired_devices);
         mPairedDevicesArrayAdapter.clear();
         pairedListView.setAdapter(mPairedDevicesArrayAdapter);
-        pairedListView.setOnItemClickListener(mPairedListClickListener);
+        final Set<BluetoothDevice> discoveredDevices = new HashSet<BluetoothDevice>();
 
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
-
+        discoveredDevices.addAll(pairedDevices);
+        boolean foundDevices = false;
         if (pairedDevices.size() > 0) {
-            boolean foundDevices = false;
 
             if (pairedDevices.size() > 0) {
 
@@ -353,8 +387,7 @@ public class MonitorFragment extends Fragment {
                     for (String s : IMonitors.MonitorNamesPatternLE) {
                         Pattern p_le = Pattern.compile(s);
                         if (device.getName().matches(p_le.pattern())) {
-                            mPairedDevicesArrayAdapter.add(device.getName()
-                                    + "\n" + device.getAddress());
+                            mPairedDevicesArrayAdapter.add(device.getName()  + "\n" + device.getAddress());
                             foundDevices = true;
                         }
                     }
@@ -365,22 +398,52 @@ public class MonitorFragment extends Fragment {
                 layout_listview.findViewById(R.id.title_paired_devices)
                         .setVisibility(View.VISIBLE);
             } else {
-                layout_listview.findViewById(R.id.title_paired_devices)
-                        .setVisibility(View.GONE);
-                String noDevices = "None devices have been paired";
-                mPairedDevicesArrayAdapter.add(noDevices);
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                    layout_listview.findViewById(R.id.title_paired_devices)
+                            .setVisibility(View.GONE);
+                    String noDevices = "None devices have been paired";
+                    mPairedDevicesArrayAdapter.add(noDevices);
+                }
             }
-        } else {
-            layout_listview.findViewById(R.id.title_paired_devices)
-                    .setVisibility(View.GONE);
-            String noDevices ="None devices have been paired";
-            mPairedDevicesArrayAdapter.add(noDevices);
         }
+
         dialogBuilder.setTitle(getText(R.string.select_device_to_connect));
-        alertSelectDevice = dialogBuilder.show();
+        alertSelectDevice = dialogBuilder.create();
+        final Object leScanCallback = (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2)
+                ? null : new BluetoothAdapter.LeScanCallback() {
+            @Override
+            public void onLeScan(final BluetoothDevice bluetoothDevice, int rssi, byte[] scanRecord) {
+                Log.i(TAG, "onLeScan(): bluetoothDevice.address="+bluetoothDevice.getAddress());
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        String deviceString = bluetoothDevice.getName() + "\n" + bluetoothDevice.getAddress();
+                        for (BluetoothDevice device: discoveredDevices) {
+                            if (device.getAddress().equals(bluetoothDevice.getAddress()))
+                                return;
+                        }
+                        discoveredDevices.add(bluetoothDevice);
+                        mPairedDevicesArrayAdapter.add(deviceString);
+                        mPairedDevicesArrayAdapter.notifyDataSetChanged();
+                    }
+                });
+
+            }
+        };
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            alertSelectDevice.setOnShowListener(new DialogInterface.OnShowListener() {
+                @Override
+                public void onShow(DialogInterface dialogInterface) {
+                    scanLeDevice(bluetoothAdapter, true, (BluetoothAdapter.LeScanCallback) leScanCallback);
+                }
+            });
+        }
         alertSelectDevice.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialogInterface) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                    scanLeDevice(bluetoothAdapter, false, (BluetoothAdapter.LeScanCallback) leScanCallback);
+                }
                 if (mBluetoothLeService == null)
                     return;
                 LeHRMonitor monitor = mBluetoothLeService.getMonitor();
@@ -393,9 +456,55 @@ public class MonitorFragment extends Fragment {
                 }
             }
         });
+        AdapterView.OnItemClickListener mPairedListClickListener = new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
+                bluetoothAdapter.cancelDiscovery();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                    scanLeDevice(bluetoothAdapter, false, (BluetoothAdapter.LeScanCallback) leScanCallback);
+                }
+
+                String info = ((TextView) v).getText().toString();
+                //Log.d(TAG, "mPairedListClickListener.onItemClick(): the total length is " + info.length());
+                String deviceAddress = info.substring(info.lastIndexOf("\n")+1);
+
+                mBluetoothLeService.connect(deviceAddress);
+                alertSelectDevice.dismiss();
+                alertSelectDevice = null;
+            }
+        };
+        pairedListView.setOnItemClickListener(mPairedListClickListener);
+        alertSelectDevice.show();
+    }
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+    private void scanLeDevice(final BluetoothAdapter bluetoothAdapter, final boolean enable, final BluetoothAdapter.LeScanCallback leScanCallback) {
+        if (enable) {
+            // Stops scanning after a pre-defined scan period.
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (mScanning) {
+                        mScanning = false;
+                        bluetoothAdapter.stopLeScan(leScanCallback);
+                        Log.d(TAG, "LeScan stopped.");
+                    }
+                }
+            }, SCAN_PERIOD);
+
+            mScanning = true;
+            bluetoothAdapter.startLeScan(new UUID[]{UUID.fromString("0000180d-0000-1000-8000-00805f9b34fb")}, leScanCallback);
+            Log.d(TAG, "LeScan started.");
+        } else {
+            mScanning = false;
+            bluetoothAdapter.stopLeScan(leScanCallback);
+            Log.d(TAG, "LeScan stopped.");
+        }
     }
 
     private void execJS(final String js) {
+        if (!isConnectedView) {
+            return;
+        }
         final Activity activity = getActivity();
         if (activity == null)
             return;

@@ -104,7 +104,7 @@ public class SessionDetailsActivity extends Activity {
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
-                if (getString(R.string.asset_details_html).equals(url)) {
+                if (url.endsWith("details.html")) {
                     new DataLoadingTask().execute(sessionId);
                 }
             }

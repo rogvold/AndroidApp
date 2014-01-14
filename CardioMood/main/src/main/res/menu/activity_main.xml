@@ -8,7 +8,7 @@
     <item cardiomood:showAsAction="never"
         android:id="@+id/menu_bt_settings"
         android:title="@string/menu_bt_settings" />
-    <item cardiomood:showAsAction="ifRoom"
+    <item cardiomood:showAsAction="never"
         android:id="@+id/menu_about"
         android:title="@string/menu_about"
         android:titleCondensed="@string/menu_about_condensed"/>
