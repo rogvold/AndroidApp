@@ -7,5 +7,4 @@
 === Устранены ошибки и исправлен UI.
 </p>
 <br/>
-<p>Soon we are going to add a continuous monitoring! :)</p>
-<p>Stay with <b><a href="http://goo.gl/ZLmHhJ">www.CardioMood.com</a></b>!</p>
+<p>Оставайтесь с <b><a href="http://goo.gl/ZLmHhJ">www.CardioMood.com</a></b>!</p>

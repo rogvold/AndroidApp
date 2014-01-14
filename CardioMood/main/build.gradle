@@ -1,3 +1,6 @@
+import com.android.builder.DefaultManifestParser
+def manifestParser = new DefaultManifestParser()
+
 buildscript {
     repositories {
         mavenCentral()
@@ -28,6 +31,31 @@ android {
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE.txt'
     }
+
+    signingConfigs {
+
+        release {
+            storeFile file('D:\\Other\\Dropbox\\Dropbox\\Documents\\Projects\\Cardio\\keystore\\android.key')
+            storePassword "57103261479"
+            keyAlias "myreleasekey"
+            keyPassword "5710326"
+        }
+    }
+
+    buildTypes {
+
+        release {
+            signingConfig signingConfigs.release
+            applicationVariants.all { variant ->
+                def appName = 'CardioMood'
+                def versionName = manifestParser.getVersionName(android.sourceSets.main.manifest.srcFile);
+                def file = variant.outputFile
+                variant.outputFile = new File(file.parent, appName + "-" + versionName + "-release.apk")
+            }
+        }
+
+    }
+
 }
 
 dependencies {
