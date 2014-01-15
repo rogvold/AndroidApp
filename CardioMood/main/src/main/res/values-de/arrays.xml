@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="gender_names">
+        <item>Männlich</item>
+        <item>Weiblich</item>
+        <item>Nicht festgelegt</item>
+    </string-array>
+    <string-array name="gender_values">
+        <item>MALE</item>
+        <item>FEMALE</item>
+        <item>NOT_SPECIFIED</item>
+    </string-array>
+</resources>
