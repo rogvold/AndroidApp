@@ -20,7 +20,9 @@ import com.cardiomood.android.dialogs.WhatsNewDialog;
 import com.cardiomood.android.fragments.HistoryFragment;
 import com.cardiomood.android.fragments.MonitorFragment;
 import com.cardiomood.android.fragments.ProfileFragment;
+import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.android.tools.config.PreferenceHelper;
+import com.flurry.android.FlurryAgent;
 
 import java.util.Locale;
 
@@ -91,6 +93,11 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         actionBar.setSelectedNavigationItem(1);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FlurryAgent.onStartSession(this, ConfigurationConstants.FLURRY_API_KEY);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -111,6 +118,12 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                 }
             });
         }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        FlurryAgent.onEndSession(this);
     }
 
     private void showWhatsNewDialog() {
@@ -144,9 +157,11 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         switch (item.getItemId()) {
             case R.id.menu_bt_settings:
+                FlurryAgent.logEvent("menu_bt_settings_clicked");
                 openBluetoothSettings();
                 return true;
             case R.id.menu_about:
+                FlurryAgent.logEvent("menu_about_clicked");
                 showAboutDialog();
                 return true;
         }

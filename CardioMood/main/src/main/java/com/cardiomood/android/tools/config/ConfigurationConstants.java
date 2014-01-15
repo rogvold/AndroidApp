@@ -1,6 +1,9 @@
 package com.cardiomood.android.tools.config;
 
 public interface ConfigurationConstants {
+
+    String FLURRY_API_KEY           = "KC9R5WHFTBYZQNKNDJX3";
+
 	// service
 	String SERVICE_PROTOCOL			= "app.service_protocol";
 	String SERVICE_HOST				= "app.service_host";

@@ -167,6 +167,18 @@ public abstract class BaseDAO<T extends Entity> implements BaseColumns {
         }
     }
 
+    public int getCount() {
+        int result = 0;
+        final SQLiteDatabase db = getDatabase();
+        synchronized (db) {
+            Cursor cursor = db.query(getTableName(), new String[]{"count(1) as C"}, null, null, null, null, null);
+            cursor.moveToFirst();
+            result = cursor.getInt(cursor.getColumnIndex("C"));
+            cursor.close();
+        }
+        return result;
+    }
+
     public abstract ContentValues getContentValues(T item);
     public abstract String getTableName();
     public abstract String[] getColumnNames();

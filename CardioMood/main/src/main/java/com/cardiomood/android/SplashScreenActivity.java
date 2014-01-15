@@ -11,7 +11,9 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.android.util.SystemUiHider;
+import com.flurry.android.FlurryAgent;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -137,6 +139,17 @@ public class SplashScreenActivity extends Activity {
         startMainActivity();
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FlurryAgent.onStartSession(this, ConfigurationConstants.FLURRY_API_KEY);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        FlurryAgent.onEndSession(this);
+    }
 
     /**
      * Touch listener to use for in-layout UI controls to delay hiding the

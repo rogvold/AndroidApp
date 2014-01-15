@@ -21,6 +21,7 @@ import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
 import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.model.HeartRateDataItem;
 import com.cardiomood.android.db.model.HeartRateSession;
+import com.flurry.android.FlurryAgent;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -71,9 +72,13 @@ public class SaveAsDialog extends Dialog {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 switch (i) {
-                    case 0: saveAsImage();
+                    case 0:
+                        FlurryAgent.logEvent("save_as_image_clicked");
+                        saveAsImage();
                         break;
-                    case 1: saveAsTxt();
+                    case 1:
+                        FlurryAgent.logEvent("save_as_text_clicked");
+                        saveAsTxt();
                         break;
                 }
                 dismiss();

@@ -59,8 +59,6 @@
     <string name="press_back_to_close">Нажмите еще раз, чтобы отключить датчик и выйти из программы.</string>
     <string name="connect_device">Подключить датчик</string>
     <string name="loading_data_for_measurement">Загрузка даных измерения #</string>
-    <string name="asset_countdown_html">file:///android_asset/www-ru/countdown.html</string>
-    <string name="asset_details_html">file:///android_asset/www-ru/details.html</string>
     <string name="good_session_name">Пример хороших показателей</string>
     <string name="stressed_session_name">Пример состояния стресса</string>
     <string name="athlete_session_name">Спортсмен в покое</string>

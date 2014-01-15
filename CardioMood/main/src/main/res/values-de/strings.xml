@@ -59,8 +59,6 @@
     <string name="opening_measurement">Warten Sie ein paar Sekunden auf die Reportgenerierung.</string>
     <string name="connect_device">Einschalten Gerät.</string>
     <string name="loading_data_for_measurement">Loading Daten von der Messung #</string>
-    <string name="asset_countdown_html">file:///android_asset/www/countdown.html</string>
-    <string name="asset_details_html">file:///android_asset/www/details.html</string>
     <string name="good_session_name">Durchschnittliches Ergebnis</string>
     <string name="stressed_session_name">Beispiel von Stress</string>
     <string name="athlete_session_name">Sportler in Ruhe</string>

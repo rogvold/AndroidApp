@@ -44,6 +44,10 @@ android {
 
     buildTypes {
 
+        debug {
+
+        }
+
         release {
             signingConfig signingConfigs.release
             applicationVariants.all { variant ->
@@ -70,4 +74,5 @@ dependencies {
     compile files('lib/clientserverinteraction.jar')
     compile 'commons-io:commons-io:2.4@jar'
     compile files('lib/CWAC-EndlessAdapter.jar')
+    compile files('lib/FlurryAnalytics_3.3.2.jar')
 }

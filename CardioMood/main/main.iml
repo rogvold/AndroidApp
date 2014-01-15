@@ -82,6 +82,7 @@
     <orderEntry type="library" exported="" name="codegist-crest-2.0.0-RC1" level="project" />
     <orderEntry type="library" exported="" name="commons-io-2.4" level="project" />
     <orderEntry type="library" exported="" name="ComAndroidSupportAppcompatV71900.aar" level="project" />
+    <orderEntry type="library" exported="" name="FlurryAnalytics_3.3.2" level="project" />
   </component>
 </module>
 

@@ -3,11 +3,14 @@ package com.cardiomood.android.bluetooth;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 /**
  * Created by danon on 18.11.13.
  */
 public abstract class LeHRMonitor {
+
+    private static final String TAG = LeHRMonitor.class.getSimpleName();
 
     public static final String ACTION_CONNECTION_STATUS_CHANGED = "com.cardiomood.android.bluetooth.ACTION_CONNECTION_STATUS_CHANGED";
     public static final String ACTION_BPM_CHANGED = "com.cardiomood.android.bluetooth.ACTION_BPM_CHANGED";
@@ -38,12 +41,16 @@ public abstract class LeHRMonitor {
 
     public static LeHRMonitor getMonitor(Context context) {
         LeHRMonitor monitor = null;
-        monitor = new AndroidLeHRMonitor(context);
-        if (monitor.isSupported())
-            return monitor;
-        monitor = new MotorolaLeHRMonitor(context);
-        if (monitor.isSupported())
-            return monitor;
+        try {
+            monitor = new AndroidLeHRMonitor(context);
+            if (monitor.isSupported())
+                return monitor;
+            monitor = new MotorolaLeHRMonitor(context);
+            if (monitor.isSupported())
+                return monitor;
+        } catch (NoClassDefFoundError ex) {
+            Log.w(TAG, "getMonitor(): this device is not supported.", ex);
+        }
         return null;
     }
 

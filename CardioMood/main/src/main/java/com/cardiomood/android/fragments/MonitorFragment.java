@@ -46,12 +46,15 @@ import com.cardiomood.android.db.model.HeartRateDataItem;
 import com.cardiomood.android.db.model.HeartRateSession;
 import com.cardiomood.android.db.model.SessionStatus;
 import com.cardiomood.android.tools.IMonitors;
+import com.flurry.android.FlurryAgent;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -133,6 +136,7 @@ public class MonitorFragment extends Fragment {
 
                 // update timer
                 if (newStatus == LeHRMonitor.CONNECTED_STATUS) {
+                    FlurryAgent.logEvent("device_connected");
                     monitorTime = 0;
                     if (timer != null) {
                         timer.cancel();
@@ -172,6 +176,7 @@ public class MonitorFragment extends Fragment {
                     if (monitorTime <=120) {
                         Toast.makeText(getActivity(), R.string.device_was_disconnected, Toast.LENGTH_SHORT).show();
                     }
+                    FlurryAgent.logEvent("device_disconnected", new HashMap<String, String>(){{put("monitorTime", monitorTime+"");}});
                     setDisconnectedView();
                 }
                 if (newStatus == LeHRMonitor.INITIAL_STATUS) {
@@ -245,6 +250,7 @@ public class MonitorFragment extends Fragment {
         connectDeviceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                FlurryAgent.logEvent("connect_device_click");
                 performConnect();
             }
         });
@@ -257,6 +263,7 @@ public class MonitorFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_disconnect:
+                FlurryAgent.logEvent("stop_button_clicked", new HashMap<String, String>(){{put("monitorTime", monitorTime+"");}});
                 performDisconnect();
                 break;
         }
@@ -564,6 +571,12 @@ public class MonitorFragment extends Fragment {
                 session.setStatus(SessionStatus.COMPLETED);
                 session = sessionDAO.insert(session, data);
                 Long sessionId = session.getId();
+
+                Map<String, String> args = new HashMap<String, String>();
+                args.put("sessionId", sessionId+"");
+                args.put("totalSessions", sessionDAO.getCount()+"");
+                FlurryAgent.logEvent("session_saved", args);
+
                 return sessionId;
             }
 

@@ -21,11 +21,14 @@ import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.model.HeartRateSession;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.android.tools.config.PreferenceHelper;
+import com.flurry.android.FlurryAgent;
 import com.haarman.listviewanimations.itemmanipulation.contextualundo.ContextualUndoAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by danshin on 01.11.13.
@@ -146,15 +149,29 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
 
     private class DeleteItemTask extends AsyncTask<Long, Void, Boolean> {
 
+        private HeartRateSessionDAO dao = new HeartRateSessionDAO();
+
         @Override
         protected Boolean doInBackground(Long... args) {
             try {
                 long sessionId = args[0];
-                new HeartRateSessionDAO().delete(sessionId);
+                HeartRateSession session = dao.findById(sessionId);
+                if (session != null) {
+                    dao.delete(sessionId);
+                    logSessionDeletedEvent(session);
+                }
                 return true;
             } catch (Exception ex) {
                 return false;
             }
+        }
+
+        private void logSessionDeletedEvent(HeartRateSession session) {
+            Map<String, String> args = new HashMap<String, String>();
+            args.put("sessionId", session.getId()+"");
+            args.put("sessionName", session.getName());
+            args.put("total_sessions", dao.getCount()+"");
+            FlurryAgent.logEvent("session_deleted", args);
         }
 
         @Override

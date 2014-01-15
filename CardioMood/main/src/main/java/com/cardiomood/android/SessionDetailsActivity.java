@@ -24,6 +24,8 @@ import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.model.HeartRateDataItem;
 import com.cardiomood.android.db.model.HeartRateSession;
 import com.cardiomood.android.dialogs.SaveAsDialog;
+import com.cardiomood.android.tools.config.ConfigurationConstants;
+import com.flurry.android.FlurryAgent;
 
 import java.text.DateFormat;
 import java.text.MessageFormat;
@@ -77,6 +79,7 @@ public class SessionDetailsActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
+        FlurryAgent.onStartSession(this, ConfigurationConstants.FLURRY_API_KEY);
     }
 
     @Override
@@ -85,6 +88,12 @@ public class SessionDetailsActivity extends Activity {
         saveAsItem.setEnabled(!savingInProgress);
 
         return super.onPrepareOptionsMenu(menu);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        FlurryAgent.onEndSession(this);
     }
 
     private void refreshData() {
@@ -104,18 +113,22 @@ public class SessionDetailsActivity extends Activity {
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageFinished(WebView view, String url) {
-                if (url.endsWith("details.html")) {
+                if (url.endsWith(".html")) {
                     new DataLoadingTask().execute(sessionId);
                 }
             }
         });
         webView.loadUrl(getString(R.string.asset_details_html));
+        Toast.makeText(this, "Loading: " + getString(R.string.asset_details_html), Toast.LENGTH_SHORT).show();
     }
 
     private void executePostRenderAction() {
-        if (postRenderAction == DO_NOTHING_ACTION)
+        if (postRenderAction == DO_NOTHING_ACTION) {
+            FlurryAgent.logEvent("old_session_opened");
             return;
+        }
         if (postRenderAction == RENAME_ACTION) {
+            FlurryAgent.logEvent("new_session_opened");
             showRenameSessionDialog();
         }
         postRenderAction = DO_NOTHING_ACTION;
@@ -158,6 +171,7 @@ public class SessionDetailsActivity extends Activity {
                                 }
                                 name = name.replace("\\", "\\\\").replace("\"", "&quote;").replace("<", "&lt;").replace(">", "&gt;");
                                 execJS("setTitle(\"" + name + "\", \"" + dateFormat.format(session.getDateStarted()) + "\")");
+                                FlurryAgent.logEvent("session_renamed");
                             }
                         })
                 .setNegativeButton("Cancel",
@@ -223,12 +237,15 @@ public class SessionDetailsActivity extends Activity {
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
             case R.id.menu_refresh:
+                FlurryAgent.logEvent("menu_refresh_clicked");
                 refreshData();
                 return true;
             case R.id.menu_rename:
+                FlurryAgent.logEvent("menu_rename_clicked");
                 showRenameSessionDialog();
                 return true;
             case R.id.menu_save_as:
+                FlurryAgent.logEvent("menu_save_clicked");
                 showSaveAsDialog();
                 return true;
         }
