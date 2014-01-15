@@ -474,7 +474,11 @@ public class MonitorFragment extends Fragment {
                 //Log.d(TAG, "mPairedListClickListener.onItemClick(): the total length is " + info.length());
                 String deviceAddress = info.substring(info.lastIndexOf("\n")+1);
 
-                mBluetoothLeService.connect(deviceAddress);
+                try {
+                    mBluetoothLeService.connect(deviceAddress);
+                } catch (Exception ex) {
+                    Log.e(TAG, "mBluetoothLeService.connect() failed to connect to the device '" + deviceAddress+"'", ex);
+                }
                 alertSelectDevice.dismiss();
                 alertSelectDevice = null;
             }
