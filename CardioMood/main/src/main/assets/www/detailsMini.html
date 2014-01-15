@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -20,10 +21,10 @@
             }
 
             .tab{
-                width: 32%;
-                text-align: center;
+                width: 30%; 
+                text-align: center; 
                 display: inline-block;
-                font-size: 30px;
+                font-size: 18px;
                 vertical-align: middle;
                 border-right: 2px dashed lightsalmon;
                 cursor: pointer;
@@ -32,7 +33,7 @@
 
             .tab.active{
                 color: firebrick;
-                font-size: 40px;
+                font-size: 22px;
                 font-weight: bold;
             }
 
@@ -41,32 +42,32 @@
             }
 
             .tabs{
-                display: block;
-                height: 100px;
+                display: block; 
+                height: 100px; 
                 /*                border-bottom: 2px lightsalmon dashed; */
                 font-size: 20px; width: 99%;
                 -webkit-box-sizing: border-box; /* Android ≤ 2.3, iOS ≤ 4 */
                 -moz-box-sizing: border-box; /* Firefox 1+ */
-                box-sizing: border-box;
+                box-sizing: border-box; 
                 padding-top: 20px;
             }
 
             .info_block{
-                width: 99%;
-                display: block;
-                min-height: 800px;
-                margin-top: 20px;
+                width: 99%; 
+                display: block; 
+                min-height: 770px;
+                margin-top: 20px; 
                 /*                border-top: 2px lightsalmon dashed; */
-                border-bottom: 2px lightsalmon dashed;
+                border-bottom: 2px lightsalmon dashed; 
                 box-sizing: border-box;
                 -webkit-box-sizing: border-box; /* Android ≤ 2.3, iOS ≤ 4 */
                 -moz-box-sizing: border-box; /* Firefox 1+ */
             }
 
             .tabs .topDescription{
-                width: 100%;
-                padding: 10px;
-                font-size: 22px;
+                width: 100%; 
+                padding: 10px; 
+                font-size: 18px;
             }
 
             .tabs .topDescription p{
@@ -75,22 +76,22 @@
             }
 
             .tabs .bottomDescription{
-                display: block;
-                margin: 0 auto;
-                font-size: 26px;
-                text-align: center;
+                display: block;  
+                margin: 0 auto; 
+                font-size: 16px; 
+                text-align: center; 
                 margin-top: 10px;
                 margin-top: 20px;
-                font-size: 22px;
-            }
+                font-size: 18px;
+            }еу
 
             .standardGraph{
-                display: block;
-                height: 400px;
-                width: 400px;
-                margin: 0 auto;
-                margin-top: 2%;
-                position: relative;
+                display: block; 
+                height: 300px;
+                width: 300px; 
+                margin: 0 auto; 
+                margin-top: 2%; 
+                position: relative; 
                 /*                border: 2px dashed lightcoral;*/
             }
 
@@ -100,7 +101,7 @@
                 left:0;
                 right:0;
                 bottom:0;
-                background-color:#fff;
+                background-color:#fff;  
                 background: url('images/texture.png');
                 /*    background-color: firebrick;  change if the mask should have another color then white */
                 z-index:99999; /* makes sure it stays on top */
@@ -158,107 +159,105 @@
         </div>
 
 
-        <div style="display: block; height: 120px; width: 100%; position: relative;">
+        <div style="display: block; height: 90px; width: 100%; position: relative;">
 
-            <span style="text-align: center; position: absolute; top: 22px; font-size: 30px;  display: block; height: 30%; width: 49%; ">
-                <span style="display: block;" >Пульс</span>
+            <span style="text-align: center; position: absolute; top: 22px; font-size: 24px;  display: block; height: 30%; width: 49%; ">
+                <span style="display: block;" >BPM</span>
                 <b id="pulseId" ></b>
             </span>
-            <span style="text-align: center; position: absolute; top: 22px; font-size: 30px; display: block; height: 30%; width: 49%; left: 50%; ">
-                <span style="display: block;" >Напряжение</span>
+            <span style="text-align: center; position: absolute; top: 22px; font-size: 24px; display: block; height: 30%; width: 49%; left: 50%; ">
+                <span style="display: block;" >Tension</span>
                 <b id="tensionId" ></b>
             </span>
         </div>
         <div id="stressSpeedometer" style="text-align: center;">
-            <canvas id="tutorial" width="440" height="220">Данные недоступны.</canvas>
+            <canvas id="tutorial" width="440" height="220">Canvas not available.</canvas>
         </div>
 
-        <div style="display: block; height: 300px; width: 500px;  margin: 0 auto; margin-top: 2%; position: relative; margin-left: 1%;" id="RRplot"></div>
+        <div style="display: block; height: 250px; width: 370px;  margin: 0 auto; margin-top: 2%; position: relative; margin-left: 1%;" id="RRplot"></div>
 
-        <div style="display: block; width: 99%; text-align: center; font-size: 30px; margin-top: 30px; ">
-            Скаттерограмма
+        <div style="display: block; width: 99%; text-align: center; font-size: 24px; margin-top: 30px; ">
+            Scattergram
         </div>
-        <div style="display: block; height: 400px; width: 400px; margin: 0 auto; margin-top: 2%; position: relative;" id="scatter" ></div>
+        <div style="display: block; height: 300px; width: 300px; margin: 0 auto; margin-top: 2%; position: relative;" id="scatter" ></div>
 
         <div style="display: none;" id="scattergramInfo" class="info_block" >
             <div class="tabs" >
                 <div class="tab active" data-id="1" >
-                    Эталон
+                    Good
                 </div>
                 <div style="" class="tab" data-id="2" >
-                    Стресс
+                    Stress
                 </div>
                 <div class="tab" data-id="3" >
-                    Плохо
+                    Bad
                 </div>
                 <div class="topDescription" >
                     <p>
-                        Скаттерограмма наглядно представляет распределение RR-интервалов на плоскости. Оси X соответствует интервал RR[i], а оси Y &mdash; интервал RR[i-1].
-                        Скаттерограмма позволяет оценить активность симпатического отдела ЦНС.
+                        Scattergram is a graphical representation of R-R intervlas distribution (current is on X and previous is on Y). It allows to measure activity of sympathicus. 
+                        Points at scattergram can be visually combined into an ellipse.
                     </p>
                 </div>
 
                 <div class="standardGraphBlock" data-id="1" style="display: block;" >
-                    <div class="standardGraph" id="goodScatter"  ></div>
+                    <div class="standardGraph" id="goodScatter" style="width: 300px; height: 300px;"  ></div>
                     <div style="" class="bottomDescription" >
-                        Хорошая скаттерограмма обычно узкая и длинная, точки лежат близко друг к другу.
+                        Good scattergram is usually thin and quite long. Points at healthy scattergram should lay very close to each other.
                     </div>
                 </div>
                 <div class="standardGraphBlock" data-id="2" style="display: none;" >
-                    <div class="standardGraph" id="stressScatter" ></div>
+                    <div class="standardGraph" id="stressScatter"  style="width: 300px; height: 300px;"   ></div>
                     <div style="" class="bottomDescription" >
-                        В состоянии напряжения точки на скаттерограмме имеют больший разброс. В норме такая картина наблюдается во время физических упражнений.
+                        Dispersed, but, however, rather thin scattergram usually indicates stressful state. Such picture is quite OK if you are currently doing physical exercises.
                     </div>
                 </div>
                 <div class="standardGraphBlock" data-id="3" style="display: none;" >
-                    <div class="standardGraph" id="badScatter" ></div>
+                    <div class="standardGraph" id="badScatter"  style="width: 300px; height: 300px;"   ></div>
                     <div style="" class="bottomDescription" >
-                        Хаос в скаттерограмме свидетельствует о возможном наличии глубоких изменений сердечного ритма и его регуляции. Требуется консультация врача.
+                        Chaotically dispersed scattergram usually says that you may have possible problems with health. Please contact a doctor for more information.
                     </div>
                 </div>
             </div>
         </div>
 
         <div style="display: block; width: 99%;  text-align: center; font-size: 30px; margin-top: 30px; ">
-            Гистограмма
+            Histogram
         </div>
-        <div style="display: block; height: 400px; width: 400px; margin: 0 auto; margin-top: 2%; position: relative;" id="dif" ></div>
+        <div style="display: block; height: 300px; width: 300px; margin: 0 auto; margin-top: 2%; position: relative;" id="dif" ></div>
 
         <div style="display: none;" id="histogrammInfo" class="info_block" >
             <div class="tabs" >
                 <div class="tab active" data-id="1" >
-                    Эталон
+                    Good
                 </div>
                 <div style="" class="tab" data-id="2" >
-                    Стресс
+                    Stress
                 </div>
                 <div class="tab" data-id="3" >
-                    Плохо
+                    Bad
                 </div>
                 <div class="topDescription" >
                     <p>
-                        Гистограмма показывает распределение RR-интервалов по диапазонам.
-                        Она позволяет оценить баланс между активностью симпатического и парасимпатического отдела вегетативной нервной системы.
+                        Histogram shows distribution of R-R intervals by various interval ranges. It allows to see how wide is an amplitude of your heart beats.
                     </p>
                 </div>
 
                 <div class="standardGraphBlock" data-id="1" style="display: block;" >
-                    <div class="standardGraph" id="goodHistogramm"  ></div>
+                    <div class="standardGraph" id="goodHistogramm"  style="width: 300px; height: 300px;" ></div>
                     <div style="" class="bottomDescription" >
-                        Хорошая гистограмма в покое похожа на пирамиду и имеет ширину 200-300 мс.
+                        Good histogram usually looks like a pyramid and is 200-300 ms wide.
                     </div>
                 </div>
                 <div class="standardGraphBlock" data-id="2" style="display: none;" >
-                    <div class="standardGraph" id="stressHistogramm" ></div>
+                    <div class="standardGraph" id="stressHistogramm" style="width: 300px; height: 300px;" ></div>
                     <div style="" class="bottomDescription" >
-                        В случае напржения, наблюдается сужение гистограммы и наличие ярко выраженного пика.
+                        In stressfull state histogram is usually quite thin and has high peaks.
                     </div>
                 </div>
                 <div class="standardGraphBlock" data-id="3" style="display: none;" >
-                    <div class="standardGraph" id="badHistogramm" ></div>
+                    <div class="standardGraph" id="badHistogramm" style="width: 300px; height: 300px;" ></div>
                     <div style="" class="bottomDescription" >
-                        Хаотическое распределение интервалов свидетельствует о наличии заболеваний сердца.
-                        Требуется консультация специалиста.
+                        Bad histogram is usually quite dispersed and chaotic.
                     </div>
                 </div>
             </div>
@@ -267,19 +266,20 @@
 
 
         <script type="text/javascript">
-            IS_MINI = undefined;
-            GLOBAL_SPEEDOMETER_WIDTH = undefined;
-            GLOBAL_SPEEDOMETER_HEIGHT = undefined;
+            IS_MINI = true;
+            GLOBAL_SPEEDOMETER_WIDTH = 300;
+            GLOBAL_SPEEDOMETER_HEIGHT = 400;
+
             //Anton, attention please!
             // all you need is to invoke method initDetails(points)
             //just keep calm and invoke method initDetails(points)
             // "points" is smth like this [765, 864, 899, 903, 704]
             $(function(){
-                //                var points = generateRandomPoints();
-                //                initDetails(points);
+                var points = generateRandomPoints();
+                initDetails(points);
                 //                setTitle('Ololo', (new Date()).getTime());
             });
-
+            
             function initDetails(points){
                 draw(0);
                 points = filterRates(points);
@@ -287,7 +287,7 @@
                 var tension = getTension(points);
                 drawSpeedometer(tension);
                 $('#tensionId').text(tension);
-
+				
                 drawRRPlot(points);
                 drawHistogramm(points, 'dif');
                 drawScatter(points, 1, 'scatter');
@@ -296,7 +296,7 @@
                 fixScale();
                 //                disablePreloader();
             }
-
+            
             function setTitle(title, dateString){
                 $('#titleBlock').show();
                 $('#titleSpan').text(title);
@@ -304,7 +304,7 @@
                 //                $('#dateSpan').text(moment(timestamp).format('DD MMMM, H:mm:ss'));
                 $('#dateSpan').text(dateString);
             }
-
+            
             function prepareTabs(){
                 $('.tab').click(function(){
                     $('.info_block').hide();
@@ -312,38 +312,37 @@
                     $(this).parents('.info_block').find('.tab').removeClass('active');
                     $(this).addClass('active');
                     var id = $(this).attr('data-id');
-
+                    
                     $(this).parents('.info_block').find('.standardGraphBlock').hide();
                     $(this).parents('.info_block').find('.standardGraphBlock[data-id="' + id +'"]').show();
                 });
-
+                
                 $('#scatter').live('click', function(){
                     $('.info_block').hide();
                     $('#scattergramInfo').toggle();
                 });
-
+                
                 $('#dif').live('click', function(){
                     $('.info_block').hide();
                     $('#histogrammInfo').toggle();
                 });
-
+                
             }
-
+            
             function prepareStandardPlots(){
                 var goodPoints = [695,710,710,703,710,679,695,664,687,656,671,679,710,703,726,718,710,718,734,695,710,726,718,710,703,710,703,726,703,710,703,726,695,718,710,718,726,710,710,718,695,695,703,695,718,726,734,718,750,734,734,710,718,726,710,718,703,710,687,687,679,679,679,671,664,640,648,632,640,656,656,664,703,703,726,757,757,750,726,734,687,695,679,679,664,679,695,695,679,671,656,648,664,671,679,718,710,742,726,710,679,664,664,640,617,617,617,625,625,664,687,695,695,718,718,718,718,742,726,710,679,687,687,726,718,710,703,710,695,679,671,671,656,632,640,617,632,656,687,718,757,773,789,765,757,742,757,734,742,742,710,726,687,671,640,632,640,664,664,656,671,679,656,656,625,640,625,609,609,601,609,585,585,562,578,570,539,554,539,562,554,546,554,554,585,585,617,617,640,656,671,656,664,664,640,648,671,664,648,656,625,632,617,617,632,617,625,601,609,593,593,570,593,570,578,585,585,609,648,664,671,679,679,687,664,679,656,671,664,679,656,656,640,640,609,617,601,593,570,593,609,625,679,687,718,726,742,734,726,726,718,726,679,703,718,710,710,687,664,664,648,648,648,656,671,687,687,671,664,679,664,671,671,687,671,656,656,648,648,632,632,609,640,648,648,640,679,687,710,695,718,734,734,710,718,718,718,703,664,664,648,671,664,710,734,750,742,734,710,710,679,679,648,656,625,625,617,632,625,617,625,601,593,593,593,601,632,664,687,703,703,695,710,695,687,656,664,648,656,648,664,640,656,640,640,632,617,625,617,640,640,648,656,851,828,781,757,710,710,679,687,664,695,671,671,664,687,656,656,648,640,632,632,609,625,601,601,601,601,617];
                 var stressPoints = [746,750,758,768,759,754,748,749,750,769,754,755,762,760,751,760,771,761,768,776,782,786,781,788,793,791,762,755,768,763,761,747,756,762,767,766,762,775,781,800,795,796,779,778,787,791,788,785,798,811,805,797,804,802,783,771,770,772,785,790,779,774,791,791,778,761,775,768,763,764,779,784,786,774,779,782,776,775,785,778,760,759,767,776,791,788,788,798,797,787,766,779,781,791,796,790,805,822,800,802,805,798,785,779,783,791,808,805,782,768,767,777,770,765,771,791,792,784,792,793,796,784,786,798,803,794,779,785,787,789,801,809,791,789,798,795,784,775,788,795,806,791,787,807,811,810,791,801,807,788,796,779,778,787,791,788,785,798,811,805,797,804,802,783,771,770,772,785,790,779,774,791,791,778,761,775,768,763,764, 762,755,768,763,761,747,756,762];
                 var badPoints = [250,23,312,164,640,625,500,523,656,476,421,609,601,445,578,562,429,679,625,437,765,23,312,773,23,312,484,523,468,359,757,23,312,765,23,312,476,437,539,460,585,640,601,742,23,312,750,23,312,601,484,492,664,593,750,664,523,468,578,554,484,492,570,710,632,507,562,843,23,312,851,23,312,625,437,515,562,492,523,609,562,562,640,679,562,726,648,578,687,562,539,703,546,515,656,539,484,546,468,554,539,546,578,562,593,515,445,492,539,429,476,656,562,507,601,484,750,23,312,757,23,312,671,476,554,562,554,492,445,695,554,468,585,507,492,593,507,484,617,453,492,492,445,414,562,562,492,765,23,312,765,539,773,632,609,23,312,578,742,23,312,742,23,312,640,523,515,687,570,593,492,773,23,312,781,23,312,625,453,617,609,460,609,648,640,648,703,718,679,492,570,382,757,23,312,765,460,492,617,23,312,132,476,718,515,437,671,687,570,554,507,632,507,460,531,625,632,507,578,460,507,492,750,23,312,750,23,312,484,453,460,867,23,312,867,23,312,617,750,23,312,750,531,500,546,539,23,312,414,359,460,375,492,570,429,539,421,757,23,312,765,476,460,500,554,476,23,312,554,492,453,500,406,421,476,406,468,500,406,484,617,445,484,601,445,546,398,750,23,312,757,453,460,460,492,476,406,23,312,500,460,507,609,523,562,539,523,617,703,500,390,562,437,492,562,437,523,601,476,468,570,515,554,515,476,539,507,421,500,562,507,445,476,507,734,562,460,640,476,476,632,460,515,648,546,523,609,523,468,531,539,531,500,484,507,531,468,437,539,531,554,476,750,23,312,750,515,562,609,617,609,500,593,484,414,421,648,23,312,601,578,507,507,531,578,476,531,500];
-
+                
                 drawScatter(goodPoints, undefined, 'goodScatter');
                 drawScatter(stressPoints, undefined, 'stressScatter');
                 drawScatter(badPoints, undefined, 'badScatter');
-
+                
                 drawHistogramm(goodPoints, 'goodHistogramm');
                 drawHistogramm(stressPoints, 'stressHistogramm');
                 drawHistogramm(badPoints, 'badHistogramm');
-
             }
-
+            
             function filterRates(points){
                 var arr = new Array();
                 if (points == undefined || points.length == 0){
@@ -357,9 +356,9 @@
                 }
                 return arr;
             }
-
+            
             //----------- tension
-
+            
             function getAverageRR(points){
                 var s = 0;
                 for (var i in points){
@@ -367,8 +366,8 @@
                 }
                 return 1.0 * s / points.length;
             }
-
-
+            
+            
             function getMo(points){
                 var width = 50;
                 var xmin = 300;
@@ -379,7 +378,7 @@
                 for (var i = 0; i < points.length; i++){
                     mas[Math.floor((points[i] - xmin)/width)]++;
                 }
-
+                
                 var res = 300;
                 var max = 0;
                 for (var i in mas){
@@ -390,7 +389,7 @@
                 }
                 return res;
             }
-
+            
             function getAmo(points){
                 var width = 50;
                 var xmin = 300;
@@ -401,7 +400,7 @@
                 for (var i = 0; i < points.length; i++){
                     mas[Math.floor((points[i] - xmin)/width)]++;
                 }
-
+                
                 var max = 0;
                 for (var i in mas){
                     if (mas[i] > max){
@@ -410,11 +409,11 @@
                 }
                 return 100.0 * max / points.length;
             }
-
+            
             function getBP(points){
                 return getMax(points) - getMin(points);
             }
-
+            
             function getMin(points){
                 var min = 1500;
                 for (var i in points){
@@ -434,27 +433,35 @@
                 return max;
             }
 
+            function getAvg(points){
+                var s = 0.0;
+                for (var i in points){
+                    s += points[i];
+                }
+                return s/points.length;
+            }
+            
             function getTension(points){
                 var amo = getAmo(points);
                 var mo = getMo(points);
                 //var x = getAvg(points);
                 var BP = getMax(points) - getMin(points);
-
+                
                 console.log('amo = ' + amo);
                 console.log('mo = ' + mo);
                 //console.log('x = ' + x);
                 console.log('BP = ' + BP);
-
+                
                 return Math.floor(amo*1000*1000/(BP*2*mo));
             }
-
-
-
+            
+            
+            
             //--------------------
-
-
-
-
+            
+            
+            
+            
             function getAveragePulse(points){
                 var s = 0;
                 for (var i in points){
@@ -462,7 +469,7 @@
                 }
                 return Math.round(s*1.0 / points.length);
             }
-
+            
             function generateRandomPoints(){
                 var a = new Array();
                 for (var i = 0; i < 200; i++){
@@ -470,7 +477,7 @@
                 }
                 return a;
             }
-
+            
             function drawRRPlot(points){
                 var divId = 'RRplot';
                 var mas = new Array();
@@ -479,11 +486,11 @@
                     t+= points[i];
                     mas.push([Math.floor(t / 1000.0), 60000.0 / points[i]]);
                 }
-
+                
                 console.log('drawing plot in ' + divId);
                 var options = {
                     series: {
-                        shadowSize: 0,
+                        shadowSize: 0, 
                         color : '#CF3300'
                     },
                     yaxis: {
@@ -498,23 +505,23 @@
                     },
                     grid: {
                         borderWidth: 0
-                    }
+                    } 
                 };
-
-                $("#"+divId).css("width", (window.screen.width-40) + "px");
-
+    
+                $("#"+divId).css("width", (window.screen.width-100) + "px");
+    
                 var pl = $.plot($("#"+divId),
                 [   {
-                        data: mas,
+                        data: mas, 
                         lines: {
                             show:true,
                             spline: true
                         }
                     } ], options);
-
+    
                 return pl;
             }
-
+            
             function getScatterArray(points){
                 var mas = new Array();
                 for (var i = 1; i < points.length; i++){
@@ -522,33 +529,33 @@
                 }
                 return mas;
             }
-
+            
             function drawScatter(points, optimumMode, div_id){
                 var divId = 'scatter';
                 if (divId != undefined){
                     divId = div_id;
                 }
                 console.log('drawing scatter graph to ' + divId);
-
+                
                 var mas = getScatterArray(points);
                 var minX = getMin(points);
                 var maxX = getMax(points);
                 var vp = maxX - minX;
                 minX-=0.3*vp;
                 maxX+=0.3*vp;
-
-                var myData = [
+                
+                var myData = [ 
                     {
-                        data: mas,
+                        data: mas, 
                         lines: {
                             show:false
-                        },
+                        }, 
                         points: {
                             show:true,
                             symbol: 'circle'
                         }
                     }];
-
+                
                 if (optimumMode != undefined){
                     var center = findCenter(mas);
                     var centData = new Array();
@@ -562,13 +569,13 @@
                     var b = optimum[1];
                     var el = generateEllipse(center, a, b);
                     console.log(el);
-
-                    myData = [
+                
+                    myData = [ 
                         {
-                            data: mas,
+                            data: mas, 
                             lines: {
                                 show:false
-                            },
+                            }, 
                             points: {
                                 show:true,
                                 symbol: 'circle'
@@ -597,15 +604,15 @@
                         }
                     ];
                 }
-
-
+                
+                
                 return $.plot($("#" + divId), myData, {
                     yaxis: {
                         color: '#38372A'
                     }
                 });
             }
-
+            
             function drawHistogramm(rates, div_id){
                 var xmin = 300;
                 var xmax = 1400;
@@ -615,7 +622,7 @@
                     divId = div_id;
                 }
                 console.log('drawHistogramm : divId = ' + divId);
-
+                
                 var mas = [];
                 for (var i=0; i <  Math.floor(1000 / width); i++){
                     mas.push(0);
@@ -624,18 +631,18 @@
                     mas[Math.floor((rates[i] - xmin)/width)]++;
                 }
                 var mas2 = [];
-
+                
                 var imin = 0;
                 var imax = mas.length - 1;
                 for (var i = imin; i <  imax; i++){
                     mas2.push([xmin + i * width , mas[i]]);
                 }
-
-                myData = [
+                
+                myData = [ 
                     {
                         data: mas2,
                         bars: {
-                            show: true,
+                            show: true, 
                             barWidth : width
                         }
                     }
@@ -643,7 +650,7 @@
                 return $.plot($("#" + divId), myData);
             }
 
-
+            
         </script>
 
     </body>
