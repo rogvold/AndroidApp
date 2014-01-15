@@ -120,12 +120,15 @@ function drawBackground(options) {
 	options.ctx.fillStyle = "rgb(0,0,0)";
 
 	// Draw semi-transparent circles
+        
+        var alfa = (IS_MINI != undefined) ? 0.8 : 1;
+        
 	for (i = 170; i < 180; i++) {
-		options.ctx.beginPath();
+//		options.ctx.beginPath();
 
-		options.ctx.arc(options.center.X,
+		options.ctx.arc(options.center.X ,
 			options.center.Y,
-			i,
+			i * alfa,
 			0,
 			Math.PI,
 			true);
@@ -426,11 +429,20 @@ function buildOptionsAsJSON(canvas, iSpeed) {
 	/* Setting for the speedometer 
 	* Alter these to modify its look and feel
 	*/
-
 	var centerX = 210,
-	    centerY = 210,
-        radius = 140,
-        outerRadius = 200;
+    centerY = 210,
+    radius = 140,
+    outerRadius = 200;
+
+        if ((GLOBAL_SPEEDOMETER_WIDTH != undefined) && (GLOBAL_SPEEDOMETER_HEIGHT != undefined)){
+            centerX = GLOBAL_SPEEDOMETER_WIDTH / 2;
+            centerY = GLOBAL_SPEEDOMETER_HEIGHT / 2;
+            radius = Math.floor(2.0*centerX / 3.0);
+            outerRadius = Math.floor((10.0/20.0) * radius);
+        }
+        
+        console.log('centerX = ' + centerX + '; centerY = ' + centerY + '; radius = ' + radius + '; outerRadius = ' + outerRadius);
+
 
 	// Create a speedometer object using Javascript object notation
 	return {
@@ -448,7 +460,7 @@ function buildOptionsAsJSON(canvas, iSpeed) {
 			},
 			radius: radius
 		},
-		radius: outerRadius
+		radius: outerRadius / 3.0
 	};
 }
 
