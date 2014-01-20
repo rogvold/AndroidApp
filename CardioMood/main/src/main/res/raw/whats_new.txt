@@ -4,6 +4,8 @@
 <br/>
 +++ Export data to a text file!
 <br/>
++++ Vibration at the end of the measurement.
+<br/>
 === Fixed crashes when connecting.
 </p>
 <br/>

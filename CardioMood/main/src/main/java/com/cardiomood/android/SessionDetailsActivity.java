@@ -2,8 +2,13 @@ package com.cardiomood.android;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,6 +32,7 @@ import com.cardiomood.android.dialogs.SaveAsDialog;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.flurry.android.FlurryAgent;
 
+import java.io.File;
 import java.text.DateFormat;
 import java.text.MessageFormat;
 import java.util.List;
@@ -119,7 +125,7 @@ public class SessionDetailsActivity extends Activity {
             }
         });
         webView.loadUrl(getString(R.string.asset_details_html));
-        Toast.makeText(this, "Loading: " + getString(R.string.asset_details_html), Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Loading: " + getString(R.string.asset_details_html), Toast.LENGTH_SHORT).show();
     }
 
     private void executePostRenderAction() {
@@ -202,7 +208,7 @@ public class SessionDetailsActivity extends Activity {
         new AsyncTask<Void, Void, Void>(){
             @Override
             public Void doInBackground(Void... params) {
-                SystemClock.sleep(4000);
+                SystemClock.sleep(3000);
                 return null;
             }
 
@@ -264,9 +270,36 @@ public class SessionDetailsActivity extends Activity {
             }
 
             @Override
-            public void onEndSave() {
+            public void onEndSave(String fileName) {
                 savingInProgress = false;
                 invalidateOptionsMenu();
+
+                // add item to notification
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_VIEW);
+                File file = new File(fileName);
+                intent.setDataAndType(Uri.fromFile(file), "image/*");
+
+                PendingIntent pIntent = PendingIntent.getActivity(SessionDetailsActivity.this, 0, intent, 0);
+
+                Notification.Builder builder = new Notification.Builder(SessionDetailsActivity.this);
+                builder.setContentIntent(pIntent)
+                        .setSmallIcon(R.drawable.ic_action_save)
+                        .setTicker(getText(R.string.measurement_saved_notification_text))
+                        .setWhen(System.currentTimeMillis())
+                        .setAutoCancel(true)
+                        .setContentTitle(getText(R.string.measurement_saved_notification_title))
+                        .setContentText(getText(R.string.measurement_saved_notification_text));
+
+                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+                if(Build.VERSION.SDK_INT<16){
+            /*build notification for HoneyComb to ICS*/
+                    notificationManager.notify(1, builder.getNotification());
+                }if(Build.VERSION.SDK_INT>15){
+            /*Notification for Jellybean and above*/
+                    notificationManager.notify(1, builder.build());
+                }
             }
 
             @Override

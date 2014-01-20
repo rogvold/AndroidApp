@@ -118,7 +118,7 @@ public class SaveAsDialog extends Dialog {
 
     public static interface SavingCallback {
         void onBeginSave();
-        void onEndSave();
+        void onEndSave(String filaName);
         void onError();
     }
 
@@ -192,12 +192,16 @@ public class SaveAsDialog extends Dialog {
         @Override
         protected void onPostExecute(String result) {
             setSavingInProgress(false);
-            if (savingCallback != null)
-                savingCallback.onEndSave();
-            if (result != null)
+
+            if (result != null) {
+                if (savingCallback != null)
+                    savingCallback.onEndSave(result);
                 Toast.makeText(SaveAsDialog.this.mContext, result, Toast.LENGTH_SHORT).show();
-            else
+            } else {
+                if (savingCallback != null)
+                    savingCallback.onError();
                 Toast.makeText(SaveAsDialog.this.mContext, R.string.failed_to_save_file, Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -264,7 +268,7 @@ public class SaveAsDialog extends Dialog {
         protected void onPostExecute(String result) {
             setSavingInProgress(false);
             if (savingCallback != null)
-                savingCallback.onEndSave();
+                savingCallback.onEndSave(result);
             if (result != null)
                 Toast.makeText(SaveAsDialog.this.mContext, result, Toast.LENGTH_SHORT).show();
             else

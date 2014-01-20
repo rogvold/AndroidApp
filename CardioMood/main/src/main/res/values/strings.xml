@@ -75,5 +75,7 @@
     <string name="failed_to_save_image">Failed to save image.</string>
     <string name="save_as_dlg_title">Save as...</string>
     <string name="menu_save_as_short">Save...</string>
+    <string name="measurement_saved_notification_title">CardioMood: Saved to image.</string>
+    <string name="measurement_saved_notification_text">Measurement has been saved to image. Tap to open.</string>
 
 </resources>

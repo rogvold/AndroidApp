@@ -49,7 +49,7 @@
     <string name="failed_to_romove_session">Не удалось удалить элемент. Обновите список и попробуйте снова.</string>
     <string name="profile_saved_locally">Профиль успешно сохранен.</string>
     <string name="unsupported_operation">Данное действие еще не поддерживается.</string>
-    <string name="select_device_to_connect">Выберете Polar H7</string>
+    <string name="select_device_to_connect">Выберите Polar H7</string>
     <string name="pair_and_tap_connect">Настройте сопряжение с Polar H7 и нажмите кнопку Подключить датчик.</string>
     <string name="menu_about">О CardioMood</string>
     <string name="menu_about_condensed">О программе...</string>
@@ -75,4 +75,6 @@
     <string name="failed_to_save_image">Не удалось сохранить изображение.</string>
     <string name="save_as_dlg_title">Сохранить как...</string>
     <string name="menu_save_as_short">Сохранить...</string>
+    <string name="measurement_saved_notification_title">CardioMood: Сохранено в PNG.</string>
+    <string name="measurement_saved_notification_text">Измерение было сохранено в файл:</string>
 </resources>
