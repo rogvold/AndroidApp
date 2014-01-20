@@ -18,6 +18,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Vibrator;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -151,6 +152,7 @@ public class MonitorFragment extends Fragment {
                                 timer.cancel();
                                 timer.purge();
                                 timer = null;
+                                vibrate(1000);
                                 performDisconnect();
                                 saveAndOpenSessionView();
                             } else {
@@ -236,6 +238,13 @@ public class MonitorFragment extends Fragment {
                 return (event.getAction() == MotionEvent.ACTION_MOVE);
             }
         });
+    }
+    private void vibrate(long milliseconds) {
+        Vibrator v = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+        // Vibrate for 500 milliseconds
+        if (v.hasVibrator()) {
+            v.vibrate(milliseconds);
+        }
     }
 
     @Override

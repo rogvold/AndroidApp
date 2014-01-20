@@ -5,11 +5,14 @@
         android:title="@string/menu_disconnect"
         android:titleCondensed="@string/stop"
         android:enabled="false" />
-    <item cardiomood:showAsAction="never"
+    <item cardiomood:showAsAction="ifRoom"
         android:id="@+id/menu_bt_settings"
+        android:icon="@drawable/ic_action_bluetooth"
         android:title="@string/menu_bt_settings" />
     <item cardiomood:showAsAction="never"
         android:id="@+id/menu_about"
+        android:icon="@drawable/ic_action_about"
         android:title="@string/menu_about"
+        android:showAsAction="ifRoom"
         android:titleCondensed="@string/menu_about_condensed"/>
 </menu>
