@@ -274,6 +274,10 @@ public class SessionDetailsActivity extends Activity {
                 savingInProgress = false;
                 invalidateOptionsMenu();
 
+                if (fileName == null || !fileName.toLowerCase().endsWith(".png")) {
+                    // saved as not *.png
+                    return;
+                }
                 // add item to notification
                 Intent intent = new Intent();
                 intent.setAction(Intent.ACTION_VIEW);
@@ -294,10 +298,10 @@ public class SessionDetailsActivity extends Activity {
                 NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
                 if(Build.VERSION.SDK_INT<16){
-            /*build notification for HoneyComb to ICS*/
+                /*build notification for HoneyComb to ICS*/
                     notificationManager.notify(1, builder.getNotification());
                 }if(Build.VERSION.SDK_INT>15){
-            /*Notification for Jellybean and above*/
+                /*Notification for Jellybean and above*/
                     notificationManager.notify(1, builder.build());
                 }
             }

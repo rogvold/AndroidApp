@@ -1,7 +1,7 @@
 <component name="libraryTable">
-  <library name="Gradle: BluetoothGatt">
+  <library name="Parse-1.4.1">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/main/lib/BluetoothGatt.jar!/" />
+      <root url="jar://$PROJECT_DIR$/main/lib/Parse-1.4.1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

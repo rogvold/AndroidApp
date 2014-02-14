@@ -75,4 +75,5 @@ dependencies {
     compile 'commons-io:commons-io:2.4@jar'
     compile files('lib/CWAC-EndlessAdapter.jar')
     compile files('lib/FlurryAnalytics_3.3.2.jar')
+    compile files('lib/Parse-1.4.1.jar')
 }

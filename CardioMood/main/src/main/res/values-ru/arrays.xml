@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string-array name="feedback_types">
+        <item>Сообщение об ошибке</item>
+        <item>Запрос на улучшение</item>
+        <item>Отзыв</item>
+    </string-array>
     <string-array name="gender_names">
         <item>Мужской</item>
         <item>Женский</item>

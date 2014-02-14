@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string-array name="feedback_types">
+        <item>Bug report</item>
+        <item>Feature request</item>
+        <item>General review</item>
+    </string-array>
     <string-array name="gender_names">
         <item>Male</item>
         <item>Female</item>

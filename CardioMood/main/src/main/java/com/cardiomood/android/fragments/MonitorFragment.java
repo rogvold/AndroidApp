@@ -47,6 +47,8 @@ import com.cardiomood.android.db.model.HeartRateDataItem;
 import com.cardiomood.android.db.model.HeartRateSession;
 import com.cardiomood.android.db.model.SessionStatus;
 import com.cardiomood.android.tools.IMonitors;
+import com.cardiomood.android.tools.config.ConfigurationConstants;
+import com.cardiomood.android.tools.config.PreferenceHelper;
 import com.flurry.android.FlurryAgent;
 
 import java.util.ArrayList;
@@ -80,13 +82,15 @@ public class MonitorFragment extends Fragment {
     private static final int CONNECTION_STATUS_CHANGE_EVENT = 2;
 
     // Stops scanning after 10 seconds.
-    private static final long SCAN_PERIOD = 10000;
+    private static final long SCAN_PERIOD = 100000;
 
     private View container;
     private WebView webView;
     private View initialView;
     private Button connectDeviceButton;
     private ScrollView scrollView;
+
+    private PreferenceHelper mPrefHelper;
 
     private Handler mHandler;
     private boolean mScanning = false;
@@ -98,6 +102,9 @@ public class MonitorFragment extends Fragment {
     private ProgressDialog sessionSavingDialog;
     public static boolean isMonitoring = false;
     private boolean isConnectedView = false;
+    private boolean unlimitedLength = false;
+    private boolean stopButtonPressed = false;
+    private boolean disableBluetoothOnClose = false;
 
     private HeartRateLeService mBluetoothLeService;
 
@@ -143,22 +150,25 @@ public class MonitorFragment extends Fragment {
                         timer.cancel();
                         timer.purge();
                     }
+
                     timer = new Timer();
                     timer.scheduleAtFixedRate(new TimerTask() {
                         @Override
                         public void run() {
                             monitorTime += 1;
-                            if (monitorTime > 120) {
-                                timer.cancel();
-                                timer.purge();
-                                timer = null;
-                                vibrate(1000);
-                                performDisconnect();
-                                saveAndOpenSessionView();
+                            if (!unlimitedLength) {
+                                if (monitorTime > 120) {
+                                    timer.cancel();
+                                    timer.purge();
+                                    timer = null;
+                                    vibrate(1000);
+                                    performDisconnect();
+                                } else {
+                                    execJS("setProgress(" + (float)monitorTime/120*100 + ");");
+                                }
                             } else {
-                                execJS("setProgress(" + (float)monitorTime/120*100 + ");");
+                                execJS("setProgress(0);");
                             }
-
                         }
                     }, 0, 1000);
                     if (collectedData!= null) {
@@ -166,8 +176,8 @@ public class MonitorFragment extends Fragment {
                     }
 
                     collectedData = Collections.synchronizedList(new ArrayList<HeartRateDataItem>());
-
                     setConnectedView();
+                    //execJS("setProgress(0);");
                 }
                 if (newStatus == LeHRMonitor.DISCONNECTING_STATUS || newStatus == LeHRMonitor.READY_STATUS && oldStatus != LeHRMonitor.INITIAL_STATUS) {
                     if (timer != null) {
@@ -175,7 +185,7 @@ public class MonitorFragment extends Fragment {
                         timer.purge();
                         timer = null;
                     }
-                    if (monitorTime <=120) {
+                    if (!unlimitedLength && monitorTime <=120 || unlimitedLength && monitorTime < 30) {
                         Toast.makeText(getActivity(), R.string.device_was_disconnected, Toast.LENGTH_SHORT).show();
                     }
                     FlurryAgent.logEvent("device_disconnected", new HashMap<String, String>(){{put("monitorTime", monitorTime+"");}});
@@ -209,12 +219,16 @@ public class MonitorFragment extends Fragment {
         getActivity().bindService(gattServiceIntent, mServiceConnection, Activity.BIND_AUTO_CREATE);
 
         setHasOptionsMenu(true);
+
+        mPrefHelper = new PreferenceHelper(getActivity().getApplicationContext());
+        mPrefHelper.setPersistent(true);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         getActivity().registerReceiver(dataReceiver, makeGattUpdateIntentFilter());
+        unlimitedLength = mPrefHelper.getBoolean(ConfigurationConstants.MEASUREMENT_UNLIMITED_LENGTH);
     }
 
     @Override
@@ -240,9 +254,12 @@ public class MonitorFragment extends Fragment {
         });
     }
     private void vibrate(long milliseconds) {
-        Vibrator v = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+        Activity activity = getActivity();
+        if (activity == null)
+                return;
+        Vibrator v = (Vibrator) activity.getSystemService(Context.VIBRATOR_SERVICE);
         // Vibrate for 500 milliseconds
-        if (v.hasVibrator()) {
+        if (v!= null && v.hasVibrator()) {
             v.vibrate(milliseconds);
         }
     }
@@ -273,7 +290,9 @@ public class MonitorFragment extends Fragment {
         switch (item.getItemId()) {
             case R.id.menu_disconnect:
                 FlurryAgent.logEvent("stop_button_clicked", new HashMap<String, String>(){{put("monitorTime", monitorTime+"");}});
+                stopButtonPressed = true;
                 performDisconnect();
+                stopButtonPressed = false;
                 break;
         }
         return false;
@@ -303,10 +322,6 @@ public class MonitorFragment extends Fragment {
             }
         });
         connectDeviceButton.setEnabled(false);
-//        execJS("setSliderText(1, \"" + getString(R.string.monitor_slider_text1) + "\")");
-//        execJS("setSliderText(2, \"" + getString(R.string.monitor_slider_text2) + "\")");
-//        execJS("setSliderText(3, \"" + getString(R.string.monitor_slider_text3) + "\")");
-//        execJS("setSliderText(4, \"" + getString(R.string.monitor_slider_text4) + "\")");
 
         // Wait for the page to load
         try {
@@ -370,6 +385,15 @@ public class MonitorFragment extends Fragment {
         if (mBluetoothLeService != null) {
             mBluetoothLeService.disconnect();
             mBluetoothLeService.close();
+        }
+        if (unlimitedLength) {
+            if (monitorTime >= 30 && stopButtonPressed) {
+                saveAndOpenSessionView();
+            }
+        } else {
+            if (monitorTime >= 120 && !stopButtonPressed) {
+                saveAndOpenSessionView();
+            }
         }
     }
 
@@ -533,7 +557,7 @@ public class MonitorFragment extends Fragment {
             @SuppressWarnings("NewApi")
             public void run() {
                 Log.d(TAG, "execJS(): js = " + js);
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     webView.evaluateJavascript(js, null);
                 } else {
                     webView.loadUrl("javascript:" + js);
@@ -615,6 +639,7 @@ public class MonitorFragment extends Fragment {
             case REQUEST_ENABLE_BT:
                 if (resultCode == Activity.RESULT_OK) {
                     Log.e(TAG, "onActivityResult(): BT enabled");
+                    disableBluetoothOnClose = mPrefHelper.getBoolean(ConfigurationConstants.CONNECTION_DISABLE_BT_ON_CLOSE);
                     performConnect();
                 } else {
                     Log.e(TAG, "onActivityResult(): BT not enabled");
@@ -628,6 +653,16 @@ public class MonitorFragment extends Fragment {
         super.onDestroy();
 
         performDisconnect();
+
+        if (disableBluetoothOnClose) {
+            LeHRMonitor monitor = mBluetoothLeService.getMonitor();
+            if (monitor != null) {
+                BluetoothAdapter bluetoothAdapter = monitor.getBluetoothAdapter();
+                if (bluetoothAdapter!= null && bluetoothAdapter.isEnabled())
+                    bluetoothAdapter.disable();
+            }
+        }
+
         getActivity().unbindService(mServiceConnection);
         mBluetoothLeService = null;
         getActivity().unregisterReceiver(dataReceiver);
@@ -639,7 +674,7 @@ public class MonitorFragment extends Fragment {
                 collectedData.add(new HeartRateDataItem(heartBeatsPerMinute, (int) (rr * (1.0 / 1024 * 1000))));
             }
         } catch (Exception e) {
-            // TODO: handle exception
+            Log.e(TAG, "saveHeartRateData() failed", e);
         }
     }
 

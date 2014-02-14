@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="Gradle: CWAC-AdapterWrapper">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/main/lib/CWAC-AdapterWrapper.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

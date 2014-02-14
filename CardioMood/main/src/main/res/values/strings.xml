@@ -77,5 +77,28 @@
     <string name="menu_save_as_short">Save...</string>
     <string name="measurement_saved_notification_title">CardioMood: Saved to image.</string>
     <string name="measurement_saved_notification_text">Measurement has been saved to image. Tap to open.</string>
+    <string name="network_settings_title">Network Settings</string>
+    <string name="measurement_settings_title">Measurement Settings</string>
+    <string name="title_settings_unlimited_measurement_length">Unlimited length (experimental)</string>
+    <string name="summary_settings_protocol">Specify service protocol (http, https, ...)</string>
+    <string name="title_settings_protocol">Protocol</string>
+    <string name="title_settings_host_name">Host name</string>
+    <string name="summary_settings_host_name">Specify host name of remote service</string>
+    <string name="summary_settings_port_number">Specify port number of remote service (default is 80)</string>
+    <string name="title_settings_port_number">Port Number</string>
+    <string name="title_settings_service_path">Web-service Endpoind path</string>
+    <string name="summary_settings_service_path">Specify relative path to the service root</string>
+    <string name="summary_settings_unlimited_measurement_length">Check this to disable the measurement limit</string>
+    <string name="title_activity_settings">CardioMood Settings</string>
+    <string name="connection_settings_title">Connection Settings</string>
+    <string name="title_settings_disable_bluetooth_on_close">Disable Bluetooth on close</string>
+    <string name="summary_disable_bluetooth_on_close">Check this if you want the app to automatically disable bluetooth on exit</string>
+    <string name="menu_feedback">Leave feedback</string>
+    <string name="title_activity_feedback">FeedbackActivity</string>
+    <string name="menu_action_send_feedback">Submit</string>
+    <string name="feedback_has_been_submitted">Thank you! Your feedback has been successfully submitted.</string>
+    <string name="feedback_submission_failed">Failed to submit feedback. Try again later.</string>
+    <string name="submitting_feedback_message">Submitting your feedback. Please, wait...</string>
+    <string name="menu_feedback_condensed">Rate</string>>
 
 </resources>

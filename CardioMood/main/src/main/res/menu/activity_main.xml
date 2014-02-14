@@ -6,6 +6,15 @@
         android:titleCondensed="@string/stop"
         android:enabled="false" />
     <item cardiomood:showAsAction="ifRoom"
+        android:id="@+id/menu_feedback"
+        android:title="@string/menu_feedback"
+        android:icon="@drawable/ic_action_important"
+        android:titleCondensed="@string/menu_feedback_condensed"/>
+    <item cardiomood:showAsAction="ifRoom"
+        android:id="@+id/menu_settings"
+        android:icon="@drawable/ic_action_settings"
+        android:title="@string/menu_settings" />
+    <item cardiomood:showAsAction="ifRoom"
         android:id="@+id/menu_bt_settings"
         android:icon="@drawable/ic_action_bluetooth"
         android:title="@string/menu_bt_settings" />

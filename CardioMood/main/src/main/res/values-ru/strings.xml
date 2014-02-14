@@ -3,7 +3,7 @@
 
     <string name="app_name">CardioMood</string>
     <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Параметры</string>
+    <string name="action_settings">Параметры CardioMood</string>
     <string name="title_activity_splash_screen">CardioMood</string>
     <string name="dummy_button">Нажмите, чтобы пропустить</string>
     <string name="dummy_content">CardioMood.Com</string>
@@ -11,7 +11,7 @@
     <string name="title_section1">Профиль</string>
     <string name="title_section2">Измерение</string>
     <string name="title_section3">История</string>
-    <string name="menu_settings">Настройки</string>
+    <string name="menu_settings">Настройки CardioMood</string>
     <string name="refresh">Обновить</string>
     <string name="menu_log_out">Выход</string>
     <string name="connect">Подключить...</string>
@@ -77,4 +77,27 @@
     <string name="menu_save_as_short">Сохранить...</string>
     <string name="measurement_saved_notification_title">CardioMood: Сохранено в PNG.</string>
     <string name="measurement_saved_notification_text">Измерение было сохранено в файл:</string>
+    <string name="network_settings_title">Настройки сети</string>
+    <string name="measurement_settings_title">Настройеи измерения</string>
+    <string name="title_settings_unlimited_measurement_length">Без ограничения длительности (experimental)</string>
+    <string name="summary_settings_protocol">Протокол веб-сервиса (http, https, ...)</string>
+    <string name="title_settings_protocol">Протокол</string>
+    <string name="title_settings_host_name">Домен</string>
+    <string name="summary_settings_host_name">Укажите доменное имя удаленного сервиса</string>
+    <string name="summary_settings_port_number">Укажите номер порта (по умолчанию 80)</string>
+    <string name="title_settings_port_number">Номер порта</string>
+    <string name="title_settings_service_path">Относительный путь</string>
+    <string name="summary_settings_service_path">Укажите относительный путь для веб-сервиса CardioMood</string>
+    <string name="summary_settings_unlimited_measurement_length">Снимает ограничение по длительности измерения</string>
+    <string name="title_activity_settings">Настройки CardioMood</string>
+    <string name="connection_settings_title">Настройки подключения</string>
+    <string name="title_settings_disable_bluetooth_on_close">Отключать Bluetooth при выходе</string>
+    <string name="summary_disable_bluetooth_on_close">Автоматически выключать Bluetooth, если он был включен в приложении.</string>
+    <string name="menu_feedback">Оставить отзыв</string>
+    <string name="manu_action_send_feedback">Отправить</string>
+    <string name="feedback_has_been_submitted">Спасибо! Выш отзыв был успешно отправлен.</string>
+    <string name="feedback_submission_failed">Произошла ошибка при отправке Вашего отзыва. Попробуйте позднее.</string>
+    <string name="submitting_feedback_message">Выполняется отправка отзыва. Пожалуйста, подождите...</string>
+    <string name="menu_feedback_condensed">Отзыв</string>
+
 </resources>

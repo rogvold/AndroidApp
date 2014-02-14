@@ -1,13 +1,13 @@
-<p><b>New in CardioMood 1.1.0 (current):</b><p>
+<p><b>New in CardioMood 1.1.4 (current):</b><p>
 <p>
-+++ Added support for Android 4.3!
++++ Unlimited measurement length (experimental).
 <br/>
-+++ Export data to a text file!
++++ Export data to text/png file.
 <br/>
 +++ Vibration at the end of the measurement.
 <br/>
 === Fixed crashes when connecting.
 </p>
 <br/>
-<p>Soon we are going to add a continuous monitoring! :)</p>
+<p>Coming soon: cloud data storage! :)</p>
 <p>Stay with <b><a href="http://goo.gl/ZLmHhJ">www.CardioMood.com</a></b>!</p>

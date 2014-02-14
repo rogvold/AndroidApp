@@ -33,6 +33,12 @@ public interface ConfigurationConstants {
 	String USER_SEX_KEY				= "user.sex";
     String USER_PHONE_NUMBER_KEY    = "user.phone_number";
     String USER_LOGGED_IN           = "user.logged_in";
+
+    // measurement settings
+    String MEASUREMENT_UNLIMITED_LENGTH = "measurement.unlimited_length";
+
+    // connection settings
+    String CONNECTION_DISABLE_BT_ON_CLOSE = "connection.disable_bluetooth_on_close";
 	
 	// analysis
 	String WINDOW_DURATION_KEY		= "analysis.window_duration";

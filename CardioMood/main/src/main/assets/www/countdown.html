@@ -84,6 +84,13 @@
 
         </style>
 
+        <script>
+
+            var ww = Math.min($(window).width(),window.screen.width); //get proper width
+            var wh = Math.min($(window).height(),window.screen.height);
+
+        </script>
+
     </head>
     <body style="background: url('images/texture.png'); width: 99%; height: 99%; overflow: hidden;">
 
@@ -98,14 +105,11 @@
 
             <div style="text-align: center; position: absolute; top: 30%; font-size: 30px; display: block; height: 10%; width: 40%; left: 30%;">
                 <div style="font-size: 38px;"><b id="pulseId" >N/A</b></div>
-                <span style="font-size: 30px;">
-                    bpm
-                </span>
             </div>
 
         </div>
 
-        <div style="display: block; height: 40%; width: 100%; font-size: 24px; margin-top: 15%;">
+        <div style="display: block; height: 40%; width: 100%; font-size: 24px; margin-top: 10%;">
             <div id="slider" style="display: block; margin: 0 auto;">
                 <ul style="height: 100%; width: 100%;">
                     <li style="">
@@ -172,6 +176,11 @@
 
         <script type="text/javascript">
 
+            $(function() {
+                $('#slider ul li').css('width', (ww) +'px');
+                $('#slider ul li div').css('width', (ww-20)+'px');
+            });
+
             function setSliderText(index, text) {
                 $("#sliderText"+index).html(text);
             }
@@ -197,16 +206,20 @@
             }
             
             $(function(){
-//                var w = $(window).width();
-//                var h = $(window).height();
-//                var kw = Math.floor(0.5 * Math.min(w, h));
-                var kw = 260;
-                
-                $(function() {
-                    knob = $(".dial").knob({
-                        width: kw,
-                        height: kw
-                    });
+                console.log('ww='+ww);
+                console.log('wh='+wh);
+                var a = ww*0.5;
+                var b = wh*0.5;
+                var kw = b;
+                if (kw > a)
+                    kw = a;
+                if (!kw) {
+                    kw = 180;
+                    $('#pulseId').css('font-size', '24px');
+                }
+                knob = $(".dial").knob({
+                        width: ''+kw,
+                        height: ''+kw
                 });
                 
                 $("#slider").easySlider({
@@ -215,16 +228,9 @@
                     speed: 1000,
                     controlsShow: false
                 });
-                
-                //use this method for setting bpm
-//                setPulse(103);
-                //use this method for setting progress
-//                setProgress(33);
-                
             });
             
         </script>
 
     </body>
 </html>
-

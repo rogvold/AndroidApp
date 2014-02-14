@@ -1,5 +1,6 @@
 package com.cardiomood.android.fragments;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -134,12 +135,15 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
     }
 
     private void refresh() {
+        Activity activity = getActivity();
+        if (activity == null)
+            return;
+
         if (listAdapter != null) {
             listAdapter.clear();
             listAdapter.notifyDataSetChanged();
         }
-
-        listAdapter = new SessionsArrayAdapter(getActivity(), new ArrayList<HeartRateSession>(100));
+        listAdapter = new SessionsArrayAdapter(activity, new ArrayList<HeartRateSession>(100));
         SessionsEndlessAdapter endlessAdapter = new SessionsEndlessAdapter(listAdapter);
         undoAdapter = new ContextualUndoAdapter(endlessAdapter, R.layout.history_item_undo, R.id.btn_undo_deletion);
         undoAdapter.setAbsListView(listView);

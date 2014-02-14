@@ -1,6 +1,7 @@
 package com.cardiomood.android;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.cardiomood.android.dialogs.AboutDialog;
@@ -76,6 +78,11 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             @Override
             public void onPageSelected(int position) {
                 actionBar.setSelectedNavigationItem(position);
+
+                // hide soft input keyboard
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null)
+                    imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
             }
         });
 
@@ -156,9 +163,20 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         // as you specify a parent activity in AndroidManifest.xml.
 
         switch (item.getItemId()) {
+            case R.id.menu_settings:
+                 FlurryAgent.logEvent("menu_settings_clicked");
+                 if (!MonitorFragment.isMonitoring)
+                    startActivity(new Intent(this, SettingsActivity.class));
+                 return true;
             case R.id.menu_bt_settings:
                 FlurryAgent.logEvent("menu_bt_settings_clicked");
-                openBluetoothSettings();
+                if (!MonitorFragment.isMonitoring)
+                    openBluetoothSettings();
+                return true;
+            case R.id.menu_feedback:
+                FlurryAgent.logEvent("menu_feedback_clicked");
+                if (!MonitorFragment.isMonitoring)
+                    startActivity(new Intent(this, FeedbackActivity.class));
                 return true;
             case R.id.menu_about:
                 FlurryAgent.logEvent("menu_about_clicked");
