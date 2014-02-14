@@ -40,8 +40,7 @@ import android.widget.Toast;
 
 import com.cardiomood.android.R;
 import com.cardiomood.android.SessionDetailsActivity;
-import com.cardiomood.android.bluetooth.HeartRateLeService;
-import com.cardiomood.android.bluetooth.LeHRMonitor;
+import com.cardiomood.android.bluetooth.CardioMoodHeartRateLeService;
 import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.model.HeartRateDataItem;
 import com.cardiomood.android.db.model.HeartRateSession;
@@ -49,6 +48,7 @@ import com.cardiomood.android.db.model.SessionStatus;
 import com.cardiomood.android.tools.IMonitors;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.android.tools.config.PreferenceHelper;
+import com.cardiomood.heartrate.bluethooth.LeHRMonitor;
 import com.flurry.android.FlurryAgent;
 
 import java.util.ArrayList;
@@ -106,14 +106,14 @@ public class MonitorFragment extends Fragment {
     private boolean stopButtonPressed = false;
     private boolean disableBluetoothOnClose = false;
 
-    private HeartRateLeService mBluetoothLeService;
+    private CardioMoodHeartRateLeService mBluetoothLeService;
 
     // Code to manage Service lifecycle.
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
-            mBluetoothLeService = ((HeartRateLeService.LocalBinder) service).getService();
+            mBluetoothLeService = (CardioMoodHeartRateLeService) ((CardioMoodHeartRateLeService.LocalBinder) service).getService();
         }
 
         @Override
@@ -215,7 +215,7 @@ public class MonitorFragment extends Fragment {
 
         mHandler = new Handler();
 
-        Intent gattServiceIntent = new Intent(getActivity(), HeartRateLeService.class);
+        Intent gattServiceIntent = new Intent(getActivity(), CardioMoodHeartRateLeService.class);
         getActivity().bindService(gattServiceIntent, mServiceConnection, Activity.BIND_AUTO_CREATE);
 
         setHasOptionsMenu(true);

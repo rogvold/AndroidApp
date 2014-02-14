@@ -1,4 +1,4 @@
-package com.cardiomood.android.bluetooth;
+package com.cardiomood.heartrate.bluethooth;
 
 import android.app.Activity;
 import android.app.Service;

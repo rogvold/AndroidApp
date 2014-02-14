@@ -67,7 +67,6 @@ dependencies {
     compile 'com.android.support:support-v4:19.0.0'
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'org.codegist.crest:codegist-crest:2.0.0-RC1'
-    compile files('lib/BluetoothGatt.jar')
     compile files('lib/com.haarman.listviewanimations-2.5.2.jar')
     compile files('lib/nineoldandroids-2.4.0.jar')
     compile files('lib/CWAC-AdapterWrapper.jar')
@@ -76,4 +75,5 @@ dependencies {
     compile files('lib/CWAC-EndlessAdapter.jar')
     compile files('lib/FlurryAnalytics_3.3.2.jar')
     compile files('lib/Parse-1.4.1.jar')
+    compile project(':HeartRate')
 }

@@ -60,7 +60,7 @@
         </activity>
 
         <service
-            android:name="com.cardiomood.android.bluetooth.HeartRateLeService"
+            android:name=".bluetooth.CardioMoodHeartRateLeService"
             android:enabled="true" />
 
         <activity
