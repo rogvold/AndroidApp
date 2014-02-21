@@ -1,4 +1,4 @@
-package com.cardiomood.heartrate.bluethooth;
+package com.cardiomood.heartrate.bluetooth;
 
 import android.app.Activity;
 import android.app.Service;
@@ -13,7 +13,7 @@ import android.util.Log;
 /**
  * Created by danon on 18.11.13.
  */
-public class HeartRateLeService extends Service {
+public abstract class HeartRateLeService extends Service {
 
     private final static String TAG = HeartRateLeService.class.getSimpleName();
 

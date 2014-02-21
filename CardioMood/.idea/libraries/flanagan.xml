@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="flanagan">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/CardioMoodApp/libs/flanagan.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

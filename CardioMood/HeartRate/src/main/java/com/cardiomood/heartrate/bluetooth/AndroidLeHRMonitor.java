@@ -1,4 +1,4 @@
-package com.cardiomood.heartrate.bluethooth;
+package com.cardiomood.heartrate.bluetooth;
 
 import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;

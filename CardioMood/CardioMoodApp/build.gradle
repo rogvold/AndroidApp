@@ -1,0 +1,56 @@
+apply plugin: 'android'
+
+android {
+    compileSdkVersion 19
+    buildToolsVersion '19.0.0'
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 19
+        versionCode 9
+        versionName "1.1.4"
+    }
+
+    packagingOptions {
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+    }
+
+    signingConfigs {
+
+        release {
+            storeFile file('D:\\Other\\Dropbox\\Dropbox\\Documents\\Projects\\Cardio\\keystore\\android.key')
+            storePassword "57103261479"
+            keyAlias "myreleasekey"
+            keyPassword "5710326"
+        }
+
+    }
+
+    buildTypes {
+        debug {
+
+        }
+
+        release {
+            runProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            signingConfig signingConfigs.release
+        }
+    }
+}
+
+dependencies {
+    compile 'com.android.support:appcompat-v7:19.0.0'
+    compile 'com.android.support:support-v4:19.0.0'
+    compile 'com.google.code.gson:gson:2.2.4'
+    compile 'org.codegist.crest:codegist-crest:2.0.0-RC1'
+    compile 'commons-io:commons-io:2.4@jar'
+    compile fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
+    compile project(':HeartRate')
+    compile project(':CommonTools')
+    compile project(':Math')
+}

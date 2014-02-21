@@ -8,8 +8,11 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/CardioMoodApp" />
+            <option value="$PROJECT_DIR$/CardioSportApp" />
+            <option value="$PROJECT_DIR$/CommonTools" />
             <option value="$PROJECT_DIR$/HeartRate" />
-            <option value="$PROJECT_DIR$/main" />
+            <option value="$PROJECT_DIR$/Math" />
           </set>
         </option>
       </GradleProjectSettings>

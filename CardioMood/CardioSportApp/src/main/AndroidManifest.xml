@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.cardiomood.sport.android"
+          android:versionCode="1"
+          android:versionName="1.0">
+    <uses-sdk android:minSdkVersion="15"/>
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
+    <application android:label="@string/app_name"
+                 android:icon="@drawable/ic_launcher"
+                 android:theme="@android:style/Theme.Holo.Light">
+
+        <activity android:name=".LoginActivity"
+                  android:label="@string/app_name"
+                  android:noHistory="true"
+                  android:windowSoftInputMode="adjustResize|stateVisible" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity android:name=".MainActivity"
+                  android:label="@string/app_name"
+                  android:launchMode="standard"
+                  android:screenOrientation="portrait"
+                >
+        </activity>
+        <activity
+                android:name=".ServiceSettingsActivity"
+                android:label="@string/title_activity_service_settings"
+                android:noHistory="true"
+                android:parentActivityName=".LoginActivity" >
+            <meta-data
+                    android:name="android.support.PARENT_ACTIVITY"
+                    android:value=".LoginActivity" />
+        </activity>
+        <activity android:name=".WorkoutActivity" android:label="Cardio Workout"
+                  android:screenOrientation="portrait" />
+    </application>
+</manifest>

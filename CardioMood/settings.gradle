@@ -1,1 +1,1 @@
-include ':main', ':HeartRate'
+include ':HeartRate', ':Math', 'CommonTools', 'CardioMoodApp', 'CardioSportApp'

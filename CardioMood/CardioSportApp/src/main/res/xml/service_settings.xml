@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="CardioSport Service">
+
+        <EditTextPreference
+                android:key="app.service_protocol"
+                android:title="@string/title_settings_protocol"
+                android:summary="Specify service protocol (http, https, ...)" />  
+        <EditTextPreference
+                android:key="app.service_host"
+                android:title="@string/title_settings_host_name"
+                android:summary="Specify host name of remote service" />
+        <EditTextPreference
+                android:key="app.service_port"
+                android:title="@string/title_settings_port_number"
+                android:summary="Specify port number of remote service (default is 80)" />
+        <EditTextPreference
+                android:key="app.service_path"
+                android:title="@string/title_settings_service_path"
+                android:summary="Specify relative path to the service root" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:orientation="vertical"
+            android:id="@+id/control_panel">
+
+        <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="right|center_vertical">
+            <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/bluetooth_settings"
+                    android:id="@+id/bluetoothSettings" />
+
+            <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/connect"
+                    android:id="@+id/connectButton"
+                    android:enabled="false" />
+        </LinearLayout>
+
+    </LinearLayout>
+    <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/message_panel"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_above="@+id/control_panel"
+            android:visibility="visible">
+
+        <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/no_current_workout_message"
+                android:id="@+id/msg_text"
+                android:textSize="6pt"
+                android:minLines="2" android:maxLines="4" android:ellipsize="end" android:clickable="true"
+                android:visibility="gone">
+        </TextView>
+
+    </LinearLayout>
+    <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/info_panel"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentTop="true"
+            android:layout_above="@+id/control_panel"
+            android:visibility="visible">
+        <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:id="@+id/info_panel">
+            <TextView
+                    android:id="@+id/workout_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="[Workout Name]"
+                    android:textSize="10pt" >
+            </TextView>
+            <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:text="[Some Workout Description]"
+                    android:id="@+id/workout_description"
+                    android:textSize="6pt"
+                    android:minLines="2" android:maxLines="4" android:ellipsize="end" android:clickable="true">
+            </TextView>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                >
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/planned_start_date"
+                        android:textSize="6pt"
+                        android:textStyle="bold"
+                        android:id="@+id/textView" android:layout_gravity="center"/>
+                <TextView
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:text="[Planned start date]"
+                        android:textSize="6pt"
+                        android:id="@+id/planned_start" android:paddingLeft="8pt"/>
+            </LinearLayout>
+
+            <TextView
+                    android:id="@+id/activities"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/activities"
+                    android:textSize="8pt" android:paddingTop="5pt">
+            </TextView>
+            <ListView
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:id="@+id/activities_list" >
+                <!-- activities here -->
+            </ListView>
+        </LinearLayout>
+
+    </LinearLayout>
+</RelativeLayout>

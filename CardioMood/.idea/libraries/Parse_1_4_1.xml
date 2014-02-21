@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="Parse-1.4.1">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/main/lib/Parse-1.4.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/CardioMoodApp/libs/Parse-1.4.1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

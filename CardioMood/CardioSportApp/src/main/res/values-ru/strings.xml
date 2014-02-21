@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CardioSport</string>
+    <string name="action_sign_in">Вход</string>
+    <string name="action_sign_in_short">Вход</string>
+    <string name="prompt_password">Пароль</string>
+    <string name="prompt_email">Email</string>
+    <string name="login_progress_signing_in">Выполняется вход...</string>
+    <string name="error_field_required">Это поля является обязательным</string>
+    <string name="error_invalid_password">Неверный пароль</string>
+    <string name="error_invalid_email">Некорректный email</string>
+    <string name="title_activity_service_settings">Настройки сервиса</string>
+    <string name="menu_settings">Настройки...</string>
+    <string name="first_name">Имя</string>
+    <string name="last_name">Фамилия</string>
+    <string name="email">Email</string>
+    <string name="phone_number_hint">+79152224455</string>
+    <string name="planned_start_date">Дата тренировки:</string>
+    <string name="connect">Начать тренировку...</string>
+    <string name="activities">Задания:</string>
+    <string name="refresh">Обновить</string>
+    <string name="save">Сохранить</string><string name="description">Описание:</string>
+    <string name="duration">Длительность:</string>
+    <string name="activity_details">Описание задания</string>
+    <string name="workout_description">Описание тренировки</string>
+    <string name="refreshing">Обновлние...</string>
+    <string name="press_back_to_close_app">Нажмите НАЗАД еще раз, чтобы закрыть приложение</string>
+    <string name="press_back_to_close_workout">Нажмите НАЗАД еще раз, чтобы выйти из режима тренировки</string>
+    <string name="tab_profile">Профиль</string>
+    <string name="tab_current_workout">Тренировка</string>
+    <string name="tab_history">История тренировок</string>
+    <string name="tab_about">О программе</string>
+    <string name="empty_string"/>
+    <string name="menu_logout">Выход</string>
+    <string name="no_current_workout_message">Информация о текущей тренировке отсутствует.</string>
+    <string name="title_settings_protocol">Протокол</string>
+    <string name="title_settings_host_name">Сервер</string>
+    <string name="title_settings_port_number">Номер порта</string>
+    <string name="title_settings_service_path">Путь</string>
+    <string name="birth_date">Дата рождения</string>
+    <string name="your_weight">Вес (кг)</string>
+    <string name="your_profile">Ваш профиль:</string>
+    <string name="bluetooth_settings">Bluetooth...</string>
+    <string name="workout_time">Время тренировки:</string>
+    <string name="n_a">Н/Д</string>
+    <string name="workout">Тренировка:</string>
+    <string name="metronome">Метроном:</string>
+    <string name="start_stop_btn">Старт / Стоп</string>
+    <string name="HR">Пульс</string>
+    <string name="current_activity">Этап:</string>
+    <string name="activity_time">Время:</string>
+    <string name="start">Начать тренировку</string>
+    <string name="stop">Остановить тренировку</string>
+    <string name="profile_saved_locally">Profile has been saved.</string>
+    <string name="unsupported_operation">Unsupported operation.</string>
+</resources>
