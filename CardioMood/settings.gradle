@@ -1,1 +1,1 @@
-include ':HeartRate', ':Math', 'CommonTools', 'CardioMoodApp', 'CardioSportApp'
+include ':HeartRate', ':Math', ':ShinobiCharts', 'CommonTools', 'CardioMoodApp', 'CardioSportApp'

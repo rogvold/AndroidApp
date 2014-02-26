@@ -1,43 +1,40 @@
 package com.cardiomood.android;
 
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.os.SystemClock;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
 import com.cardiomood.android.db.dao.HeartRateSessionDAO;
-import com.cardiomood.android.db.model.HeartRateDataItem;
 import com.cardiomood.android.db.model.HeartRateSession;
-import com.cardiomood.android.dialogs.SaveAsDialog;
+import com.cardiomood.android.fragments.details.HistogramReportFragment;
+import com.cardiomood.android.fragments.details.OveralSessionReportFragment;
+import com.cardiomood.android.fragments.details.SpectralAnalysisReportFragment;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.flurry.android.FlurryAgent;
 
-import java.io.File;
-import java.text.DateFormat;
 import java.text.MessageFormat;
-import java.util.List;
+import java.util.Locale;
 
-public class SessionDetailsActivity extends Activity {
+public class SessionDetailsActivity extends ActionBarActivity implements ActionBar.TabListener {
 
     private static final String TAG = "CardioMood.SessionDetailsActivity";
 
@@ -47,13 +44,27 @@ public class SessionDetailsActivity extends Activity {
     public static final int DO_NOTHING_ACTION = 0;
     public static final int RENAME_ACTION = 1;
 
+    /**
+     * The {@link android.support.v4.view.PagerAdapter} that will provide
+     * fragments for each of the sections. We use a
+     * {@link FragmentPagerAdapter} derivative, which will keep every
+     * loaded fragment in memory. If this becomes too memory intensive, it
+     * may be best to switch to a
+     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
+     */
+    SectionsPagerAdapter mSectionsPagerAdapter;
+
+    /**
+     * The {@link ViewPager} that will host the section contents.
+     */
+    ViewPager mViewPager;
+
     private long sessionId = 0;
     private int postRenderAction;
-    private WebView webView;
     private HeartRateSessionDAO sessionDAO;
     private HeartRateDataItemDAO hrDAO;
     private ProgressDialog pDialog;
-    private DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.MEDIUM);
+
     private boolean savingInProgress = false;
 
     @Override
@@ -61,8 +72,49 @@ public class SessionDetailsActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session_details);
 
-        sessionId = getIntent().getLongExtra(SESSION_ID_EXTRA, 0);
+        // Set up the action bar.
+        final ActionBar actionBar = getSupportActionBar();
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+        // Create the adapter that will return a fragment for each of the three
+        // primary sections of the activity.
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
+        // Set up the ViewPager with the sections adapter.
+        mViewPager = (ViewPager) findViewById(R.id.pager);
+        mViewPager.setAdapter(mSectionsPagerAdapter);
+        mViewPager.setOffscreenPageLimit(4);
+
+        // When swiping between different sections, select the corresponding
+        // tab. We can also use ActionBar.Tab#select() to do this if we have
+        // a reference to the Tab.
+        mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+            @Override
+            public void onPageSelected(int position) {
+                actionBar.setSelectedNavigationItem(position);
+
+                // hide soft input keyboard
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null)
+                    imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            }
+        });
+
+        // For each of the sections in the app, add a tab to the action bar.
+        for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
+            // Create a tab with text corresponding to the page title defined by
+            // the adapter. Also specify this Activity object, which implements
+            // the TabListener interface, as the callback (listener) for when
+            // this tab is selected.
+            actionBar.addTab(
+                    actionBar.newTab()
+                            .setText(mSectionsPagerAdapter.getPageTitle(i))
+                            .setTabListener(this));
+        }
+        actionBar.setSelectedNavigationItem(0);
+
         postRenderAction = getIntent().getIntExtra(POST_RENDER_ACTION_EXTRA, DO_NOTHING_ACTION);
+        sessionId = getIntent().getLongExtra(SESSION_ID_EXTRA, 0);
         if (sessionId == 0) {
             Toast.makeText(this, getText(R.string.nothing_to_view), Toast.LENGTH_SHORT).show();
             finish();
@@ -76,16 +128,13 @@ public class SessionDetailsActivity extends Activity {
         }
 
         hrDAO = new HeartRateDataItemDAO();
-
-        webView = (WebView) findViewById(R.id.webView);
-
-        refreshData();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         FlurryAgent.onStartSession(this, ConfigurationConstants.FLURRY_API_KEY);
+        Toast.makeText(this, getString(R.string.loading_data_for_measurement) + sessionId, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -102,30 +151,65 @@ public class SessionDetailsActivity extends Activity {
         FlurryAgent.onEndSession(this);
     }
 
-    private void refreshData() {
-        initWebView();
+    @Override
+    public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+        // When the given tab is selected, switch to the corresponding page in
+        // the ViewPager.
+        mViewPager.setCurrentItem(tab.getPosition());
     }
 
-    private void initWebView() {
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.setHorizontalScrollBarEnabled(false);
-        webView.getSettings().setBuiltInZoomControls(false);
-        webView.setOnTouchListener(new View.OnTouchListener() {
+    @Override
+    public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+    }
 
-            public boolean onTouch(View v, MotionEvent event) {
-                return (event.getAction() == MotionEvent.ACTION_MOVE);
+    @Override
+    public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+    }
+
+
+    /**
+     * A {@link android.support.v4.app.FragmentPagerAdapter} that returns a fragment corresponding to
+     * one of the sections/tabs/pages.
+     */
+    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+
+        public SectionsPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            // getItem is called to instantiate the fragment for the given page.
+            switch (position) {
+                case 0: return OveralSessionReportFragment.newInstance(sessionId);
+                case 1: return SpectralAnalysisReportFragment.newInstance(sessionId);
+                case 2: return HistogramReportFragment.newInstance(sessionId);
+                case 3: return SpectralAnalysisReportFragment.newInstance(sessionId);
             }
-        });
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                if (url.endsWith(".html")) {
-                    new DataLoadingTask().execute(sessionId);
-                }
+            return null;
+        }
+
+        @Override
+        public int getCount() {
+            // Show 3 total pages.
+            return 4;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            Locale l = Locale.getDefault();
+            switch (position) {
+                case 0:
+                    return "General Info".toUpperCase(l);
+                case 1:
+                    return "Spectral Analysis".toUpperCase(l);
+                case 2:
+                    return "Histogram".toUpperCase(l);
+                case 3:
+                    return "Scatterogram".toUpperCase(l);
             }
-        });
-        webView.loadUrl(getString(R.string.asset_details_html));
-        //Toast.makeText(this, "Loading: " + getString(R.string.asset_details_html), Toast.LENGTH_SHORT).show();
+            return null;
+        }
     }
 
     private void executePostRenderAction() {
@@ -173,10 +257,11 @@ public class SessionDetailsActivity extends Activity {
 
                                 String name = session.getName();
                                 if (name == null || name.isEmpty()) {
-                                    name = getText(R.string.dafault_measurement_name) + "#" + sessionId;
+                                    name = getText(R.string.dafault_measurement_name) + "# " + sessionId;
                                 }
-                                name = name.replace("\\", "\\\\").replace("\"", "&quote;").replace("<", "&lt;").replace(">", "&gt;");
-                                execJS("setTitle(\"" + name + "\", \"" + dateFormat.format(session.getDateStarted()) + "\")");
+                                TextView tv = (TextView) findViewById(R.id.session_title);
+                                if (tv != null)
+                                    tv.setText(name);
                                 FlurryAgent.logEvent("session_renamed");
                             }
                         })
@@ -205,27 +290,16 @@ public class SessionDetailsActivity extends Activity {
     }
 
     private void removeProgressDialog() {
-        new AsyncTask<Void, Void, Void>(){
-            @Override
-            public Void doInBackground(Void... params) {
-                SystemClock.sleep(3000);
-                return null;
-            }
+        if (pDialog != null) {
+            pDialog.dismiss();
+            pDialog = null;
+        }
 
-            @Override
-            protected void onPostExecute(Void aVoid) {
-                try {
-                    if (pDialog != null) {
-                        pDialog.dismiss();
-                        pDialog = null;
-                    }
-
-                    executePostRenderAction();
-                } catch (Exception e) {
-                    Log.e(TAG, "removeProgressDialog.onPostExecute() - exception", e);
-                }
-            }
-        }.execute();
+        try {
+            executePostRenderAction();
+        } catch (Exception e) {
+            Log.e(TAG, "removeProgressDialog() - exception", e);
+        }
     }
 
 
@@ -242,10 +316,6 @@ public class SessionDetailsActivity extends Activity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
-            case R.id.menu_refresh:
-                FlurryAgent.logEvent("menu_refresh_clicked");
-                refreshData();
-                return true;
             case R.id.menu_rename:
                 FlurryAgent.logEvent("menu_rename_clicked");
                 showRenameSessionDialog();
@@ -259,111 +329,60 @@ public class SessionDetailsActivity extends Activity {
     }
 
     private void showSaveAsDialog() {
-        SaveAsDialog dlg = new SaveAsDialog(this, sessionId, webView);
-        dlg.setTitle(R.string.save_as_dlg_title);
-        dlg.setSavingCallback(new SaveAsDialog.SavingCallback() {
-
-            @Override
-            public void onBeginSave() {
-               savingInProgress = true;
-               invalidateOptionsMenu();
-            }
-
-            @Override
-            public void onEndSave(String fileName) {
-                savingInProgress = false;
-                invalidateOptionsMenu();
-
-                if (fileName == null || !fileName.toLowerCase().endsWith(".png")) {
-                    // saved as not *.png
-                    return;
-                }
-                // add item to notification
-                Intent intent = new Intent();
-                intent.setAction(Intent.ACTION_VIEW);
-                File file = new File(fileName);
-                intent.setDataAndType(Uri.fromFile(file), "image/*");
-
-                PendingIntent pIntent = PendingIntent.getActivity(SessionDetailsActivity.this, 0, intent, 0);
-
-                Notification.Builder builder = new Notification.Builder(SessionDetailsActivity.this);
-                builder.setContentIntent(pIntent)
-                        .setSmallIcon(R.drawable.ic_action_save)
-                        .setTicker(getText(R.string.measurement_saved_notification_text))
-                        .setWhen(System.currentTimeMillis())
-                        .setAutoCancel(true)
-                        .setContentTitle(getText(R.string.measurement_saved_notification_title))
-                        .setContentText(getText(R.string.measurement_saved_notification_text));
-
-                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
-                if(Build.VERSION.SDK_INT<16){
-                /*build notification for HoneyComb to ICS*/
-                    notificationManager.notify(1, builder.getNotification());
-                }if(Build.VERSION.SDK_INT>15){
-                /*Notification for Jellybean and above*/
-                    notificationManager.notify(1, builder.build());
-                }
-            }
-
-            @Override
-            public void onError() {
-                savingInProgress = false;
-                invalidateOptionsMenu();
-            }
-        });
-        dlg.show();
-    }
-
-    private class DataLoadingTask extends AsyncTask<Long, Void, String> {
-
-        @Override
-        protected void onPreExecute() {
-            Toast.makeText(SessionDetailsActivity.this, getString(R.string.loading_data_for_measurement) + sessionId, Toast.LENGTH_SHORT).show();
-            showProgressDialog();
-        }
-
-        @Override
-        protected String doInBackground(Long... params) {
-            List<HeartRateDataItem> items = hrDAO.getItemsBySessionId(sessionId);
-            StringBuffer sb = new StringBuffer("$(document).ready(function(){");
-            HeartRateSession session = sessionDAO.findById(sessionId);
-            String name = session.getName();
-            if (name == null || name.isEmpty()) {
-                name = getText(R.string.dafault_measurement_name) + " #" + sessionId;
-            }
-            name = name.replace("\\", "\\\\").replace("\"", "&quote;").replace("<", "&lt;").replace(">", "&gt;");
-            sb.append("setTitle(\""+name+"\",\"" + dateFormat.format(session.getDateStarted()) + "\");");
-            sb.append("initDetails(new Array(");
-            sb.append(items.get(0).getRrTime());
-            for (int i=1; i<items.size(); i++) {
-                sb.append(",").append(items.get(i).getRrTime());
-            }
-            sb.append("));})");
-            return sb.toString();
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            execJS(s);
-            Log.d(TAG, "execJS: " + s);
-            removeProgressDialog();
-        }
-    }
-
-    private void execJS(final String js) {
-        runOnUiThread(new Runnable() {
-            @Override
-            @SuppressWarnings("NewApi")
-            public void run() {
-                Log.d(TAG, "execJS(): js = " + js);
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
-                    webView.evaluateJavascript(js, null);
-                } else {
-                    webView.loadUrl("javascript:" + js);
-                }
-            }
-        });
+//        SaveAsDialog dlg = new SaveAsDialog(this, sessionId, webView);
+//        dlg.setTitle(R.string.save_as_dlg_title);
+//        dlg.setSavingCallback(new SaveAsDialog.SavingCallback() {
+//
+//            @Override
+//            public void onBeginSave() {
+//               savingInProgress = true;
+//               invalidateOptionsMenu();
+//            }
+//
+//            @Override
+//            public void onEndSave(String fileName) {
+//                savingInProgress = false;
+//                invalidateOptionsMenu();
+//
+//                if (fileName == null || !fileName.toLowerCase().endsWith(".png")) {
+//                    // saved as not *.png
+//                    return;
+//                }
+//                // add item to notification
+//                Intent intent = new Intent();
+//                intent.setAction(Intent.ACTION_VIEW);
+//                File file = new File(fileName);
+//                intent.setDataAndType(Uri.fromFile(file), "image/*");
+//
+//                PendingIntent pIntent = PendingIntent.getActivity(SessionDetailsActivity.this, 0, intent, 0);
+//
+//                Notification.Builder builder = new Notification.Builder(SessionDetailsActivity.this);
+//                builder.setContentIntent(pIntent)
+//                        .setSmallIcon(R.drawable.ic_action_save)
+//                        .setTicker(getText(R.string.measurement_saved_notification_text))
+//                        .setWhen(System.currentTimeMillis())
+//                        .setAutoCancel(true)
+//                        .setContentTitle(getText(R.string.measurement_saved_notification_title))
+//                        .setContentText(getText(R.string.measurement_saved_notification_text));
+//
+//                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+//
+//                if(Build.VERSION.SDK_INT<16){
+//                /*build notification for HoneyComb to ICS*/
+//                    notificationManager.notify(1, builder.getNotification());
+//                }if(Build.VERSION.SDK_INT>15){
+//                /*Notification for Jellybean and above*/
+//                    notificationManager.notify(1, builder.build());
+//                }
+//            }
+//
+//            @Override
+//            public void onError() {
+//                savingInProgress = false;
+//                invalidateOptionsMenu();
+//            }
+//        });
+//        dlg.show();
     }
 
 }

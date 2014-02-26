@@ -49,6 +49,10 @@ import com.cardiomood.android.tools.IMonitors;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.heartrate.bluetooth.LeHRMonitor;
+import com.cardiomood.math.HeartRateMath;
+import com.cardiomood.math.histogram.Histogram;
+import com.cardiomood.math.window.AbstractIntervalsWindow;
+import com.cardiomood.math.window.TimedWindow;
 import com.flurry.android.FlurryAgent;
 
 import java.util.ArrayList;
@@ -105,6 +109,7 @@ public class MonitorFragment extends Fragment {
     private boolean unlimitedLength = false;
     private boolean stopButtonPressed = false;
     private boolean disableBluetoothOnClose = false;
+    private HeartRateMath math;
 
     private CardioMoodHeartRateLeService mBluetoothLeService;
 
@@ -150,6 +155,27 @@ public class MonitorFragment extends Fragment {
                         timer.cancel();
                         timer.purge();
                     }
+
+                    math = new HeartRateMath();
+                    math.setWindow(new TimedWindow(30*1000, 5000));
+                    math.setWindowCallback(new HeartRateMath.WindowCallback() {
+
+                        @Override
+                        public <T extends AbstractIntervalsWindow> void onMove(T window, double t, double value) {
+
+                        }
+
+                        @Override
+                        public <T extends AbstractIntervalsWindow> double onAdd(T window, double t, double value) {
+                            return value;
+                        }
+
+                        @Override
+                        public <T extends AbstractIntervalsWindow> void onStep(T window, double t, double value) {
+                            Histogram h = new Histogram(window.getIntervals().getElements(), 50);
+                            Log.i(TAG, "window.onStep(): t=" + t + ", SI=" + h.getSI());
+                        }
+                    });
 
                     timer = new Timer();
                     timer.scheduleAtFixedRate(new TimerTask() {
@@ -672,6 +698,7 @@ public class MonitorFragment extends Fragment {
         try {
             for (short rr: rrIntervals) {
                 collectedData.add(new HeartRateDataItem(heartBeatsPerMinute, (int) (rr * (1.0 / 1024 * 1000))));
+                math.addIntervals(rr);
             }
         } catch (Exception e) {
             Log.e(TAG, "saveHeartRateData() failed", e);

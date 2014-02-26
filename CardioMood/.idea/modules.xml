@@ -8,6 +8,7 @@
       <module fileurl="file://$PROJECT_DIR$/CommonTools/CommonTools.iml" filepath="$PROJECT_DIR$/CommonTools/CommonTools.iml" />
       <module fileurl="file://$PROJECT_DIR$/HeartRate/HeartRate.iml" filepath="$PROJECT_DIR$/HeartRate/HeartRate.iml" />
       <module fileurl="file://$PROJECT_DIR$/Math/Math.iml" filepath="$PROJECT_DIR$/Math/Math.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ShinobiCharts/ShinobiCharts.iml" filepath="$PROJECT_DIR$/ShinobiCharts/ShinobiCharts.iml" />
     </modules>
   </component>
 </project>

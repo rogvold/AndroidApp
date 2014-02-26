@@ -52,15 +52,14 @@
         <activity
             android:name="com.cardiomood.android.SessionDetailsActivity"
             android:label="@string/title_activity_session_details"
-            android:parentActivityName="com.cardiomood.android.MainActivity"
-            android:screenOrientation="portrait" >
+            android:parentActivityName="com.cardiomood.android.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="MainActivity" />
         </activity>
 
         <service
-            android:name=".bluetooth.CardioMoodHeartRateLeService"
+            android:name="com.cardiomood.android.bluetooth.CardioMoodHeartRateLeService"
             android:enabled="true" />
 
         <activity
@@ -71,6 +70,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="MainActivity" />
         </activity>
+
     </application>
 
 </manifest>

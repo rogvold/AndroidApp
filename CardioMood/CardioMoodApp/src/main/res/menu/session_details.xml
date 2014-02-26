@@ -8,9 +8,4 @@
         android:icon="@drawable/ic_action_save"
         android:title="@string/menu_save_as"
         android:titleCondensed="@string/menu_save_as_short" />
-
-    <item android:id="@+id/menu_refresh"
-        android:showAsAction="ifRoom"
-        android:icon="@drawable/ic_action_refresh"
-        android:title="@string/menu_refresh"></item>
 </menu>
