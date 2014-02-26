@@ -1,10 +1,11 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:cardiomood="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/menu_rename"
-        android:showAsAction="always"
+        cardiomood:showAsAction="always"
         android:icon="@drawable/ic_action_edit"
         android:title="@string/menu_rename" />
     <item android:id="@+id/menu_save_as"
-        android:showAsAction="ifRoom"
+        cardiomood:showAsAction="ifRoom"
         android:icon="@drawable/ic_action_save"
         android:title="@string/menu_save_as"
         android:titleCondensed="@string/menu_save_as_short" />

@@ -1,5 +1,6 @@
 package com.cardiomood.android.fragments.details;
 
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -20,9 +21,9 @@ import com.cardiomood.android.db.model.HeartRateDataItem;
 import com.cardiomood.android.db.model.HeartRateSession;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.math.HeartRateMath;
-import com.cardiomood.math.spectrum.SpectralAnalysis;
 import com.flurry.android.FlurryAgent;
 import com.shinobicontrols.charts.ChartView;
+import com.shinobicontrols.charts.DataAdapter;
 import com.shinobicontrols.charts.DataPoint;
 import com.shinobicontrols.charts.LineSeries;
 import com.shinobicontrols.charts.NumberAxis;
@@ -30,15 +31,15 @@ import com.shinobicontrols.charts.NumberRange;
 import com.shinobicontrols.charts.ShinobiChart;
 import com.shinobicontrols.charts.SimpleDataAdapter;
 
-import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+import org.apache.commons.math3.stat.StatUtils;
 
 import java.text.DateFormat;
 import java.util.List;
 
 
-public class SpectralAnalysisReportFragment extends Fragment {
+public class ScatterogramReportFragment extends Fragment {
 
-    private static final String TAG = SpectralAnalysisReportFragment.class.getSimpleName();
+    private static final String TAG = ScatterogramReportFragment.class.getSimpleName();
     private static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.MEDIUM);
 
     public static final String ARG_SESSION_ID = "com.cardiomood.android.fragments.extra.SESSION_ID";
@@ -53,7 +54,7 @@ public class SpectralAnalysisReportFragment extends Fragment {
     private TextView sessionName;
     private TextView sessionDate;
 
-    private ShinobiChart spectrumChart;
+    private ShinobiChart scatterogramChart;
 
     // Fragment parameters
     private long sessionId;
@@ -64,15 +65,15 @@ public class SpectralAnalysisReportFragment extends Fragment {
      *
      * @return A new instance of fragment OveralSessionReportFragment.
      */
-    public static SpectralAnalysisReportFragment newInstance(long sessionId) {
-        SpectralAnalysisReportFragment fragment = new SpectralAnalysisReportFragment();
+    public static ScatterogramReportFragment newInstance(long sessionId) {
+        ScatterogramReportFragment fragment = new ScatterogramReportFragment();
         Bundle args = new Bundle();
         args.putLong(ARG_SESSION_ID, sessionId);
         fragment.setArguments(args);
         return fragment;
     }
 
-    public SpectralAnalysisReportFragment() {
+    public ScatterogramReportFragment() {
         // Required empty public constructor
     }
 
@@ -96,14 +97,14 @@ public class SpectralAnalysisReportFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_spectral_analysis_report, container, false);
+        View v = inflater.inflate(R.layout.fragment_scatterogram_report, container, false);
         progress = (LinearLayout) v.findViewById(R.id.progress);
         scrollView = (ScrollView) v.findViewById(R.id.scrollView);
 
         // Spectrum chart
-        spectrumChart = ((ChartView) v.findViewById(R.id.spectrum_chart)).getShinobiChart();
-        spectrumChart.setTitle("Spectrum");
-        spectrumChart.setLicenseKey(ConfigurationConstants.SHINOBI_CHARTS_API_KEY);
+        scatterogramChart = ((ChartView) v.findViewById(R.id.scatterogram_chart)).getShinobiChart();
+        scatterogramChart.setTitle("Histogram");
+        scatterogramChart.setLicenseKey(ConfigurationConstants.SHINOBI_CHARTS_API_KEY);
 
         sessionName = (TextView) v.findViewById(R.id.session_title);
         sessionDate = (TextView) v.findViewById(R.id.session_date);
@@ -120,7 +121,7 @@ public class SpectralAnalysisReportFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.fragment_spectral_analysis_report, menu);
+        inflater.inflate(R.menu.fragment_scatterogram_report, menu);
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -140,36 +141,41 @@ public class SpectralAnalysisReportFragment extends Fragment {
     private void initCharts(HeartRateMath hrm) {
         // prepare source data
         double rr[] = hrm.getRrIntervals();
-        double time[] = hrm.getTime();
-        double bpm[] = new double[rr.length];
-        for (int i=0; i<rr.length; i++)
-            bpm[i] = 1000*60/rr[i];
-
-        // Spectrum Chart
-        SpectralAnalysis sa = new SpectralAnalysis(time, rr);
-        double[] power = sa.getPower();
-        PolynomialSplineFunction spectrum = sa.getSplinePower();
 
         NumberAxis xAxis = new NumberAxis();
         xAxis.enableGesturePanning(true);
         xAxis.enableGestureZooming(true);
-        xAxis.setDefaultRange(new NumberRange(0.0, 0.6));
-        spectrumChart.setXAxis(xAxis);
+        xAxis.setDefaultRange(new NumberRange(StatUtils.min(rr)-100, StatUtils.max(rr)+100));
+        scatterogramChart.setXAxis(xAxis);
 
         NumberAxis yAxis = new NumberAxis();
-        spectrumChart.setYAxis(yAxis);
+        yAxis.setDefaultRange(new NumberRange(StatUtils.min(rr)-100, StatUtils.max(rr)+100));
+        yAxis.enableGesturePanning(true);
+        yAxis.enableGestureZooming(true);
+        scatterogramChart.setYAxis(yAxis);
 
-        SimpleDataAdapter<Double, Double> dataAdapter2 = new SimpleDataAdapter<Double, Double>();
-        double maxFreq = sa.toFrequency(power.length-1), freq = 0;
-        while(freq < maxFreq) {
-            dataAdapter2.add(new DataPoint<Double, Double>(freq, spectrum.value(freq)));
-            freq += 0.0005;
+        DataAdapter<Double, Double> dataAdapter1 = new SimpleDataAdapter<Double, Double>();
+        for (double i=0; i<1500; i+=50)
+            dataAdapter1.add(new DataPoint<Double, Double>(i, i));
+        LineSeries series1 = new LineSeries();
+        series1.setDataAdapter(dataAdapter1);
+        scatterogramChart.addSeries(series1);
+
+        DataAdapter<Double, Double> dataAdapter2 = new SimpleDataAdapter<Double, Double>();
+        for (int i=1; i<rr.length; i++) {
+            dataAdapter2.add(new DataPoint<Double, Double>(rr[i-1], rr[i]));
         }
 
         LineSeries series2 = new LineSeries();
         series2.setDataAdapter(dataAdapter2);
-        spectrumChart.addSeries(series2);
-        spectrumChart.redrawChart();
+        series2.getStyle().setLineShown(false);
+        series2.getStyle().getPointStyle().setPointsShown(true);
+        series2.getStyle().getPointStyle().setInnerColor(Color.RED);
+        series2.getStyle().getPointStyle().setColor(Color.BLACK);
+        series2.getStyle().getPointStyle().setRadius(1.0f);
+        scatterogramChart.addSeries(series2);
+
+        scatterogramChart.redrawChart();
     }
 
     private void showProgress() {
@@ -183,8 +189,6 @@ public class SpectralAnalysisReportFragment extends Fragment {
     }
 
     private class DataLoadingTask extends AsyncTask<Long, Void, Void> {
-
-        double[] rr = null;
 
         private String sessionName = null;
         private String sessionDate = null;
@@ -207,7 +211,7 @@ public class SpectralAnalysisReportFragment extends Fragment {
             this.sessionName = name;
             this.sessionDate = DATE_FORMAT.format(session.getDateStarted());
 
-            rr = new double[items.size()];
+            double[] rr = new double[items.size()];
             for (int i=0; i<items.size(); i++) {
                 rr[i] = items.get(i).getRrTime();
             }
@@ -217,8 +221,8 @@ public class SpectralAnalysisReportFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Void v) {
-            SpectralAnalysisReportFragment.this.sessionName.setText(sessionName);
-            SpectralAnalysisReportFragment.this.sessionDate.setText(sessionDate);
+            ScatterogramReportFragment.this.sessionName.setText(sessionName);
+            ScatterogramReportFragment.this.sessionDate.setText(sessionDate);
             initCharts(math);
             hideProgress();
         }

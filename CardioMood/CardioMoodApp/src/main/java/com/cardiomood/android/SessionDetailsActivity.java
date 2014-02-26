@@ -22,11 +22,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cardiomood.android.components.CustomViewPager;
 import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
 import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.model.HeartRateSession;
 import com.cardiomood.android.fragments.details.HistogramReportFragment;
 import com.cardiomood.android.fragments.details.OveralSessionReportFragment;
+import com.cardiomood.android.fragments.details.ScatterogramReportFragment;
 import com.cardiomood.android.fragments.details.SpectralAnalysisReportFragment;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.flurry.android.FlurryAgent;
@@ -57,7 +59,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
     /**
      * The {@link ViewPager} that will host the section contents.
      */
-    ViewPager mViewPager;
+    CustomViewPager mViewPager;
 
     private long sessionId = 0;
     private int postRenderAction;
@@ -81,9 +83,10 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.pager);
+        mViewPager = (CustomViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
         mViewPager.setOffscreenPageLimit(4);
+        mViewPager.setPagingEnabled(true);
 
         // When swiping between different sections, select the corresponding
         // tab. We can also use ActionBar.Tab#select() to do this if we have
@@ -167,6 +170,8 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
     }
 
 
+
+
     /**
      * A {@link android.support.v4.app.FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -184,7 +189,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
                 case 0: return OveralSessionReportFragment.newInstance(sessionId);
                 case 1: return SpectralAnalysisReportFragment.newInstance(sessionId);
                 case 2: return HistogramReportFragment.newInstance(sessionId);
-                case 3: return SpectralAnalysisReportFragment.newInstance(sessionId);
+                case 3: return ScatterogramReportFragment.newInstance(sessionId);
             }
             return null;
         }

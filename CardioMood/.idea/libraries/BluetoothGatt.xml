@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="BluetoothGatt">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/HeartRate/libs/BluetoothGatt.jar!/" />
+      <root url="jar://$PROJECT_DIR$/CardioMoodApp/build/exploded-bundles/CardioMoodHeartRateUnspecified.aar/libs/BluetoothGatt.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

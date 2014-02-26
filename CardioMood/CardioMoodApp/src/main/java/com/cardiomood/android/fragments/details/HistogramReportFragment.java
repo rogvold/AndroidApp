@@ -146,9 +146,13 @@ public class HistogramReportFragment extends Fragment {
         Histogram histogram = new Histogram(rr, 50);
 
         CategoryAxis xAxis = new CategoryAxis();
-        xAxis.getStyle().setInterSeriesSetPadding(0.0f);
+        xAxis.getStyle().setInterSeriesSetPadding(2.0f);
         xAxis.enableGesturePanning(true);
-//        xAxis.enableGestureZooming(true);
+        xAxis.enableGestureZooming(true);
+        xAxis.setMajorTickFrequency(100.0);
+        xAxis.getStyle().getTickStyle().setMinorTicksShown(false);
+        xAxis.getStyle().getTickStyle().setMajorTicksShown(true);
+        xAxis.getStyle().getTickStyle().setLabelTextSize(10);
         histogramChart.setXAxis(xAxis);
 
         NumberAxis yAxis = new NumberAxis();
@@ -157,11 +161,11 @@ public class HistogramReportFragment extends Fragment {
         DataAdapter<String, Double> dataAdapter2 = new SimpleDataAdapter<String, Double>();
         double maxRR = StatUtils.max(rr);
         double minRR = StatUtils.min(rr);
-        for (double x=minRR-200; x<=maxRR+200; x+=50) {
+        for (double x=Math.floor((minRR-100)/50)*50; x<=Math.ceil((maxRR+100)/50)*50; x+=50) {
             if (x <= maxRR)
-                dataAdapter2.add(new DataPoint<String, Double>(String.valueOf((int)x), (double)histogram.getCountFor(x)));
+                dataAdapter2.add(new DataPoint<String, Double>(String.valueOf((int) x), (double)histogram.getCountFor(x)));
             else
-                dataAdapter2.add(new DataPoint<String, Double>(String.valueOf((int)x), 0.0));
+                dataAdapter2.add(new DataPoint<String, Double>(String.valueOf((int) x), 0.0));
         }
 
         ColumnSeries series2 = new ColumnSeries();
