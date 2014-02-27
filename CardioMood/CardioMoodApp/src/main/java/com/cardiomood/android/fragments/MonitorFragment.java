@@ -51,8 +51,7 @@ import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.heartrate.bluetooth.LeHRMonitor;
 import com.cardiomood.math.HeartRateMath;
 import com.cardiomood.math.histogram.Histogram;
-import com.cardiomood.math.window.AbstractIntervalsWindow;
-import com.cardiomood.math.window.TimedWindow;
+import com.cardiomood.math.window.DataWindow;
 import com.flurry.android.FlurryAgent;
 
 import java.util.ArrayList;
@@ -157,21 +156,21 @@ public class MonitorFragment extends Fragment {
                     }
 
                     math = new HeartRateMath();
-                    math.setWindow(new TimedWindow(30*1000, 5000));
-                    math.setWindowCallback(new HeartRateMath.WindowCallback() {
+                    math.setWindow(new DataWindow.Timed(30*1000, 5000));
+                    math.getWindow().setCallback(new DataWindow.Callback() {
 
                         @Override
-                        public <T extends AbstractIntervalsWindow> void onMove(T window, double t, double value) {
+                        public <T extends DataWindow> void onMove(T window, double t, double value) {
 
                         }
 
                         @Override
-                        public <T extends AbstractIntervalsWindow> double onAdd(T window, double t, double value) {
+                        public <T extends DataWindow> double onAdd(T window, double t, double value) {
                             return value;
                         }
 
                         @Override
-                        public <T extends AbstractIntervalsWindow> void onStep(T window, double t, double value) {
+                        public <T extends DataWindow> void onStep(T window, double t, double value) {
                             Histogram h = new Histogram(window.getIntervals().getElements(), 50);
                             Log.i(TAG, "window.onStep(): t=" + t + ", SI=" + h.getSI());
                         }

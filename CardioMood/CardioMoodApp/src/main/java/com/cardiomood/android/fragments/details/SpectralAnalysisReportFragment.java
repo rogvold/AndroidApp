@@ -27,12 +27,14 @@ import com.shinobicontrols.charts.DataPoint;
 import com.shinobicontrols.charts.LineSeries;
 import com.shinobicontrols.charts.NumberAxis;
 import com.shinobicontrols.charts.NumberRange;
+import com.shinobicontrols.charts.Series;
 import com.shinobicontrols.charts.ShinobiChart;
 import com.shinobicontrols.charts.SimpleDataAdapter;
 
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -153,11 +155,16 @@ public class SpectralAnalysisReportFragment extends Fragment {
         NumberAxis xAxis = new NumberAxis();
         xAxis.enableGesturePanning(true);
         xAxis.enableGestureZooming(true);
-        xAxis.setDefaultRange(new NumberRange(0.0, 0.6));
+        xAxis.setDefaultRange(new NumberRange(0.0, 0.45));
         spectrumChart.setXAxis(xAxis);
 
         NumberAxis yAxis = new NumberAxis();
         spectrumChart.setYAxis(yAxis);
+
+        // Clear
+        List<Series<?>> series = new ArrayList<Series<?>>(spectrumChart.getSeries());
+        for (Series<?> s: series)
+            spectrumChart.removeSeries(s);
 
         SimpleDataAdapter<Double, Double> dataAdapter2 = new SimpleDataAdapter<Double, Double>();
         double maxFreq = sa.toFrequency(power.length-1), freq = 0;

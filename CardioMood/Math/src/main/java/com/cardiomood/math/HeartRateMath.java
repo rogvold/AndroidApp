@@ -1,8 +1,7 @@
 package com.cardiomood.math;
 
 import com.cardiomood.math.histogram.Histogram;
-import com.cardiomood.math.window.AbstractIntervalsWindow;
-import com.cardiomood.math.window.UnlimitedWindow;
+import com.cardiomood.math.window.DataWindow;
 
 import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.util.DoubleArray;
@@ -15,17 +14,19 @@ public class HeartRateMath {
     private DoubleArray time = null;
     private DoubleArray rrIntervals = null;
     private double duration = 0;
-    private AbstractIntervalsWindow window;
-    private WindowCallback windowCallback = null;
+    private DataWindow window;
 
     public HeartRateMath() {
         rrIntervals = new ResizableDoubleArray();
         time = new ResizableDoubleArray();
-        setWindow(new UnlimitedWindow(0, DEFAULT_WINDOW_STEP));
+        setWindow(new DataWindow.Unlimited(0, DEFAULT_WINDOW_STEP));
     }
 
     public HeartRateMath(double[] rrIntervals) {
-        this();
+        this.rrIntervals = new ResizableDoubleArray();
+        time = new ResizableDoubleArray();
+        setWindow(new DataWindow.Unlimited(0, DEFAULT_WINDOW_STEP));
+
         this.rrIntervals.addElements(rrIntervals);
 
         this.duration = 0;
@@ -44,39 +45,15 @@ public class HeartRateMath {
         return time.getElements();
     }
 
-    public void setWindow(AbstractIntervalsWindow window) {
+    public void setWindow(DataWindow window) {
         this.window = window;
-        window.setCallback(new AbstractIntervalsWindow.Callback() {
-            @Override
-            public <T extends AbstractIntervalsWindow> void onMove(T window, double t, double value) {
-                if (windowCallback != null)
-                    windowCallback.onMove(window, t, value);
-            }
-
-            @Override
-            public <T extends AbstractIntervalsWindow> double onAdd(T window, double t, double value) {
-                if (windowCallback != null)
-                    return windowCallback.onAdd(window, t, value);
-                return value;
-            }
-
-            @Override
-            public <T extends AbstractIntervalsWindow> void onStep(T window, double t, double value) {
-                if (windowCallback != null)
-                    windowCallback.onStep(window, t, value);
-            }
-        });
-    }
-
-    public void setWindowCallback(WindowCallback windowCallback) {
-        this.windowCallback = windowCallback;
     }
 
     public double getDuration() {
         return duration;
     }
 
-    public AbstractIntervalsWindow getWindow() {
+    public DataWindow getWindow() {
         return window;
     }
 
@@ -95,16 +72,6 @@ public class HeartRateMath {
     public double getTotalStressIndex() {
         Histogram h = new Histogram(rrIntervals.getElements(), 50);
         return h.getSI();
-    }
-
-    public static interface WindowCallback {
-
-        public <T extends AbstractIntervalsWindow> void onMove(T window, double t, double value);
-
-        public <T extends AbstractIntervalsWindow> double onAdd(T window, double t, double value);
-
-        public <T extends AbstractIntervalsWindow> void onStep(T window, double t, double value);
-
     }
 
 }

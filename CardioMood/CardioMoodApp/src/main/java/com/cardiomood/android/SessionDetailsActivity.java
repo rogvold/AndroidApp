@@ -1,5 +1,6 @@
 package com.cardiomood.android;
 
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -74,6 +75,11 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session_details);
 
+        ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        if (am.getLargeMemoryClass() < 10) {
+            Toast.makeText(this, "Low available memory. Possible application crash...", Toast.LENGTH_SHORT).show();
+        }
+
         // Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
@@ -131,13 +137,14 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
         }
 
         hrDAO = new HeartRateDataItemDAO();
+
+        Toast.makeText(this, getString(R.string.loading_data_for_measurement) + sessionId, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         FlurryAgent.onStartSession(this, ConfigurationConstants.FLURRY_API_KEY);
-        Toast.makeText(this, getString(R.string.loading_data_for_measurement) + sessionId, Toast.LENGTH_SHORT).show();
     }
 
     @Override

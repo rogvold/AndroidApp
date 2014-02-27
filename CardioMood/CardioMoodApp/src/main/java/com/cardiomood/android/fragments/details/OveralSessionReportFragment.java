@@ -1,5 +1,6 @@
 package com.cardiomood.android.fragments.details;
 
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -18,20 +19,26 @@ import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
 import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.model.HeartRateDataItem;
 import com.cardiomood.android.db.model.HeartRateSession;
+import com.cardiomood.android.speedometer.SpeedometerView;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.math.HeartRateMath;
 import com.flurry.android.FlurryAgent;
 import com.shinobicontrols.charts.ChartView;
+import com.shinobicontrols.charts.DataAdapter;
 import com.shinobicontrols.charts.DataPoint;
 import com.shinobicontrols.charts.LineSeries;
 import com.shinobicontrols.charts.NumberAxis;
+import com.shinobicontrols.charts.NumberRange;
+import com.shinobicontrols.charts.Series;
 import com.shinobicontrols.charts.ShinobiChart;
 import com.shinobicontrols.charts.SimpleDataAdapter;
 
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+import org.apache.commons.math3.stat.StatUtils;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -53,9 +60,9 @@ public class OveralSessionReportFragment extends Fragment {
     private TextView sessionDate;
     private TextView meanHeartRate;
     private TextView meanStressIndex;
+    private SpeedometerView speedometer;
 
     private ShinobiChart heartRateChart;
-    private ShinobiChart spectrumChart;
 
     // Fragment parameters
     private long sessionId;
@@ -102,15 +109,23 @@ public class OveralSessionReportFragment extends Fragment {
         progress = (LinearLayout) v.findViewById(R.id.progress);
         scrollView = (ScrollView) v.findViewById(R.id.scrollView);
 
+        speedometer = (SpeedometerView) v.findViewById(R.id.speedometer);
+        speedometer.setLabelConverter(new SpeedometerView.LabelConverter() {
+            @Override
+            public String getLabelFor(double progress, double maxProgress) {
+                return String.valueOf((int) Math.round(progress));
+            }
+        });
+        speedometer.setMaxProgress(300);
+        speedometer.setMajorTickStep(30);
+        speedometer.addColoredRange(30, 140, Color.GREEN);
+        speedometer.addColoredRange(140, 180, Color.YELLOW);
+        speedometer.addColoredRange(180, 400, Color.RED);
+
         // Heart rate chart
         heartRateChart = ((ChartView) v.findViewById(R.id.heart_rate_chart)).getShinobiChart();
         heartRateChart.setTitle("Heart Rate");
         heartRateChart.setLicenseKey(ConfigurationConstants.SHINOBI_CHARTS_API_KEY);
-
-//        // Spectrum chart
-//        spectrumChart = ((ChartView) v.findViewById(R.id.spectrum_chart)).getShinobiChart();
-//        spectrumChart.setTitle("Spectrum");
-//        spectrumChart.setLicenseKey(ConfigurationConstants.SHINOBI_CHARTS_API_KEY);
 
         sessionName = (TextView) v.findViewById(R.id.session_title);
         sessionDate = (TextView) v.findViewById(R.id.session_date);
@@ -155,6 +170,8 @@ public class OveralSessionReportFragment extends Fragment {
         for (int i=0; i<rr.length; i++)
             bpm[i] = 1000*60/rr[i];
 
+        double meanBPM = StatUtils.mean(bpm);
+
         SplineInterpolator interpol = new SplineInterpolator();
         PolynomialSplineFunction f = interpol.interpolate(time, bpm);
 
@@ -162,10 +179,18 @@ public class OveralSessionReportFragment extends Fragment {
         NumberAxis xAxis = new NumberAxis();
         xAxis.enableGesturePanning(true);
         xAxis.enableGestureZooming(true);
+        xAxis.allowPanningOutOfDefaultRange(false);
+        xAxis.setDefaultRange(new NumberRange(time[0], time[time.length-1]/1000));
+        xAxis.getStyle().getTickStyle().setLabelTextSize(10);
         heartRateChart.setXAxis(xAxis);
 
         NumberAxis yAxis = new NumberAxis();
         heartRateChart.setYAxis(yAxis);
+
+        // Clear
+        List<Series<?>> series = new ArrayList<Series<?>>(heartRateChart.getSeries());
+        for (Series<?> s: series)
+            heartRateChart.removeSeries(s);
 
         SimpleDataAdapter<Double, Double> dataAdapter1 = new SimpleDataAdapter<Double, Double>();
         double t = 0;
@@ -174,35 +199,20 @@ public class OveralSessionReportFragment extends Fragment {
             t += 50;
         }
 
+        // Add Mean Heart Rate horizontal line
         LineSeries series1 = new LineSeries();
         series1.setDataAdapter(dataAdapter1);
         heartRateChart.addSeries(series1);
-        heartRateChart.redrawChart();
 
-        // Spectrum Chart
-//        SpectralAnalysis sa = new SpectralAnalysis(time, rr);
-//        double[] power = sa.getPower();
-//        PolynomialSplineFunction spectrum = sa.getSplinePower();
-//
-//        xAxis = new NumberAxis();
-//        xAxis.enableGesturePanning(true);
-//        xAxis.enableGestureZooming(true);
-//        spectrumChart.setXAxis(xAxis);
-//
-//        yAxis = new NumberAxis();
-//        spectrumChart.setYAxis(yAxis);
-//
-//        SimpleDataAdapter<Double, Double> dataAdapter2 = new SimpleDataAdapter<Double, Double>();
-//        double maxFreq = sa.toFrequency(power.length-1), freq = 0;
-//        while(freq < maxFreq) {
-//            dataAdapter2.add(new DataPoint<Double, Double>(freq, spectrum.value(freq)));
-//            freq += 0.0005;
-//        }
-//
-//        LineSeries series2 = new LineSeries();
-//        series2.setDataAdapter(dataAdapter2);
-//        spectrumChart.addSeries(series2);
-//        spectrumChart.redrawChart();
+        DataAdapter<Double, Double> dataAdapter2 = new SimpleDataAdapter<Double, Double>();
+        dataAdapter2.add(new DataPoint<Double, Double>(-500.0, meanBPM));
+        dataAdapter2.add(new DataPoint<Double, Double>(time[time.length-1]/1000 + 500.0, meanBPM));
+
+        LineSeries series2 = new LineSeries();
+        series2.setDataAdapter(dataAdapter2);
+        heartRateChart.addSeries(series2);
+
+        heartRateChart.redrawChart();
     }
 
     private void showProgress() {
@@ -259,7 +269,10 @@ public class OveralSessionReportFragment extends Fragment {
             OveralSessionReportFragment.this.meanHeartRate.setText(meanHeartRate);
             OveralSessionReportFragment.this.meanStressIndex.setText(meanStress);
             initCharts(math);
+
+            OveralSessionReportFragment.this.speedometer.setProgress(0);
             hideProgress();
+            OveralSessionReportFragment.this.speedometer.setProgress(Double.valueOf(meanStress), true);
         }
     }
 

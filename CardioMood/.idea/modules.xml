@@ -9,6 +9,7 @@
       <module fileurl="file://$PROJECT_DIR$/HeartRate/HeartRate.iml" filepath="$PROJECT_DIR$/HeartRate/HeartRate.iml" />
       <module fileurl="file://$PROJECT_DIR$/Math/Math.iml" filepath="$PROJECT_DIR$/Math/Math.iml" />
       <module fileurl="file://$PROJECT_DIR$/ShinobiCharts/ShinobiCharts.iml" filepath="$PROJECT_DIR$/ShinobiCharts/ShinobiCharts.iml" />
+      <module fileurl="file://$PROJECT_DIR$/SpeedometerView/SpeedometerView.iml" filepath="$PROJECT_DIR$/SpeedometerView/SpeedometerView.iml" />
     </modules>
   </component>
 </project>

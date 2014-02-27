@@ -28,12 +28,14 @@ import com.shinobicontrols.charts.DataPoint;
 import com.shinobicontrols.charts.LineSeries;
 import com.shinobicontrols.charts.NumberAxis;
 import com.shinobicontrols.charts.NumberRange;
+import com.shinobicontrols.charts.Series;
 import com.shinobicontrols.charts.ShinobiChart;
 import com.shinobicontrols.charts.SimpleDataAdapter;
 
 import org.apache.commons.math3.stat.StatUtils;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -103,7 +105,7 @@ public class ScatterogramReportFragment extends Fragment {
 
         // Spectrum chart
         scatterogramChart = ((ChartView) v.findViewById(R.id.scatterogram_chart)).getShinobiChart();
-        scatterogramChart.setTitle("Histogram");
+        scatterogramChart.setTitle("Scatterogram");
         scatterogramChart.setLicenseKey(ConfigurationConstants.SHINOBI_CHARTS_API_KEY);
 
         sessionName = (TextView) v.findViewById(R.id.session_title);
@@ -153,6 +155,11 @@ public class ScatterogramReportFragment extends Fragment {
         yAxis.enableGesturePanning(true);
         yAxis.enableGestureZooming(true);
         scatterogramChart.setYAxis(yAxis);
+
+        // Clear
+        List<Series<?>> series = new ArrayList<Series<?>>(scatterogramChart.getSeries());
+        for (Series<?> s: series)
+            scatterogramChart.removeSeries(s);
 
         DataAdapter<Double, Double> dataAdapter1 = new SimpleDataAdapter<Double, Double>();
         for (double i=0; i<1500; i+=50)

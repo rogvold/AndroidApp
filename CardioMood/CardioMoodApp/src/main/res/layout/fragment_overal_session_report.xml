@@ -63,6 +63,12 @@
                 android:layout_marginBottom="16dp"
                 android:background="@android:color/darker_gray"/>
 
+            <com.cardiomood.android.speedometer.SpeedometerView
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:padding="8dp"
+                android:id="@+id/speedometer" />
+
             <com.shinobicontrols.charts.ChartView
                 android:layout_height="200sp"
                 android:layout_width="match_parent"
