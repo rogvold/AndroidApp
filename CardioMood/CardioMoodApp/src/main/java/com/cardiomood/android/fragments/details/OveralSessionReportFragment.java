@@ -118,6 +118,7 @@ public class OveralSessionReportFragment extends Fragment {
         });
         speedometer.setMaxProgress(300);
         speedometer.setMajorTickStep(30);
+        speedometer.setMinorTicks(2);
         speedometer.addColoredRange(30, 140, Color.GREEN);
         speedometer.addColoredRange(140, 180, Color.YELLOW);
         speedometer.addColoredRange(180, 400, Color.RED);

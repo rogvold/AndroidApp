@@ -314,8 +314,8 @@ public class SpeedometerView extends View {
 
     private RectF getOval(Canvas canvas, float factor) {
         RectF oval;
-        final int canvasWidth = canvas.getWidth();
-        final int canvasHeight = canvas.getHeight();
+        final int canvasWidth = canvas.getWidth() - getPaddingLeft() - getPaddingRight();
+        final int canvasHeight = canvas.getHeight() - getPaddingTop() - getPaddingBottom();
 
         if (canvasHeight*2 >= canvasWidth) {
             oval = new RectF(0, 0, canvasWidth*factor, canvasWidth*factor);
@@ -323,7 +323,7 @@ public class SpeedometerView extends View {
             oval = new RectF(0, 0, canvasHeight*2*factor, canvasHeight*2*factor);
         }
 
-        oval.offset((canvasWidth-oval.width())/2, (canvasHeight*2-oval.height())/2);
+        oval.offset((canvasWidth-oval.width())/2 + getPaddingLeft(), (canvasHeight*2-oval.height())/2 + getPaddingTop());
 
         return oval;
     }
