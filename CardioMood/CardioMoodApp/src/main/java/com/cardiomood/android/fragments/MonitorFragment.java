@@ -189,10 +189,10 @@ public class MonitorFragment extends Fragment {
                                     vibrate(1000);
                                     performDisconnect();
                                 } else {
-                                    execJS("setProgress(" + (float)monitorTime/120*100 + ");");
+                                    execJS("setSpeed(" + (float)monitorTime/120*100 + ");");
                                 }
                             } else {
-                                execJS("setProgress(0);");
+                                execJS("setSpeed(0);");
                             }
                         }
                     }, 0, 1000);
@@ -202,7 +202,7 @@ public class MonitorFragment extends Fragment {
 
                     collectedData = Collections.synchronizedList(new ArrayList<HeartRateDataItem>());
                     setConnectedView();
-                    //execJS("setProgress(0);");
+                    //execJS("setSpeed(0);");
                 }
                 if (newStatus == LeHRMonitor.DISCONNECTING_STATUS || newStatus == LeHRMonitor.READY_STATUS && oldStatus != LeHRMonitor.INITIAL_STATUS) {
                     if (timer != null) {

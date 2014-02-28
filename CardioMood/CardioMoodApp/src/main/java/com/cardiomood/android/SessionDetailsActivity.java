@@ -138,7 +138,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
 
         hrDAO = new HeartRateDataItemDAO();
 
-        Toast.makeText(this, getString(R.string.loading_data_for_measurement) + sessionId, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, getString(R.string.loading_data_for_measurement) + sessionId, Toast.LENGTH_SHORT).show();
     }
 
     @Override

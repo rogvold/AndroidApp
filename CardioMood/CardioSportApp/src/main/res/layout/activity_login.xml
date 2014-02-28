@@ -3,7 +3,7 @@
        android:layout_height="wrap_content"
        tools:context=".LoginActivity" >
 
-    <!-- Login progress -->
+    <!-- Login speed -->
 
     <LinearLayout
             android:id="@+id/login_status"

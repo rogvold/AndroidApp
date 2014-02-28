@@ -11,6 +11,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
@@ -19,17 +20,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Speedometer with needle.
+ *
  * Created by danon on 26.02.14.
+ * @version 1.0
+ * @author Anton Danshin <a href="mailto:anton.danshin@frtk.ru">anton.danshin@frtk.ru</a>
  */
 public class SpeedometerView extends View {
 
     private static final String TAG = SpeedometerView.class.getSimpleName();
 
-    private double maxProgress = 100;
-    private double progress = 0;
+    public static final double DEFAULT_MAX_SPEED = 100.0;
+    public static final double DEFAULT_MAJOR_TICK_STEP = 20.0;
+    public static final int DEFAULT_MINOR_TICKS = 1;
+
+    private double maxSpeed = DEFAULT_MAX_SPEED;
+    private double speed = 0;
     private int defaultColor = Color.rgb(180, 180, 180);
-    private double majorTickStep = 20;
-    private int minorTicks = 1;
+    private double majorTickStep = DEFAULT_MAJOR_TICK_STEP;
+    private int minorTicks = DEFAULT_MINOR_TICKS;
     private LabelConverter labelConverter;
 
     private List<ColoredRange> ranges = new ArrayList<ColoredRange>();
@@ -59,65 +68,70 @@ public class SpeedometerView extends View {
 
         try {
             // read attributes
+            setMaxSpeed(attributes.getFloat(R.styleable.SpeedometerView_maxSpeed, (float) DEFAULT_MAX_SPEED));
+            setSpeed(attributes.getFloat(R.styleable.SpeedometerView_speed, 0));
         } finally {
             attributes.recycle();
         }
         init();
     }
 
-    public double getMaxProgress() {
-        return maxProgress;
+    public double getMaxSpeed() {
+        return maxSpeed;
     }
 
-    public void setMaxProgress(double maxProgress) {
-        if (maxProgress <= 0)
-            throw new IllegalArgumentException("Non-positive value specified as max progress.");
-        this.maxProgress = maxProgress;
+    public void setMaxSpeed(double maxSpeed) {
+        if (maxSpeed <= 0)
+            throw new IllegalArgumentException("Non-positive value specified as max speed.");
+        this.maxSpeed = maxSpeed;
         invalidate();
     }
 
-    public double getProgress() {
-        return progress;
+    public double getSpeed() {
+        return speed;
     }
 
-    public void setProgress(double progress) {
-        if (progress < 0)
-            throw new IllegalArgumentException("Non-positive value specified as a progress.");
-        if (progress > maxProgress)
-            progress = maxProgress;
-        this.progress = progress;
+    public void setSpeed(double speed) {
+        if (speed < 0)
+            throw new IllegalArgumentException("Non-positive value specified as a speed.");
+        if (speed > maxSpeed)
+            speed = maxSpeed;
+        this.speed = speed;
         invalidate();
     }
 
     @TargetApi(11)
-    public void setProgress(double progress, boolean animate) {
-        if (!animate)
-            setProgress(progress);
-
+    public ValueAnimator setSpeed(double progress, long duration, long startDelay) {
         if (progress <= 0)
-            throw new IllegalArgumentException("Non-positive value specified as a progress.");
+            throw new IllegalArgumentException("Non-positive value specified as a speed.");
 
-        if (progress > maxProgress)
-            progress = maxProgress;
+        if (progress > maxSpeed)
+            progress = maxSpeed;
 
         ValueAnimator va = ValueAnimator.ofObject(new TypeEvaluator<Double>() {
             @Override
             public Double evaluate(float fraction, Double startValue, Double endValue) {
                 return startValue + fraction*(endValue-startValue);
             }
-        }, Double.valueOf(getProgress()), Double.valueOf(progress));
+        }, Double.valueOf(getSpeed()), Double.valueOf(progress));
 
-        va.setDuration(1500);
-        va.setStartDelay(200);
+        va.setDuration(duration);
+        va.setStartDelay(startDelay);
         va.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             public void onAnimationUpdate(ValueAnimator animation) {
                 Double value = (Double) animation.getAnimatedValue();
                 if (value != null)
-                    setProgress(value);
-                Log.d(TAG, "setProgress(): onAnumationUpdate() -> value = " + value);
+                    setSpeed(value);
+                Log.d(TAG, "setSpeed(): onAnumationUpdate() -> value = " + value);
             }
         });
         va.start();
+        return va;
+    }
+
+    @TargetApi(11)
+    public ValueAnimator setSpeed(double progress, boolean animate) {
+        return setSpeed(progress, 1500, 200);
     }
 
     public int getDefaultColor() {
@@ -166,10 +180,10 @@ public class SpeedometerView extends View {
     public void addColoredRange(double begin, double end, int color) {
         if (begin >= end)
             throw new IllegalArgumentException("Incorrect number range specified!");
-        if (begin < - 5.0/160*maxProgress)
-            begin = - 5.0/160*maxProgress;
-        if (end > maxProgress * (5.0/160 + 1))
-            end = maxProgress * (5.0/160 + 1);
+        if (begin < - 5.0/160* maxSpeed)
+            begin = - 5.0/160* maxSpeed;
+        if (end > maxSpeed * (5.0/160 + 1))
+            end = maxSpeed * (5.0/160 + 1);
         ranges.add(new ColoredRange(color, begin, end));
         invalidate();
     }
@@ -184,7 +198,7 @@ public class SpeedometerView extends View {
         // Draw Metallic Arc and background
         drawBackground(canvas);
 
-        // Draw Ticks
+        // Draw Ticks and colored arc
         drawTicks(canvas);
 
         // Draw Needle
@@ -237,7 +251,7 @@ public class SpeedometerView extends View {
         RectF oval = getOval(canvas, 1);
         float radius = oval.width()*0.35f;
 
-        float angle = 10 + (float) (getProgress()/getMaxProgress()*160);
+        float angle = 10 + (float) (getSpeed()/ getMaxSpeed()*160);
         canvas.drawLine(
                 (float) (oval.centerX() + 0),
                 (float) (oval.centerY() - 0),
@@ -252,7 +266,7 @@ public class SpeedometerView extends View {
 
     private void drawTicks(Canvas canvas) {
         float availableAngle = 160;
-        float majorStep = (float) (majorTickStep/maxProgress*availableAngle);
+        float majorStep = (float) (majorTickStep/ maxSpeed *availableAngle);
         float minorStep = majorStep / (1 + minorTicks);
 
         float majorTicksLength = 30;
@@ -294,7 +308,7 @@ public class SpeedometerView extends View {
                 float txtX = oval.centerX() + radius + majorTicksLength/2 + 8;
                 float txtY = oval.centerY();
                 canvas.rotate(+90, txtX, txtY);
-                canvas.drawText(labelConverter.getLabelFor(curProgress, maxProgress), txtX, txtY, txtPaint);
+                canvas.drawText(labelConverter.getLabelFor(curProgress, maxSpeed), txtX, txtY, txtPaint);
                 canvas.restore();
             }
 
@@ -308,7 +322,7 @@ public class SpeedometerView extends View {
 
         for (ColoredRange range: ranges) {
             colorLinePaint.setColor(range.getColor());
-            canvas.drawArc(smallOval, (float) (190 + range.getBegin()/maxProgress*160), (float) ((range.getEnd() - range.getBegin())/maxProgress*160), false, colorLinePaint);
+            canvas.drawArc(smallOval, (float) (190 + range.getBegin()/ maxSpeed *160), (float) ((range.getEnd() - range.getBegin())/ maxSpeed *160), false, colorLinePaint);
         }
     }
 
@@ -328,6 +342,18 @@ public class SpeedometerView extends View {
         return oval;
     }
 
+    private RectF getOval(float w, float h) {
+        RectF oval;
+        final float canvasWidth = w - getPaddingLeft() - getPaddingRight();
+        final float canvasHeight = h - getPaddingTop() - getPaddingBottom();
+        if (canvasHeight*2 >= canvasWidth) {
+            oval = new RectF(0, 0, canvasWidth, canvasWidth);
+        } else {
+            oval = new RectF(0, 0, canvasHeight*2, canvasHeight*2);
+        }
+        return oval;
+    }
+
     private void drawBackground(Canvas canvas) {
         RectF oval = getOval(canvas, 1);
         canvas.drawArc(oval, 180, 180, true, backgroundPaint);
@@ -339,7 +365,12 @@ public class SpeedometerView extends View {
         canvas.drawBitmap(mask, oval.centerX() - oval.width()*1.1f/2, oval.centerY()-oval.width()*1.1f/2, maskPaint);
     }
 
+    @SuppressWarnings("NewApi")
     private void init() {
+        if (Build.VERSION.SDK_INT >= 11 && !isInEditMode()) {
+            setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        }
+
         backgroundPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         backgroundPaint.setStyle(Paint.Style.FILL);
         backgroundPaint.setColor(Color.rgb(127, 127, 127));

@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.ContentLoadingProgressBar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -116,7 +117,7 @@ public class OveralSessionReportFragment extends Fragment {
                 return String.valueOf((int) Math.round(progress));
             }
         });
-        speedometer.setMaxProgress(300);
+        speedometer.setMaxSpeed(300);
         speedometer.setMajorTickStep(30);
         speedometer.setMinorTicks(2);
         speedometer.addColoredRange(30, 140, Color.GREEN);
@@ -219,11 +220,13 @@ public class OveralSessionReportFragment extends Fragment {
     private void showProgress() {
         scrollView.setVisibility(View.GONE);
         progress.setVisibility(View.VISIBLE);
+        ((ContentLoadingProgressBar) progress.findViewById(R.id.content_loading)).show();
     }
 
     private void hideProgress() {
         progress.setVisibility(View.GONE);
         scrollView.setVisibility(View.VISIBLE);
+        ((ContentLoadingProgressBar) progress.findViewById(R.id.content_loading)).hide();
     }
 
     private class DataLoadingTask extends AsyncTask<Long, Void, Void> {
@@ -271,9 +274,9 @@ public class OveralSessionReportFragment extends Fragment {
             OveralSessionReportFragment.this.meanStressIndex.setText(meanStress);
             initCharts(math);
 
-            OveralSessionReportFragment.this.speedometer.setProgress(0);
+            OveralSessionReportFragment.this.speedometer.setSpeed(0);
             hideProgress();
-            OveralSessionReportFragment.this.speedometer.setProgress(Double.valueOf(meanStress), true);
+            OveralSessionReportFragment.this.speedometer.setSpeed(Double.valueOf(meanStress), 1200, 500);
         }
     }
 

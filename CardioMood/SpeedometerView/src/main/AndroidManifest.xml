@@ -4,6 +4,8 @@
     <application android:allowBackup="true"
         android:label="SpeedometerView" >
 
+        <uses-sdk android:targetSdkVersion="9"/>
+
     </application>
 
 </manifest>

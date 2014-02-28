@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.ContentLoadingProgressBar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -188,11 +189,13 @@ public class ScatterogramReportFragment extends Fragment {
     private void showProgress() {
         scrollView.setVisibility(View.GONE);
         progress.setVisibility(View.VISIBLE);
+        ((ContentLoadingProgressBar) progress.findViewById(R.id.content_loading)).show();
     }
 
     private void hideProgress() {
         progress.setVisibility(View.GONE);
         scrollView.setVisibility(View.VISIBLE);
+        ((ContentLoadingProgressBar) progress.findViewById(R.id.content_loading)).hide();
     }
 
     private class DataLoadingTask extends AsyncTask<Long, Void, Void> {
