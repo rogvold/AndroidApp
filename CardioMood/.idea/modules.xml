@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/CardioMood.iml" filepath="$PROJECT_DIR$/CardioMood.iml" />
       <module fileurl="file://$PROJECT_DIR$/CardioMoodApp/CardioMoodApp.iml" filepath="$PROJECT_DIR$/CardioMoodApp/CardioMoodApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/CardioSportApp/CardioSportApp.iml" filepath="$PROJECT_DIR$/CardioSportApp/CardioSportApp.iml" />
+      <module fileurl="file://$PROJECT_DIR$/CircularProgressBar/CircularProgressBar.iml" filepath="$PROJECT_DIR$/CircularProgressBar/CircularProgressBar.iml" />
       <module fileurl="file://$PROJECT_DIR$/CommonTools/CommonTools.iml" filepath="$PROJECT_DIR$/CommonTools/CommonTools.iml" />
       <module fileurl="file://$PROJECT_DIR$/HeartRate/HeartRate.iml" filepath="$PROJECT_DIR$/HeartRate/HeartRate.iml" />
       <module fileurl="file://$PROJECT_DIR$/Math/Math.iml" filepath="$PROJECT_DIR$/Math/Math.iml" />

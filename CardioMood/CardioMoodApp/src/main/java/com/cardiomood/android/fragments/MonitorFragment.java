@@ -25,11 +25,8 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -45,6 +42,7 @@ import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.model.HeartRateDataItem;
 import com.cardiomood.android.db.model.HeartRateSession;
 import com.cardiomood.android.db.model.SessionStatus;
+import com.cardiomood.android.progress.CircularProgressBar;
 import com.cardiomood.android.tools.IMonitors;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
@@ -88,10 +86,10 @@ public class MonitorFragment extends Fragment {
     private static final long SCAN_PERIOD = 100000;
 
     private View container;
-    private WebView webView;
     private View initialView;
     private Button connectDeviceButton;
     private ScrollView scrollView;
+    private CircularProgressBar progressBar;
 
     private PreferenceHelper mPrefHelper;
 
@@ -133,7 +131,7 @@ public class MonitorFragment extends Fragment {
             final String action = intent.getAction();
             if (LeHRMonitor.ACTION_BPM_CHANGED.equals(action)) {
                 int bpm = intent.getIntExtra(LeHRMonitor.EXTRA_NEW_BPM, 0);
-                execJS("setPulse(" + bpm + ")");
+                //execJS("setPulse(" + bpm + ")");
             }
             if (LeHRMonitor.ACTION_CONNECTION_STATUS_CHANGED.equals(action)) {
                 final int newStatus = intent.getIntExtra(LeHRMonitor.EXTRA_NEW_STATUS, -100);
@@ -189,10 +187,10 @@ public class MonitorFragment extends Fragment {
                                     vibrate(1000);
                                     performDisconnect();
                                 } else {
-                                    execJS("setSpeed(" + (float)monitorTime/120*100 + ");");
+                                    setProgress((float) monitorTime / 120 * 100);
                                 }
                             } else {
-                                execJS("setSpeed(0);");
+                                setProgress(0);
                             }
                         }
                     }, 0, 1000);
@@ -202,7 +200,6 @@ public class MonitorFragment extends Fragment {
 
                     collectedData = Collections.synchronizedList(new ArrayList<HeartRateDataItem>());
                     setConnectedView();
-                    //execJS("setSpeed(0);");
                 }
                 if (newStatus == LeHRMonitor.DISCONNECTING_STATUS || newStatus == LeHRMonitor.READY_STATUS && oldStatus != LeHRMonitor.INITIAL_STATUS) {
                     if (timer != null) {
@@ -222,10 +219,11 @@ public class MonitorFragment extends Fragment {
             }
             if (LeHRMonitor.ACTION_HEART_RATE_DATA_RECEIVED.equals(action)) {
                 int bpm = intent.getIntExtra(LeHRMonitor.EXTRA_BPM, 0);
+                Log.d(TAG, "heart rate = " + bpm);
                 short[] rr = intent.getShortArrayExtra(LeHRMonitor.EXTRA_INTERVALS);
                 // this should be always invoked!!!
                 saveHeartRateData(bpm, 0, rr);
-                execJS("setPulse(" + bpm + ")");
+                //execJS("setPulse(" + bpm + ")");
             }
         }
     };
@@ -261,23 +259,6 @@ public class MonitorFragment extends Fragment {
         super.onPause();
     }
 
-    private void initWebView() {
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.setHorizontalScrollBarEnabled(false);
-        webView.getSettings().setBuiltInZoomControls(false);
-        scrollView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return true;
-            }
-        });
-        webView.setOnTouchListener(new View.OnTouchListener() {
-
-            public boolean onTouch(View v, MotionEvent event) {
-                return (event.getAction() == MotionEvent.ACTION_MOVE);
-            }
-        });
-    }
     private void vibrate(long milliseconds) {
         Activity activity = getActivity();
         if (activity == null)
@@ -293,7 +274,6 @@ public class MonitorFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView()");
         this.container = inflater.inflate(R.layout.fragment_monitor, container, false);
-        webView = (WebView) this.container.findViewById(R.id.webView1);
         initialView = this.container.findViewById(R.id.initial_view);
         scrollView = (ScrollView) this.container.findViewById(R.id.connected_view);
         connectDeviceButton = (Button) this.container.findViewById(R.id.btn_connect_device);
@@ -305,6 +285,9 @@ public class MonitorFragment extends Fragment {
                 performConnect();
             }
         });
+
+        progressBar = (CircularProgressBar) this.container.findViewById(R.id.progress1);
+        progressBar.setProgress(0);
 
         setDisconnectedView();
         return this.container;
@@ -327,7 +310,6 @@ public class MonitorFragment extends Fragment {
         isConnectedView = false;
         final Semaphore mutex = new Semaphore(1);
         isMonitoring = true;
-        initWebView();
         scrollView.setVisibility(View.VISIBLE);
         try {
             mutex.acquire();
@@ -335,17 +317,6 @@ public class MonitorFragment extends Fragment {
             Thread.currentThread().interrupt();
             return;
         }
-        webView.loadUrl(getString(R.string.asset_countdown_html));
-
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                if (getString(R.string.asset_countdown_html).equals(url)) {
-                    mutex.release();
-                    isConnectedView = true;
-                }
-            }
-        });
         connectDeviceButton.setEnabled(false);
 
         // Wait for the page to load
@@ -363,7 +334,6 @@ public class MonitorFragment extends Fragment {
     private void setDisconnectedView() {
         isConnectedView = false;
         scrollView.setVisibility(View.GONE);
-        webView.stopLoading();
         connectDeviceButton.setEnabled(true);
         initialView.setVisibility(View.VISIBLE);
         isMonitoring = false;
@@ -570,25 +540,17 @@ public class MonitorFragment extends Fragment {
         }
     }
 
-    private void execJS(final String js) {
-        if (!isConnectedView) {
-            return;
-        }
-        final Activity activity = getActivity();
-        if (activity == null)
-            return;
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            @SuppressWarnings("NewApi")
-            public void run() {
-                Log.d(TAG, "execJS(): js = " + js);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                    webView.evaluateJavascript(js, null);
-                } else {
-                    webView.loadUrl("javascript:" + js);
+    private void setProgress(final float progress) {
+        Activity activity = getActivity();
+        if (activity != null) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (progressBar != null)
+                        progressBar.setProgress(progress);
                 }
-            }
-        });
+            });
+        }
     }
 
     @Override

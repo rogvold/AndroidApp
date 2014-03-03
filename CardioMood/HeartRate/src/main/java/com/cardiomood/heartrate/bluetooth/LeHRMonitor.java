@@ -45,12 +45,18 @@ public abstract class LeHRMonitor {
             monitor = new AndroidLeHRMonitor(context);
             if (monitor.isSupported())
                 return monitor;
+        } catch (NoClassDefFoundError ex) {
+            Log.w(TAG, "getMonitor(): this is not Android 4.3+ device.", ex);
+        }
+
+        try {
             monitor = new MotorolaLeHRMonitor(context);
             if (monitor.isSupported())
                 return monitor;
         } catch (NoClassDefFoundError ex) {
-            Log.w(TAG, "getMonitor(): this device is not supported.", ex);
+            Log.w(TAG, "getMonitor(): this device is not supported (not Motorola).", ex);
         }
+
         return null;
     }
 
@@ -118,6 +124,7 @@ public abstract class LeHRMonitor {
     }
 
     protected void notifyHeartRateDataReceived(int bpm, short energyExpended, short[] rrIntervals) {
+        Log.d(TAG, "notifyHeartRateDataReceived(): bpm=" + bpm);
         Intent intent = new Intent(ACTION_HEART_RATE_DATA_RECEIVED);
         intent.putExtra(EXTRA_BPM, bpm);
         intent.putExtra(EXTRA_ENERGY_EXPENDED, energyExpended);

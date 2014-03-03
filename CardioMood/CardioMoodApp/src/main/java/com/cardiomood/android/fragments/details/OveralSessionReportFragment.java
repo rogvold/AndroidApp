@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.ContentLoadingProgressBar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -195,17 +196,20 @@ public class OveralSessionReportFragment extends Fragment {
             heartRateChart.removeSeries(s);
 
         SimpleDataAdapter<Double, Double> dataAdapter1 = new SimpleDataAdapter<Double, Double>();
-        double t = 0;
-        while(t < time[time.length-1]) {
-            dataAdapter1.add(new DataPoint<Double, Double>(t/1000, f.value(t)));
-            t += 50;
-        }
+//        double t = 0;
+//        while(t < time[time.length-1]) {
+//            dataAdapter1.add(new DataPoint<Double, Double>(t/1000, f.value(t)));
+//            t += 50;
+//        }
+        for (int i=0; i<time.length; i++)
+            dataAdapter1.add(new DataPoint<Double, Double>(time[i]/1000, bpm[i]));
 
-        // Add Mean Heart Rate horizontal line
+
         LineSeries series1 = new LineSeries();
         series1.setDataAdapter(dataAdapter1);
         heartRateChart.addSeries(series1);
 
+        // Add Mean Heart Rate horizontal line
         DataAdapter<Double, Double> dataAdapter2 = new SimpleDataAdapter<Double, Double>();
         dataAdapter2.add(new DataPoint<Double, Double>(-500.0, meanBPM));
         dataAdapter2.add(new DataPoint<Double, Double>(time[time.length-1]/1000 + 500.0, meanBPM));
@@ -259,6 +263,7 @@ public class OveralSessionReportFragment extends Fragment {
             rr = new double[items.size()];
             for (int i=0; i<items.size(); i++) {
                 rr[i] = items.get(i).getRrTime();
+                Log.d(TAG, "rr[i]=" + rr[i]);
             }
             math = new HeartRateMath(rr);
             this.meanHeartRate = "" + Math.round(60*1000/math.getMean());

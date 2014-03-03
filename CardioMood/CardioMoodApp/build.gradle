@@ -56,4 +56,5 @@ dependencies {
     compile project(':Math')
     compile project(':ShinobiCharts')
     compile project(':SpeedometerView')
+    compile project(':CircularProgressBar')
 }

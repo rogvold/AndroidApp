@@ -342,18 +342,6 @@ public class SpeedometerView extends View {
         return oval;
     }
 
-    private RectF getOval(float w, float h) {
-        RectF oval;
-        final float canvasWidth = w - getPaddingLeft() - getPaddingRight();
-        final float canvasHeight = h - getPaddingTop() - getPaddingBottom();
-        if (canvasHeight*2 >= canvasWidth) {
-            oval = new RectF(0, 0, canvasWidth, canvasWidth);
-        } else {
-            oval = new RectF(0, 0, canvasHeight*2, canvasHeight*2);
-        }
-        return oval;
-    }
-
     private void drawBackground(Canvas canvas) {
         RectF oval = getOval(canvas, 1);
         canvas.drawArc(oval, 180, 180, true, backgroundPaint);

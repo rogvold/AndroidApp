@@ -3,13 +3,13 @@
   <component name="FacetManager">
     <facet type="android-gradle" name="Android-Gradle">
       <configuration>
-        <option name="GRADLE_PROJECT_PATH" value=":CardioMoodApp" />
+        <option name="GRADLE_PROJECT_PATH" value=":CircularProgressBar" />
       </configuration>
     </facet>
     <facet type="android" name="Android">
       <configuration>
         <option name="SELECTED_BUILD_VARIANT" value="debug" />
-        <option name="ASSEMBLE_TASK_NAME" value="assembleDebug" />
+        <option name="ASSEMBLE_TASK_NAME" value="bundleDebug" />
         <option name="COMPILE_JAVA_TASK_NAME" value="compileDebugJava" />
         <option name="ASSEMBLE_TEST_TASK_NAME" value="assembleDebugTest" />
         <option name="SOURCE_GEN_TASK_NAME" value="generateDebugSources" />
@@ -18,6 +18,7 @@
         <option name="RES_FOLDER_RELATIVE_PATH" value="/src/main/res" />
         <option name="RES_FOLDERS_RELATIVE_PATH" value="file://$MODULE_DIR$/src/main/res" />
         <option name="ASSETS_FOLDER_RELATIVE_PATH" value="/src/main/assets" />
+        <option name="LIBRARY_PROJECT" value="true" />
       </configuration>
     </facet>
   </component>
@@ -56,8 +57,6 @@
       <sourceFolder url="file://$MODULE_DIR$/src/instrumentTest/rs" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src/instrumentTest/res" type="java-test-resource" />
       <sourceFolder url="file://$MODULE_DIR$/src/instrumentTest/resources" type="java-test-resource" />
-      <excludeFolder url="file://$MODULE_DIR$/../CardioMood/build/bundles" />
-      <excludeFolder url="file://$MODULE_DIR$/../CardioMood/build/tmp" />
       <excludeFolder url="file://$MODULE_DIR$/build/apk" />
       <excludeFolder url="file://$MODULE_DIR$/build/assets" />
       <excludeFolder url="file://$MODULE_DIR$/build/bundles" />
@@ -72,31 +71,8 @@
     </content>
     <orderEntry type="jdk" jdkName="Android API 19 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" exported="" name="com.haarman.listviewanimations-2.5.2" level="project" />
     <orderEntry type="library" exported="" name="appcompat-v7-19.0.0" level="project" />
-    <orderEntry type="library" exported="" name="CWAC-EndlessAdapter" level="project" />
-    <orderEntry type="library" exported="" name="flanagan" level="project" />
-    <orderEntry type="library" exported="" name="gson-2.2.4" level="project" />
-    <orderEntry type="library" exported="" name="nineoldandroids-2.4.0" level="project" />
-    <orderEntry type="library" exported="" name="clientserverinteraction" level="project" />
-    <orderEntry type="library" exported="" name="Parse-1.4.1" level="project" />
     <orderEntry type="library" exported="" name="support-v4-19.0.0" level="project" />
-    <orderEntry type="library" exported="" name="codegist-common-2.0.0-RC1" level="project" />
-    <orderEntry type="library" exported="" name="shinobicharts-android-trial-1.3.2" level="project" />
-    <orderEntry type="library" exported="" name="BluetoothGatt" level="project" />
-    <orderEntry type="library" exported="" name="codegist-crest-2.0.0-RC1" level="project" />
-    <orderEntry type="library" exported="" name="jackson-all-1.9.0" level="project" />
-    <orderEntry type="library" exported="" name="commons-io-2.4" level="project" />
-    <orderEntry type="library" exported="" name="FlurryAnalytics_3.3.2" level="project" />
-    <orderEntry type="library" exported="" name="CWAC-AdapterWrapper" level="project" />
-    <orderEntry type="library" exported="" name="commons-math3-3.2" level="project" />
-    <orderEntry type="library" exported="" name="GraphView-3.0" level="project" />
-    <orderEntry type="module" module-name="ShinobiCharts" exported="" />
-    <orderEntry type="module" module-name="CommonTools" exported="" />
-    <orderEntry type="module" module-name="CircularProgressBar" exported="" />
-    <orderEntry type="module" module-name="SpeedometerView" exported="" />
-    <orderEntry type="module" module-name="Math" exported="" />
-    <orderEntry type="module" module-name="HeartRate" exported="" />
   </component>
 </module>
 

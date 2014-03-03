@@ -159,6 +159,7 @@ public class AndroidLeHRMonitor extends LeHRMonitor {
                 Log.d(TAG, String.format("Received battery level: %d", batteryLevel));
             } else {
                 // unsupported UUID
+                Log.w(TAG, "Unsupported UUID " + characteristic.getUuid());
             }
         }
     };
