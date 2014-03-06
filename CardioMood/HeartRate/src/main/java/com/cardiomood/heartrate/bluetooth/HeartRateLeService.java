@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -21,13 +22,35 @@ public abstract class HeartRateLeService extends Service {
 
     private final IBinder mBinder = new LocalBinder();
     private LeHRMonitor monitor;
+    private DataCollector dataCollector;
 
-    private BroadcastReceiver receiver = new BroadcastReceiver() {
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            HeartRateLeService.this.sendBroadcast(intent);
+            //HeartRateLeService.this.sendBroadcast(intent);
+            DataCollector collector = dataCollector;
+            if (collector != null) {
+                String action = intent.getAction();
+                // Connection status changed
+                if (LeHRMonitor.ACTION_CONNECTION_STATUS_CHANGED.equals(action)) {
+                    int newStatus = intent.getIntExtra(LeHRMonitor.EXTRA_NEW_STATUS, 0);
+                    if (newStatus == LeHRMonitor.CONNECTED_STATUS)
+                        collector.onConnected();
+                    int oldStatus = intent.getIntExtra(LeHRMonitor.EXTRA_OLD_STATUS, 0);
+                    if (oldStatus == LeHRMonitor.CONNECTED_STATUS)
+                        collector.onDisconnected();
+                }
+                // Heart rate data received
+                if (LeHRMonitor.ACTION_HEART_RATE_DATA_RECEIVED.equals(action)) {
+                    int bpm = intent.getIntExtra(LeHRMonitor.EXTRA_BPM, 0);
+                    short[] rr = intent.getShortArrayExtra(LeHRMonitor.EXTRA_INTERVALS);
+                    collector.addData(bpm, rr);
+                }
+            }
         }
     };
+
+    private boolean receiverRegistered = false;
 
     public class LocalBinder extends Binder {
         public HeartRateLeService getService() {
@@ -43,11 +66,6 @@ public abstract class HeartRateLeService extends Service {
 
     @Override
     public boolean onUnbind(Intent intent) {
-        // After using a given device, you should make sure that BluetoothGatt.close() is called
-        // such that resources are cleaned up properly.  In this particular example, close() is
-        // invoked when the UI is disconnected from the Service.
-        close();
-        monitor = null;
         return super.onUnbind(intent);
     }
 
@@ -67,6 +85,12 @@ public abstract class HeartRateLeService extends Service {
         if (!bluetoothAdapter.isEnabled()) {
             Log.w(TAG, "initialize(): bluetooth adapter is not enabled");
         }
+
+        if (!receiverRegistered) {
+            receiverRegistered = true;
+            registerReceiver(receiver, makeGattUpdateIntentFilter());
+        }
+
         return monitor.initialize();
     }
 
@@ -117,7 +141,38 @@ public abstract class HeartRateLeService extends Service {
             return;
         }
 
+        if (receiverRegistered) {
+            unregisterReceiver(receiver);
+            receiverRegistered = false;
+        }
+
         monitor.close();
         monitor = LeHRMonitor.getMonitor(this);
+    }
+
+    public DataCollector getDataCollector() {
+        return dataCollector;
+    }
+
+    public void setDataCollector(DataCollector dataCollector) {
+        this.dataCollector = dataCollector;
+    }
+
+    public static interface DataCollector {
+
+        void onConnected();
+
+        void addData(int bpm, short[] rrIntervals);
+
+        void onDisconnected();
+
+    }
+
+    private static IntentFilter makeGattUpdateIntentFilter() {
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(LeHRMonitor.ACTION_HEART_RATE_DATA_RECEIVED);
+        intentFilter.addAction(LeHRMonitor.ACTION_BPM_CHANGED);
+        intentFilter.addAction(LeHRMonitor.ACTION_CONNECTION_STATUS_CHANGED);
+        return intentFilter;
     }
 }

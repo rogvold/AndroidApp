@@ -121,7 +121,7 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if (MonitorFragment.isMonitoring) {
+        if (ConnectionFragment.isMonitoring) {
             Toast.makeText(getActivity(), R.string.monitoring_is_in_progress, Toast.LENGTH_SHORT).show();
             return;
         }

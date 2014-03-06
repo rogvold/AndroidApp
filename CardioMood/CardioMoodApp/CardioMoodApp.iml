@@ -89,6 +89,7 @@
     <orderEntry type="library" exported="" name="commons-io-2.4" level="project" />
     <orderEntry type="library" exported="" name="FlurryAnalytics_3.3.2" level="project" />
     <orderEntry type="library" exported="" name="CWAC-AdapterWrapper" level="project" />
+    <orderEntry type="library" exported="" name="support-v13-19.0.0" level="project" />
     <orderEntry type="library" exported="" name="commons-math3-3.2" level="project" />
     <orderEntry type="library" exported="" name="GraphView-3.0" level="project" />
     <orderEntry type="module" module-name="ShinobiCharts" exported="" />

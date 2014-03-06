@@ -99,5 +99,9 @@
     <string name="feedback_submission_failed">Произошла ошибка при отправке Вашего отзыва. Попробуйте позднее.</string>
     <string name="submitting_feedback_message">Выполняется отправка отзыва. Пожалуйста, подождите...</string>
     <string name="menu_feedback_condensed">Отзыв</string>
+    <string name="open_monitor">Open monitor</string>
+    <string name="device_connected_open_monitor">The device is connected.</string>
+    <string name="monitoring_title_heart_rate">Heart Rate</string>
+    <string name="monitoring_title_stress" />
 
 </resources>

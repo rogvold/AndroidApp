@@ -59,6 +59,7 @@ public class HeartRateMath {
 
     public void addIntervals(double... rrIntervals) {
         for (double rrInterval: rrIntervals) {
+            this.rrIntervals.addElement(rrInterval);
             time.addElement(this.duration);
             window.add(rrInterval);
             this.duration += rrInterval;
@@ -74,4 +75,7 @@ public class HeartRateMath {
         return h.getSI();
     }
 
+    public int getCount() {
+        return this.rrIntervals.getNumElements();
+    }
 }

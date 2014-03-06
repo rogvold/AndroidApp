@@ -13,7 +13,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -31,40 +30,24 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cardiomood.android.MonitoringActivity;
 import com.cardiomood.android.R;
-import com.cardiomood.android.SessionDetailsActivity;
-import com.cardiomood.android.bluetooth.CardioMoodHeartRateLeService;
-import com.cardiomood.android.db.dao.HeartRateSessionDAO;
-import com.cardiomood.android.db.model.HeartRateDataItem;
-import com.cardiomood.android.db.model.HeartRateSession;
-import com.cardiomood.android.db.model.SessionStatus;
-import com.cardiomood.android.progress.CircularProgressBar;
+import com.cardiomood.android.heartrate.AbstractDataCollector;
+import com.cardiomood.android.heartrate.CardioMoodHeartRateLeService;
+import com.cardiomood.android.heartrate.IntervalLimitDataCollector;
 import com.cardiomood.android.tools.IMonitors;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.heartrate.bluetooth.LeHRMonitor;
-import com.cardiomood.math.HeartRateMath;
-import com.cardiomood.math.histogram.Histogram;
-import com.cardiomood.math.window.DataWindow;
 import com.flurry.android.FlurryAgent;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.UUID;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
@@ -73,40 +56,33 @@ import java.util.regex.Pattern;
  * Date: 23.05.13
  * Time: 23:50
  */
-public class MonitorFragment extends Fragment {
+public class ConnectionFragment extends Fragment {
 
-   private static final String TAG = "CardioMood.MonitorFragment";
+   private static final String TAG = ConnectionFragment.class.getSimpleName();
     // Bluetooth Intent request codes
     private static final int REQUEST_ENABLE_BT = 2;
-
-    private static final int HR_DATA_EVENT = 1;
-    private static final int CONNECTION_STATUS_CHANGE_EVENT = 2;
 
     // Stops scanning after 10 seconds.
     private static final long SCAN_PERIOD = 100000;
 
     private View container;
-    private View initialView;
+    private TextView hintText;
     private Button connectDeviceButton;
-    private ScrollView scrollView;
-    private CircularProgressBar progressBar;
 
     private PreferenceHelper mPrefHelper;
-
     private Handler mHandler;
     private boolean mScanning = false;
 
     private AlertDialog alertSelectDevice;
 
-    private List<HeartRateDataItem> collectedData;
-
     private ProgressDialog sessionSavingDialog;
     public static boolean isMonitoring = false;
-    private boolean isConnectedView = false;
-    private boolean unlimitedLength = false;
-    private boolean stopButtonPressed = false;
     private boolean disableBluetoothOnClose = false;
-    private HeartRateMath math;
+
+    // Service registration
+    private boolean receiverRegistered = false;
+    private boolean serviceBound = false;
+    private boolean deviceConnected = false;
 
     private CardioMoodHeartRateLeService mBluetoothLeService;
 
@@ -116,6 +92,9 @@ public class MonitorFragment extends Fragment {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             mBluetoothLeService = (CardioMoodHeartRateLeService) ((CardioMoodHeartRateLeService.LocalBinder) service).getService();
+            LeHRMonitor monitor = mBluetoothLeService.getMonitor();
+            deviceConnected = (monitor.getConnectionStatus() == LeHRMonitor.CONNECTED_STATUS);
+            updateView();
         }
 
         @Override
@@ -129,10 +108,6 @@ public class MonitorFragment extends Fragment {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
-            if (LeHRMonitor.ACTION_BPM_CHANGED.equals(action)) {
-                int bpm = intent.getIntExtra(LeHRMonitor.EXTRA_NEW_BPM, 0);
-                //execJS("setPulse(" + bpm + ")");
-            }
             if (LeHRMonitor.ACTION_CONNECTION_STATUS_CHANGED.equals(action)) {
                 final int newStatus = intent.getIntExtra(LeHRMonitor.EXTRA_NEW_STATUS, -100);
                 final int oldStatus = intent.getIntExtra(LeHRMonitor.EXTRA_OLD_STATUS, -100);
@@ -143,93 +118,24 @@ public class MonitorFragment extends Fragment {
 
                 // update button ui state
                 connectDeviceButton.setEnabled(newStatus == LeHRMonitor.CONNECTED_STATUS || newStatus == LeHRMonitor.INITIAL_STATUS);
+                deviceConnected = newStatus == LeHRMonitor.CONNECTED_STATUS;
 
-                // update timer
                 if (newStatus == LeHRMonitor.CONNECTED_STATUS) {
                     FlurryAgent.logEvent("device_connected");
-                    monitorTime = 0;
-                    if (timer != null) {
-                        timer.cancel();
-                        timer.purge();
-                    }
-
-                    math = new HeartRateMath();
-                    math.setWindow(new DataWindow.Timed(30*1000, 5000));
-                    math.getWindow().setCallback(new DataWindow.Callback() {
-
-                        @Override
-                        public <T extends DataWindow> void onMove(T window, double t, double value) {
-
-                        }
-
-                        @Override
-                        public <T extends DataWindow> double onAdd(T window, double t, double value) {
-                            return value;
-                        }
-
-                        @Override
-                        public <T extends DataWindow> void onStep(T window, double t, double value) {
-                            Histogram h = new Histogram(window.getIntervals().getElements(), 50);
-                            Log.i(TAG, "window.onStep(): t=" + t + ", SI=" + h.getSI());
-                        }
-                    });
-
-                    timer = new Timer();
-                    timer.scheduleAtFixedRate(new TimerTask() {
-                        @Override
-                        public void run() {
-                            monitorTime += 1;
-                            if (!unlimitedLength) {
-                                if (monitorTime > 120) {
-                                    timer.cancel();
-                                    timer.purge();
-                                    timer = null;
-                                    vibrate(1000);
-                                    performDisconnect();
-                                } else {
-                                    setProgress((float) monitorTime / 120 * 100);
-                                }
-                            } else {
-                                setProgress(0);
-                            }
-                        }
-                    }, 0, 1000);
-                    if (collectedData!= null) {
-                        collectedData.clear();
-                    }
-
-                    collectedData = Collections.synchronizedList(new ArrayList<HeartRateDataItem>());
-                    setConnectedView();
+                    openMonitor();
                 }
                 if (newStatus == LeHRMonitor.DISCONNECTING_STATUS || newStatus == LeHRMonitor.READY_STATUS && oldStatus != LeHRMonitor.INITIAL_STATUS) {
-                    if (timer != null) {
-                        timer.cancel();
-                        timer.purge();
-                        timer = null;
-                    }
-                    if (!unlimitedLength && monitorTime <=120 || unlimitedLength && monitorTime < 30) {
-                        Toast.makeText(getActivity(), R.string.device_was_disconnected, Toast.LENGTH_SHORT).show();
-                    }
-                    FlurryAgent.logEvent("device_disconnected", new HashMap<String, String>(){{put("monitorTime", monitorTime+"");}});
+                    FlurryAgent.logEvent("device_disconnected");
                     setDisconnectedView();
                 }
                 if (newStatus == LeHRMonitor.INITIAL_STATUS) {
                     setDisconnectedView();
                 }
             }
-            if (LeHRMonitor.ACTION_HEART_RATE_DATA_RECEIVED.equals(action)) {
-                int bpm = intent.getIntExtra(LeHRMonitor.EXTRA_BPM, 0);
-                Log.d(TAG, "heart rate = " + bpm);
-                short[] rr = intent.getShortArrayExtra(LeHRMonitor.EXTRA_INTERVALS);
-                // this should be always invoked!!!
-                saveHeartRateData(bpm, 0, rr);
-                //execJS("setPulse(" + bpm + ")");
-            }
+
+            updateView();
         }
     };
-
-    private long monitorTime = 0;
-    private Timer timer = new Timer();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -238,8 +144,11 @@ public class MonitorFragment extends Fragment {
 
         mHandler = new Handler();
 
-        Intent gattServiceIntent = new Intent(getActivity(), CardioMoodHeartRateLeService.class);
-        getActivity().bindService(gattServiceIntent, mServiceConnection, Activity.BIND_AUTO_CREATE);
+        if (! serviceBound) {
+            Intent gattServiceIntent = new Intent(getActivity(), CardioMoodHeartRateLeService.class);
+            getActivity().bindService(gattServiceIntent, mServiceConnection, Activity.BIND_AUTO_CREATE);
+            serviceBound = true;
+        }
 
         setHasOptionsMenu(true);
 
@@ -250,13 +159,22 @@ public class MonitorFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        getActivity().registerReceiver(dataReceiver, makeGattUpdateIntentFilter());
-        unlimitedLength = mPrefHelper.getBoolean(ConfigurationConstants.MEASUREMENT_UNLIMITED_LENGTH);
+
+        if (!receiverRegistered) {
+            getActivity().registerReceiver(dataReceiver, makeGattUpdateIntentFilter());
+            receiverRegistered = true;
+        }
+        //unlimitedLength = mPrefHelper.getBoolean(ConfigurationConstants.MEASUREMENT_UNLIMITED_LENGTH);
     }
 
     @Override
     public void onPause() {
         super.onPause();
+
+        if (receiverRegistered) {
+            receiverRegistered = false;
+            getActivity().unregisterReceiver(dataReceiver);
+        }
     }
 
     private void vibrate(long milliseconds) {
@@ -274,8 +192,6 @@ public class MonitorFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView()");
         this.container = inflater.inflate(R.layout.fragment_monitor, container, false);
-        initialView = this.container.findViewById(R.id.initial_view);
-        scrollView = (ScrollView) this.container.findViewById(R.id.connected_view);
         connectDeviceButton = (Button) this.container.findViewById(R.id.btn_connect_device);
 
         connectDeviceButton.setOnClickListener(new View.OnClickListener() {
@@ -286,8 +202,7 @@ public class MonitorFragment extends Fragment {
             }
         });
 
-        progressBar = (CircularProgressBar) this.container.findViewById(R.id.progress1);
-        progressBar.setProgress(0);
+        hintText = (TextView) this.container.findViewById(R.id.hintText);
 
         setDisconnectedView();
         return this.container;
@@ -297,45 +212,90 @@ public class MonitorFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_disconnect:
-                FlurryAgent.logEvent("stop_button_clicked", new HashMap<String, String>(){{put("monitorTime", monitorTime+"");}});
-                stopButtonPressed = true;
+                FlurryAgent.logEvent("stop_button_clicked");
                 performDisconnect();
-                stopButtonPressed = false;
                 break;
         }
         return false;
     }
 
-    private void setConnectedView() {
-        isConnectedView = false;
-        final Semaphore mutex = new Semaphore(1);
-        isMonitoring = true;
-        scrollView.setVisibility(View.VISIBLE);
-        try {
-            mutex.acquire();
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
-            return;
-        }
-        connectDeviceButton.setEnabled(false);
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
 
-        // Wait for the page to load
-        try {
-            while (true) {
-                if (mutex.tryAcquire(100L, TimeUnit.MILLISECONDS));
-                    mutex.release();
-                    return;
-            }
-        } catch (InterruptedException ex) {
-            Thread.currentThread().interrupt();
+            case REQUEST_ENABLE_BT:
+                if (resultCode == Activity.RESULT_OK) {
+                    Log.e(TAG, "onActivityResult(): BT enabled");
+                    disableBluetoothOnClose = mPrefHelper.getBoolean(ConfigurationConstants.CONNECTION_DISABLE_BT_ON_CLOSE);
+                    performConnect();
+                } else {
+                    Log.e(TAG, "onActivityResult(): BT not enabled");
+                }
+                break;
         }
     }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        performDisconnect();
+
+        if (serviceBound) {
+            serviceBound = false;
+            getActivity().unbindService(mServiceConnection);
+        }
+
+        if (disableBluetoothOnClose) {
+            LeHRMonitor monitor = mBluetoothLeService.getMonitor();
+            if (monitor != null) {
+                BluetoothAdapter bluetoothAdapter = monitor.getBluetoothAdapter();
+                if (bluetoothAdapter!= null && bluetoothAdapter.isEnabled())
+                    bluetoothAdapter.disable();
+            }
+        }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        Log.d(TAG, "onCreateOptionsMenu()");
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_connection, menu);
+    }
+
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        MenuItem disconnectItem = menu.findItem(R.id.menu_disconnect);
+        MenuItem bpmItem = menu.findItem(R.id.menu_bpm);
+
+
+        if (deviceConnected && serviceBound) {
+            LeHRMonitor monitor = mBluetoothLeService.getMonitor();
+
+            bpmItem.setVisible(true);
+            bpmItem.setTitle(String.valueOf(monitor.getLastBPM()));
+
+            disconnectItem.setVisible(true);
+        } else {
+            bpmItem.setVisible(false);
+            disconnectItem.setVisible(false);
+        }
+
+        super.onPrepareOptionsMenu(menu);
+    }
+
+    private void openMonitor() {
+        startActivity(new Intent(getActivity(), MonitoringActivity.class));
+    }
+
     private void setDisconnectedView() {
-        isConnectedView = false;
-        scrollView.setVisibility(View.GONE);
         connectDeviceButton.setEnabled(true);
-        initialView.setVisibility(View.VISIBLE);
+
         isMonitoring = false;
     }
 
@@ -360,10 +320,26 @@ public class MonitorFragment extends Fragment {
             try {
                 if (!requestEnableBluetooth())
                     return;
+
+                // Check if already initialized
+                LeHRMonitor monitor = mBluetoothLeService.getMonitor();
+
+                if (monitor != null && monitor.getConnectionStatus() == LeHRMonitor.CONNECTED_STATUS) {
+                    openMonitor();
+                    return;
+                }
+
+                if (monitor != null && monitor.getConnectionStatus() != LeHRMonitor.INITIAL_STATUS) {
+                    mBluetoothLeService.disconnect();
+                    mBluetoothLeService.close();
+                }
+
                 if (!mBluetoothLeService.initialize(getActivity())) {
                     Log.e(TAG, "Unable to initialize Bluetooth");
                     return;
                 }
+
+                mBluetoothLeService.setDataCollector(createDataCollector());
             } catch (Exception ex) {
                 Log.e(TAG, "Failed to initialize service.", ex);
                 Toast.makeText(getActivity(), "Cannot start Bluetooth.", Toast.LENGTH_SHORT);
@@ -381,15 +357,21 @@ public class MonitorFragment extends Fragment {
             mBluetoothLeService.disconnect();
             mBluetoothLeService.close();
         }
-        if (unlimitedLength) {
-            if (monitorTime >= 30 && stopButtonPressed) {
-                saveAndOpenSessionView();
-            }
+    }
+
+    private AbstractDataCollector createDataCollector() {
+        return new IntervalLimitDataCollector(mBluetoothLeService, 100);
+    }
+
+    private void updateView() {
+        if (serviceBound && deviceConnected) {
+            connectDeviceButton.setText(getString(R.string.open_monitor));
+            hintText.setText(R.string.device_connected_open_monitor);
         } else {
-            if (monitorTime >= 120 && !stopButtonPressed) {
-                saveAndOpenSessionView();
-            }
+            connectDeviceButton.setText(getString(R.string.connect_device));
+            hintText.setText(R.string.pair_and_tap_connect);
         }
+        getActivity().invalidateOptionsMenu();
     }
 
     @SuppressWarnings("NewApi")
@@ -540,25 +522,6 @@ public class MonitorFragment extends Fragment {
         }
     }
 
-    private void setProgress(final float progress) {
-        Activity activity = getActivity();
-        if (activity != null) {
-            activity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (progressBar != null)
-                        progressBar.setProgress(progress);
-                }
-            });
-        }
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        Log.d(TAG, "onActivityCreated()");
-        super.onActivityCreated(savedInstanceState);
-        getActivity().getActionBar().setDisplayHomeAsUpEnabled(true);
-    }
 
     private void showSavingSessionDialog() {
         getActivity().runOnUiThread(new Runnable() {
@@ -576,119 +539,48 @@ public class MonitorFragment extends Fragment {
         }
     }
 
-    private void saveAndOpenSessionView() {
-        final List<HeartRateDataItem> data = new ArrayList<HeartRateDataItem>(collectedData);
-        new AsyncTask<Void, Void, Long>() {
-            @Override
-            protected void onPreExecute() {
-                showSavingSessionDialog();
-            }
-
-            @Override
-            protected Long doInBackground(Void... params) {
-                if (data.isEmpty())
-                    return null;
-                HeartRateSessionDAO sessionDAO = new HeartRateSessionDAO();
-                HeartRateSession session = new HeartRateSession();
-                session.setDateStarted(data.get(0).getTimeStamp());
-                session.setDateEnded(new Date());
-                session.setStatus(SessionStatus.COMPLETED);
-                session = sessionDAO.insert(session, data);
-                Long sessionId = session.getId();
-
-                Map<String, String> args = new HashMap<String, String>();
-                args.put("sessionId", sessionId+"");
-                args.put("totalSessions", sessionDAO.getCount()+"");
-                FlurryAgent.logEvent("session_saved", args);
-
-                return sessionId;
-            }
-
-            @Override
-            protected void onPostExecute(Long sessionId) {
-                if (sessionId == null) {
-                    return;
-                }
-                Intent intent = new Intent(getActivity(), SessionDetailsActivity.class);
-                intent.putExtra(SessionDetailsActivity.SESSION_ID_EXTRA, sessionId);
-                intent.putExtra(SessionDetailsActivity.POST_RENDER_ACTION_EXTRA, SessionDetailsActivity.RENAME_ACTION);
-                startActivity(intent);
-
-                removeSavingSessionDialog();
-            }
-        }.execute();
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-
-            case REQUEST_ENABLE_BT:
-                if (resultCode == Activity.RESULT_OK) {
-                    Log.e(TAG, "onActivityResult(): BT enabled");
-                    disableBluetoothOnClose = mPrefHelper.getBoolean(ConfigurationConstants.CONNECTION_DISABLE_BT_ON_CLOSE);
-                    performConnect();
-                } else {
-                    Log.e(TAG, "onActivityResult(): BT not enabled");
-                }
-                break;
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-
-        performDisconnect();
-
-        if (disableBluetoothOnClose) {
-            LeHRMonitor monitor = mBluetoothLeService.getMonitor();
-            if (monitor != null) {
-                BluetoothAdapter bluetoothAdapter = monitor.getBluetoothAdapter();
-                if (bluetoothAdapter!= null && bluetoothAdapter.isEnabled())
-                    bluetoothAdapter.disable();
-            }
-        }
-
-        getActivity().unbindService(mServiceConnection);
-        mBluetoothLeService = null;
-        getActivity().unregisterReceiver(dataReceiver);
-    }
-
-    private void saveHeartRateData(int heartBeatsPerMinute, int energyExpended, short[] rrIntervals) {
-        try {
-            for (short rr: rrIntervals) {
-                collectedData.add(new HeartRateDataItem(heartBeatsPerMinute, (int) (rr * (1.0 / 1024 * 1000))));
-                math.addIntervals(rr);
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "saveHeartRateData() failed", e);
-        }
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        Log.d(TAG, "onCreateOptionsMenu()");
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.fragment_monitor, menu);
-    }
-
-    @Override
-    public void onPrepareOptionsMenu(Menu menu) {
-        MenuItem item = menu.findItem(R.id.menu_disconnect);
-        LeHRMonitor monitor = mBluetoothLeService == null ? null : mBluetoothLeService.getMonitor();
-        if (item != null && monitor != null) {
-            int c = monitor.getConnectionStatus();
-            if (c == LeHRMonitor.CONNECTED_STATUS) {
-                item.setEnabled(true);
-                //item.setVisible(true);
-            } else {
-                item.setEnabled(false);
-                //item.setVisible(false);
-            }
-        }
-        super.onPrepareOptionsMenu(menu);
-    }
+//    private void saveAndOpenSessionView() {
+//        final List<HeartRateDataItem> data = new ArrayList<HeartRateDataItem>(collectedData);
+//        new AsyncTask<Void, Void, Long>() {
+//            @Override
+//            protected void onPreExecute() {
+//                showSavingSessionDialog();
+//            }
+//
+//            @Override
+//            protected Long doInBackground(Void... params) {
+//                if (data.isEmpty())
+//                    return null;
+//                HeartRateSessionDAO sessionDAO = new HeartRateSessionDAO();
+//                HeartRateSession session = new HeartRateSession();
+//                session.setDateStarted(data.get(0).getTimeStamp());
+//                session.setDateEnded(new Date());
+//                session.setStatus(SessionStatus.COMPLETED);
+//                session = sessionDAO.insert(session, data);
+//                Long sessionId = session.getId();
+//
+//                Map<String, String> args = new HashMap<String, String>();
+//                args.put("sessionId", sessionId+"");
+//                args.put("totalSessions", sessionDAO.getCount()+"");
+//                FlurryAgent.logEvent("session_saved", args);
+//
+//                return sessionId;
+//            }
+//
+//            @Override
+//            protected void onPostExecute(Long sessionId) {
+//                if (sessionId == null) {
+//                    return;
+//                }
+//                Intent intent = new Intent(getActivity(), SessionDetailsActivity.class);
+//                intent.putExtra(SessionDetailsActivity.SESSION_ID_EXTRA, sessionId);
+//                intent.putExtra(SessionDetailsActivity.POST_RENDER_ACTION_EXTRA, SessionDetailsActivity.RENAME_ACTION);
+//                startActivity(intent);
+//
+//                removeSavingSessionDialog();
+//            }
+//        }.execute();
+//    }
 
     private static IntentFilter makeGattUpdateIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();

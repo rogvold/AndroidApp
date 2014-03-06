@@ -1,0 +1,22 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:cardiomood="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.cardiomood.android.MonitoringActivity" >
+
+    <item android:id="@+id/menu_bpm"
+        cardiomood:showAsAction="always"
+        android:title="-"/>
+
+    <item android:id="@+id/menu_stop_monitoring"
+        android:title="Stop Measurement"
+        android:titleCondensed="Stop"
+        cardiomood:showAsAction="always"
+        android:visible="true"/>
+
+    <item android:id="@+id/menu_start_monitoring"
+        android:title="Start Measurement"
+        android:titleCondensed="Start"
+        cardiomood:showAsAction="always"
+        android:visible="false"/>
+
+</menu>

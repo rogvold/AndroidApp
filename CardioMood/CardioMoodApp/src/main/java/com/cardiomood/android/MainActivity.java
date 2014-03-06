@@ -19,8 +19,8 @@ import android.widget.Toast;
 
 import com.cardiomood.android.dialogs.AboutDialog;
 import com.cardiomood.android.dialogs.WhatsNewDialog;
+import com.cardiomood.android.fragments.ConnectionFragment;
 import com.cardiomood.android.fragments.HistoryFragment;
-import com.cardiomood.android.fragments.MonitorFragment;
 import com.cardiomood.android.fragments.ProfileFragment;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
@@ -165,17 +165,17 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         switch (item.getItemId()) {
             case R.id.menu_settings:
                  FlurryAgent.logEvent("menu_settings_clicked");
-                 if (!MonitorFragment.isMonitoring)
+                 if (!ConnectionFragment.isMonitoring)
                     startActivity(new Intent(this, SettingsActivity.class));
                  return true;
             case R.id.menu_bt_settings:
                 FlurryAgent.logEvent("menu_bt_settings_clicked");
-                if (!MonitorFragment.isMonitoring)
+                if (!ConnectionFragment.isMonitoring)
                     openBluetoothSettings();
                 return true;
             case R.id.menu_feedback:
                 FlurryAgent.logEvent("menu_feedback_clicked");
-                if (!MonitorFragment.isMonitoring)
+                if (!ConnectionFragment.isMonitoring)
                     startActivity(new Intent(this, FeedbackActivity.class));
                 return true;
             case R.id.menu_about:
@@ -217,7 +217,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             // getItem is called to instantiate the fragment for the given page.
             switch (position) {
                 case 0: return new ProfileFragment();
-                case 1: return new MonitorFragment();
+                case 1: return new ConnectionFragment();
                 case 2: return new HistoryFragment();
             }
             return null;
@@ -246,7 +246,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
     @Override
     public void onBackPressed() {
-        if (MonitorFragment.isMonitoring) {
+        if (ConnectionFragment.isMonitoring) {
             if (this.lastBackPressTime < System.currentTimeMillis() - 4000) {
                 toast = Toast.makeText(this, getString(R.string.press_back_to_close), Toast.LENGTH_SHORT);
                 toast.show();

@@ -1,32 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@drawable/background_texture"
     android:padding="8dp">
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scrollbars="none"
-        android:background="@drawable/background_texture"
-        android:visibility="gone"
-        android:id="@+id/connected_view">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-            <com.cardiomood.android.progress.CircularProgressBar
-                android:id="@+id/progress1"
-                android:layout_width="match_parent"
-                android:layout_height="200dp"
-                app:color="#FF0000"
-                />
-        </LinearLayout>
-
-    </ScrollView>
 
     <LinearLayout
         android:layout_height="match_parent"
@@ -58,7 +36,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="@string/pair_and_tap_connect"
-            android:id="@+id/textView"
+            android:id="@+id/hintText"
             android:layout_gravity="center_horizontal"
             android:paddingTop="8dp"
             android:gravity="center_horizontal" />

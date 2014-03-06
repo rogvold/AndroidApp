@@ -21,11 +21,11 @@
         android:required="false" />
 
     <application
-        android:largeHeap="true"
         android:name="com.cardiomood.android.CardioMoodApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
+        android:largeHeap="true"
         android:theme="@style/AppTheme" >
         <activity
             android:name="com.cardiomood.android.SplashScreenActivity"
@@ -60,7 +60,7 @@
         </activity>
 
         <service
-            android:name="com.cardiomood.android.bluetooth.CardioMoodHeartRateLeService"
+            android:name="com.cardiomood.android.heartrate.CardioMoodHeartRateLeService"
             android:enabled="true" />
 
         <activity
@@ -71,7 +71,14 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="MainActivity" />
         </activity>
-
+        <activity
+            android:name="com.cardiomood.android.MonitoringActivity"
+            android:label="@string/title_activity_monitoring"
+            android:parentActivityName="com.cardiomood.android.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="MainActivity" />
+        </activity>
     </application>
 
 </manifest>
