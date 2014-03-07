@@ -19,6 +19,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Vibrator;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -29,7 +30,11 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,6 +43,10 @@ import com.cardiomood.android.R;
 import com.cardiomood.android.heartrate.AbstractDataCollector;
 import com.cardiomood.android.heartrate.CardioMoodHeartRateLeService;
 import com.cardiomood.android.heartrate.IntervalLimitDataCollector;
+import com.cardiomood.android.heartrate.TimeAndIntervalLimitDataCollector;
+import com.cardiomood.android.heartrate.TimeLimitDataCollector;
+import com.cardiomood.android.heartrate.UnlimitedDataCollector;
+import com.cardiomood.android.progress.CircularProgressBar;
 import com.cardiomood.android.tools.IMonitors;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
@@ -60,7 +69,7 @@ public class ConnectionFragment extends Fragment {
 
    private static final String TAG = ConnectionFragment.class.getSimpleName();
     // Bluetooth Intent request codes
-    private static final int REQUEST_ENABLE_BT = 2;
+    private static final  int REQUEST_ENABLE_BT = 2;
 
     // Stops scanning after 10 seconds.
     private static final long SCAN_PERIOD = 100000;
@@ -68,6 +77,19 @@ public class ConnectionFragment extends Fragment {
     private View container;
     private TextView hintText;
     private Button connectDeviceButton;
+
+    private LinearLayout measurementOptionsLayout;
+    private LinearLayout measurementStatusLayout;
+    private LinearLayout timeLimitLayout;
+    private LinearLayout countLimitLayout;
+    private LinearLayout customLimitLayout;
+    private Spinner limitTypeSpinner;
+    private Spinner timeLimitSpinner;
+    private Spinner countLimitSpinner;
+    private EditText customCountLimitTxt;
+    private EditText customTimeLimitTxt;
+    private CheckBox startImmediately;
+    private CircularProgressBar measurementProgress;
 
     private PreferenceHelper mPrefHelper;
     private Handler mHandler;
@@ -82,7 +104,6 @@ public class ConnectionFragment extends Fragment {
     // Service registration
     private boolean receiverRegistered = false;
     private boolean serviceBound = false;
-    private boolean deviceConnected = false;
 
     private CardioMoodHeartRateLeService mBluetoothLeService;
 
@@ -92,8 +113,6 @@ public class ConnectionFragment extends Fragment {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             mBluetoothLeService = (CardioMoodHeartRateLeService) ((CardioMoodHeartRateLeService.LocalBinder) service).getService();
-            LeHRMonitor monitor = mBluetoothLeService.getMonitor();
-            deviceConnected = (monitor.getConnectionStatus() == LeHRMonitor.CONNECTED_STATUS);
             updateView();
         }
 
@@ -116,9 +135,10 @@ public class ConnectionFragment extends Fragment {
                     getActivity().invalidateOptionsMenu();
                 }
 
-                // update button ui state
-                connectDeviceButton.setEnabled(newStatus == LeHRMonitor.CONNECTED_STATUS || newStatus == LeHRMonitor.INITIAL_STATUS);
-                deviceConnected = newStatus == LeHRMonitor.CONNECTED_STATUS;
+                // update button ui state and options layout
+                boolean enableControls = (newStatus != LeHRMonitor.CONNECTING_STATUS);
+                connectDeviceButton.setEnabled(enableControls);
+                disableEnableControls(enableControls, measurementOptionsLayout);
 
                 if (newStatus == LeHRMonitor.CONNECTED_STATUS) {
                     FlurryAgent.logEvent("device_connected");
@@ -165,6 +185,7 @@ public class ConnectionFragment extends Fragment {
             receiverRegistered = true;
         }
         //unlimitedLength = mPrefHelper.getBoolean(ConfigurationConstants.MEASUREMENT_UNLIMITED_LENGTH);
+        updateView();
     }
 
     @Override
@@ -191,7 +212,7 @@ public class ConnectionFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView()");
-        this.container = inflater.inflate(R.layout.fragment_monitor, container, false);
+        this.container = inflater.inflate(R.layout.fragment_connection, container, false);
         connectDeviceButton = (Button) this.container.findViewById(R.id.btn_connect_device);
 
         connectDeviceButton.setOnClickListener(new View.OnClickListener() {
@@ -201,8 +222,60 @@ public class ConnectionFragment extends Fragment {
                 performConnect();
             }
         });
-
         hintText = (TextView) this.container.findViewById(R.id.hintText);
+
+        measurementOptionsLayout = (LinearLayout) this.container.findViewById(R.id.measurement_options_layout);
+        limitTypeSpinner = (Spinner) this.container.findViewById(R.id.limit_by);
+        timeLimitLayout = (LinearLayout) this.container.findViewById(R.id.time_limit_layout);
+        countLimitLayout = (LinearLayout) this.container.findViewById(R.id.count_limit_layout);
+        customLimitLayout = (LinearLayout) this.container.findViewById(R.id.custom_limit_layout);
+        timeLimitSpinner = (Spinner) this.container.findViewById(R.id.time_limit);
+        countLimitSpinner = (Spinner) this.container.findViewById(R.id.count_limit);
+        customCountLimitTxt = (EditText) this.container.findViewById(R.id.custom_count_limit);
+        customTimeLimitTxt = (EditText) this.container.findViewById(R.id.custom_time_limit);
+        startImmediately = (CheckBox) this.container.findViewById(R.id.auto_start_measurement);
+        measurementStatusLayout = (LinearLayout) this.container.findViewById(R.id.measurement_status_layout);
+        measurementProgress = (CircularProgressBar) this.container.findViewById(R.id.measurement_progress);
+
+        limitTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, final int position, long id) {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        switch (position) {
+                            case 0:
+                                countLimitLayout.setVisibility(View.GONE);
+                                timeLimitLayout.setVisibility(View.GONE);
+                                customLimitLayout.setVisibility(View.GONE);
+                                break;
+                            case 1:
+                                countLimitLayout.setVisibility(View.GONE);
+                                timeLimitLayout.setVisibility(View.VISIBLE);
+                                customLimitLayout.setVisibility(View.GONE);
+                                break;
+                            case 2:
+                                countLimitLayout.setVisibility(View.VISIBLE);
+                                timeLimitLayout.setVisibility(View.GONE);
+                                customLimitLayout.setVisibility(View.GONE);
+                                break;
+                            case 3:
+                                countLimitLayout.setVisibility(View.GONE);
+                                timeLimitLayout.setVisibility(View.GONE);
+                                customLimitLayout.setVisibility(View.VISIBLE);
+                                break;
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                countLimitLayout.setVisibility(View.GONE);
+                timeLimitLayout.setVisibility(View.GONE);
+                customLimitLayout.setVisibility(View.GONE);
+            }
+        });
 
         setDisconnectedView();
         return this.container;
@@ -274,7 +347,7 @@ public class ConnectionFragment extends Fragment {
         MenuItem bpmItem = menu.findItem(R.id.menu_bpm);
 
 
-        if (deviceConnected && serviceBound) {
+        if (deviceConnected()) {
             LeHRMonitor monitor = mBluetoothLeService.getMonitor();
 
             bpmItem.setVisible(true);
@@ -294,9 +367,15 @@ public class ConnectionFragment extends Fragment {
     }
 
     private void setDisconnectedView() {
-        connectDeviceButton.setEnabled(true);
-
+        measurementStatusLayout.setVisibility(View.GONE);
+        measurementOptionsLayout.setVisibility(View.VISIBLE);
         isMonitoring = false;
+    }
+
+    private void setConnectedView() {
+        connectDeviceButton.setEnabled(true);
+        measurementOptionsLayout.setVisibility(View.GONE);
+        measurementStatusLayout.setVisibility(View.VISIBLE);
     }
 
     public boolean requestEnableBluetooth() {
@@ -339,7 +418,11 @@ public class ConnectionFragment extends Fragment {
                     return;
                 }
 
-                mBluetoothLeService.setDataCollector(createDataCollector());
+                AbstractDataCollector collector = createDataCollector();
+                if (collector != null && startImmediately.isChecked()) {
+                    collector.startCollecting();
+                }
+                mBluetoothLeService.setDataCollector(collector);
             } catch (Exception ex) {
                 Log.e(TAG, "Failed to initialize service.", ex);
                 Toast.makeText(getActivity(), "Cannot start Bluetooth.", Toast.LENGTH_SHORT);
@@ -360,18 +443,92 @@ public class ConnectionFragment extends Fragment {
     }
 
     private AbstractDataCollector createDataCollector() {
-        return new IntervalLimitDataCollector(mBluetoothLeService, 100);
+        switch (limitTypeSpinner.getSelectedItemPosition()) {
+            case 0: return new UnlimitedDataCollector(mBluetoothLeService);
+            case 1:
+                switch (timeLimitSpinner.getSelectedItemPosition()) {
+                    case 0: return new TimeLimitDataCollector(mBluetoothLeService, 60*1000);
+                    case 1: return new TimeLimitDataCollector(mBluetoothLeService, 2*60*1000);
+                    case 2: return new TimeLimitDataCollector(mBluetoothLeService, 3*60*1000);
+                    case 3: return new TimeLimitDataCollector(mBluetoothLeService, 5*60*1000);
+                    case 4: return new TimeLimitDataCollector(mBluetoothLeService, 10*60*1000);
+                    case 5: return new TimeLimitDataCollector(mBluetoothLeService, 30*60*1000);
+                    case 6: return new TimeLimitDataCollector(mBluetoothLeService, 60*60*1000);
+                    case 7: return new TimeLimitDataCollector(mBluetoothLeService, 2*60*60*1000);
+                    case 8: return new TimeLimitDataCollector(mBluetoothLeService, 5*60*60*1000);
+                    case 9: return new TimeLimitDataCollector(mBluetoothLeService, 12*60*60*1000);
+                    case 10: return new TimeLimitDataCollector(mBluetoothLeService, 24*60*60*1000);
+                }
+                break;
+            case 2:
+                switch (countLimitSpinner.getSelectedItemPosition()) {
+                    case 0: return new IntervalLimitDataCollector(mBluetoothLeService, 100);
+                    case 1: return new IntervalLimitDataCollector(mBluetoothLeService, 200);
+                    case 2: return new IntervalLimitDataCollector(mBluetoothLeService, 300);
+                    case 3: return new IntervalLimitDataCollector(mBluetoothLeService, 400);
+                    case 4: return new IntervalLimitDataCollector(mBluetoothLeService, 500);
+                    case 5: return new IntervalLimitDataCollector(mBluetoothLeService, 1000);
+                    case 6: return new IntervalLimitDataCollector(mBluetoothLeService, 2000);
+                    case 7: return new IntervalLimitDataCollector(mBluetoothLeService, 5000);
+                    case 8: return new IntervalLimitDataCollector(mBluetoothLeService, 10000);
+                    case 9: return new IntervalLimitDataCollector(mBluetoothLeService, 20000);
+                }
+                break;
+            case 3:
+                int countLimit = 0;
+                double timeLimit = 0;
+                try {
+                    if (customTimeLimitTxt.getText().length() > 0)
+                        timeLimit = Double.parseDouble(customTimeLimitTxt.getText().toString());
+                } catch (NumberFormatException ex) {
+                    Log.d(TAG, "Incorrect double format: " + customTimeLimitTxt.getText());
+                }
+                try {
+                    if (customCountLimitTxt.getText().length() > 0 && TextUtils.isDigitsOnly(customCountLimitTxt.getText().toString()))
+                        countLimit = Integer.parseInt(customCountLimitTxt.getText().toString());
+                } catch (NumberFormatException ex) {
+                    Log.d(TAG, "Incorrect integer format: " + customCountLimitTxt.getText());
+                }
+                if (timeLimit > 0) {
+                    if (countLimit > 0) {
+                        return new TimeAndIntervalLimitDataCollector(mBluetoothLeService, timeLimit, countLimit);
+                    } else return new TimeLimitDataCollector(mBluetoothLeService, timeLimit*1000);
+                } else {
+                    if (countLimit > 0) {
+                        return new IntervalLimitDataCollector(mBluetoothLeService, countLimit);
+                    } else {
+                        new UnlimitedDataCollector(mBluetoothLeService);
+                    }
+                }
+            default: return new UnlimitedDataCollector(mBluetoothLeService);
+        }
+        return null;
+    }
+
+    private boolean deviceConnected() {
+        if (mBluetoothLeService == null)
+            return false;
+        LeHRMonitor monitor = mBluetoothLeService.getMonitor();
+        return (monitor.getConnectionStatus() == LeHRMonitor.CONNECTED_STATUS);
     }
 
     private void updateView() {
-        if (serviceBound && deviceConnected) {
+        getActivity().invalidateOptionsMenu();
+        if (serviceBound && deviceConnected()) {
+            AbstractDataCollector collector = (AbstractDataCollector) mBluetoothLeService.getDataCollector();
+            if (collector == null) {
+                measurementProgress.setProgress(0);
+            } else {
+                measurementProgress.setProgress((float) collector.getProgress(), 300);
+            }
+            setConnectedView();
             connectDeviceButton.setText(getString(R.string.open_monitor));
             hintText.setText(R.string.device_connected_open_monitor);
         } else {
+            setDisconnectedView();
             connectDeviceButton.setText(getString(R.string.connect_device));
             hintText.setText(R.string.pair_and_tap_connect);
         }
-        getActivity().invalidateOptionsMenu();
     }
 
     @SuppressWarnings("NewApi")
@@ -536,6 +693,16 @@ public class ConnectionFragment extends Fragment {
         if (sessionSavingDialog != null) {
             sessionSavingDialog.dismiss();
             sessionSavingDialog = null;
+        }
+    }
+
+    private void disableEnableControls(boolean enable, ViewGroup vg){
+        for (int i = 0; i < vg.getChildCount(); i++){
+            View child = vg.getChildAt(i);
+            child.setEnabled(enable);
+            if (child instanceof ViewGroup){
+                disableEnableControls(enable, (ViewGroup)child);
+            }
         }
     }
 

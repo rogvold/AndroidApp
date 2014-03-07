@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/background_texture"
+    android:padding="8dp">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:id="@+id/measurement_options_layout">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="100sp"
+                    android:layout_weight="1"
+                    android:src="@drawable/img_cardiomood_logo"
+                    android:scaleType="centerInside"/>
+
+                <TextView
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Measurement options:"
+                    android:textStyle="bold"/>
+
+                <Spinner
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/limit_by"
+                    android:entries="@array/measurement_limit_types"
+                    />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:id="@+id/time_limit_layout"
+                    android:visibility="gone">
+                    <TextView
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Time limit:" />
+                    <Spinner
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/time_limit"
+                        android:entries="@array/time_limit_types"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:id="@+id/count_limit_layout"
+                    android:visibility="gone">
+                    <TextView
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Intervals limit:" />
+                    <Spinner
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/count_limit"
+                        android:entries="@array/count_limit_types"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:id="@+id/custom_limit_layout"
+                    android:visibility="gone">
+                    <TextView
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Specify your custom limit:" />
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/custom_time_limit"
+                        android:hint="Time limit"
+                        android:inputType="numberDecimal"/>
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/custom_count_limit"
+                        android:hint="Count limit"
+                        android:inputType="number"/>
+                </LinearLayout>
+
+                <CheckBox
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/auto_start_measurement"
+                    android:id="@+id/auto_start_measurement"
+                    android:checked="false" />
+
+        </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:id="@+id/measurement_status_layout"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="100sp"
+                    android:layout_weight="1"
+                    android:src="@drawable/img_cardiomood_logo"
+                    android:scaleType="centerInside"/>
+
+                <TextView
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Measurement in progress..." />
+
+                <com.cardiomood.android.progress.CircularProgressBar
+                    android:layout_width="200sp"
+                    android:layout_height="200sp"
+                    android:layout_gravity="center_horizontal"
+                    android:id="@+id/measurement_progress"/>
+
+                </LinearLayout>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="bottom">
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/connect_device"
+            android:id="@+id/btn_connect_device"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:background="#ffff3700"
+            android:textStyle="bold"
+            android:textColor="@android:color/primary_text_dark"
+            android:layout_gravity="center_horizontal" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/pair_and_tap_connect"
+            android:id="@+id/hintText"
+            android:layout_gravity="center_horizontal"
+            android:paddingTop="8dp"
+            android:gravity="center_horizontal" />
+    </LinearLayout>
+ </LinearLayout>

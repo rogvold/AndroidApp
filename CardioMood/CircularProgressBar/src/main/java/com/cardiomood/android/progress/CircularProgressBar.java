@@ -1,5 +1,7 @@
 package com.cardiomood.android.progress;
 
+import android.animation.ValueAnimator;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
@@ -78,6 +80,23 @@ public class CircularProgressBar extends View {
         }
         this.progress = progress;
         invalidate();
+    }
+
+    @TargetApi(11)
+    public ValueAnimator setProgress(float progress, long duration) {
+        if (progress > max || progress < min) {
+            throw new IllegalArgumentException("Illegal value: progress is outside range [min, max]");
+        }
+        ValueAnimator animator = ValueAnimator.ofFloat(getProgress(), progress).setDuration(duration);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                float f = (Float) animation.getAnimatedValue();
+                setProgress(f);
+            }
+        });
+        animator.start();
+        return animator;
     }
 
     public float getMin() {

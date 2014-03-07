@@ -1,7 +1,5 @@
 package com.cardiomood.android.heartrate;
 
-import android.util.Log;
-
 /**
  * Created by danon on 05.03.14.
  */
@@ -30,15 +28,18 @@ public class IntervalLimitDataCollector extends AbstractDataCollector {
         super.onCompleteCollecting();
 
         // save data :)
-        StringBuilder sb = new StringBuilder("rrIntervals:");
-        double rr[] = math.getRrIntervals();
-        for (double r: rr)
-            sb.append(" ").append(r);
-        Log.d(TAG, sb.toString());
+        if (needToStopCollecting()) {
+            // enough data were collected
+        } else {
+            // remove session
+        }
     }
 
     @Override
     public double getProgress() {
-        return (100.0*math.getCount()) / intervalsLimit;
+        double progress = (100.0*math.getCount()) / intervalsLimit;
+        if (progress > 100)
+            progress = 100;
+        return progress;
     }
 }

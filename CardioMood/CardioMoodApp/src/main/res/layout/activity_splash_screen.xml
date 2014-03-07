@@ -22,15 +22,15 @@
             android:textColor="#ff4848"
             android:textStyle="bold"
             android:textSize="40sp"
-            android:paddingTop="60dp"
+            android:paddingTop="40dp"
             android:layout_gravity="center"
             android:text="@string/dummy_content" />
         <ImageView
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:id="@+id/imageView"
-            android:src="@drawable/ic_splash_logo"
-            android:layout_marginTop="-60dp"/>
+            android:src="@drawable/img_cardiomood_notext"
+            android:padding="48sp"/>
 
     </LinearLayout>
 

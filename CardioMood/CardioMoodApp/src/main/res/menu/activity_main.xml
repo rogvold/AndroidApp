@@ -4,7 +4,6 @@
     <item cardiomood:showAsAction="always"
         android:id="@+id/menu_disconnect"
         android:title="@string/menu_disconnect"
-        android:titleCondensed="@string/stop"
         android:visible="false" />
     <item android:id="@+id/menu_bpm"
         cardiomood:showAsAction="always"

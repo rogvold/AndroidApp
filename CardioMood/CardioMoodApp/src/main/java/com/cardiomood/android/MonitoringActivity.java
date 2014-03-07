@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.cardiomood.android.components.CustomViewPager;
+import com.cardiomood.android.db.model.HeartRateSession;
 import com.cardiomood.android.fragments.monitoring.FragmentCallback;
 import com.cardiomood.android.fragments.monitoring.HeartRateMonitoringFragment;
 import com.cardiomood.android.heartrate.AbstractDataCollector;
@@ -51,10 +52,27 @@ public class MonitoringActivity extends ActionBarActivity implements ActionBar.T
                 Toast.makeText(MonitoringActivity.this, "Not connected. Closing...", Toast.LENGTH_SHORT).show();
                 finish();
             }
+
+            AbstractDataCollector collector = (AbstractDataCollector) mBluetoothLeService.getDataCollector();
+            if (collector != null)
+                collector.setListener(new AbstractDataCollector.SimpleListener() {
+                    @Override
+                    public void onDataSaved(HeartRateSession session) {
+                        if (session != null && session.getId() != null) {
+                            Intent intent = new Intent(MonitoringActivity.this, SessionDetailsActivity.class);
+                            intent.putExtra(SessionDetailsActivity.SESSION_ID_EXTRA, session.getId());
+                            startActivity(intent);
+                            finish();
+                        }
+                    }
+                });
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
+            AbstractDataCollector collector = (AbstractDataCollector) mBluetoothLeService.getDataCollector();
+            if (collector != null)
+                collector.setListener(null);
             mBluetoothLeService = null;
         }
     };
@@ -158,7 +176,7 @@ public class MonitoringActivity extends ActionBarActivity implements ActionBar.T
         MenuItem stopItem = menu.findItem(R.id.menu_stop_monitoring);
         MenuItem startItem = menu.findItem(R.id.menu_start_monitoring);
         MenuItem bpmItem = menu.findItem(R.id.menu_bpm);
-        if (serviceBound) {
+        if (mBluetoothLeService != null) {
             bpmItem.setTitle(String.valueOf(getCurrentBPM()));
             AbstractDataCollector collector = (AbstractDataCollector) mBluetoothLeService.getDataCollector();
             if (collector != null) {
@@ -279,6 +297,8 @@ public class MonitoringActivity extends ActionBarActivity implements ActionBar.T
                     return getString(R.string.monitoring_title_heart_rate).toUpperCase(l);
                 case 1:
                     return getString(R.string.monitoring_title_stress).toUpperCase(l);
+                case 2:
+                    return getString(R.string.monitoring_title_spectrum).toUpperCase(l);
             }
             return null;
         }

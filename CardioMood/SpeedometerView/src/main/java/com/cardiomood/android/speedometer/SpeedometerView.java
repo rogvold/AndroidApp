@@ -13,7 +13,6 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
 import java.util.ArrayList;
@@ -122,7 +121,6 @@ public class SpeedometerView extends View {
                 Double value = (Double) animation.getAnimatedValue();
                 if (value != null)
                     setSpeed(value);
-                Log.d(TAG, "setSpeed(): onAnumationUpdate() -> value = " + value);
             }
         });
         va.start();
@@ -249,18 +247,19 @@ public class SpeedometerView extends View {
 
     private void drawNeedle(Canvas canvas) {
         RectF oval = getOval(canvas, 1);
-        float radius = oval.width()*0.35f;
+        float radius = oval.width()*0.35f + 10;
+        RectF smallOval = getOval(canvas, 0.2f);
 
         float angle = 10 + (float) (getSpeed()/ getMaxSpeed()*160);
         canvas.drawLine(
-                (float) (oval.centerX() + 0),
-                (float) (oval.centerY() - 0),
+                (float) (oval.centerX() + Math.cos((180 - angle) / 180 * Math.PI) * smallOval.width()*0.5f),
+                (float) (oval.centerY() - Math.sin(angle / 180 * Math.PI) * smallOval.width()*0.5f),
                 (float) (oval.centerX() + Math.cos((180 - angle) / 180 * Math.PI) * (radius)),
                 (float) (oval.centerY() - Math.sin(angle / 180 * Math.PI) * (radius)),
                 needlePaint
         );
 
-        RectF smallOval = getOval(canvas, 0.2f);
+
         canvas.drawArc(smallOval, 180, 180, true, backgroundPaint);
     }
 
