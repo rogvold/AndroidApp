@@ -40,10 +40,13 @@ public interface CardioMoodDataService {
     @POST @Path("cardioSession/updateCardioSessionInfo")
     JsonResponse<CardioSession> updateSessionInfo(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("sessionId") Long sessionId, @FormParam("name") String name, @FormParam("description") String description);
 
-    @POST @Path("getCardioSessionData")
+    @POST @Path("cardioSession/getCardioSessionData")
     JsonResponse<CardioSessionWithData> getSessionData(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("sessionId") Long sessionId);
 
-    @POST @Path("deleteCardioSession")
+    @POST @Path("cardioSession/deleteCardioSession")
     JsonResponse<String> deleteSession(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("sessionId") Long sessionId);
+
+    @POST @Path("cardioSession/appendDataToCardioSession")
+    JsonResponse<String> appendDataToSession(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serializedData") String serializedData);
 
 }

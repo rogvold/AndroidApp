@@ -11,6 +11,7 @@ import com.cardiomood.data.json.CardioSessionWithData;
 import com.cardiomood.data.json.JsonError;
 import com.cardiomood.data.json.JsonResponse;
 import com.cardiomood.data.json.UserProfile;
+import com.google.gson.Gson;
 
 import java.util.List;
 
@@ -20,6 +21,8 @@ import java.util.List;
 public class DataServiceHelper {
 
     private static final String TAG = DataServiceHelper.class.getSimpleName();
+
+    private static final Gson GSON = new Gson();
 
     private CardioMoodDataService mService;
     private ApiToken mToken = null;
@@ -242,6 +245,31 @@ public class DataServiceHelper {
                 return deleteSession((Long) params[0]);
             }
         }.execute(sessionId);
+    }
+
+    private JsonResponse<String> appendDataToSession(CardioSessionWithData serializedData) {
+        try {
+            if (isSignedIn()) {
+                String token = getTokenString();
+                Long userId = getUserId();
+                return mService.appendDataToSession(token, userId, GSON.toJson(serializedData));
+            } else {
+                throw new IllegalStateException("Not signed in.");
+            }
+        } catch (Exception ex) {
+            Log.w(TAG, "deleteSession() -> failed with an exception", ex);
+            return new JsonResponse<String>(new JsonError("Service error: " + ex.getLocalizedMessage(), JsonError.SERVICE_ERROR));
+        }
+    }
+
+    public void appendDataToSession(CardioSessionWithData serializedData, ServerResponseCallbackRetry<String> callback) {
+        new ServiceTask<String>(new HandleTokenExpiredCallback<String>(callback)) {
+
+            @Override
+            protected JsonResponse<String> doInBackground(Object... params) {
+                return appendDataToSession((CardioSessionWithData) params[0]);
+            }
+        }.execute(serializedData);
     }
 
 
