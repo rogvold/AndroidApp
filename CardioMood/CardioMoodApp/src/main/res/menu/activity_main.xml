@@ -27,4 +27,7 @@
         android:icon="@drawable/ic_action_about"
         android:title="@string/menu_about"
         android:titleCondensed="@string/menu_about_condensed"/>
+    <item cardiomood:showAsAction="never"
+        android:id="@+id/menu_logout"
+        android:title="@string/menu_log_out"/>
 </menu>

@@ -11,28 +11,11 @@ android {
         versionName "1.0"
     }
 
-//    productFlavors {
-//        x86 {
-//            ndk {
-//                abiFilter "x86"
-//            }
-//        }
-//        arm {
-//            ndk {
-//                abiFilters "armeabi-v7a", "armeabi"
-//            }
-//        }
-//        mips {
-//            ndk {
-//                abiFilter "mips"
-//            }
-//        }
-//    }
-
-
-    release {
-        runProguard false
-        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+    buildTypes {
+        release {
+            runProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
     }
 }
 

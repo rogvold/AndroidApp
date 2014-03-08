@@ -49,7 +49,6 @@ dependencies {
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'commons-io:commons-io:2.4@jar'
     compile 'com.android.support:support-v13:+'
-    compile 'org.codegist.crest:codegist-crest:2.0.0-RC1'
     
     compile fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
     compile project(':HeartRate')
@@ -58,4 +57,5 @@ dependencies {
     compile project(':ShinobiCharts')
     compile project(':SpeedometerView')
     compile project(':CircularProgressBar')
+    compile project(':ClientServerInteraction')
 }

@@ -6,7 +6,6 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 
 import com.cardiomood.android.R;
 import com.cardiomood.android.heartrate.AbstractDataCollector;
@@ -18,9 +17,6 @@ import com.cardiomood.android.heartrate.CardioMoodHeartRateLeService;
 public class HeartRateMonitoringFragment extends Fragment {
 
     private FragmentCallback mCallback = null;
-
-    private Button startButton;
-    private Button stopButton;
 
 
     public static HeartRateMonitoringFragment newInstance() {
@@ -36,7 +32,7 @@ public class HeartRateMonitoringFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_heart_rate_monitoring, container, false);
 
-        // todo: initialize view params
+
 
         return v;
     }
@@ -48,7 +44,7 @@ public class HeartRateMonitoringFragment extends Fragment {
         if (activity instanceof FragmentCallback) {
             mCallback = (FragmentCallback) activity;
         } else {
-            throw new ClassCastException("Activity must implement " + FragmentCallback.class.getName());
+            throw new ClassCastException("Host activity must implement " + FragmentCallback.class.getName());
         }
     }
 

@@ -13,6 +13,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -214,16 +216,7 @@ public class ConnectionFragment extends Fragment {
         Log.d(TAG, "onCreateView()");
         this.container = inflater.inflate(R.layout.fragment_connection, container, false);
         connectDeviceButton = (Button) this.container.findViewById(R.id.btn_connect_device);
-
-        connectDeviceButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FlurryAgent.logEvent("connect_device_click");
-                performConnect();
-            }
-        });
         hintText = (TextView) this.container.findViewById(R.id.hintText);
-
         measurementOptionsLayout = (LinearLayout) this.container.findViewById(R.id.measurement_options_layout);
         limitTypeSpinner = (Spinner) this.container.findViewById(R.id.limit_by);
         timeLimitLayout = (LinearLayout) this.container.findViewById(R.id.time_limit_layout);
@@ -236,6 +229,23 @@ public class ConnectionFragment extends Fragment {
         startImmediately = (CheckBox) this.container.findViewById(R.id.auto_start_measurement);
         measurementStatusLayout = (LinearLayout) this.container.findViewById(R.id.measurement_status_layout);
         measurementProgress = (CircularProgressBar) this.container.findViewById(R.id.measurement_progress);
+
+        connectDeviceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FlurryAgent.logEvent("connect_device_click");
+                performConnect();
+            }
+        });
+
+        measurementProgress.setTextSize(26);
+        measurementProgress.setLabelConverter(new CircularProgressBar.LabelConverter() {
+            @Override
+            public String getLabelFor(float progress, float max, Paint paint) {
+                paint.setTypeface(Typeface.DEFAULT_BOLD);
+                return mBluetoothLeService.getMonitor().getLastBPM() + " bpm";
+            }
+        });
 
         limitTypeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override

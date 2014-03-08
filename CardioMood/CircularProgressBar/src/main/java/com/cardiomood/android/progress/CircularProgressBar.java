@@ -26,8 +26,12 @@ public class CircularProgressBar extends View {
     private float min = DEFAULT_MIN;
     private float lineWidth = DEFAULT_LINE_WIDTH;
     private int color = DEFAULT_COLOR;
+    private float textSize = 16;
+    private int textColor = Color.BLACK;
+    private LabelConverter labelConverter = null;
 
     private Paint mPaint;
+    private Paint txtPaint;
 
 
     public CircularProgressBar(Context context) {
@@ -132,6 +136,37 @@ public class CircularProgressBar extends View {
         invalidate();
     }
 
+    public int getTextColor() {
+        return textColor;
+    }
+
+    public void setTextColor(int color) {
+        this.textColor = textColor;
+        if (txtPaint != null)
+            txtPaint.setColor(color);
+        invalidate();
+    }
+
+    public float getTextSize() {
+        return textSize;
+    }
+
+    public void setTextSize(float textSize) {
+        this.textSize = textSize;
+        if (txtPaint != null)
+            txtPaint.setTextSize(textSize);
+        invalidate();
+    }
+
+    public LabelConverter getLabelConverter() {
+        return labelConverter;
+    }
+
+    public void setLabelConverter(LabelConverter labelConverter) {
+        this.labelConverter = labelConverter;
+        invalidate();
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
@@ -150,6 +185,10 @@ public class CircularProgressBar extends View {
         float angle = 360 * Math.abs((progress)/(max - min));
         mPaint.setColor(color);
         canvas.drawArc(oval, -90, angle, false, mPaint);
+
+        if (labelConverter != null) {
+            canvas.drawText(labelConverter.getLabelFor(progress, max, txtPaint), oval.centerX(), oval.centerY()+textSize/2, txtPaint);
+        }
     }
 
     private RectF getOval(Canvas canvas, float factor) {
@@ -171,9 +210,14 @@ public class CircularProgressBar extends View {
     private void init() {
         mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mPaint.setStyle(Paint.Style.STROKE);
+
+        txtPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        txtPaint.setTextSize(textSize);
+        txtPaint.setColor(textColor);
+        txtPaint.setTextAlign(Paint.Align.CENTER);
     }
 
     public static interface LabelConverter {
-        String getLabelFor(float progress, float max);
+        String getLabelFor(float progress, float max, Paint paint);
     }
 }

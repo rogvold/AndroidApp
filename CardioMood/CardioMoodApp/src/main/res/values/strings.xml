@@ -110,5 +110,17 @@
     <string name="monitoring_title_stress">Stress Index</string>
     <string name="auto_start_measurement">Start measurement automatically</string>
     <string name="monitoring_title_spectrum">Frequency</string>
+    <string name="login_progress_signing_in">Contacting CardioMood data server...</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in_short">Log in</string>
+    <string name="action_sign_in">Sign in</string>
+    <string name="dont_have_an_account">Don\'t have an account?</string>
+    <string name="register">Create Free CardioMood account</string>
+    <string name="guest_login">Try offline</string>
+    <string name="error_field_required">Field value required</string>
+    <string name="error_invalid_password">Invalid password</string>
+    <string name="error_invalid_email">Invalid email</string>
+    <string name="press_back_to_close_app">Tap BACK again to exit the app</string>
 
 </resources>

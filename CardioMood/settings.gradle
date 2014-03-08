@@ -1,1 +1,1 @@
-include ':HeartRate', ':Math', ':ShinobiCharts', ':CircularProgressBar', 'CommonTools', 'CardioMoodApp', 'CardioSportApp', 'SpeedometerView'
+include ':HeartRate', ':Math', ':ShinobiCharts', ':CircularProgressBar', ':ClientServerInteraction', 'CommonTools', 'CardioMoodApp', 'CardioSportApp', 'SpeedometerView'

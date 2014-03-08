@@ -15,6 +15,12 @@ public class CustomViewPager extends ViewPager {
     }
 
     @Override
+    public void setCurrentItem(int item) {
+        if (getCurrentItem() != item)
+            super.setCurrentItem(item);
+    }
+
+    @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (this.enabled) {
             return super.onTouchEvent(event);

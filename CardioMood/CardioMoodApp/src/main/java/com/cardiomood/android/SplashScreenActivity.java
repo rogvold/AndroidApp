@@ -26,7 +26,7 @@ public class SplashScreenActivity extends Activity {
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
      */
-    private static final boolean AUTO_HIDE = true;
+    private static final boolean AUTO_HIDE = false;
 
     /**
      * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
@@ -186,8 +186,8 @@ public class SplashScreenActivity extends Activity {
                 @Override
                 protected void onPostExecute(Object o) {
                     Log.e("SplashScreenActivity", "Starting MainActivity");
-                    SplashScreenActivity.this.startActivity(new Intent(SplashScreenActivity.this, MainActivity.class));
-                    SplashScreenActivity.this.finish();
+                    startActivity(new Intent(SplashScreenActivity.this, LoginActivity.class));
+                    finish();
                 }
             };
             startMainActivityTask.execute(null);

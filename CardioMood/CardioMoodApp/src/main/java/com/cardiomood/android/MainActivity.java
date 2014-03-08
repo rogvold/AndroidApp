@@ -28,7 +28,7 @@ import com.flurry.android.FlurryAgent;
 
 import java.util.Locale;
 
-public class MainActivity extends ActionBarActivity implements ActionBar.TabListener {
+public class MainActivity extends ActionBarActivity implements ActionBar.TabListener, ConfigurationConstants {
 
     private Toast toast;
     private long lastBackPressTime = 0;
@@ -97,7 +97,13 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                             .setText(mSectionsPagerAdapter.getPageTitle(i))
                             .setTabListener(this));
         }
-        actionBar.setSelectedNavigationItem(1);
+
+        mViewPager.post(new Runnable() {
+            @Override
+            public void run() {
+                actionBar.setSelectedNavigationItem(1);
+            }
+        });
     }
 
     @Override
@@ -182,6 +188,10 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                 FlurryAgent.logEvent("menu_about_clicked");
                 showAboutDialog();
                 return true;
+            case R.id.menu_logout:
+                FlurryAgent.logEvent("menu_logout_clicked");
+                logout();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -200,6 +210,16 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
     @Override
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+    }
+
+    private void logout() {
+        mPrefHelper.putBoolean(USER_LOGGED_IN, false);
+        mPrefHelper.putString(USER_EMAIL_KEY, mPrefHelper.getString(USER_EMAIL_KEY));
+        mPrefHelper.putString(USER_PASSWORD_KEY, null);
+        mPrefHelper.putString(USER_ACCESS_TOKEN_KEY, null);
+        mPrefHelper.putString(USER_EXTERNAL_ID, null);
+        startActivity(new Intent(this, LoginActivity.class));
+        finish();
     }
 
     /**

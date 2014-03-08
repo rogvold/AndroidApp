@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="clientserverinteraction">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/CardioMoodApp/libs/clientserverinteraction.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>

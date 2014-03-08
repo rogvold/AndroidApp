@@ -1,6 +1,4 @@
-package com.cardiomood.android.server;
-
-import com.omnihealth.client_server_interaction.ServerResponseCallback;
+package com.cardiomood.data.async;
 
 /**
  * Project: CardioMood
