@@ -132,10 +132,7 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
             Toast.makeText(getActivity(), R.string.cannot_delete_predefined_data, Toast.LENGTH_SHORT).show();
             return;
         }
-        new DeleteItemTask().execute(session.getId());
-        listAdapter.remove(session);
-        Toast.makeText(getActivity(), getText(R.string.item_removed), Toast.LENGTH_SHORT).show();
-        listAdapter.notifyDataSetChanged();
+        new DeleteItemTask(session).execute();
     }
 
     @Override
@@ -161,14 +158,29 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
         new SyncTask(activity).execute();
     }
 
-    private class DeleteItemTask extends AsyncTask<Long, Void, Boolean> {
+    private class DeleteItemTask extends AsyncTask<Void, Void, Boolean> {
 
         private HeartRateSessionDAO dao = new HeartRateSessionDAO();
+        private HeartRateSession session = null;
+
+        private DeleteItemTask(HeartRateSession session) {
+            this.session = session;
+        }
 
         @Override
-        protected Boolean doInBackground(Long... args) {
+        protected Boolean doInBackground(Void... args) {
             try {
-                long sessionId = args[0];
+
+                if (session.getExternalId() != null) {
+                    JsonResponse<String> response = serviceHelper.deleteSession(session.getExternalId());
+                    if (!response.isOk()) {
+                        if (getActivity() != null)
+                            Toast.makeText(getActivity(), response.getError().getMessage(), Toast.LENGTH_SHORT).show();
+                        return null;
+                    }
+                }
+
+                long sessionId = session.getId();
                 HeartRateSession session = dao.findById(sessionId);
                 if (session != null) {
                     dao.delete(sessionId);
@@ -191,11 +203,16 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
         @Override
         protected void onPostExecute(Boolean result) {
             if (getActivity() != null) {
-                if (result == null || !result) {
+                if (result == null)
+                    return;
+                if (!result) {
                     Toast.makeText(getActivity(), R.string.failed_to_romove_session, Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(getActivity(), R.string.item_removed, Toast.LENGTH_SHORT).show();
+                    listAdapter.remove(session);
+                    listAdapter.notifyDataSetChanged();
                 }
+
             }
         }
     }
