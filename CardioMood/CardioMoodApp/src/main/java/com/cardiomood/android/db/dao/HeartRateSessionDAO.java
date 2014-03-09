@@ -145,4 +145,19 @@ public class HeartRateSessionDAO extends BaseDAO<HeartRateSession> implements He
         }
         return sessions;
     }
+
+    public List<HeartRateSession> getSessions(String selection, String[] selectionArgs) {
+        List<HeartRateSession> sessions = new ArrayList<HeartRateSession>();
+        final SQLiteDatabase db = getDatabase();
+        synchronized (db) {
+            Cursor cursor = db.query(getTableName(), getColumnNames(), selection, selectionArgs, null, null, COLUMN_NAME_DATE_STARTED + " desc");
+            if (cursor.moveToFirst()) {
+                do {
+                    sessions.add(new HeartRateSession(cursor));
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        }
+        return sessions;
+    }
 }

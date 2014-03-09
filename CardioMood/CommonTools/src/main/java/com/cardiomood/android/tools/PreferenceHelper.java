@@ -12,7 +12,12 @@ public class PreferenceHelper {
     private boolean persistent;
 
     public PreferenceHelper(Context context) {
+        this(context, false);
+    }
+
+    public PreferenceHelper(Context context, boolean persistent) {
         this.context = context;
+        this.persistent = persistent;
     }
 
     public synchronized boolean isPersistent() {

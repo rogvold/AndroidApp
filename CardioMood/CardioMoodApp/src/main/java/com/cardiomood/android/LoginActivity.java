@@ -345,6 +345,7 @@ public class LoginActivity extends Activity implements ConfigurationConstants {
                             }
                         }
                     }
+                    prefHelper.putLong(USER_ID, user.getId());
                 } catch (Exception ex) {
                     // suppress this
                 }

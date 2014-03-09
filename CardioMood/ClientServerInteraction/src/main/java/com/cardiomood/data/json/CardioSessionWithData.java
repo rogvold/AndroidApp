@@ -14,6 +14,10 @@ public class CardioSessionWithData extends CardioSession {
     public CardioSessionWithData() {
     }
 
+    public CardioSessionWithData(CardioSession session) {
+        super(session.id, session.name, session.description, session.serverId, session.userId, session.creationTimestamp, session.dataClassName);
+    }
+
     public List<CardioDataItem> getDataItems() {
         return dataItems;
     }

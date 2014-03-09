@@ -47,7 +47,8 @@ public class ConfigurationManager {
 	}
 	
 	public String getString(String key) {
-		return get(key);
+	    Object v = get(key);
+        return (v == null ? null : v.toString());
 	}
 	
 	public String getString(String key, String defaultValue) {
@@ -98,6 +99,8 @@ public class ConfigurationManager {
                 Log.w(TAG, "getFloat(): failed to parse parameter value for key = " + key, ex);
                 return defValue;
             }
+        } else if (v instanceof Float) {
+            return (Float) v;
         }
         return defValue;
     }
@@ -111,6 +114,8 @@ public class ConfigurationManager {
                 Log.w(TAG, "getBoolean(): failed to parse parameter value for key = " + key, ex);
                 return defValue;
             }
+        } else if (v instanceof Boolean) {
+            return (Boolean) v;
         }
         return defValue;
     }
@@ -122,7 +127,7 @@ public class ConfigurationManager {
     public long getLong(String key, long defaultValue) {
         String value = getString(key, null);
         if (value!= null && TextUtils.isDigitsOnly(value)) {
-            return Integer.valueOf(value);
+            return Long.valueOf(value);
         }
         return defaultValue;
     }

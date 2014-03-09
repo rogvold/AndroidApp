@@ -108,7 +108,7 @@ public class DataServiceHelper {
         email = null;
     }
 
-    private JsonResponse<ApiToken> login(String email, String password) {
+    public JsonResponse<ApiToken> login(String email, String password) {
         try {
             return mService.login(email, password);
         } catch (Exception ex) {
@@ -130,7 +130,7 @@ public class DataServiceHelper {
         }.execute(email, password);
     }
 
-    private JsonResponse<UserProfile> register(String email, String password) {
+    public JsonResponse<UserProfile> register(String email, String password) {
         try {
             return mService.register(email, password);
         } catch (Exception ex) {
@@ -152,7 +152,7 @@ public class DataServiceHelper {
         }.execute(email, password);
     }
 
-    private JsonResponse<CardioSession> createSession() {
+    public JsonResponse<CardioSession> createSession() {
         try {
             if (isSignedIn()) {
                 String token = getTokenString();
@@ -179,7 +179,7 @@ public class DataServiceHelper {
         }.execute();
     }
 
-    private JsonResponse<List<CardioSession>> getSessions() {
+    public JsonResponse<List<CardioSession>> getSessions() {
         try {
             if (isSignedIn()) {
                 String token = getTokenString();
@@ -206,7 +206,7 @@ public class DataServiceHelper {
         }.execute();
     }
 
-    private JsonResponse<CardioSession> updateSessionInfo(Long sessionId, String name, String description) {
+    public JsonResponse<CardioSession> updateSessionInfo(Long sessionId, String name, String description) {
         try {
             if (isSignedIn()) {
                 String token = getTokenString();
@@ -233,7 +233,7 @@ public class DataServiceHelper {
         }.execute(sessionId, name, description);
     }
 
-    private JsonResponse<CardioSessionWithData> getSessionData(Long sessionId) {
+    public JsonResponse<CardioSessionWithData> getSessionData(Long sessionId) {
         try {
             if (isSignedIn()) {
                 String token = getTokenString();
@@ -261,7 +261,7 @@ public class DataServiceHelper {
     }
 
 
-    private JsonResponse<String> deleteSession(Long sessionId) {
+    public JsonResponse<String> deleteSession(Long sessionId) {
         try {
             if (isSignedIn()) {
                 String token = getTokenString();
@@ -288,7 +288,7 @@ public class DataServiceHelper {
         }.execute(sessionId);
     }
 
-    private JsonResponse<String> appendDataToSession(CardioSessionWithData serializedData) {
+    public JsonResponse<String> appendDataToSession(CardioSessionWithData serializedData) {
         try {
             if (isSignedIn()) {
                 String token = getTokenString();

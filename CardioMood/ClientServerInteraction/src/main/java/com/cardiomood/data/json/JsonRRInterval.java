@@ -10,6 +10,10 @@ public class JsonRRInterval implements Serializable {
 
     private Integer r;
 
+    public JsonRRInterval(Integer r) {
+        this.r = r;
+    }
+
     public Integer getR() {
         return r;
     }
@@ -20,5 +24,9 @@ public class JsonRRInterval implements Serializable {
 
     public String toString() {
         return GSON.toJson(this);
+    }
+
+    public static JsonRRInterval fromJson(String json) {
+        return GSON.fromJson(json, JsonRRInterval.class);
     }
 }

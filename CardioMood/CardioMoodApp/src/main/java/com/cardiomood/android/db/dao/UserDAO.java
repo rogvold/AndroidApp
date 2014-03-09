@@ -43,17 +43,29 @@ public class UserDAO extends BaseDAO<User> implements HeartRateDBContract.Users 
         return user;
     }
 
-    public User findByExternalId(long externalId) {
+    public User findByExternalId(Long externalId) {
         final SQLiteDatabase db = getDatabase();
         synchronized (db) {
-            Cursor cursor = db.query(
-                    getTableName(),
-                    getColumnNames(),
-                    COLUMN_NAME_EXTERNAL_ID + "=?",
-                    new String[]{String.valueOf(externalId)},
-                    null,
-                    null,
-                    null);
+            Cursor cursor = null;
+            if (externalId != null) {
+                cursor = db.query(
+                        getTableName(),
+                        getColumnNames(),
+                        COLUMN_NAME_EXTERNAL_ID + "=?",
+                        new String[]{String.valueOf(externalId)},
+                        null,
+                        null,
+                        null);
+            } else {
+                cursor = db.query(
+                        getTableName(),
+                        getColumnNames(),
+                        COLUMN_NAME_EXTERNAL_ID + " is null",
+                        new String[]{String.valueOf(externalId)},
+                        null,
+                        null,
+                        null);
+            }
             try {
                 if (cursor.moveToFirst()) {
                     return loadFromCursor(cursor);

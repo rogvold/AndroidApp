@@ -27,6 +27,7 @@ import com.cardiomood.android.components.CustomViewPager;
 import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
 import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.model.HeartRateSession;
+import com.cardiomood.android.db.model.SessionStatus;
 import com.cardiomood.android.fragments.details.HistogramReportFragment;
 import com.cardiomood.android.fragments.details.OveralSessionReportFragment;
 import com.cardiomood.android.fragments.details.ScatterogramReportFragment;
@@ -264,6 +265,8 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
                                 if (newName.isEmpty())
                                     newName = null;
                                 session.setName(newName);
+                                if (session.getStatus() == SessionStatus.SYNCHRONIZED)
+                                    session.setStatus(SessionStatus.COMPLETED);
                                 dao.update(session);
                                 Toast.makeText(SessionDetailsActivity.this, R.string.session_renamed, Toast.LENGTH_SHORT).show();
 

@@ -23,7 +23,7 @@ android {
     signingConfigs {
 
         release {
-            storeFile file('D:\\Other\\Dropbox\\Dropbox\\Documents\\Projects\\Cardio\\keystore\\android.key')
+            storeFile file("${project(':').projectDir}/android.key")
             storePassword "57103261479"
             keyAlias "myreleasekey"
             keyPassword "5710326"

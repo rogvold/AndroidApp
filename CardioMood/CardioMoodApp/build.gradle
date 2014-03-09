@@ -11,6 +11,10 @@ android {
         versionName "1.1.4"
     }
 
+    lintOptions {
+        abortOnError false
+    }
+
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES'
         exclude 'META-INF/NOTICE'
@@ -22,7 +26,7 @@ android {
     signingConfigs {
 
         release {
-            storeFile file('D:\\Other\\Dropbox\\Dropbox\\Documents\\Projects\\Cardio\\keystore\\android.key')
+            storeFile file("${project(':').projectDir}/android.key")
             storePassword "57103261479"
             keyAlias "myreleasekey"
             keyPassword "5710326"

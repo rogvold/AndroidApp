@@ -20,6 +20,7 @@ public interface ConfigurationConstants {
     String OFFLINE_MODE             = "app.offline_mode";
 	
 	// user profile
+    String USER_ID                  = "user.id";
     String USER_EXTERNAL_ID			= "user.external_id";
 	String USER_EMAIL_KEY			= "user.email";
 	String USER_PASSWORD_KEY		= "user.password";

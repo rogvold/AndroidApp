@@ -7,6 +7,8 @@ import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.model.HeartRateDataItem;
 import com.cardiomood.android.db.model.HeartRateSession;
 import com.cardiomood.android.db.model.SessionStatus;
+import com.cardiomood.android.tools.PreferenceHelper;
+import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.heartrate.bluetooth.HeartRateLeService;
 import com.cardiomood.math.HeartRateMath;
 
@@ -27,6 +29,8 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
     private final HeartRateSessionDAO sessionDAO = new HeartRateSessionDAO();
     private final HeartRateDataItemDAO hrItemDAO = new HeartRateDataItemDAO();
 
+    private final PreferenceHelper preferenceHelper;
+
     private HeartRateSession currentSession = null;
     private List<HeartRateDataItem> heartRateDataItems = null;
 
@@ -40,6 +44,7 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
             throw new IllegalArgumentException("Service object is null");
         }
         this.service = service;
+        this.preferenceHelper = new PreferenceHelper(service.getApplicationContext(), true);
     }
 
     @Override
@@ -52,6 +57,10 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
         currentSession = new HeartRateSession();
         currentSession.setDateStarted(new Date());
         currentSession.setStatus(SessionStatus.NEW);
+        Long userId = preferenceHelper.getLong(ConfigurationConstants.USER_ID, -1);
+        if (userId < 0)
+            userId = null;
+        currentSession.setUserId(userId);
 
         heartRateDataItems = new ArrayList<HeartRateDataItem>();
 
