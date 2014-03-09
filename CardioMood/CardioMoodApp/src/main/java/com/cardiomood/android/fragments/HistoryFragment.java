@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -162,6 +164,7 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
 
         private HeartRateSessionDAO dao = new HeartRateSessionDAO();
         private HeartRateSession session = null;
+        private Handler handler = new Handler();
 
         private DeleteItemTask(HeartRateSession session) {
             this.session = session;
@@ -172,10 +175,16 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
             try {
 
                 if (session.getExternalId() != null) {
-                    JsonResponse<String> response = serviceHelper.deleteSession(session.getExternalId());
+                    final JsonResponse<String> response = serviceHelper.deleteSession(session.getExternalId());
                     if (!response.isOk()) {
-                        if (getActivity() != null)
-                            Toast.makeText(getActivity(), response.getError().getMessage(), Toast.LENGTH_SHORT).show();
+                        handler.post(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                if (getActivity() != null)
+                                    Toast.makeText(getActivity(), response.getError().getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
                         return null;
                     }
                 }
@@ -188,6 +197,7 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
                 }
                 return true;
             } catch (Exception ex) {
+                Log.w("HistoryFragment", "exception in doInBackground()", ex);
                 return false;
             }
         }
