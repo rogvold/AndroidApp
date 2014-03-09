@@ -62,4 +62,8 @@ public class JsonResponse<T> implements Serializable {
     public void setResponseCode(Integer responseCode) {
         this.responseCode = responseCode;
     }
+
+    public boolean isOk() {
+        return RESPONSE_OK.equals(responseCode);
+    }
 }
