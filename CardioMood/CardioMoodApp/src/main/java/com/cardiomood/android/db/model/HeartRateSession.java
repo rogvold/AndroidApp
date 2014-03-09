@@ -16,6 +16,7 @@ public class HeartRateSession extends Entity implements HeartRateDBContract.Sess
 	@SuppressLint("SimpleDateFormat")
 	private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("h:mm:ss");
 
+    private Long externalId;
 	private Long userId;
 	private String name;
 	private String description;
@@ -33,6 +34,9 @@ public class HeartRateSession extends Entity implements HeartRateDBContract.Sess
         userId = cursor.getLong(cursor.getColumnIndex(COLUMN_NAME_USER_ID));
         if (userId == 0)
             userId = null;
+        this.externalId = cursor.getLong(cursor.getColumnIndex(COLUMN_NAME_EXTERNAL_ID));
+        if (externalId == 0L)
+            externalId = null;
         name = cursor.getString(cursor.getColumnIndex(COLUMN_NAME_NAME));
         description = cursor.getString(cursor.getColumnIndex(COLUMN_NAME_DESCRIPTION));
         status = SessionStatus.valueOf(cursor.getString(cursor.getColumnIndex(COLUMN_NAME_STATUS)));
@@ -78,8 +82,16 @@ public class HeartRateSession extends Entity implements HeartRateDBContract.Sess
 	public void setDateEnded(Date dateEnded) {
 		this.dateEnded = dateEnded;
 	}
-	
-	@Override
+
+    public Long getExternalId() {
+        return externalId;
+    }
+
+    public void setExternalId(Long externalId) {
+        this.externalId = externalId;
+    }
+
+    @Override
 	public String toString() {
 		String s = name == null ? "Measurement #" + getId() + " " + DATE_FORMAT.format(getDateStarted()) : name;
 		if (status == SessionStatus.SYNCHRONIZED)

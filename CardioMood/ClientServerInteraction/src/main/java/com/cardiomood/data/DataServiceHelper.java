@@ -2,6 +2,7 @@ package com.cardiomood.data;
 
 import android.util.Log;
 
+import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.data.async.ServerResponseCallback;
 import com.cardiomood.data.async.ServerResponseCallbackRetry;
 import com.cardiomood.data.async.ServiceTask;
@@ -24,15 +25,33 @@ public class DataServiceHelper {
 
     private static final Gson GSON = new Gson();
 
+    private static final String OFFLINE_MODE_KEY         = "app.offline_mode";
+
+    // user profile
+    private static final String USER_EXTERNAL_ID		 = "user.external_id";
+    private static final String USER_EMAIL_KEY			 = "user.email";
+    private static final String USER_PASSWORD_KEY		 = "user.password";
+    private static final String USER_ACCESS_TOKEN_KEY    = "user.access_token";
+
     private CardioMoodDataService mService;
     private ApiToken mToken = null;
 
     private boolean signedIn = false;
     private String email = null;
     private String password = null;
+    private boolean offlineMode;
 
     public DataServiceHelper(CardioMoodDataService service) {
         this.mService = service;
+    }
+
+    public DataServiceHelper(CardioMoodDataService service, PreferenceHelper pHelper) {
+        this.mService = service;
+        this.mToken = new ApiToken(pHelper.getLong(USER_EXTERNAL_ID), pHelper.getString(USER_ACCESS_TOKEN_KEY), System.currentTimeMillis()+100000);
+        this.email = pHelper.getString(USER_EMAIL_KEY);
+        this.password = pHelper.getString(USER_PASSWORD_KEY);
+        this.offlineMode = pHelper.getBoolean(OFFLINE_MODE_KEY);
+        this.signedIn = true;
     }
 
     public boolean isSignedIn() {
@@ -57,6 +76,14 @@ public class DataServiceHelper {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public boolean isOfflineMode() {
+        return offlineMode;
+    }
+
+    public void setOfflineMode(boolean offlineMode) {
+        this.offlineMode = offlineMode;
     }
 
     public ApiToken getToken() {
@@ -91,6 +118,8 @@ public class DataServiceHelper {
     }
 
     public void login(String email, String password, ServerResponseCallback<ApiToken> callback) {
+        if (isOfflineMode())
+            return;
         new ServiceTask<ApiToken>(new LoginCallback(email, password, callback)) {
 
             @Override
@@ -111,6 +140,8 @@ public class DataServiceHelper {
     }
 
     public void register(String email, String password, ServerResponseCallback<UserProfile> callback) {
+        if (isOfflineMode())
+            return;
         new ServiceTask<UserProfile>(callback) {
 
             @Override
@@ -137,6 +168,8 @@ public class DataServiceHelper {
     }
 
     public void createSession(ServerResponseCallbackRetry<CardioSession> callback) {
+        if (isOfflineMode())
+            return;
         new ServiceTask<CardioSession>(new HandleTokenExpiredCallback<CardioSession>(callback)) {
 
             @Override
@@ -162,6 +195,8 @@ public class DataServiceHelper {
     }
 
     public void getSessions(ServerResponseCallbackRetry<List<CardioSession>> callback) {
+        if (isOfflineMode())
+            return;
         new ServiceTask<List<CardioSession>>(new HandleTokenExpiredCallback<List<CardioSession>>(callback)) {
 
             @Override
@@ -187,6 +222,8 @@ public class DataServiceHelper {
     }
 
     public void updateSessionInfo(Long sessionId, String name, String description, ServerResponseCallbackRetry<CardioSession> callback) {
+        if (isOfflineMode())
+            return;
         new ServiceTask<CardioSession>(new HandleTokenExpiredCallback<CardioSession>(callback)) {
 
             @Override
@@ -212,6 +249,8 @@ public class DataServiceHelper {
     }
 
     public void getSessionData(Long sessionId, ServerResponseCallbackRetry<CardioSessionWithData> callback) {
+        if (isOfflineMode())
+            return;
         new ServiceTask<CardioSessionWithData>(new HandleTokenExpiredCallback<CardioSessionWithData>(callback)) {
 
             @Override
@@ -238,6 +277,8 @@ public class DataServiceHelper {
     }
 
     public void deleteSession(Long sessionId, ServerResponseCallbackRetry<String> callback) {
+        if (isOfflineMode())
+            return;
         new ServiceTask<String>(new HandleTokenExpiredCallback<String>(callback)) {
 
             @Override
@@ -263,6 +304,8 @@ public class DataServiceHelper {
     }
 
     public void appendDataToSession(CardioSessionWithData serializedData, ServerResponseCallbackRetry<String> callback) {
+        if (isOfflineMode())
+            return;
         new ServiceTask<String>(new HandleTokenExpiredCallback<String>(callback)) {
 
             @Override

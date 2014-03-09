@@ -23,6 +23,8 @@ import java.util.List;
 
 public class HeartRateDBHelper extends SQLiteOpenHelper implements HeartRateDBContract {
 
+    private static final String TAG = HeartRateDBHelper.class.getSimpleName();
+
     private static final short[] GOOD_SESSION_RR = new short[] {
             695,710,710,703,710,679,695,664,687,656,671,679,710,703,726,718,710,718,734,695,710,726,718,710,703,710,703,726,703,710,703,726,695,718,710,718,726,710,710,718,695,695,703,695,718,726,734,718,750,734,734,710,718,726,710,718,703,710,687,687,679,679,679,671,664,640,648,632,640,656,656,664,703,703,726,757,757,750,726,734,687,695,679,679,664,679,695,695,679,671,656,648,664,671,679,718,710,742,726,710,679,664,664,640,617,617,617,625,625,664,687,695,695,718,718,718,718,742,726,710,679,687,687,726,718,710,703,710,695,679,671,671,656,632,640,617,632,656,687,718,757,773,789,765,757,742,757,734,742,742,710,726,687,671,640,632,640,664,664,656,671,679,656,656,625,640,625,609,609,601,609,585,585,562,578,570,539,554,539,562,554,546,554,554,585,585,617,617,640,656,671,656,664,664,640,648,671,664,648,656,625,632,617,617,632,617,625,601,609,593,593,570,593,570,578,585,585,609,648,664,671,679,679,687,664,679,656,671,664,679,656,656,640,640,609,617,601,593,570,593,609,625,679,687,718,726,742,734,726,726,718,726,679,703,718,710,710,687,664,664,648,648,648,656,671,687,687,671,664,679,664,671,671,687,671,656,656
     };
@@ -44,7 +46,11 @@ public class HeartRateDBHelper extends SQLiteOpenHelper implements HeartRateDBCo
         pHelper = new PreferenceHelper(context);
         pHelper.setPersistent(true);
 
-        backupDB();
+        try {
+            backupDB();
+        } catch (Exception ex) {
+            Log.w(TAG, "onCreate(): failed to backup DB", ex);
+        }
 	}
 
     private void backupDB() {
@@ -64,6 +70,7 @@ public class HeartRateDBHelper extends SQLiteOpenHelper implements HeartRateDBCo
 		// Create database entities                                 
 		try {
 			// create
+            db.execSQL(SQL.CREATE_TABLE_USERS);
             db.execSQL(SQL.CREATE_TABLE_SESSIONS);
 			db.execSQL(SQL.CREATE_TABLE_HR_DATA);
 
@@ -71,13 +78,27 @@ public class HeartRateDBHelper extends SQLiteOpenHelper implements HeartRateDBCo
             createSampleSessions(db);
 		} catch (Exception e) {
 			// tables already exist
+            Log.d(TAG, "onCreate() exception", e);
 		}
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		// Upgrade or downgrade the database schema
-		createSampleSessions(db);
+		if (oldVersion <= 20) {
+            try {
+                db.execSQL(SQL.CREATE_TABLE_USERS);
+
+                String ADD_COLUMN_EXTERNAL_ID = "ALTER TABLE " + Sessions.TABLE_NAME
+                        + " ADD COLUMN " + Sessions.COLUMN_NAME_EXTERNAL_ID + " INTEGER";
+                db.execSQL(ADD_COLUMN_EXTERNAL_ID);
+            } catch (Exception e) {
+                Log.d(TAG, "onUpgrade() exception", e);
+            }
+
+        }
+
+        createSampleSessions(db);
 	}
 	
 	@Override

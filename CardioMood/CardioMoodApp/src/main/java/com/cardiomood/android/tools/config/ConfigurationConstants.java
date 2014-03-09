@@ -16,6 +16,8 @@ public interface ConfigurationConstants {
     String DEFAULT_SERVICE_PROTOCOL	= "http";
     String DEFAULT_SERVICE_HOST		= "www.cardiomood.com";
     String DEFAULT_SERVICE_PORT		= "80";
+
+    String OFFLINE_MODE             = "app.offline_mode";
 	
 	// user profile
     String USER_EXTERNAL_ID			= "user.external_id";

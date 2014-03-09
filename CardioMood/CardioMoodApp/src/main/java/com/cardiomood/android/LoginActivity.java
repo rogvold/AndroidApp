@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -17,6 +18,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cardiomood.android.db.dao.HeartRateSessionDAO;
+import com.cardiomood.android.db.dao.UserDAO;
+import com.cardiomood.android.db.model.HeartRateSession;
+import com.cardiomood.android.db.model.User;
+import com.cardiomood.android.db.model.UserStatus;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.data.CardioMoodServer;
@@ -25,6 +31,8 @@ import com.cardiomood.data.async.ServerResponseCallback;
 import com.cardiomood.data.json.ApiToken;
 import com.cardiomood.data.json.JsonError;
 import com.cardiomood.data.json.UserProfile;
+
+import java.util.List;
 
 /**
  * Project: CardioSport
@@ -309,11 +317,41 @@ public class LoginActivity extends Activity implements ConfigurationConstants {
     }
 
     protected void performLogIn(ApiToken t) {
+        final Long userId = t.getUserId();
+        final String email = mEmail;
+
         prefHelper.putBoolean(USER_LOGGED_IN, true);
-        prefHelper.putString(USER_EMAIL_KEY, mEmail);
+        prefHelper.putString(USER_EMAIL_KEY, email);
         prefHelper.putString(USER_PASSWORD_KEY, mPassword);
         prefHelper.putString(USER_ACCESS_TOKEN_KEY, t.getToken());
-        prefHelper.putLong(USER_EXTERNAL_ID, t.getUserId());
+        prefHelper.putLong(USER_EXTERNAL_ID, userId);
+
+        new AsyncTask() {
+
+            @Override
+            protected Object doInBackground(Object[] params) {
+                try {
+                    UserDAO userDAO = new UserDAO();
+                    User user = userDAO.findByExternalId(userId);
+                    if (user == null) {
+                        user = new User(userId, email, UserStatus.NEW);
+                        user = userDAO.insert(user);
+                        HeartRateSessionDAO sessionDAO = new HeartRateSessionDAO();
+                        List<HeartRateSession> sessions = sessionDAO.getAllSessions();
+                        for (HeartRateSession session : sessions) {
+                            if (session.getUserId() == null) {
+                                session.setUserId(user.getId());
+                                sessionDAO.merge(session);
+                            }
+                        }
+                    }
+                } catch (Exception ex) {
+                    // suppress this
+                }
+                return null;
+            }
+        }.execute();
+
     }
 
     public boolean isLoggedIn() {

@@ -102,6 +102,10 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             @Override
             public void run() {
                 actionBar.setSelectedNavigationItem(1);
+                // hide soft input keyboard
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null)
+                    imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
             }
         });
     }

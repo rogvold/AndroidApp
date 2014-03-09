@@ -22,6 +22,8 @@ import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.model.HeartRateSession;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
+import com.cardiomood.data.CardioMoodServer;
+import com.cardiomood.data.DataServiceHelper;
 import com.flurry.android.FlurryAgent;
 import com.haarman.listviewanimations.itemmanipulation.contextualundo.ContextualUndoAdapter;
 
@@ -41,6 +43,7 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
     private ArrayAdapter<HeartRateSession> listAdapter = null;
     private ContextualUndoAdapter undoAdapter = null;
     private PreferenceHelper pHelper;
+    private DataServiceHelper serviceHelper;
 
     // work around for 'view already has a parent...'
     private boolean initial = true;
@@ -54,6 +57,8 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
         listView = (ListView) root.findViewById(R.id.sessionList);
         listView.setOnItemClickListener(this);
         setHasOptionsMenu(true);
+
+        serviceHelper = new DataServiceHelper(CardioMoodServer.INSTANCE.getService(), pHelper);
 
         return root;
     }
@@ -144,7 +149,7 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
             listAdapter.notifyDataSetChanged();
         }
         listAdapter = new SessionsArrayAdapter(activity, new ArrayList<HeartRateSession>(100));
-        SessionsEndlessAdapter endlessAdapter = new SessionsEndlessAdapter(listAdapter);
+        SessionsEndlessAdapter endlessAdapter = new SessionsEndlessAdapter(listAdapter, getActivity().getApplicationContext());
         undoAdapter = new ContextualUndoAdapter(endlessAdapter, R.layout.history_item_undo, R.id.btn_undo_deletion);
         undoAdapter.setAbsListView(listView);
         undoAdapter.setDeleteItemCallback(this);

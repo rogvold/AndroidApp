@@ -15,7 +15,7 @@ import java.util.List;
 public class HeartRateSessionDAO extends BaseDAO<HeartRateSession> implements HeartRateDBContract.Sessions {
 	
 	private static final String [] ALL_COLUMNS = new String[] {
-		_ID, COLUMN_NAME_USER_ID, COLUMN_NAME_NAME, COLUMN_NAME_DESCRIPTION, COLUMN_NAME_DATE_STARTED, 
+		_ID, COLUMN_NAME_USER_ID, COLUMN_NAME_EXTERNAL_ID, COLUMN_NAME_NAME, COLUMN_NAME_DESCRIPTION, COLUMN_NAME_DATE_STARTED,
 		COLUMN_NAME_DATE_ENDED, COLUMN_NAME_STATUS
 	};
 
@@ -31,6 +31,7 @@ public class HeartRateSessionDAO extends BaseDAO<HeartRateSession> implements He
     public ContentValues getContentValues(HeartRateSession item) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME_USER_ID, item.getUserId());
+        values.put(COLUMN_NAME_EXTERNAL_ID, item.getExternalId());
         values.put(COLUMN_NAME_NAME, item.getName());
         values.put(COLUMN_NAME_DESCRIPTION, item.getDescription());
         values.put(COLUMN_NAME_DATE_STARTED, item.getDateStarted() == null ? null : item.getDateStarted().getTime());
@@ -121,5 +122,27 @@ public class HeartRateSessionDAO extends BaseDAO<HeartRateSession> implements He
             }
         }
         return session;
+    }
+
+    public List<HeartRateSession> getAllSessionsOfUser(Long userId, int step, int from) {
+        List<HeartRateSession> sessions = new ArrayList<HeartRateSession>();
+        final SQLiteDatabase db = getDatabase();
+        synchronized (db) {
+            Cursor cursor = db.query(
+                    getTableName(),
+                    getColumnNames(),
+                    COLUMN_NAME_USER_ID +"=?",
+                    new String[]{String.valueOf(userId)},
+                    null,
+                    null,
+                    _ID + " desc limit "+step+" offset " + from);
+            if (cursor.moveToFirst()) {
+                do {
+                    sessions.add(new HeartRateSession(cursor));
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        }
+        return sessions;
     }
 }
