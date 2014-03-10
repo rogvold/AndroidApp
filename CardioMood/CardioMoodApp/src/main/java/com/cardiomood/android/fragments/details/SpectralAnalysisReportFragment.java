@@ -111,6 +111,11 @@ public class SpectralAnalysisReportFragment extends Fragment {
         sessionName = (TextView) v.findViewById(R.id.session_title);
         sessionDate = (TextView) v.findViewById(R.id.session_date);
 
+        if (savedInstanceState == null) {
+            spectrumChart.setXAxis(xAxis);
+            spectrumChart.setYAxis(yAxis);
+        }
+
         new DataLoadingTask().execute(sessionId);
 
         return v;
@@ -140,6 +145,9 @@ public class SpectralAnalysisReportFragment extends Fragment {
     }
 
 
+    NumberAxis xAxis = new NumberAxis();
+    NumberAxis yAxis = new NumberAxis();
+
     private void initCharts(HeartRateMath hrm) {
         // prepare source data
         double rr[] = hrm.getRrIntervals();
@@ -153,14 +161,10 @@ public class SpectralAnalysisReportFragment extends Fragment {
         double[] power = sa.getPower();
         PolynomialSplineFunction spectrum = sa.getSplinePower();
 
-        NumberAxis xAxis = new NumberAxis();
+
         xAxis.enableGesturePanning(true);
         xAxis.enableGestureZooming(true);
         xAxis.setDefaultRange(new NumberRange(0.0, 0.45));
-        spectrumChart.setXAxis(xAxis);
-
-        NumberAxis yAxis = new NumberAxis();
-        spectrumChart.setYAxis(yAxis);
 
         // Clear
         List<Series<?>> series = new ArrayList<Series<?>>(spectrumChart.getSeries());

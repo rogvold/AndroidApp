@@ -115,5 +115,7 @@
     <string name="error_invalid_password">Invalid password</string>
     <string name="error_invalid_email">Invalid email</string>
     <string name="press_back_to_close_app">Tap BACK again to exit the app</string>
+    <string name="sync">Synchronize with server</string>
+    <string name="sync_condensed">Sync</string>
 
 </resources>

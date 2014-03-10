@@ -315,6 +315,14 @@ public class DataServiceHelper {
         }.execute(serializedData);
     }
 
+    public void refreshToken() {
+        if (!isSignedIn())
+            return;
+        String login = getEmail();
+        String password = getPassword();
+        login(login, password, null);
+    }
+
 
     private class HandleTokenExpiredCallback<T> implements ServerResponseCallback {
 

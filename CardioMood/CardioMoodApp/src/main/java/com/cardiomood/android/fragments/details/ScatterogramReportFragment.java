@@ -112,6 +112,11 @@ public class ScatterogramReportFragment extends Fragment {
         sessionName = (TextView) v.findViewById(R.id.session_title);
         sessionDate = (TextView) v.findViewById(R.id.session_date);
 
+        if (savedInstanceState == null) {
+            scatterogramChart.setXAxis(xAxis);
+            scatterogramChart.setYAxis(yAxis);
+        }
+
         new DataLoadingTask().execute(sessionId);
 
         return v;
@@ -140,22 +145,21 @@ public class ScatterogramReportFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+    NumberAxis xAxis = new NumberAxis();
+    NumberAxis yAxis = new NumberAxis();
 
     private void initCharts(HeartRateMath hrm) {
         // prepare source data
         double rr[] = hrm.getRrIntervals();
 
-        NumberAxis xAxis = new NumberAxis();
+
         xAxis.enableGesturePanning(true);
         xAxis.enableGestureZooming(true);
         xAxis.setDefaultRange(new NumberRange(StatUtils.min(rr)-100, StatUtils.max(rr)+100));
-        scatterogramChart.setXAxis(xAxis);
 
-        NumberAxis yAxis = new NumberAxis();
         yAxis.setDefaultRange(new NumberRange(StatUtils.min(rr)-100, StatUtils.max(rr)+100));
         yAxis.enableGesturePanning(true);
         yAxis.enableGestureZooming(true);
-        scatterogramChart.setYAxis(yAxis);
 
         // Clear
         List<Series<?>> series = new ArrayList<Series<?>>(scatterogramChart.getSeries());

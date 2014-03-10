@@ -40,8 +40,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.cardiomood.android.MonitoringActivity;
 import com.cardiomood.android.R;
+import com.cardiomood.android.SessionDetailsActivity;
+import com.cardiomood.android.db.model.HeartRateSession;
 import com.cardiomood.android.heartrate.AbstractDataCollector;
 import com.cardiomood.android.heartrate.CardioMoodHeartRateLeService;
 import com.cardiomood.android.heartrate.IntervalLimitDataCollector;
@@ -373,7 +374,8 @@ public class ConnectionFragment extends Fragment {
     }
 
     private void openMonitor() {
-        startActivity(new Intent(getActivity(), MonitoringActivity.class));
+        Toast.makeText(getActivity(), "This feature will beavailable soon.", Toast.LENGTH_SHORT).show();
+        //startActivity(new Intent(getActivity(), MonitoringActivity.class));
     }
 
     private void setDisconnectedView() {
@@ -432,6 +434,21 @@ public class ConnectionFragment extends Fragment {
                 if (collector != null && startImmediately.isChecked()) {
                     collector.startCollecting();
                 }
+                if (collector != null) {
+                    collector.setListener(new AbstractDataCollector.SimpleListener() {
+
+                        @Override
+                        public void onDataSaved(HeartRateSession session) {
+                            Activity activity = getActivity();
+                            if (activity != null) {
+                                Intent intent = new Intent(activity, SessionDetailsActivity.class);
+                                intent.putExtra(SessionDetailsActivity.SESSION_ID_EXTRA, session.getId());
+                                intent.putExtra(SessionDetailsActivity.POST_RENDER_ACTION_EXTRA, SessionDetailsActivity.RENAME_ACTION);
+                                startActivity(intent);
+                            }
+                        }
+                    });
+                }
                 mBluetoothLeService.setDataCollector(collector);
             } catch (Exception ex) {
                 Log.e(TAG, "Failed to initialize service.", ex);
@@ -447,8 +464,13 @@ public class ConnectionFragment extends Fragment {
 
     public void performDisconnect() {
         if (mBluetoothLeService != null) {
-            mBluetoothLeService.disconnect();
-            mBluetoothLeService.close();
+            AbstractDataCollector collector = (AbstractDataCollector) mBluetoothLeService.getDataCollector();
+            if (collector == null) {
+                mBluetoothLeService.disconnect();
+                mBluetoothLeService.close();
+            } else {
+                collector.stopCollecting();
+            }
         }
     }
 
@@ -523,22 +545,27 @@ public class ConnectionFragment extends Fragment {
     }
 
     private void updateView() {
-        getActivity().invalidateOptionsMenu();
-        if (serviceBound && deviceConnected()) {
-            AbstractDataCollector collector = (AbstractDataCollector) mBluetoothLeService.getDataCollector();
-            if (collector == null) {
-                measurementProgress.setProgress(0);
-            } else {
-                measurementProgress.setProgress((float) collector.getProgress(), 300);
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                getActivity().invalidateOptionsMenu();
+                if (serviceBound && deviceConnected()) {
+                    AbstractDataCollector collector = (AbstractDataCollector) mBluetoothLeService.getDataCollector();
+                    if (collector == null) {
+                        measurementProgress.setProgress(0);
+                    } else {
+                        measurementProgress.setProgress((float) collector.getProgress(), 300);
+                    }
+                    setConnectedView();
+                    connectDeviceButton.setText(getString(R.string.open_monitor));
+                    hintText.setText(R.string.device_connected_open_monitor);
+                } else {
+                    setDisconnectedView();
+                    connectDeviceButton.setText(getString(R.string.connect_device));
+                    hintText.setText(R.string.pair_and_tap_connect);
+                }
             }
-            setConnectedView();
-            connectDeviceButton.setText(getString(R.string.open_monitor));
-            hintText.setText(R.string.device_connected_open_monitor);
-        } else {
-            setDisconnectedView();
-            connectDeviceButton.setText(getString(R.string.connect_device));
-            hintText.setText(R.string.pair_and_tap_connect);
-        }
+        });
     }
 
     @SuppressWarnings("NewApi")

@@ -117,6 +117,11 @@ public class HistogramReportFragment extends Fragment {
         sessionName = (TextView) v.findViewById(R.id.session_title);
         sessionDate = (TextView) v.findViewById(R.id.session_date);
 
+        if (savedInstanceState == null) {
+            histogramChart.setXAxis(xAxis);
+            histogramChart.setYAxis(yAxis);
+        }
+
         new DataLoadingTask().execute(sessionId);
 
         return v;
@@ -145,13 +150,14 @@ public class HistogramReportFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+    CategoryAxis xAxis = new CategoryAxis();
+    NumberAxis yAxis = new NumberAxis();
 
     private void initCharts(HeartRateMath hrm) {
         // prepare source data
         double rr[] = hrm.getRrIntervals();
 
         // Histogram Chart
-        CategoryAxis xAxis = new CategoryAxis();
         xAxis.getStyle().setInterSeriesSetPadding(2.0f);
         xAxis.enableGesturePanning(true);
         xAxis.enableGestureZooming(true);
@@ -159,11 +165,8 @@ public class HistogramReportFragment extends Fragment {
         xAxis.getStyle().getTickStyle().setMinorTicksShown(false);
         xAxis.getStyle().getTickStyle().setMajorTicksShown(true);
         xAxis.getStyle().getTickStyle().setLabelTextSize(10);
-        histogramChart.setXAxis(xAxis);
 
-        NumberAxis yAxis = new NumberAxis();
         yAxis.getStyle().getTickStyle().setLabelTextSize(10);
-        histogramChart.setYAxis(yAxis);
 
         // Clear
         List<Series<?>> series = new ArrayList<Series<?>>(histogramChart.getSeries());

@@ -38,7 +38,6 @@ import com.cardiomood.data.json.CardioSessionWithData;
 import com.cardiomood.data.json.JsonRRInterval;
 import com.cardiomood.data.json.JsonResponse;
 import com.flurry.android.FlurryAgent;
-import com.google.gson.Gson;
 import com.haarman.listviewanimations.itemmanipulation.contextualundo.ContextualUndoAdapter;
 
 import java.util.ArrayList;
@@ -60,6 +59,7 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
     private ContextualUndoAdapter undoAdapter = null;
     private PreferenceHelper pHelper;
     private DataServiceHelper serviceHelper;
+    private ProgressDialog pDialog = null;
 
     // work around for 'view already has a parent...'
     private boolean initial = true;
@@ -75,6 +75,7 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
         setHasOptionsMenu(true);
 
         serviceHelper = new DataServiceHelper(CardioMoodServer.INSTANCE.getService(), pHelper);
+        serviceHelper.refreshToken();
 
         return root;
     }
@@ -112,6 +113,9 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
         switch (item.getItemId()) {
             case R.id.menu_refresh:
                 refresh();
+                return true;
+            case R.id.menu_sync:
+                sync();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -152,12 +156,31 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
         }
     }
 
+    private void sync() {
+        Activity activity = getActivity();
+        if (activity == null)
+            return;
+
+        pDialog = new ProgressDialog(activity);
+
+        new SyncTask(activity).execute();
+    }
+
     private void refresh() {
         Activity activity = getActivity();
         if (activity == null)
             return;
 
-        new SyncTask(activity).execute();
+        if (listAdapter != null) {
+            listAdapter.clear();
+            listAdapter.notifyDataSetChanged();
+        }
+        listAdapter = new SessionsArrayAdapter(activity, new ArrayList<HeartRateSession>(100));
+        SessionsEndlessAdapter endlessAdapter = new SessionsEndlessAdapter(listAdapter, getActivity().getApplicationContext());
+        undoAdapter = new ContextualUndoAdapter(endlessAdapter, R.layout.history_item_undo, R.id.btn_undo_deletion);
+        undoAdapter.setAbsListView(listView);
+        undoAdapter.setDeleteItemCallback(HistoryFragment.this);
+        listView.setAdapter(undoAdapter);
     }
 
     private class DeleteItemTask extends AsyncTask<Void, Void, Boolean> {
@@ -230,16 +253,14 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
     private class SyncTask extends AsyncTask {
 
         private Context context = null;
-        private ProgressDialog pDialog = null;
+
         private UserDAO userDAO;
         private HeartRateSessionDAO sessionDAO;
         private HeartRateDataItemDAO itemDAO;
         private Long userId;
-        private Gson gson = new Gson();
 
         private SyncTask(Context context) {
             this.context = context;
-            pDialog = new ProgressDialog(context);
             userDAO = new UserDAO();
             sessionDAO = new HeartRateSessionDAO();
             itemDAO = new HeartRateDataItemDAO();
@@ -285,31 +306,38 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
         protected Object doInBackground(Object[] params) {
             if (userId < 0)
                 return null;
-            List<HeartRateSession> sessions = sessionDAO.getSessions(
-                    HeartRateSession.COLUMN_NAME_EXTERNAL_ID + " is null and " + HeartRateSession.COLUMN_NAME_USER_ID + "=?",
-                    new String[]{String.valueOf(userId)}
-            );
 
-            int progress = 0;
-            for (HeartRateSession session: sessions) {
-                synchronizeSession(session);
-                progress++;
-                publishProgress("Sending data... " + Math.round(100.0f * progress / sessions.size()) + "%");
-            }
+            try {
+                List<HeartRateSession> sessions = sessionDAO.getSessions(
+                        "((" + HeartRateSession.COLUMN_NAME_EXTERNAL_ID + " is null) or ("
+                                + HeartRateSession.COLUMN_NAME_STATUS + " <> '" + SessionStatus.SYNCHRONIZED + "')) and "
+                                + HeartRateSession.COLUMN_NAME_USER_ID + "=?",
+                        new String[]{String.valueOf(userId)}
+                );
 
-            progress = 0;
-            JsonResponse<List<CardioSession>> response = serviceHelper.getSessions();
-            if (JsonResponse.RESPONSE_OK.equals(response.getResponseCode())) {
-                List<CardioSession> cardioSessions = response.getData();
-                if (cardioSessions == null)
-                    return null;
-                for (CardioSession cardioSession: cardioSessions) {
-                    synchronizeCardioSession(cardioSession);
+                int progress = 0;
+                for (HeartRateSession session : sessions) {
+                    synchronizeSession(session);
                     progress++;
-                    publishProgress("Receiving data... " + Math.round(100.0f*progress/cardioSessions.size()) + "%");
+                    publishProgress("Sending data... " + Math.round(100.0f * progress / sessions.size()) + "%");
                 }
+
+                progress = 0;
+                JsonResponse<List<CardioSession>> response = serviceHelper.getSessions();
+                if (JsonResponse.RESPONSE_OK.equals(response.getResponseCode())) {
+                    List<CardioSession> cardioSessions = response.getData();
+                    if (cardioSessions == null)
+                        return null;
+                    for (CardioSession cardioSession : cardioSessions) {
+                        synchronizeCardioSession(cardioSession);
+                        progress++;
+                        publishProgress("Receiving data... " + Math.round(100.0f * progress / cardioSessions.size()) + "%");
+                    }
+                }
+            } catch (Exception ex) {
+                Log.e("HistoryFragment", "SyncTask.doInBackground() exception", ex);
             }
-            return null;
+         return null;
         }
 
         private void synchronizeSession(HeartRateSession session) {

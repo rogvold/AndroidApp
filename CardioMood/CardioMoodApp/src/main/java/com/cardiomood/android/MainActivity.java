@@ -270,20 +270,18 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
     @Override
     public void onBackPressed() {
-        if (ConnectionFragment.isMonitoring) {
-            if (this.lastBackPressTime < System.currentTimeMillis() - 4000) {
-                toast = Toast.makeText(this, getString(R.string.press_back_to_close), Toast.LENGTH_SHORT);
-                toast.show();
-                this.lastBackPressTime = System.currentTimeMillis();
-            }
-            else
+        if (this.lastBackPressTime < System.currentTimeMillis() - 4000) {
+            toast = Toast.makeText(this, getString(R.string.press_back_to_close), Toast.LENGTH_SHORT);
+            toast.show();
+            this.lastBackPressTime = System.currentTimeMillis();
+        }
+        else
+        {
+            if (toast != null)
             {
-                if (toast != null)
-                {
-                    toast.cancel();
-                }
-                finish();
+                toast.cancel();
             }
-        } else super.onBackPressed();
+            finish();
+        }
     }
 }

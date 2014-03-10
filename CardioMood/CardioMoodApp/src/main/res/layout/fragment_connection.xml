@@ -110,7 +110,8 @@
                     android:layout_height="wrap_content"
                     android:text="@string/auto_start_measurement"
                     android:id="@+id/auto_start_measurement"
-                    android:checked="false" />
+                    android:checked="true"
+                    android:visibility="gone"/>
 
         </LinearLayout>
 

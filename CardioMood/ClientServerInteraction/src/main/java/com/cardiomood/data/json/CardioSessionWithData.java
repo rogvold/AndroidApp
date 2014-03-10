@@ -1,5 +1,6 @@
 package com.cardiomood.data.json;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CardioSessionWithData extends CardioSession {
@@ -12,10 +13,12 @@ public class CardioSessionWithData extends CardioSession {
     }
 
     public CardioSessionWithData() {
+        dataItems = new ArrayList<CardioDataItem>();
     }
 
     public CardioSessionWithData(CardioSession session) {
         super(session.id, session.name, session.description, session.serverId, session.userId, session.creationTimestamp, session.dataClassName);
+        dataItems = new ArrayList<CardioDataItem>();
     }
 
     public List<CardioDataItem> getDataItems() {

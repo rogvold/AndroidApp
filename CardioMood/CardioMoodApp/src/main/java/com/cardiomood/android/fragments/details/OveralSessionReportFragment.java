@@ -137,6 +137,11 @@ public class OveralSessionReportFragment extends Fragment {
 
         showProgress();
 
+        if (savedInstanceState == null) {
+            heartRateChart.setXAxis(xAxis);
+            heartRateChart.setYAxis(yAxis);
+        }
+
         return v;
     }
 
@@ -165,6 +170,9 @@ public class OveralSessionReportFragment extends Fragment {
     }
 
 
+    NumberAxis xAxis = new NumberAxis();
+    NumberAxis yAxis = new NumberAxis();
+
     private void initCharts(HeartRateMath hrm) {
         // prepare source data
         double rr[] = hrm.getRrIntervals();
@@ -179,16 +187,11 @@ public class OveralSessionReportFragment extends Fragment {
         PolynomialSplineFunction f = interpol.interpolate(time, bpm);
 
         // Heart Rate Chart
-        NumberAxis xAxis = new NumberAxis();
         xAxis.enableGesturePanning(true);
         xAxis.enableGestureZooming(true);
         xAxis.allowPanningOutOfDefaultRange(false);
         xAxis.setDefaultRange(new NumberRange(time[0], time[time.length-1]/1000));
         xAxis.getStyle().getTickStyle().setLabelTextSize(10);
-        heartRateChart.setXAxis(xAxis);
-
-        NumberAxis yAxis = new NumberAxis();
-        heartRateChart.setYAxis(yAxis);
 
         // Clear
         List<Series<?>> series = new ArrayList<Series<?>>(heartRateChart.getSeries());

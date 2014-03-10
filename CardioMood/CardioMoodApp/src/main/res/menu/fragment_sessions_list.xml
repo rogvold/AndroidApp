@@ -4,4 +4,10 @@
         cardiomood:showAsAction="always"
         android:icon="@drawable/ic_action_refresh"
         android:title="@string/refresh" />
+
+    <item android:id="@+id/menu_sync"
+        cardiomood:showAsAction="ifRoom"
+        android:title="@string/sync"
+        android:titleCondensed="@string/sync_condensed"/>
+
 </menu>
