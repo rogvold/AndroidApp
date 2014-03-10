@@ -21,7 +21,7 @@ public class TimeLimitDataCollector extends AbstractDataCollector {
 
     @Override
     public boolean needToStopCollecting() {
-        return math.getDuration() > timeLimit;
+        return getDuration() > timeLimit;
     }
 
     @Override

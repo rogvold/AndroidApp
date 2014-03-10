@@ -251,6 +251,16 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
         this.listener = listener;
     }
 
+    public int getIntervalsCount() {
+        return math.getCount();
+    }
+
+    public double getDuration() {
+        if (currentSession != null && currentSession.getDateStarted() != null) {
+            return System.currentTimeMillis() - currentSession.getDateStarted().getTime();
+        } else return 0;
+    }
+
     public static enum Status {
         NOT_STARTED,
         COLLECTING,

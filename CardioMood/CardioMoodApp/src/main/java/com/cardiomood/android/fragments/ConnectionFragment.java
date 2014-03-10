@@ -22,6 +22,7 @@ import android.os.IBinder;
 import android.os.Vibrator;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -29,6 +30,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -57,9 +59,11 @@ import com.cardiomood.heartrate.bluetooth.LeHRMonitor;
 import com.flurry.android.FlurryAgent;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
@@ -93,6 +97,8 @@ public class ConnectionFragment extends Fragment {
     private EditText customTimeLimitTxt;
     private CheckBox startImmediately;
     private CircularProgressBar measurementProgress;
+    private TextView intervalsCollected;
+    private TextView timeElapsed;
 
     private PreferenceHelper mPrefHelper;
     private Handler mHandler;
@@ -230,6 +236,8 @@ public class ConnectionFragment extends Fragment {
         startImmediately = (CheckBox) this.container.findViewById(R.id.auto_start_measurement);
         measurementStatusLayout = (LinearLayout) this.container.findViewById(R.id.measurement_status_layout);
         measurementProgress = (CircularProgressBar) this.container.findViewById(R.id.measurement_progress);
+        intervalsCollected = (TextView) this.container.findViewById(R.id.intervalsCollected);
+        timeElapsed = (TextView) this.container.findViewById(R.id.timeElapsed);
 
         connectDeviceButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -289,6 +297,16 @@ public class ConnectionFragment extends Fragment {
         });
 
         setDisconnectedView();
+
+        this.container.post(new Runnable() {
+            @Override
+            public void run() {
+                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                if (imm != null)
+                    imm.hideSoftInputFromWindow(getActivity().findViewById(android.R.id.content).getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+
+            }
+        });
         return this.container;
     }
 
@@ -553,8 +571,23 @@ public class ConnectionFragment extends Fragment {
                     AbstractDataCollector collector = (AbstractDataCollector) mBluetoothLeService.getDataCollector();
                     if (collector == null) {
                         measurementProgress.setProgress(0);
+                        timeElapsed.setText("00:00");
+                        intervalsCollected.setText("0");
                     } else {
                         measurementProgress.setProgress((float) collector.getProgress(), 300);
+                        timeElapsed.setText("00:00");
+                        intervalsCollected.setText(collector.getIntervalsCount()+"");
+                        long millis = Math.round(collector.getDuration());
+                        timeElapsed.setText(
+                                String.format(
+                                        "%d:%02d:%02d",
+                                        TimeUnit.MILLISECONDS.toHours(millis),
+                                        TimeUnit.MILLISECONDS.toMinutes(millis) -
+                                                TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
+                                        TimeUnit.MILLISECONDS.toSeconds(millis) -
+                                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))
+                                )
+                        );
                     }
                     setConnectedView();
                     connectDeviceButton.setText(getString(R.string.open_monitor));

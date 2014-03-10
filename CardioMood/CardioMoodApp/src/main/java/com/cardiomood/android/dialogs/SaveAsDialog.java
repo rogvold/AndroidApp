@@ -42,15 +42,13 @@ public class SaveAsDialog extends Dialog {
     private long sessionId;
     private Context mContext;
     private ListView mListView;
-    private WebView mWebView;
 
     private boolean savingInProgress = false;
     private SavingCallback savingCallback;
 
-    public SaveAsDialog(Context context, long sessionId, WebView webView) {
+    public SaveAsDialog(Context context, long sessionId) {
         super(context, android.R.style.Theme_Holo_Light_Dialog);
         mContext = context;
-        mWebView = webView;
         this.sessionId = sessionId;
     }
 
@@ -104,8 +102,9 @@ public class SaveAsDialog extends Dialog {
 
     private void saveAsImage() {
         if (!savingInProgress) {
-            setSavingInProgress(true);
-            new SaveAsImageTask().execute(sessionId, mWebView.capturePicture());
+//            setSavingInProgress(true);
+//            new SaveAsImageTask().execute(sessionId, mWebView.capturePicture());
+            Toast.makeText(getContext(), "This feature will be available soon.", Toast.LENGTH_SHORT).show();
         }
     }
 

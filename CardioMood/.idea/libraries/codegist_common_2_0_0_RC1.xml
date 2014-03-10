@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="codegist-common-2.0.0-RC1">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/CardioMoodApp/build/exploded-aar/CardioMood/ClientServerInteraction/unspecified/libs/codegist-common-2.0.0-RC1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/CardioSportApp/libs/codegist-common-2.0.0-RC1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

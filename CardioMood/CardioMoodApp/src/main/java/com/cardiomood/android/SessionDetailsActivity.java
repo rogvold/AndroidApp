@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -28,6 +29,7 @@ import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
 import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.model.HeartRateSession;
 import com.cardiomood.android.db.model.SessionStatus;
+import com.cardiomood.android.dialogs.SaveAsDialog;
 import com.cardiomood.android.fragments.details.HistogramReportFragment;
 import com.cardiomood.android.fragments.details.OveralSessionReportFragment;
 import com.cardiomood.android.fragments.details.ScatterogramReportFragment;
@@ -35,6 +37,7 @@ import com.cardiomood.android.fragments.details.SpectralAnalysisReportFragment;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.flurry.android.FlurryAgent;
 
+import java.io.File;
 import java.text.MessageFormat;
 import java.util.Locale;
 
@@ -344,60 +347,29 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
     }
 
     private void showSaveAsDialog() {
-//        SaveAsDialog dlg = new SaveAsDialog(this, sessionId, webView);
-//        dlg.setTitle(R.string.save_as_dlg_title);
-//        dlg.setSavingCallback(new SaveAsDialog.SavingCallback() {
-//
-//            @Override
-//            public void onBeginSave() {
-//               savingInProgress = true;
-//               invalidateOptionsMenu();
-//            }
-//
-//            @Override
-//            public void onEndSave(String fileName) {
-//                savingInProgress = false;
-//                invalidateOptionsMenu();
-//
-//                if (fileName == null || !fileName.toLowerCase().endsWith(".png")) {
-//                    // saved as not *.png
-//                    return;
-//                }
-//                // add item to notification
-//                Intent intent = new Intent();
-//                intent.setAction(Intent.ACTION_VIEW);
-//                File file = new File(fileName);
-//                intent.setDataAndType(Uri.fromFile(file), "image/*");
-//
-//                PendingIntent pIntent = PendingIntent.getActivity(SessionDetailsActivity.this, 0, intent, 0);
-//
-//                Notification.Builder builder = new Notification.Builder(SessionDetailsActivity.this);
-//                builder.setContentIntent(pIntent)
-//                        .setSmallIcon(R.drawable.ic_action_save)
-//                        .setTicker(getText(R.string.measurement_saved_notification_text))
-//                        .setWhen(System.currentTimeMillis())
-//                        .setAutoCancel(true)
-//                        .setContentTitle(getText(R.string.measurement_saved_notification_title))
-//                        .setContentText(getText(R.string.measurement_saved_notification_text));
-//
-//                NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-//
-//                if(Build.VERSION.SDK_INT<16){
-//                /*build notification for HoneyComb to ICS*/
-//                    notificationManager.notify(1, builder.getNotification());
-//                }if(Build.VERSION.SDK_INT>15){
-//                /*Notification for Jellybean and above*/
-//                    notificationManager.notify(1, builder.build());
-//                }
-//            }
-//
-//            @Override
-//            public void onError() {
-//                savingInProgress = false;
-//                invalidateOptionsMenu();
-//            }
-//        });
-//        dlg.show();
+        SaveAsDialog dlg = new SaveAsDialog(this, sessionId);
+        dlg.setTitle(R.string.save_as_dlg_title);
+        dlg.setSavingCallback(new SaveAsDialog.SavingCallback() {
+
+            @Override
+            public void onBeginSave() {
+                savingInProgress = true;
+                invalidateOptionsMenu();
+            }
+
+            @Override
+            public void onEndSave(String fileName) {
+                savingInProgress = false;
+                invalidateOptionsMenu();
+            }
+
+            @Override
+            public void onError() {
+                savingInProgress = false;
+                invalidateOptionsMenu();
+            }
+        });
+        dlg.show();
     }
 
 }
