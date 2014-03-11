@@ -49,4 +49,12 @@ public class JsonError implements Serializable {
     public void setMessage(String message) {
         this.message = message;
     }
+
+    @Override
+    public String toString() {
+        return "JsonError{" +
+                "message='" + message + '\'' +
+                ", code=" + code +
+                '}';
+    }
 }
