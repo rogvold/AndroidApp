@@ -71,13 +71,14 @@
     <orderEntry type="jdk" jdkName="Android API 19 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="jackson-jaxrs-1.9.0" level="project" />
-    <orderEntry type="library" exported="" name="appcompat-v7-19.0.1" level="project" />
+    <orderEntry type="library" exported="" name="appcompat-v7-19.0.0" level="project" />
     <orderEntry type="library" exported="" name="jackson-core-asl-1.9.0" level="project" />
     <orderEntry type="library" exported="" name="flanagan" level="project" />
     <orderEntry type="library" exported="" name="gson-2.2.4" level="project" />
     <orderEntry type="library" exported="" name="codegist-common-2.0.0-RC1" level="project" />
+    <orderEntry type="library" exported="" name="support-v4-19.0.0" level="project" />
+    <orderEntry type="library" exported="" name="BluetoothGatt" level="project" />
     <orderEntry type="library" exported="" name="codegist-crest-2.0.0-RC1" level="project" />
-    <orderEntry type="library" exported="" name="support-v4-19.0.1" level="project" />
     <orderEntry type="library" exported="" name="commons-math3-3.2" level="project" />
     <orderEntry type="library" exported="" name="log4j-1.2.17" level="project" />
     <orderEntry type="library" exported="" name="jackson-mapper-asl-1.9.0" level="project" />
