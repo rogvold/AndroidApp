@@ -111,10 +111,8 @@ public class SpectralAnalysisReportFragment extends Fragment {
         sessionName = (TextView) v.findViewById(R.id.session_title);
         sessionDate = (TextView) v.findViewById(R.id.session_date);
 
-        if (savedInstanceState == null) {
-            spectrumChart.setXAxis(xAxis);
-            spectrumChart.setYAxis(yAxis);
-        }
+        spectrumChart.setXAxis(xAxis);
+        spectrumChart.setYAxis(yAxis);
 
         new DataLoadingTask().execute(sessionId);
 

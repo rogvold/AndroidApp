@@ -32,6 +32,7 @@ public class SpeedometerView extends View {
     public static final double DEFAULT_MAX_SPEED = 100.0;
     public static final double DEFAULT_MAJOR_TICK_STEP = 20.0;
     public static final int DEFAULT_MINOR_TICKS = 1;
+    public static final int DEFAULT_LABEL_TEXT_SIZE_DP = 12;
 
     private double maxSpeed = DEFAULT_MAX_SPEED;
     private double speed = 0;
@@ -49,17 +50,22 @@ public class SpeedometerView extends View {
     private Paint ticksPaint;
     private Paint txtPaint;
     private Paint colorLinePaint;
+    private int labelTextSize;
 
     private Bitmap mMask;
 
     public SpeedometerView(Context context) {
         super(context);
         init();
+
+        float density = getResources().getDisplayMetrics().density;
+        setLabelTextSize(Math.round(DEFAULT_LABEL_TEXT_SIZE_DP * density));
     }
 
     public SpeedometerView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
+        float density = getResources().getDisplayMetrics().density;
         TypedArray attributes = context.getTheme().obtainStyledAttributes(
                 attrs,
                 R.styleable.SpeedometerView,
@@ -69,6 +75,7 @@ public class SpeedometerView extends View {
             // read attributes
             setMaxSpeed(attributes.getFloat(R.styleable.SpeedometerView_maxSpeed, (float) DEFAULT_MAX_SPEED));
             setSpeed(attributes.getFloat(R.styleable.SpeedometerView_speed, 0));
+            setLabelTextSize(attributes.getDimensionPixelSize(R.styleable.SpeedometerView_labelTextSize, Math.round(DEFAULT_LABEL_TEXT_SIZE_DP * density)));
         } finally {
             attributes.recycle();
         }
@@ -184,6 +191,18 @@ public class SpeedometerView extends View {
             end = maxSpeed * (5.0/160 + 1);
         ranges.add(new ColoredRange(color, begin, end));
         invalidate();
+    }
+
+    public int getLabelTextSize() {
+        return labelTextSize;
+    }
+
+    public void setLabelTextSize(int labelTextSize) {
+        this.labelTextSize = labelTextSize;
+        if (txtPaint != null) {
+            txtPaint.setTextSize(labelTextSize);
+            invalidate();
+        }
     }
 
     @Override
@@ -368,7 +387,7 @@ public class SpeedometerView extends View {
 
         txtPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         txtPaint.setColor(Color.WHITE);
-        txtPaint.setTextSize(18);
+        txtPaint.setTextSize(labelTextSize);
         txtPaint.setTextAlign(Paint.Align.CENTER);
 
         mMask = BitmapFactory.decodeResource(getResources(), R.drawable.spot_mask);

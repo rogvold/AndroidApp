@@ -18,17 +18,20 @@ public class CircularProgressBar extends View {
 
     public static final float DEFAULT_MAX = 100;
     public static final float DEFAULT_MIN = 0;
-    public static final float DEFAULT_LINE_WIDTH = 60;
+    public static final int DEFAULT_LINE_WIDTH = 60;
     public static final int DEFAULT_COLOR = Color.RED;
+    public static final int DEFAULT_TEXT_SIZE = 20;
 
     private float max = DEFAULT_MAX;
     private float progress = 0;
     private float min = DEFAULT_MIN;
     private float lineWidth = DEFAULT_LINE_WIDTH;
     private int color = DEFAULT_COLOR;
-    private float textSize = 16;
+    private float textSize = 0;
     private int textColor = Color.BLACK;
     private LabelConverter labelConverter = null;
+
+    private float density = 1.0f;
 
     private Paint mPaint;
     private Paint txtPaint;
@@ -36,12 +39,15 @@ public class CircularProgressBar extends View {
 
     public CircularProgressBar(Context context) {
         super(context);
+        density = getResources().getDisplayMetrics().density;
+        textSize = DEFAULT_TEXT_SIZE*density;
         init();
     }
 
     public CircularProgressBar(Context context, AttributeSet attrs) {
         super(context, attrs);
 
+        density = getResources().getDisplayMetrics().density;
         TypedArray attributes = context.getTheme().obtainStyledAttributes(
                 attrs,
                 R.styleable.CircularProgressBar,
@@ -52,8 +58,9 @@ public class CircularProgressBar extends View {
             setMax(attributes.getFloat(R.styleable.CircularProgressBar_max, (float) DEFAULT_MAX));
             setMin(attributes.getFloat(R.styleable.CircularProgressBar_min, (float) DEFAULT_MIN));
             setProgress(attributes.getFloat(R.styleable.CircularProgressBar_progress, 0));
-            setLineWidth(attributes.getFloat(R.styleable.CircularProgressBar_lineWidth, DEFAULT_LINE_WIDTH));
+            setLineWidth(attributes.getDimensionPixelSize(R.styleable.CircularProgressBar_lineWidth, DEFAULT_LINE_WIDTH));
             setColor(attributes.getColor(R.styleable.CircularProgressBar_color, DEFAULT_COLOR));
+            setTextSize(attributes.getDimensionPixelSize(R.styleable.CircularProgressBar_textSize, Math.round(DEFAULT_TEXT_SIZE*density)));
         } finally {
             attributes.recycle();
         }
@@ -187,7 +194,13 @@ public class CircularProgressBar extends View {
         canvas.drawArc(oval, -90, angle, false, mPaint);
 
         if (labelConverter != null) {
-            canvas.drawText(labelConverter.getLabelFor(progress, max, txtPaint), oval.centerX(), oval.centerY()+textSize/2, txtPaint);
+            String text = labelConverter.getLabelFor(progress, max, txtPaint);
+
+            if (text != null) {
+//                Rect bounds = new Rect();
+//                txtPaint.getTextBounds(text, 0, text.length(), bounds);
+                canvas.drawText(text, oval.centerX(), oval.centerY() - (txtPaint.descent() + txtPaint.ascent()) / 2, txtPaint);
+            }
         }
     }
 

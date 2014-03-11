@@ -137,10 +137,8 @@ public class OveralSessionReportFragment extends Fragment {
 
         showProgress();
 
-        if (savedInstanceState == null) {
-            heartRateChart.setXAxis(xAxis);
-            heartRateChart.setYAxis(yAxis);
-        }
+        heartRateChart.setXAxis(xAxis);
+        heartRateChart.setYAxis(yAxis);
 
         return v;
     }

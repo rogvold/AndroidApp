@@ -5,6 +5,7 @@
         <attr name="progress" format="float" />
         <attr name="min" format="float" />
         <attr name="color" format="color" />
-        <attr name="lineWidth" format="float" />
+        <attr name="lineWidth" format="dimension" />
+        <attr name="textSize" format="dimension" />
     </declare-styleable>
 </resources>

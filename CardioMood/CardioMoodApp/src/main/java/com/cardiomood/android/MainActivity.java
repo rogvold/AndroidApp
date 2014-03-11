@@ -22,6 +22,7 @@ import com.cardiomood.android.dialogs.WhatsNewDialog;
 import com.cardiomood.android.fragments.ConnectionFragment;
 import com.cardiomood.android.fragments.HistoryFragment;
 import com.cardiomood.android.fragments.ProfileFragment;
+import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.flurry.android.FlurryAgent;
@@ -101,11 +102,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         mViewPager.post(new Runnable() {
             @Override
             public void run() {
+                CommonTools.hideSoftInputKeyboard(MainActivity.this);
                 actionBar.setSelectedNavigationItem(1);
-                // hide soft input keyboard
-                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                if (imm != null)
-                    imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
             }
         });
     }
@@ -135,6 +133,8 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                 }
             });
         }
+
+        invalidateOptionsMenu();
     }
 
     @Override
@@ -175,18 +175,15 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         switch (item.getItemId()) {
             case R.id.menu_settings:
                  FlurryAgent.logEvent("menu_settings_clicked");
-                 if (!ConnectionFragment.isMonitoring)
-                    startActivity(new Intent(this, SettingsActivity.class));
+                 startActivity(new Intent(this, SettingsActivity.class));
                  return true;
             case R.id.menu_bt_settings:
                 FlurryAgent.logEvent("menu_bt_settings_clicked");
-                if (!ConnectionFragment.isMonitoring)
-                    openBluetoothSettings();
+                openBluetoothSettings();
                 return true;
             case R.id.menu_feedback:
                 FlurryAgent.logEvent("menu_feedback_clicked");
-                if (!ConnectionFragment.isMonitoring)
-                    startActivity(new Intent(this, FeedbackActivity.class));
+                startActivity(new Intent(this, FeedbackActivity.class));
                 return true;
             case R.id.menu_about:
                 FlurryAgent.logEvent("menu_about_clicked");

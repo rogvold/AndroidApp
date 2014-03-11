@@ -117,10 +117,8 @@ public class HistogramReportFragment extends Fragment {
         sessionName = (TextView) v.findViewById(R.id.session_title);
         sessionDate = (TextView) v.findViewById(R.id.session_date);
 
-        if (savedInstanceState == null) {
-            histogramChart.setXAxis(xAxis);
-            histogramChart.setYAxis(yAxis);
-        }
+        histogramChart.setXAxis(xAxis);
+        histogramChart.setYAxis(yAxis);
 
         new DataLoadingTask().execute(sessionId);
 
@@ -187,7 +185,7 @@ public class HistogramReportFragment extends Fragment {
     }
 
     private ColumnSeries getSeriesForIntervals(double rr[]) {
-        DataAdapter<Double, Double> dataAdapter2 = new SimpleDataAdapter<Double, Double>();
+        DataAdapter<Integer, Integer> dataAdapter2 = new SimpleDataAdapter<Integer, Integer>();
         double maxRR = StatUtils.max(rr);
         double minRR = StatUtils.min(rr);
         Histogram histogram = new Histogram(rr, 50);
@@ -195,9 +193,9 @@ public class HistogramReportFragment extends Fragment {
             minRR = 100;
         for (double x=Math.floor((minRR-100)/50)*50; x<=Math.ceil((maxRR+50)/50)*50; x+=50) {
             if (x <= maxRR)
-                dataAdapter2.add(new DataPoint<Double, Double>(x, (double)histogram.getCountFor(x)));
+                dataAdapter2.add(new DataPoint<Integer, Integer>((int) x, histogram.getCountFor(x)));
             else
-                dataAdapter2.add(new DataPoint<Double, Double>(x, 0.0));
+                dataAdapter2.add(new DataPoint<Integer, Integer>((int) x, 0));
         }
 
         ColumnSeries series2 = new ColumnSeries();

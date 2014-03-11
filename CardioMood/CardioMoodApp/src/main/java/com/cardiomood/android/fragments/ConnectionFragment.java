@@ -19,10 +19,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Vibrator;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -30,7 +28,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -52,6 +49,7 @@ import com.cardiomood.android.heartrate.TimeAndIntervalLimitDataCollector;
 import com.cardiomood.android.heartrate.TimeLimitDataCollector;
 import com.cardiomood.android.heartrate.UnlimitedDataCollector;
 import com.cardiomood.android.progress.CircularProgressBar;
+import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.android.tools.IMonitors;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
@@ -59,11 +57,9 @@ import com.cardiomood.heartrate.bluetooth.LeHRMonitor;
 import com.flurry.android.FlurryAgent;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
@@ -107,7 +103,6 @@ public class ConnectionFragment extends Fragment {
     private AlertDialog alertSelectDevice;
 
     private ProgressDialog sessionSavingDialog;
-    public static boolean isMonitoring = false;
     private boolean disableBluetoothOnClose = false;
 
     // Service registration
@@ -140,9 +135,14 @@ public class ConnectionFragment extends Fragment {
                 final int newStatus = intent.getIntExtra(LeHRMonitor.EXTRA_NEW_STATUS, -100);
                 final int oldStatus = intent.getIntExtra(LeHRMonitor.EXTRA_OLD_STATUS, -100);
 
-                if (getActivity() != null) {
-                    getActivity().invalidateOptionsMenu();
-                }
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (getActivity() != null) {
+                            getActivity().invalidateOptionsMenu();
+                        }
+                    }
+                });
 
                 // update button ui state and options layout
                 boolean enableControls = (newStatus != LeHRMonitor.CONNECTING_STATUS);
@@ -207,17 +207,6 @@ public class ConnectionFragment extends Fragment {
         }
     }
 
-    private void vibrate(long milliseconds) {
-        Activity activity = getActivity();
-        if (activity == null)
-                return;
-        Vibrator v = (Vibrator) activity.getSystemService(Context.VIBRATOR_SERVICE);
-        // Vibrate for 500 milliseconds
-        if (v!= null && v.hasVibrator()) {
-            v.vibrate(milliseconds);
-        }
-    }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "onCreateView()");
@@ -247,7 +236,6 @@ public class ConnectionFragment extends Fragment {
             }
         });
 
-        measurementProgress.setTextSize(26);
         measurementProgress.setLabelConverter(new CircularProgressBar.LabelConverter() {
             @Override
             public String getLabelFor(float progress, float max, Paint paint) {
@@ -301,10 +289,7 @@ public class ConnectionFragment extends Fragment {
         this.container.post(new Runnable() {
             @Override
             public void run() {
-                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                if (imm != null)
-                    imm.hideSoftInputFromWindow(getActivity().findViewById(android.R.id.content).getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-
+                CommonTools.hideSoftInputKeyboard(getActivity());
             }
         });
         return this.container;
@@ -392,14 +377,13 @@ public class ConnectionFragment extends Fragment {
     }
 
     private void openMonitor() {
-        Toast.makeText(getActivity(), "This feature will beavailable soon.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), "This feature will be available soon.", Toast.LENGTH_SHORT).show();
         //startActivity(new Intent(getActivity(), MonitoringActivity.class));
     }
 
     private void setDisconnectedView() {
         measurementStatusLayout.setVisibility(View.GONE);
         measurementOptionsLayout.setVisibility(View.VISIBLE);
-        isMonitoring = false;
     }
 
     private void setConnectedView() {
@@ -575,19 +559,8 @@ public class ConnectionFragment extends Fragment {
                         intervalsCollected.setText("0");
                     } else {
                         measurementProgress.setProgress((float) collector.getProgress(), 300);
-                        timeElapsed.setText("00:00");
-                        intervalsCollected.setText(collector.getIntervalsCount()+"");
-                        long millis = Math.round(collector.getDuration());
-                        timeElapsed.setText(
-                                String.format(
-                                        "%d:%02d:%02d",
-                                        TimeUnit.MILLISECONDS.toHours(millis),
-                                        TimeUnit.MILLISECONDS.toMinutes(millis) -
-                                                TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)),
-                                        TimeUnit.MILLISECONDS.toSeconds(millis) -
-                                                TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis))
-                                )
-                        );
+                        intervalsCollected.setText(String.valueOf(collector.getIntervalsCount()));
+                        timeElapsed.setText(CommonTools.timeToHumanString(Math.round(collector.getDuration())));
                     }
                     setConnectedView();
                     connectDeviceButton.setText(getString(R.string.open_monitor));
