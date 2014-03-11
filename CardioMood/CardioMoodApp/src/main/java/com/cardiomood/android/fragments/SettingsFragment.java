@@ -19,7 +19,6 @@ public class SettingsFragment extends PreferenceActivityBase.AbstractMainFragmen
     private EditTextPreference mHostPref;
     private EditTextPreference mPortPref;
     private EditTextPreference mPathPref;
-    private CheckBoxPreference mUnlimitedLengthPref;
     private CheckBoxPreference mDisableBluetoothOnClosePref;
 
     @Override
@@ -41,14 +40,13 @@ public class SettingsFragment extends PreferenceActivityBase.AbstractMainFragmen
         mHostPref = (EditTextPreference) findPreference(SERVICE_HOST);
         mPortPref = (EditTextPreference) findPreference(SERVICE_PORT);
         mPathPref = (EditTextPreference) findPreference(SERVICE_PATH);
-        mUnlimitedLengthPref = (CheckBoxPreference) findPreference(MEASUREMENT_UNLIMITED_LENGTH);
         mDisableBluetoothOnClosePref = (CheckBoxPreference) findPreference(CONNECTION_DISABLE_BT_ON_CLOSE);
 
         refreshSummaries();
     }
 
     private void refreshSummaries() {
-        updatePrefSummary(mProtocolPref, mHostPref, mPortPref, mPathPref, mUnlimitedLengthPref);
+        updatePrefSummary(mProtocolPref, mHostPref, mPortPref, mPathPref, mDisableBluetoothOnClosePref);
     }
 
     @Override

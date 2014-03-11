@@ -77,6 +77,8 @@ public abstract class HeartRateLeService extends Service {
             if (monitor == null)
                 return false;
         }
+        if (!monitor.isSupported())
+            return false;
         BluetoothAdapter bluetoothAdapter = monitor.getBluetoothAdapter();
         if (bluetoothAdapter == null) {
             Log.w(TAG, "initialize(): bluetooth adapter is not available");

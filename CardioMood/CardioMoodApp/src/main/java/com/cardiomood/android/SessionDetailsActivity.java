@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -30,6 +29,7 @@ import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.model.HeartRateSession;
 import com.cardiomood.android.db.model.SessionStatus;
 import com.cardiomood.android.dialogs.SaveAsDialog;
+import com.cardiomood.android.fragments.details.AbstractSessionReportFragment;
 import com.cardiomood.android.fragments.details.HistogramReportFragment;
 import com.cardiomood.android.fragments.details.OveralSessionReportFragment;
 import com.cardiomood.android.fragments.details.ScatterogramReportFragment;
@@ -37,7 +37,6 @@ import com.cardiomood.android.fragments.details.SpectralAnalysisReportFragment;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.flurry.android.FlurryAgent;
 
-import java.io.File;
 import java.text.MessageFormat;
 import java.util.Locale;
 
@@ -197,10 +196,10 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             switch (position) {
-                case 0: return OveralSessionReportFragment.newInstance(sessionId);
-                case 1: return SpectralAnalysisReportFragment.newInstance(sessionId);
-                case 2: return HistogramReportFragment.newInstance(sessionId);
-                case 3: return ScatterogramReportFragment.newInstance(sessionId);
+                case 0: return AbstractSessionReportFragment.newInstance(OveralSessionReportFragment.class, sessionId);
+                case 1: return AbstractSessionReportFragment.newInstance(SpectralAnalysisReportFragment.class, sessionId);
+                case 2: return AbstractSessionReportFragment.newInstance(HistogramReportFragment.class, sessionId);
+                case 3: return AbstractSessionReportFragment.newInstance(ScatterogramReportFragment.class, sessionId);
             }
             return null;
         }

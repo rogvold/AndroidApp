@@ -54,7 +54,13 @@ public abstract class LeHRMonitor {
             if (monitor.isSupported())
                 return monitor;
         } catch (NoClassDefFoundError ex) {
-            Log.w(TAG, "getMonitor(): this device is not supported (not Motorola).", ex);
+            Log.w(TAG, "getMonitor(): this device not Motorola.", ex);
+        }
+
+        try {
+            return new FallbackMonitor(context);
+        } catch (NoClassDefFoundError ex) {
+            Log.wtf(TAG, "getMonitor(): shit just got real...", ex);
         }
 
         return null;

@@ -428,6 +428,7 @@ public class ConnectionFragment extends Fragment {
                 }
 
                 if (!mBluetoothLeService.initialize(getActivity())) {
+                    Toast.makeText(getActivity(), "Failed to initialize service. Make sure your device is supported.", Toast.LENGTH_SHORT).show();
                     Log.e(TAG, "Unable to initialize Bluetooth");
                     return;
                 }
@@ -543,7 +544,9 @@ public class ConnectionFragment extends Fragment {
         if (mBluetoothLeService == null)
             return false;
         LeHRMonitor monitor = mBluetoothLeService.getMonitor();
-        return (monitor.getConnectionStatus() == LeHRMonitor.CONNECTED_STATUS);
+        if (monitor != null) {
+            return (monitor.getConnectionStatus() == LeHRMonitor.CONNECTED_STATUS);
+        } else return false;
     }
 
     private void updateView() {
