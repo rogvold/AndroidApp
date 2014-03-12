@@ -32,9 +32,11 @@ import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.data.CardioMoodServer;
 import com.cardiomood.data.DataServiceHelper;
+import com.cardiomood.data.async.ServerResponseCallback;
 import com.cardiomood.data.json.CardioDataItem;
 import com.cardiomood.data.json.CardioSession;
 import com.cardiomood.data.json.CardioSessionWithData;
+import com.cardiomood.data.json.JsonError;
 import com.cardiomood.data.json.JsonRRInterval;
 import com.cardiomood.data.json.JsonResponse;
 import com.flurry.android.FlurryAgent;
@@ -150,13 +152,28 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
     }
 
     private void sync() {
-        Activity activity = getActivity();
+        final Activity activity = getActivity();
         if (activity == null)
             return;
 
         pDialog = new ProgressDialog(activity);
 
-        new SyncTask(activity).execute();
+        serviceHelper.checkInternetAvailable(activity, new ServerResponseCallback<Boolean>() {
+            @Override
+            public void onResult(Boolean result) {
+                if (result) {
+                    new SyncTask(activity).execute();
+                } else {
+                    refresh();
+                    Toast.makeText(activity, "Data sever is not accessible. Try again later.", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onError(JsonError error) {
+
+            }
+        });
     }
 
     private void refresh() {
@@ -276,16 +293,7 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
                 return;
             pDialog.setMessage("100% - completed.");
 
-            if (listAdapter != null) {
-                listAdapter.clear();
-                listAdapter.notifyDataSetChanged();
-            }
-            listAdapter = new SessionsArrayAdapter(context, new ArrayList<HeartRateSession>(100));
-            SessionsEndlessAdapter endlessAdapter = new SessionsEndlessAdapter(listAdapter, getActivity().getApplicationContext());
-            undoAdapter = new ContextualUndoAdapter(endlessAdapter, R.layout.history_item_undo, R.id.btn_undo_deletion);
-            undoAdapter.setAbsListView(listView);
-            undoAdapter.setDeleteItemCallback(HistoryFragment.this);
-            listView.setAdapter(undoAdapter);
+           refresh();
 
             pDialog.dismiss();
         }

@@ -1,4 +1,17 @@
-<p><b>New in CardioMood 1.1.4 (current):</b><p>
+<p><b>New in CardioMood 1.2 (current):</b><p>
+<p>
++++ Cloud storage (experimental).
+<br/>
++++ Measurement length configuration.
+<br/>
++++ Timer and heart beat counter.
+<br/>
+=== Performance boost
+<br/>
+=== Fixed crashes on Android 4.0.
+</p>
+<br/>
+<p><b>New in CardioMood 1.1.4:</b><p>
 <p>
 +++ Unlimited measurement length (experimental).
 <br/>
@@ -9,5 +22,4 @@
 === Fixed crashes when connecting.
 </p>
 <br/>
-<p>Coming soon: cloud data storage! :)</p>
 <p>Stay with <b><a href="http://goo.gl/ZLmHhJ">www.CardioMood.com</a></b>!</p>

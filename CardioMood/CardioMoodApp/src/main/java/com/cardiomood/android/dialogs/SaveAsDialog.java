@@ -3,14 +3,11 @@ package com.cardiomood.android.dialogs;
 import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Picture;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.view.View;
-import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -42,14 +39,16 @@ public class SaveAsDialog extends Dialog {
     private long sessionId;
     private Context mContext;
     private ListView mListView;
+    private View viewToSave;
 
     private boolean savingInProgress = false;
     private SavingCallback savingCallback;
 
-    public SaveAsDialog(Context context, long sessionId) {
+    public SaveAsDialog(Context context, long sessionId, View viewToSave) {
         super(context, android.R.style.Theme_Holo_Light_Dialog);
         mContext = context;
         this.sessionId = sessionId;
+        this.viewToSave = viewToSave;
     }
 
     @Override
@@ -102,9 +101,13 @@ public class SaveAsDialog extends Dialog {
 
     private void saveAsImage() {
         if (!savingInProgress) {
-//            setSavingInProgress(true);
-//            new SaveAsImageTask().execute(sessionId, mWebView.capturePicture());
-            Toast.makeText(getContext(), "This feature will be available soon.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, "This feature is currently unavailable. Hold POWER and VOLUME DOWN buttons to capture a screenshot.", Toast.LENGTH_SHORT).show();
+//            if (viewToSave != null) {
+//                setSavingInProgress(true);
+//                viewToSave.setDrawingCacheEnabled(true);
+//                viewToSave.setDrawingCacheBackgroundColor(Color.WHITE);
+//                new SaveAsImageTask().execute(sessionId, viewToSave.getDrawingCache());
+//            }
         }
     }
 
@@ -234,10 +237,7 @@ public class SaveAsDialog extends Dialog {
         @Override
         protected String doInBackground(Object... params) {
             long sessionId = (Long) params[0];
-            Picture picture = (Picture) params[1];
-            Bitmap bitmap = Bitmap.createBitmap(picture.getWidth(), picture.getHeight(), Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            picture.draw(canvas);
+            Bitmap bitmap = (Bitmap) params[1];
             FileOutputStream fos = null;
             try {
                 File directory = getPictureStorageDirectory();

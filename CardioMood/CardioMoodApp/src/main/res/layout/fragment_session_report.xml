@@ -75,11 +75,9 @@
             </FrameLayout>
 
             <com.shinobicontrols.charts.ChartView
-                android:layout_height="200sp"
+                android:layout_height="230dp"
                 android:layout_width="match_parent"
-                android:id="@+id/chart"
-                android:paddingBottom="8dp"
-                android:background="@drawable/background_texture" />
+                android:id="@+id/chart" />
 
             <FrameLayout
                 android:layout_width="match_parent"

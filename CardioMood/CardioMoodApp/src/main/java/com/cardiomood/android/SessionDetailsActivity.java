@@ -13,7 +13,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,7 +27,6 @@ import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
 import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.model.HeartRateSession;
 import com.cardiomood.android.db.model.SessionStatus;
-import com.cardiomood.android.dialogs.SaveAsDialog;
 import com.cardiomood.android.fragments.details.AbstractSessionReportFragment;
 import com.cardiomood.android.fragments.details.HistogramReportFragment;
 import com.cardiomood.android.fragments.details.OveralSessionReportFragment;
@@ -106,7 +104,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
                 actionBar.setSelectedNavigationItem(position);
 
                 // hide soft input keyboard
-                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 if (imm != null)
                     imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
             }
@@ -121,7 +119,8 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
             actionBar.addTab(
                     actionBar.newTab()
                             .setText(mSectionsPagerAdapter.getPageTitle(i))
-                            .setTabListener(this));
+                            .setTabListener(this)
+            );
         }
         actionBar.setSelectedNavigationItem(0);
 
@@ -134,7 +133,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
 
         sessionDAO = new HeartRateSessionDAO();
 
-        if (! sessionDAO.exists(sessionId)) {
+        if (!sessionDAO.exists(sessionId)) {
             Toast.makeText(this, MessageFormat.format(getText(R.string.session_doesnt_exist).toString(), sessionId), Toast.LENGTH_SHORT).show();
             finish();
         }
@@ -148,14 +147,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
     protected void onStart() {
         super.onStart();
         FlurryAgent.onStartSession(this, ConfigurationConstants.FLURRY_API_KEY);
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        MenuItem saveAsItem = menu.findItem(R.id.menu_save_as);
-        saveAsItem.setEnabled(!savingInProgress);
-
-        return super.onPrepareOptionsMenu(menu);
+        executePostRenderAction();
     }
 
     @Override
@@ -180,8 +172,6 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
     }
 
 
-
-
     /**
      * A {@link android.support.v4.app.FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -196,10 +186,14 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             switch (position) {
-                case 0: return AbstractSessionReportFragment.newInstance(OveralSessionReportFragment.class, sessionId);
-                case 1: return AbstractSessionReportFragment.newInstance(SpectralAnalysisReportFragment.class, sessionId);
-                case 2: return AbstractSessionReportFragment.newInstance(HistogramReportFragment.class, sessionId);
-                case 3: return AbstractSessionReportFragment.newInstance(ScatterogramReportFragment.class, sessionId);
+                case 0:
+                    return AbstractSessionReportFragment.newInstance(OveralSessionReportFragment.class, sessionId);
+                case 1:
+                    return AbstractSessionReportFragment.newInstance(SpectralAnalysisReportFragment.class, sessionId);
+                case 2:
+                    return AbstractSessionReportFragment.newInstance(HistogramReportFragment.class, sessionId);
+                case 3:
+                    return AbstractSessionReportFragment.newInstance(ScatterogramReportFragment.class, sessionId);
             }
             return null;
         }
@@ -228,13 +222,15 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
     }
 
     private void executePostRenderAction() {
-        if (postRenderAction == DO_NOTHING_ACTION) {
-            FlurryAgent.logEvent("old_session_opened");
-            return;
-        }
-        if (postRenderAction == RENAME_ACTION) {
-            FlurryAgent.logEvent("new_session_opened");
-            showRenameSessionDialog();
+        switch (postRenderAction) {
+            case DO_NOTHING_ACTION: {
+                FlurryAgent.logEvent("old_session_opened");
+                return;
+            }
+            case RENAME_ACTION: {
+                FlurryAgent.logEvent("new_session_opened");
+                showRenameSessionDialog();
+            }
         }
         postRenderAction = DO_NOTHING_ACTION;
     }
@@ -257,7 +253,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
                 .setCancelable(false)
                 .setPositiveButton("OK",
                         new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
+                            public void onClick(DialogInterface dialog, int id) {
                                 // get user input and set it to result
                                 // edit text
                                 HeartRateSessionDAO dao = new HeartRateSessionDAO();
@@ -281,13 +277,15 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
                                     tv.setText(name);
                                 FlurryAgent.logEvent("session_renamed");
                             }
-                        })
+                        }
+                )
                 .setNegativeButton("Cancel",
                         new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,int id) {
+                            public void onClick(DialogInterface dialog, int id) {
                                 dialog.cancel();
                             }
-                        })
+                        }
+                )
                 .setTitle(R.string.rename_session);
 
         // create alert dialog
@@ -295,28 +293,6 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
 
         // show it
         alertDialog.show();
-    }
-
-    private void showProgressDialog() {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                pDialog = ProgressDialog.show(SessionDetailsActivity.this, getText(R.string.preparing_report), getString(R.string.please_wait), true, false);
-            }
-        });
-    }
-
-    private void removeProgressDialog() {
-        if (pDialog != null) {
-            pDialog.dismiss();
-            pDialog = null;
-        }
-
-        try {
-            executePostRenderAction();
-        } catch (Exception e) {
-            Log.e(TAG, "removeProgressDialog() - exception", e);
-        }
     }
 
 
@@ -337,38 +313,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
                 FlurryAgent.logEvent("menu_rename_clicked");
                 showRenameSessionDialog();
                 return true;
-            case R.id.menu_save_as:
-                FlurryAgent.logEvent("menu_save_clicked");
-                showSaveAsDialog();
-                return true;
         }
         return super.onOptionsItemSelected(item);
     }
-
-    private void showSaveAsDialog() {
-        SaveAsDialog dlg = new SaveAsDialog(this, sessionId);
-        dlg.setTitle(R.string.save_as_dlg_title);
-        dlg.setSavingCallback(new SaveAsDialog.SavingCallback() {
-
-            @Override
-            public void onBeginSave() {
-                savingInProgress = true;
-                invalidateOptionsMenu();
-            }
-
-            @Override
-            public void onEndSave(String fileName) {
-                savingInProgress = false;
-                invalidateOptionsMenu();
-            }
-
-            @Override
-            public void onError() {
-                savingInProgress = false;
-                invalidateOptionsMenu();
-            }
-        });
-        dlg.show();
-    }
-
 }

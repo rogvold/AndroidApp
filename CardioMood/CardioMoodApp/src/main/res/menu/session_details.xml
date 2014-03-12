@@ -4,13 +4,4 @@
         cardiomood:showAsAction="always"
         android:icon="@drawable/ic_action_edit"
         android:title="@string/menu_rename" />
-    <item android:id="@+id/menu_save_as"
-        cardiomood:showAsAction="ifRoom"
-        android:icon="@drawable/ic_action_save"
-        android:title="@string/menu_save_as"
-        android:titleCondensed="@string/menu_save_as_short" />
-    <item android:id="@+id/menu_refresh"
-        cardiomood:showAsAction="ifRoom"
-        android:icon="@drawable/ic_action_refresh"
-        android:title="@string/menu_refresh" />
 </menu>

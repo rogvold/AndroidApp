@@ -1,6 +1,13 @@
 package com.cardiomood.android.fragments.details;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.ContentLoadingProgressBar;
@@ -18,12 +25,14 @@ import android.widget.TextView;
 import com.cardiomood.android.R;
 import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.model.HeartRateSession;
+import com.cardiomood.android.dialogs.SaveAsDialog;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.math.HeartRateMath;
 import com.shinobicontrols.charts.Axis;
 import com.shinobicontrols.charts.ChartView;
 import com.shinobicontrols.charts.ShinobiChart;
 
+import java.io.File;
 import java.text.DateFormat;
 
 /**
@@ -38,6 +47,7 @@ public abstract class AbstractSessionReportFragment extends Fragment {
     private Axis xAxis;
     private Axis yAxis;
     private long sessionId;
+    private boolean savingInProgress = false;
 
     // Components in this fragment view:
     private ScrollView scrollView;
@@ -45,6 +55,7 @@ public abstract class AbstractSessionReportFragment extends Fragment {
     private ContentLoadingProgressBar progress;
     private TextView sessionName;
     private TextView sessionDate;
+    private ChartView chartView;
     private ShinobiChart chart;
     private FrameLayout topCustomSection;
     private FrameLayout bottomCustomSection;
@@ -95,7 +106,9 @@ public abstract class AbstractSessionReportFragment extends Fragment {
         sessionName = (TextView) v.findViewById(R.id.session_title);
         sessionDate = (TextView) v.findViewById(R.id.session_date);
 
-        chart = ((ChartView) v.findViewById(R.id.chart)).getShinobiChart();
+        chartView = (ChartView) v.findViewById(R.id.chart);
+        chartView.setDrawingCacheEnabled(true);
+        chart = chartView.getShinobiChart();
         chart.setLicenseKey(ConfigurationConstants.SHINOBI_CHARTS_API_KEY);
 
         int topCustomLayoutId = getTopCustomLayoutId();
@@ -134,10 +147,20 @@ public abstract class AbstractSessionReportFragment extends Fragment {
     }
 
     @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        MenuItem item = menu.findItem(R.id.menu_save_as);
+        item.setEnabled(! savingInProgress);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_refresh:
                 refresh();
+                return true;
+            case R.id.menu_save_as:
+                showSaveAsDialog();
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -174,6 +197,73 @@ public abstract class AbstractSessionReportFragment extends Fragment {
     public ShinobiChart getChart() {
         return chart;
     }
+
+    private void showSaveAsDialog() {
+        SaveAsDialog dlg = new SaveAsDialog(getActivity(), sessionId, scrollView);
+        dlg.setTitle(R.string.save_as_dlg_title);
+        dlg.setSavingCallback(new SaveAsDialog.SavingCallback() {
+
+            @Override
+            public void onBeginSave() {
+                savingInProgress = true;
+                getActivity().invalidateOptionsMenu();
+            }
+
+            @Override
+            public void onEndSave(String fileName) {
+                savingInProgress = false;
+                getActivity().invalidateOptionsMenu();
+
+                if (fileName == null) {
+                    return;
+                }
+
+                if (!fileName.toLowerCase().endsWith(".png")) {
+                    // saved as not *.png
+                    return;
+                }
+
+                Context context = getActivity();
+                if (context == null)
+                    return;
+
+                // add item to notification
+                Intent intent = new Intent();
+                intent.setAction(Intent.ACTION_VIEW);
+                File file = new File(fileName);
+                intent.setDataAndType(Uri.fromFile(file), "image/png");
+
+                PendingIntent pIntent = PendingIntent.getActivity(context, 0, intent, 0);
+
+                Notification.Builder builder = new Notification.Builder(context);
+                builder.setContentIntent(pIntent)
+                        .setSmallIcon(R.drawable.ic_action_save)
+                        .setTicker(getText(R.string.measurement_saved_notification_text))
+                        .setWhen(System.currentTimeMillis())
+                        .setAutoCancel(true)
+                        .setContentTitle(getText(R.string.measurement_saved_notification_title))
+                        .setContentText(getText(R.string.measurement_saved_notification_text));
+
+                NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+                if(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                    // build notification for HoneyComb to ICS
+                    notificationManager.notify(1, builder.getNotification());
+                } if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                    // Notification for Jellybean and above
+                    notificationManager.notify(1, builder.build());
+                }
+            }
+
+            @Override
+            public void onError() {
+                savingInProgress = false;
+                getActivity().invalidateOptionsMenu();
+            }
+        });
+        dlg.show();
+    }
+
 
     protected abstract Axis getXAxis();
     protected abstract Axis getYAxis();
@@ -216,14 +306,6 @@ public abstract class AbstractSessionReportFragment extends Fragment {
             else sessionDate.setVisibility(View.GONE);
             displayData(math);
             hideProgress();
-        }
-
-        public HeartRateSessionDAO getSessionDAO() {
-            return sessionDAO;
-        }
-
-        public void setSessionDAO(HeartRateSessionDAO sessionDAO) {
-            this.sessionDAO = sessionDAO;
         }
 
         public String getName() {

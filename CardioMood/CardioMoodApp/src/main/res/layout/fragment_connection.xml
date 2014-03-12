@@ -26,7 +26,7 @@
 
                 <ImageView
                     android:layout_width="wrap_content"
-                    android:layout_height="100sp"
+                    android:layout_height="80dp"
                     android:layout_weight="1"
                     android:src="@drawable/img_cardiomood_logo"
                     android:scaleType="centerInside"/>
@@ -126,7 +126,7 @@
 
                 <ImageView
                     android:layout_width="wrap_content"
-                    android:layout_height="100sp"
+                    android:layout_height="80dp"
                     android:layout_weight="1"
                     android:src="@drawable/img_cardiomood_logo"
                     android:scaleType="centerInside"/>

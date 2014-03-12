@@ -1,7 +1,10 @@
 package com.cardiomood.data;
 
+import android.content.Context;
+import android.os.AsyncTask;
 import android.util.Log;
 
+import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.data.async.ServerResponseCallback;
 import com.cardiomood.data.async.ServerResponseCallbackRetry;
@@ -298,7 +301,7 @@ public class DataServiceHelper {
                 throw new IllegalStateException("Not signed in.");
             }
         } catch (Exception ex) {
-            Log.w(TAG, "deleteSession() -> failed with an exception", ex);
+            Log.w(TAG, "appendDataToSession() -> failed with an exception", ex);
             return new JsonResponse<String>(new JsonError("Service error: " + ex.getLocalizedMessage(), JsonError.SERVICE_ERROR));
         }
     }
@@ -321,6 +324,28 @@ public class DataServiceHelper {
         String login = getEmail();
         String password = getPassword();
         login(login, password, null);
+    }
+
+    public void checkInternetAvailable(Context context, final ServerResponseCallback<Boolean> callback) {
+        if (callback == null) {
+            // nothing to do
+            return;
+        }
+        new AsyncTask() {
+            @Override
+            protected Object doInBackground(Object[] params) {
+                return CommonTools.isNetworkAvailable((Context) params[0]);
+            }
+
+            @Override
+            protected void onPostExecute(Object o) {
+                if (callback != null) {
+                    if (o != null)
+                        callback.onResult((Boolean) o);
+                    else callback.onResult(false);
+                }
+            }
+        }.execute(context);
     }
 
 

@@ -193,7 +193,6 @@ public class ConnectionFragment extends Fragment {
             getActivity().registerReceiver(dataReceiver, makeGattUpdateIntentFilter());
             receiverRegistered = true;
         }
-        //unlimitedLength = mPrefHelper.getBoolean(ConfigurationConstants.MEASUREMENT_UNLIMITED_LENGTH);
         updateView();
     }
 
@@ -350,7 +349,6 @@ public class ConnectionFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        Log.d(TAG, "onCreateOptionsMenu()");
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_connection, menu);
     }
@@ -377,7 +375,7 @@ public class ConnectionFragment extends Fragment {
     }
 
     private void openMonitor() {
-        Toast.makeText(getActivity(), "This feature will be available soon.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(), R.string.this_feature_will_be_available_soon, Toast.LENGTH_SHORT).show();
         //startActivity(new Intent(getActivity(), MonitoringActivity.class));
     }
 

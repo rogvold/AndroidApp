@@ -1,5 +1,5 @@
 <h3>CardioMood</h3>
-Version 1.1.4<br>
+Version 1.2<br>
 Copyright 2013-2014<br/>
 <br/>
 <b><a href="http://goo.gl/ZLmHhJ">www.cardiomood.com</a></b><br><br>
