@@ -320,7 +320,7 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
                 for (HeartRateSession session : sessions) {
                     synchronizeSession(session);
                     progress++;
-                    publishProgress("Sending data... " + Math.round(100.0f * progress / sessions.size()) + "%");
+                    publishProgress(context.getString(R.string.progress_sending_data) +" " + Math.round(100.0f * progress / sessions.size()) + "%");
                 }
 
                 progress = 0;
@@ -332,7 +332,7 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
                     for (CardioSession cardioSession : cardioSessions) {
                         synchronizeCardioSession(cardioSession);
                         progress++;
-                        publishProgress("Receiving data... " + Math.round(100.0f * progress / cardioSessions.size()) + "%");
+                        publishProgress(context.getText(R.string.progress_receiving_data) + " " + Math.round(100.0f * progress / cardioSessions.size()) + "%");
                     }
                 }
             } catch (Exception ex) {

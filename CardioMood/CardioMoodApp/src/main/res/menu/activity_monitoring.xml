@@ -8,14 +8,14 @@
         android:title="-"/>
 
     <item android:id="@+id/menu_stop_monitoring"
-        android:title="Stop Measurement"
-        android:titleCondensed="Stop"
+        android:title="@string/menu_stop_measurement"
+        android:titleCondensed="@string/menu_stop_measurement_condensed"
         cardiomood:showAsAction="always"
         android:visible="true"/>
 
     <item android:id="@+id/menu_start_monitoring"
-        android:title="Start Measurement"
-        android:titleCondensed="Start"
+        android:title="@string/menu_start_measurement"
+        android:titleCondensed="@string/menu_start_measurement_condensed"
         cardiomood:showAsAction="always"
         android:visible="false"/>
 

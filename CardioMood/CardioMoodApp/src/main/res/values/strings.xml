@@ -126,5 +126,21 @@
     <string name="sync_condensed">Sync</string>
     <string name="this_feature_will_be_available_soon">This feature will be available soon.</string>
     <string name="disclaimer_text">In order to provide our services,  CardioMood may need to process your private data behind the scenes.\nYour private data will never be shown or disclosed to any third party without your permission or explicit request.</string>
+    <string name="progress_sending_data">Sending data...</string>
+    <string name="progress_receiving_data">Receiving data...</string>
+    <string name="hint_count_limit">Heart beats limit</string>
+    <string name="hint_time_limit">Time limit (seconds)</string>
+    <string name="specify_your_custom_limit">Specify your custom limit:</string>
+    <string name="time_limit">Time limit:</string>
+    <string name="measurement_options">Measurement options:</string>
+    <string name="heart_beats_collected">Heart Beats</string>
+    <string name="time_elapsed">Time elapsed</string>
+    <string name="you_can_report_a_bug_or">You can also report a bug or send us a feature request.</string>
+    <string name="please_rate_our_app">Please, rate our app:</string>
+    <string name="progress_loading">Loading...</string>
+    <string name="menu_stop_measurement">Stop measurement</string>
+    <string name="menu_start_measurement">Start measurement</string>
+    <string name="menu_stop_measurement_condensed">Stop</string>
+    <string name="menu_start_measurement_condensed">Start</string>
 
 </resources>

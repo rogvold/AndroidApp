@@ -5,7 +5,6 @@ import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Html;
-import android.text.util.Linkify;
 import android.widget.TextView;
 
 import com.cardiomood.android.R;
@@ -22,28 +21,23 @@ public class WhatsNewDialog extends Dialog {
 
     private static final String TAG = WhatsNewDialog.class.getSimpleName();
 
-    public static final String CONFIG_SHOW_DIALOG_ON_STARTUP = "app.whats_new.show_on_startup_v9";
+    public static final String CONFIG_SHOW_DIALOG_ON_STARTUP = "app.whats_new.show_on_startup_v10";
 
     private Context mContext;
 
     public WhatsNewDialog(Context context) {
-        super(context, android.R.style.Theme_Holo_Dialog);
+        super(context, android.R.style.Theme_Holo_Light_Dialog);
         mContext = context;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.dialog_whats_new);
-        TextView tv = (TextView) findViewById(R.id.info_text);
-        tv.setText(Html.fromHtml(readRawTextFile(R.raw.info)));
-        tv.setLinkTextColor(Color.WHITE);
-        Linkify.addLinks(tv, Linkify.ALL);
 
-        tv = (TextView) findViewById(R.id.whats_new_text);
+        TextView tv = (TextView) findViewById(R.id.whats_new_text);
         tv.setText(Html.fromHtml(readRawTextFile(R.raw.whats_new)));
-        tv.setLinkTextColor(Color.WHITE);
+        tv.setLinkTextColor(Color.RED);
     }
 
     public String readRawTextFile(int id) {

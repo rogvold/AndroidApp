@@ -33,6 +33,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
     private Toast toast;
     private long lastBackPressTime = 0;
+    private boolean whatsNewDialogShown = false;
 
     private PreferenceHelper mPrefHelper;
 
@@ -144,6 +145,9 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     }
 
     private void showWhatsNewDialog() {
+        if (whatsNewDialogShown)
+            return;
+        whatsNewDialogShown = true;
         Dialog dialog = new WhatsNewDialog(this);
         dialog.setTitle(R.string.whats_new_dialog_title);
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {

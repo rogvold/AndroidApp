@@ -1,34 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:stretchColumns="*">
+    android:orientation="vertical"
+    android:padding="8dp">
 
-    <TableRow android:visibility="gone">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
         <ImageView
-            android:layout_width="100sp"
-            android:layout_height="100sp"
-            android:layout_gravity="left|center"
-            android:src="@drawable/ic_splash_logo" />
-
-        <TextView
-            android:id="@+id/info_text"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_gravity="center"
-            android:textSize="8sp"
-            android:gravity="center" />
-    </TableRow>
-    <TableRow>
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:src="@drawable/img_cardiomood_logo"
+            android:scaleType="centerInside"/>
         <TextView
-            android:id="@+id/whats_new_text"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="8dip"
-            android:layout_span="2"
-            android:textColor="#cccccc"
-            android:textSize="16sp" />
-    </TableRow>
+            android:layout_weight="8"
+            android:layout_gravity="top"
+            android:textSize="20dp"
+            android:layout_marginLeft="-32dp"
+            android:textStyle="bold"
+            android:text="1.2"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_height="300dp"
+        android:layout_width="match_parent">
+        <ScrollView android:scrollbars="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/whats_new_text"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dip"
+                android:textSize="16sp" />
+        </ScrollView>
+    </LinearLayout>
 
-</TableLayout>
+</LinearLayout>

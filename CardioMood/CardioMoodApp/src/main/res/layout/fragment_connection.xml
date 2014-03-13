@@ -35,7 +35,7 @@
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Measurement options:"
+                    android:text="@string/measurement_options"
                     android:textStyle="bold"/>
 
                 <Spinner
@@ -55,7 +55,7 @@
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Time limit:" />
+                        android:text="@string/time_limit" />
                     <Spinner
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -92,18 +92,18 @@
                         android:textAppearance="?android:attr/textAppearanceMedium"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Specify your custom limit:" />
+                        android:text="@string/specify_your_custom_limit" />
                     <EditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:id="@+id/custom_time_limit"
-                        android:hint="Time limit"
+                        android:hint="@string/hint_time_limit"
                         android:inputType="numberDecimal"/>
                     <EditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:id="@+id/custom_count_limit"
-                        android:hint="Count limit"
+                        android:hint="@string/hint_count_limit"
                         android:inputType="number"/>
                 </LinearLayout>
 
@@ -146,7 +146,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
                             android:textAppearance="?android:attr/textAppearanceMedium"
-                            android:text="Intervals collected" />
+                            android:text="@string/heart_beats_collected" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -166,7 +166,7 @@
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
                             android:textAppearance="?android:attr/textAppearanceMedium"
-                            android:text="Time elapsed" />
+                            android:text="@string/time_elapsed" />
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"

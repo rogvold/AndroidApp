@@ -160,6 +160,7 @@ public class LoginActivity extends Activity implements ConfigurationConstants {
             focusView = mEmailView;
             cancel = true;
         } else if (!mEmail.contains("@")) {
+            // TODO: validate email
             mEmailView.setError(getString(R.string.error_invalid_email));
             focusView = mEmailView;
             cancel = true;
@@ -235,6 +236,8 @@ public class LoginActivity extends Activity implements ConfigurationConstants {
             focusView = mEmailView;
             cancel = true;
         } else if (!mEmail.contains("@")) {
+            // TODO: validate email
+            // ^[-a-z0-9!#$%&'*+/=?^_`{|}~]+(?:\.[-a-z0-9!#$%&'*+/=?^_`{|}~]+)*@(?:[a-z0-9]([-a-z0-9]{0,61}[a-z0-9])?\.)*(?:aero|arpa|asia|biz|cat|com|coop|edu|gov|info|int|jobs|mil|mobi|museum|name|net|org|pro|tel|travel|[a-z][a-z])$
             mEmailView.setError(getString(R.string.error_invalid_email));
             focusView = mEmailView;
             cancel = true;

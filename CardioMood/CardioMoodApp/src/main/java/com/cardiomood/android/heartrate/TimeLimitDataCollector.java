@@ -1,7 +1,5 @@
 package com.cardiomood.android.heartrate;
 
-import android.util.Log;
-
 /**
  * Created by danon on 05.03.14.
  */
@@ -22,18 +20,6 @@ public class TimeLimitDataCollector extends AbstractDataCollector {
     @Override
     public boolean needToStopCollecting() {
         return getDuration() > timeLimit;
-    }
-
-    @Override
-    public void onCompleteCollecting() {
-        super.onCompleteCollecting();
-
-        // save data :)
-        StringBuilder sb = new StringBuilder("rrIntervals:");
-        double rr[] = math.getRrIntervals();
-        for (double r: rr)
-            sb.append(" ").append(r);
-        Log.d(TAG, sb.toString());
     }
 
     @Override
