@@ -142,5 +142,8 @@
     <string name="menu_start_measurement">Start measurement</string>
     <string name="menu_stop_measurement_condensed">Stop</string>
     <string name="menu_start_measurement_condensed">Start</string>
+    <string name="spectrum_chart_description" />
+    <string name="historgam_description">Histogram shows distribution of R-R intervals by various interval ranges. It allows to see how wide is an amplitude of your heart beats.</string>
+    <string name="scatterogram_description">Scattergram is a graphical representation of R-R intervlas distribution (current is on X and previous is on Y). It allows to measure activity of sympathicus.                          Points at scattergram can be visually combined into an ellipse.</string>
 
 </resources>

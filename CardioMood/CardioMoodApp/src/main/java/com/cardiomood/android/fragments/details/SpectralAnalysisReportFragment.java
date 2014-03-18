@@ -2,6 +2,7 @@ package com.cardiomood.android.fragments.details;
 
 import android.os.Bundle;
 
+import com.cardiomood.android.R;
 import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
 import com.cardiomood.android.db.model.HeartRateDataItem;
 import com.cardiomood.android.db.model.HeartRateSession;
@@ -100,4 +101,8 @@ public class SpectralAnalysisReportFragment extends AbstractSessionReportFragmen
         chart.redrawChart();
     }
 
+    @Override
+    protected int getBottomCustomLayoutId() {
+        return R.layout.fragment_spectral_analysis_report_bottom;
+    }
 }

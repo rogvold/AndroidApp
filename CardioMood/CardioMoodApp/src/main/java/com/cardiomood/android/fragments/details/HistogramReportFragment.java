@@ -1,5 +1,6 @@
 package com.cardiomood.android.fragments.details;
 
+import com.cardiomood.android.R;
 import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
 import com.cardiomood.android.db.model.HeartRateDataItem;
 import com.cardiomood.android.db.model.HeartRateSession;
@@ -105,4 +106,8 @@ public class HistogramReportFragment extends AbstractSessionReportFragment {
         return series2;
     }
 
+    @Override
+    protected int getBottomCustomLayoutId() {
+        return R.layout.fragment_histogram_report_bottom;
+    }
 }

@@ -37,7 +37,7 @@ public class Histogram {
         }
 
         int index = 0;
-        int height = -1;
+        height = -1;
         for (int i=0; i<count.length; i++) {
             if (count[i] > height) {
                 height = count[i];

@@ -7,6 +7,7 @@ import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.model.HeartRateDataItem;
 import com.cardiomood.android.db.model.HeartRateSession;
 import com.cardiomood.android.db.model.SessionStatus;
+import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.data.CardioMoodServer;
@@ -124,6 +125,7 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
             // call listener
             if (listener != null)
                 listener.onDataSaved(currentSession);
+            CommonTools.vibrate(service, 1000);
         }
     }
 
@@ -167,6 +169,7 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
     }
 
     private void sendPendingData() {
+        // todo: fix possible lost of data!
         cardioSession.setDataItems(new ArrayList<CardioDataItem>(pendingData));
         dataService.appendDataToSession(cardioSession, new ServerResponseCallbackRetry<String>() {
             @Override

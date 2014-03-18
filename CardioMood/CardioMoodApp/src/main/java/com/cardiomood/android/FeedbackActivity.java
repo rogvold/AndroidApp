@@ -18,6 +18,8 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.cardiomood.android.db.dao.HeartRateSessionDAO;
+import com.cardiomood.android.tools.PreferenceHelper;
+import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -62,6 +64,7 @@ public class FeedbackActivity extends Activity {
         private EditText userMessage;
         private Spinner feedbackType;
         private RatingBar userRating;
+        private PreferenceHelper prefHelper;
 
         public FeedbackFragment() {
         }
@@ -70,6 +73,7 @@ public class FeedbackActivity extends Activity {
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             setHasOptionsMenu(true);
+            prefHelper = new PreferenceHelper(getActivity(), true);
         }
 
         @Override
@@ -118,6 +122,7 @@ public class FeedbackActivity extends Activity {
             feedback.put("user_feedback_type", feedbackType.getSelectedItem().toString());
             feedback.put("user_message", userMessage.getText().toString());
             feedback.put("sessions_number", new HeartRateSessionDAO().getCount());
+            feedback.put("user_email", prefHelper.getString(ConfigurationConstants.USER_EMAIL_KEY));
 
             feedback.saveInBackground(new SaveCallback() {
                 @Override

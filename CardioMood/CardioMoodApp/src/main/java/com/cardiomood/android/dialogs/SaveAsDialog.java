@@ -18,6 +18,7 @@ import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
 import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.model.HeartRateDataItem;
 import com.cardiomood.android.db.model.HeartRateSession;
+import com.cardiomood.android.fragments.details.TextReport;
 import com.flurry.android.FlurryAgent;
 
 import java.io.File;
@@ -168,13 +169,22 @@ public class SaveAsDialog extends Dialog {
                 if (name == null || name.trim().isEmpty()) {
                     name = mContext.getText(R.string.dafault_measurement_name) + " #" + sessionId;
                 }
-                pw.println(name);
-                if (session.getDescription() != null && !session.getDescription().isEmpty())
-                    pw.println(session.getDescription());
-                pw.println("Date: " + session.getDateStarted());
-                pw.println();
-                pw.printf("%4s  %-14s  %-4s %-3s%n", "n", "timestamp", "rr", "bpm");
+                TextReport.Builder reportBuilder = new TextReport.Builder();
+                if (session.getDateStarted() != null)
+                    reportBuilder.setStartDate(session.getDateStarted());
+                else reportBuilder.setStartDate(new Date());
+                reportBuilder.setEndDate(session.getDateEnded());
+                reportBuilder.setTag(name);
                 List<HeartRateDataItem> items = new HeartRateDataItemDAO().getItemsBySessionId(sessionId);
+                double rr[] = new double[items.size()];
+                for (int i=0; i<items.size(); i++)
+                    rr[i] = items.get(i).getRrTime();
+                reportBuilder.setRRIntervals(rr);
+                pw.println(reportBuilder.build().toString());
+                pw.println();
+                pw.flush();
+                pw.println("Source data:");
+                pw.printf("%4s  %-14s  %-4s %-3s%n", "n", "timestamp", "rr", "bpm");
                 int i = 1;
                 for (HeartRateDataItem item: items) {
                     pw.printf("%4d  %14d  %4d %3d%n", i++, item.getTimeStamp().getTime(), (int)item.getRrTime(), item.getHeartBeatsPerMinute());

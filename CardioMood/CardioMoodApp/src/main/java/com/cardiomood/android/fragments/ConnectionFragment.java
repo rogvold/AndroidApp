@@ -496,15 +496,17 @@ public class ConnectionFragment extends Fragment {
             case 2:
                 switch (countLimitSpinner.getSelectedItemPosition()) {
                     case 0: return new IntervalLimitDataCollector(mBluetoothLeService, 100);
-                    case 1: return new IntervalLimitDataCollector(mBluetoothLeService, 200);
-                    case 2: return new IntervalLimitDataCollector(mBluetoothLeService, 300);
-                    case 3: return new IntervalLimitDataCollector(mBluetoothLeService, 400);
-                    case 4: return new IntervalLimitDataCollector(mBluetoothLeService, 500);
-                    case 5: return new IntervalLimitDataCollector(mBluetoothLeService, 1000);
-                    case 6: return new IntervalLimitDataCollector(mBluetoothLeService, 2000);
-                    case 7: return new IntervalLimitDataCollector(mBluetoothLeService, 5000);
-                    case 8: return new IntervalLimitDataCollector(mBluetoothLeService, 10000);
-                    case 9: return new IntervalLimitDataCollector(mBluetoothLeService, 20000);
+                    case 1: return new IntervalLimitDataCollector(mBluetoothLeService, 150);
+                    case 2: return new IntervalLimitDataCollector(mBluetoothLeService, 200);
+                    case 3: return new IntervalLimitDataCollector(mBluetoothLeService, 250);
+                    case 4: return new IntervalLimitDataCollector(mBluetoothLeService, 300);
+                    case 5: return new IntervalLimitDataCollector(mBluetoothLeService, 400);
+                    case 6: return new IntervalLimitDataCollector(mBluetoothLeService, 500);
+                    case 7: return new IntervalLimitDataCollector(mBluetoothLeService, 1000);
+                    case 8: return new IntervalLimitDataCollector(mBluetoothLeService, 2000);
+                    case 9: return new IntervalLimitDataCollector(mBluetoothLeService, 5000);
+                    case 10: return new IntervalLimitDataCollector(mBluetoothLeService, 10000);
+                    case 11: return new IntervalLimitDataCollector(mBluetoothLeService, 20000);
                 }
                 break;
             case 3:

@@ -15,4 +15,39 @@
         <item>FEMALE</item>
         <item>NOT_SPECIFIED</item>
     </string-array>
+    <string-array name="measurement_limit_types">
+        <item>Без ограничения длительности</item>
+        <item>Ограничение по времени</item>
+        <item>Ограничение по числу интервалов</item>
+        <item>Произвольные ограничения</item>
+    </string-array>
+
+    <string-array name="count_limit_types">
+        <item>100 интервалов</item>
+        <item>150 интервалов</item>
+        <item>200 интервалов</item>
+        <item>250 интервалов</item>
+        <item>300 интервалов</item>
+        <item>400 интервалов</item>
+        <item>500 интервалов</item>
+        <item>1000 интервалов</item>
+        <item>2000 интервалов</item>
+        <item>5000 интервалов</item>
+        <item>10000 интервалов</item>
+        <item>20000 интервалов</item>
+    </string-array>
+
+    <string-array name="time_limit_types">
+        <item>1 минута</item>
+        <item>2 минуты</item>
+        <item>3 минуты</item>
+        <item>5 минут</item>
+        <item>10 минут</item>
+        <item>30 минут</item>
+        <item>1 час</item>
+        <item>2 часа</item>
+        <item>5 часов</item>
+        <item>12 часов</item>
+        <item>24 часа</item>
+    </string-array>
 </resources>

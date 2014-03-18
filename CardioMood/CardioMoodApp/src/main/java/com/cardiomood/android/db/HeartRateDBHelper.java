@@ -162,6 +162,7 @@ public class HeartRateDBHelper extends SQLiteOpenHelper implements HeartRateDBCo
         session.setDateStarted(new Date(ts));
         session.setDateEnded(new Date(ts + length));
         session.setStatus(SessionStatus.SYNCHRONIZED);
+        session.setExternalId(-1L);
         session.setName(title);
 
         return sessionDAO.insert(session, sampleItems);

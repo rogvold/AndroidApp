@@ -2,7 +2,6 @@ package com.cardiomood.android;
 
 import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -32,10 +31,13 @@ import com.cardiomood.android.fragments.details.HistogramReportFragment;
 import com.cardiomood.android.fragments.details.OveralSessionReportFragment;
 import com.cardiomood.android.fragments.details.ScatterogramReportFragment;
 import com.cardiomood.android.fragments.details.SpectralAnalysisReportFragment;
+import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.flurry.android.FlurryAgent;
 
 import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 
 public class SessionDetailsActivity extends ActionBarActivity implements ActionBar.TabListener {
@@ -67,14 +69,14 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
     private int postRenderAction;
     private HeartRateSessionDAO sessionDAO;
     private HeartRateDataItemDAO hrDAO;
-    private ProgressDialog pDialog;
-
-    private boolean savingInProgress = false;
+    private PreferenceHelper pHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session_details);
+
+        pHelper = new PreferenceHelper(this);
 
         ActivityManager am = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         if (am.getLargeMemoryClass() < 10) {
@@ -200,7 +202,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
 
         @Override
         public int getCount() {
-            // Show 3 total pages.
+            // Show 4 total pages.
             return 4;
         }
 
@@ -315,5 +317,22 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem item = menu.findItem(R.id.menu_rename);
+        item.setEnabled(!isPredefinedSession(sessionId));
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    private boolean isPredefinedSession(long sessionId) {
+        List<Long> ids = Arrays.asList(
+                pHelper.getLong(ConfigurationConstants.DB_GOOD_SESSION_ID),
+                pHelper.getLong(ConfigurationConstants.DB_BAD_SESSION_ID),
+                pHelper.getLong(ConfigurationConstants.DB_ATHLETE_SESSION_ID),
+                pHelper.getLong(ConfigurationConstants.DB_STRESSED_SESSION_ID)
+        );
+        return ids.contains(sessionId);
     }
 }

@@ -1,6 +1,10 @@
 package com.cardiomood.math;
 
 import com.cardiomood.math.histogram.Histogram;
+import com.cardiomood.math.parameters.AbstractSingleValue;
+import com.cardiomood.math.parameters.PNN50Value;
+import com.cardiomood.math.parameters.RMSSDValue;
+import com.cardiomood.math.parameters.SDNNValue;
 import com.cardiomood.math.window.DataWindow;
 
 import org.apache.commons.math3.stat.StatUtils;
@@ -10,6 +14,10 @@ import org.apache.commons.math3.util.ResizableDoubleArray;
 public class HeartRateMath {
 
     public static final double DEFAULT_WINDOW_STEP = 1000;
+
+    public static final AbstractSingleValue SDNN = new SDNNValue();
+    public static final AbstractSingleValue RMSSD = new RMSSDValue();
+    public static final AbstractSingleValue PNN50 = new PNN50Value();
 
     private DoubleArray time = null;
     private DoubleArray rrIntervals = null;
@@ -77,5 +85,17 @@ public class HeartRateMath {
 
     public int getCount() {
         return this.rrIntervals.getNumElements();
+    }
+
+    public double getSDNN() {
+        return SDNN.evaluate(getTime(), getRrIntervals());
+    }
+
+    public double getRMSSD() {
+        return RMSSD.evaluate(getTime(), getRrIntervals());
+    }
+
+    public double getPNN50() {
+        return PNN50.evaluate(getTime(), getRrIntervals());
     }
 }

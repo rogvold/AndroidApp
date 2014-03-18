@@ -24,7 +24,9 @@
 
     <string-array name="count_limit_types">
         <item>100 intervals</item>
+        <item>150 intervals</item>
         <item>200 intervals</item>
+        <item>250 intervals</item>
         <item>300 intervals</item>
         <item>400 intervals</item>
         <item>500 intervals</item>

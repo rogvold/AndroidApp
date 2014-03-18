@@ -3,6 +3,7 @@ package com.cardiomood.android.fragments.details;
 import android.graphics.Color;
 import android.os.Bundle;
 
+import com.cardiomood.android.R;
 import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
 import com.cardiomood.android.db.model.HeartRateDataItem;
 import com.cardiomood.android.db.model.HeartRateSession;
@@ -103,5 +104,10 @@ public class ScatterogramReportFragment extends AbstractSessionReportFragment {
         chart.addSeries(series2);
 
         chart.redrawChart();
+    }
+
+    @Override
+    protected int getBottomCustomLayoutId() {
+        return R.layout.fragment_scatterogram_report_bottom;
     }
 }
