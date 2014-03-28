@@ -41,5 +41,8 @@
         </activity>
         <activity android:name=".WorkoutActivity" android:label="Cardio Workout"
                   android:screenOrientation="portrait" />
+        <service
+            android:name="com.cardiomood.sport.android.system.bluetooth.CardioMoodHeartRateLeService"
+            android:enabled="true" />
     </application>
 </manifest>

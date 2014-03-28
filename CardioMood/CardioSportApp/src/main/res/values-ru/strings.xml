@@ -53,4 +53,5 @@
     <string name="stop">Остановить тренировку</string>
     <string name="profile_saved_locally">Profile has been saved.</string>
     <string name="unsupported_operation">Unsupported operation.</string>
+    <string name="select_device_to_connect">Select your Polar H7</string>
 </resources>

@@ -150,7 +150,9 @@ public class CardioSportSystem {
         activitiesIterator = activities.iterator();
 
         hrMonitor = new HeartRateMonitor(activity);
+        hrMonitor.initBLEService();
         gpsMonitor = new GPSMonitor(activity);
+
 
         hrMonitor.setCallback(hrListener);
         gpsMonitor.setListener(gpsListener);
@@ -225,8 +227,12 @@ public class CardioSportSystem {
                 Toast.makeText(getActivity(), "Please, allow access to the GPS location provider.", Toast.LENGTH_SHORT).show();
             }
             gpsMonitor.start();
-            hrMonitor.initBLEService();
-            hrMonitor.attemptConnection();
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    hrMonitor.attemptConnection();
+                }
+            });
 
             gpsDBWorker.start();
             hrDBWorker.start();
@@ -632,16 +638,6 @@ public class CardioSportSystem {
             }
             if (getStatus() == STATUS_IN_PROGRESS || getStatus() == STATUS_PAUSED) {
                 long time = System.currentTimeMillis();
-                short length = 0;
-                for (short rr: rrIntervals) {
-                    length += rr;
-                }
-                if (lastIntervalsLength + lastIntervalDate > time) {
-                    return;
-                }
-                lastIntervalDate = time;
-                lastIntervalsLength = length;
-
                 HeartRateEntity entity = new HeartRateEntity();
                 entity.setWorkoutId(getCurrentWorkoutId());
                 entity.setTimestamp(time);
@@ -650,11 +646,6 @@ public class CardioSportSystem {
                 entity.setRr(rrIntervals);
                 hrDBWorker.put(entity);
             }
-        }
-
-        @Override
-        public void onSensorLocationChange(int oldLocation, int newLocation) {
-            CardioSportSystem.this.notifyUI(MSG_HR_SENSOR_LOCATION_CHANGED, oldLocation, newLocation, null);
         }
     }
 

@@ -198,7 +198,13 @@ public class WorkoutActivity extends Activity implements ConfigurationConstants 
 
         system = new CardioSportSystem(this, workout);
         system.setUiHandler(uiHandler);
-        system.init();
+        uiHandler.postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                system.init();
+            }
+        }, 500);
 
         paceChecker = new Thread(new Runnable() {
             @Override

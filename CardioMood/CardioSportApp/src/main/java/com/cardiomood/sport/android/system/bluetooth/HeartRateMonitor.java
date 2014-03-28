@@ -1,11 +1,11 @@
 package com.cardiomood.sport.android.system.bluetooth;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothHeadset;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -13,27 +13,28 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.ParcelUuid;
-import android.os.RemoteException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cardiomood.heartrate.bluetooth.HeartRateLeService;
+import com.cardiomood.heartrate.bluetooth.LeHRMonitor;
 import com.cardiomood.sport.android.R;
-import com.cardiomood.sport.android.tools.Tools;
-import com.motorola.bluetoothle.BluetoothGatt;
-import com.motorola.bluetoothle.hrm.IBluetoothHrm;
-import com.motorola.bluetoothle.hrm.IBluetoothHrmCallback;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 public class HeartRateMonitor {
@@ -47,6 +48,9 @@ public class HeartRateMonitor {
 	public static final int INIT = -1;
 	
 	private static final String TAG = "HeartRateMonitor";
+
+    // Stops scanning after 10 seconds.
+    private static final long SCAN_PERIOD = 100000;
 	
 	// Bluetooth Intent request codes
     private static final int REQUEST_ENABLE_BT = 2;
@@ -54,23 +58,22 @@ public class HeartRateMonitor {
 	private Activity mActivity;
 	private Context mContext;
 	private Callback mCallback;
-	
-	AlertDialog alertDialog;
-	AlertDialog.Builder alert_paired;
-	private ArrayAdapter<String> mPairedDevicesArrayAdapter;
+
+    private Handler mHandler;
+    private boolean mScanning = false;
+
+    private AlertDialog alertSelectDevice;
 	ProgressDialog aDialog;
 	
 	// sensor parameters
-	private int sensorLocation = -1;
 	private int energyExpended = 0;
 	private int heartBeatsPerMinute = 0;
 	
 	private BluetoothDevice device;
-	private BluetoothAdapter bluetoothAdapter;
 	private ServiceConnection mConnection = new ServiceConnection() {
 
 		public void onServiceConnected(ComponentName className, IBinder service) {
-			hrmService = IBluetoothHrm.Stub.asInterface(service);
+			hrmService = ((HeartRateLeService.LocalBinder) service).getService();
 			bleBound = true;
 		}
 
@@ -79,91 +82,45 @@ public class HeartRateMonitor {
 			bleBound = false;
 		}
 	};
-	private boolean bleSupported = false;
 	private boolean bleBound = false;
 	private boolean leDisconnected = true;
 	boolean flag_leRcvrReg = false;
 	private int leState = INIT;
-	private IBluetoothHrm hrmService;
-	private String hrmUUID;
-	private IntentFilter filter_scan;
-	private BLECallback callback1;
+	private HeartRateLeService hrmService;
 	
 	private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
 		
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			String action = intent.getAction();
-			Log.i(TAG, action);
-			
-			if (BluetoothGatt.CONNECT_COMPLETE.equals(action)) {
-				int status = intent.getIntExtra("status", BluetoothGatt.FAILURE);
-				
-				String service = intent.getStringExtra("uuid");
-				if (status == BluetoothGatt.SUCCESS) {
-					leDisconnected = false;
-					setConnectionStatus(CONNECTED);
-					if (getSensorLocation() == -1) {
-						requestLocation();
-					}
+			final String action = intent.getAction();
+            if (LeHRMonitor.ACTION_HEART_RATE_DATA_RECEIVED.equals(action)) {
+                if (mCallback != null) {
+                    mCallback.onHRDataRecieved(intent.getIntExtra(LeHRMonitor.EXTRA_BPM, 0), 0, intent.getShortArrayExtra(LeHRMonitor.EXTRA_INTERVALS));
+                }
+                return;
+            }
+            if (LeHRMonitor.ACTION_BPM_CHANGED.equals(action)) {
+                heartBeatsPerMinute = intent.getIntExtra(LeHRMonitor.EXTRA_NEW_BPM, 0);
+                return;
+            }
+            if (LeHRMonitor.ACTION_CONNECTION_STATUS_CHANGED.equals(action)) {
+                int oldStatus = intent.getIntExtra(LeHRMonitor.EXTRA_OLD_STATUS, 0);
+                int newStatus = intent.getIntExtra(LeHRMonitor.EXTRA_NEW_STATUS, 0);
+                switch (newStatus) {
+                    case LeHRMonitor.CONNECTING_STATUS:
+                        setConnectionStatus(CONNECTING);
+                        break;
+                    case LeHRMonitor.DISCONNECTING_STATUS:
+                        setConnectionStatus(DISCONNECTING);
+                        break;
+                    case LeHRMonitor.CONNECTED_STATUS:
+                        setConnectionStatus(CONNECTED);
+                        break;
+                    default:
+                        setConnectionStatus(DISCONNECTED);
+                }
+            }
 
-				} else if (status != BluetoothGatt.SUCCESS) {
-					setConnectionStatus(DISCONNECTED);
-					leDisconnected = true;
-					try {
-						hrmService.disconnectLe(device, hrmUUID);
-					} catch (RemoteException e) {
-						//Log.e(TAG, "", e);
-					}
-				}
-		
-			} else if (action.equals(BluetoothGatt.DISCONNECT_COMPLETE)) {
-				int status = intent.getIntExtra("status", BluetoothGatt.FAILURE);
-				//String service = intent.getStringExtra("uuid");
-				if (status == BluetoothGatt.SUCCESS) {
-					setConnectionStatus(DISCONNECTED);
-					device = null;
-				} else if (status != BluetoothGatt.SUCCESS) {
-					setConnectionStatus(DISCONNECTED);
-					device = null;
-				}
-
-			}
-
-			else if ((BluetoothGatt.GET_COMPLETE).equals(action)) {
-				int status = intent
-						.getIntExtra("status", BluetoothGatt.FAILURE);
-				String service = intent.getStringExtra("uuid");// Todo
-				int length = intent.getIntExtra("length", 0);
-				if (status == BluetoothGatt.SUCCESS) {
-					if ((length >= 0) && service.equalsIgnoreCase(hrmUUID)) {
-						//Log.d(TAG, "broadcastReceiver.onReceive(): received "+length+" bytes of data");
-						byte[] data = new byte[length];
-						data = intent.getByteArrayExtra("data");
-						setSensorLocation(data[0]);
-					}
-				} else {
-					Toast.makeText(context, "Sensor query failed! ",
-							Toast.LENGTH_LONG).show();
-				}
-			} else if (action.equals(BluetoothGatt.SET_COMPLETE)) {
-				int status = intent.getIntExtra("status", BluetoothGatt.FAILURE);
-				String service = intent.getStringExtra("uuid"); // Todo
-				if (status == BluetoothGatt.SUCCESS
-						&& service.equalsIgnoreCase(hrmUUID)) {
-				} else if (status != BluetoothGatt.SUCCESS
-						&& service.equalsIgnoreCase(hrmUUID)) {
-					Toast.makeText(context, "Notification enabling failed! ",
-							Toast.LENGTH_LONG).show();
-				}
-			} else if(BluetoothHeadset.ACTION_VENDOR_SPECIFIC_HEADSET_EVENT.equals(action)) {
-//				String[] args = intent.getStringArrayExtra(BluetoothHeadset.EXTRA_VENDOR_SPECIFIC_HEADSET_EVENT_ARGS);
-//				if (args != null) {
-//					for (String arg: args) {
-//						Log.i("HeartRateMonitor", "extra_arg: args" + arg);
-//					}
-//				}
-			}
 		}
 
 	};
@@ -175,81 +132,74 @@ public class HeartRateMonitor {
 	}
 	
 	public void initBLEService() {
-		bleSupported = Tools.isBLESupported();
-		if (!bleSupported) {
-			throw new UnsupportedOperationException("This device doesn't support GATT service.");
-		} else {
-			bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-			if (bluetoothAdapter == null) {
-				throw new UnsupportedOperationException("Bluetooth adapter is not available.");
-			}
-			
-			hrmUUID = HRM.toString();
-			
-			filter_scan = new IntentFilter(BluetoothGatt.CONNECT_COMPLETE);
-			filter_scan.addAction(BluetoothGatt.DISCONNECT_COMPLETE);
-			filter_scan.addAction(BluetoothGatt.GET_COMPLETE);
-			filter_scan.addAction(BluetoothGatt.SET_COMPLETE);
-			filter_scan.addAction(BluetoothHeadset.ACTION_VENDOR_SPECIFIC_HEADSET_EVENT);
-			
-			mContext.registerReceiver(broadcastReceiver, filter_scan);
-			
-			flag_leRcvrReg = true;
-			Intent intent1 = new Intent(IBluetoothHrm.class.getName());
-			mContext.bindService(intent1, mConnection, Context.BIND_AUTO_CREATE);
-		    
-			Intent intent2 = new Intent(BluetoothGatt.ACTION_START_LE);
-			intent2.putExtra(BluetoothGatt.EXTRA_PRIMARY_UUID, hrmUUID);
-			mContext.sendBroadcast(intent2);
+        mHandler = new Handler();
 
-			if (!bluetoothAdapter.isEnabled()) {
-				Intent enableIntent = new Intent(
-						BluetoothAdapter.ACTION_REQUEST_ENABLE);
-				mActivity.startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
-			}
-			
-			callback1 = new BLECallback(hrmUUID);
-		}
+        mActivity.registerReceiver(broadcastReceiver, makeGattUpdateIntentFilter());
+        flag_leRcvrReg = true;
+
+        Intent intent1 = new Intent(CardioMoodHeartRateLeService.class.getName());
+        mActivity.bindService(intent1, mConnection, Context.BIND_AUTO_CREATE);
 	}
+
+    public boolean requestEnableBluetooth() {
+        LeHRMonitor monitor = hrmService.getMonitor();
+        if (monitor == null)
+            return false;
+        BluetoothAdapter bluetoothAdapter = monitor.getBluetoothAdapter();
+        if (bluetoothAdapter == null) {
+            Toast.makeText(mActivity, "Bluetooth adapter is not available.", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (!bluetoothAdapter.isEnabled()) {
+            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            mActivity.startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
+            return false;
+        } return true;
+    }
 
     public void attemptConnection() {
         attemptConnection(null);
     }
-	
-	public void attemptConnection(String deviceAddress) {
-		if (bluetoothAdapter != null && bluetoothAdapter.isEnabled()) {
-			showPairedDeviceSelectDialog(deviceAddress);
-		} else {
-			throw new IllegalStateException("Bluetooth is not available.");
-		}
-	}
+
+    public void attemptConnection(String deviceAddress) {
+        try {
+            try {
+                if (!requestEnableBluetooth())
+                    return;
+
+                // Check if already initialized
+                LeHRMonitor monitor = hrmService.getMonitor();
+
+                if (monitor != null && monitor.getConnectionStatus() != LeHRMonitor.INITIAL_STATUS) {
+                    hrmService.disconnect();
+                    hrmService.close();
+                }
+
+                if (!hrmService.initialize(mActivity)) {
+                    Toast.makeText(mActivity, "Failed to initialize service. Make sure your device is supported.", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Unable to initialize Bluetooth");
+                    return;
+                }
+
+                if (deviceAddress != null && !deviceAddress.isEmpty()) {
+                    hrmService.connect(deviceAddress);
+                    return;
+                }
+            } catch (Exception ex) {
+                Log.e(TAG, "Failed to initialize service.", ex);
+                Toast.makeText(mActivity, "Cannot start Bluetooth.", Toast.LENGTH_SHORT);
+                return;
+            }
+            showConnectionDialog();
+        } catch (Exception ex) {
+            Log.d(TAG, "performConnect(): "+ex);
+            ex.printStackTrace();
+        }
+    }
 
     public boolean isConnected() {
         return leState == CONNECTED;
     }
-	
-	public void requestLocation() {
-		try {
-			if(hrmService != null)
-				hrmService.getLeData(device, hrmUUID, BluetoothGatt.OPERATION_READ_SENSOR_LOCATION);
-		} catch (Exception e) {
-			//Log.e(TAG, "pull sensor location ", e);
-		}
-	}
-	
-	public int getSensorLocation() {
-		return sensorLocation;
-	}
-
-	public void setSensorLocation(int sensorLocation) {
-		int oldLocation = sensorLocation;
-		if (oldLocation != sensorLocation) {
-			this.sensorLocation = sensorLocation;
-			if (mCallback != null) {
-				mCallback.onSensorLocationChange(oldLocation, sensorLocation);
-			}
-		}
-	}
 	
 	public int getConnectionStatus() {
 		return leState;
@@ -276,13 +226,7 @@ public class HeartRateMonitor {
 			if (leState == CONNECTED) {
 				if (device != null) {
 					setConnectionStatus(DISCONNECTING);
-					try {
-						hrmService.disconnectLe(device, hrmUUID);
-					} catch (RemoteException e) {
-
-					} finally {
-                        setConnectionStatus(DISCONNECTED);
-                    }
+				    hrmService.disconnect();
 				}
 			}
 			leDisconnected = true;
@@ -295,14 +239,13 @@ public class HeartRateMonitor {
 			mContext.unregisterReceiver(broadcastReceiver);
 		}
 
-		if (hrmService != null) {
+		if (bleBound && hrmService != null) {
+            bleBound = false;
 			mContext.unbindService(mConnection);
 		}
 		
 		if (mConnection != null)
 			mConnection = null;
-		if (callback1 != null)
-			callback1 = null;
 		if (hrmService != null)
 			hrmService = null;
 	}
@@ -317,155 +260,161 @@ public class HeartRateMonitor {
 	
 	@Override
 	public void finalize() {
-		try {
-			super.finalize();
-		} catch (Throwable ex) {
-			// nothing to do here
-		} finally {
-			disconnect();
-			cleanup();
-		}
-	}
-	
-	private void parseData(int length, byte[] data) {
-		heartBeatsPerMinute = 0;
-		if (data[1] == 0) {
-			heartBeatsPerMinute = (data[0] + 256) % 256;
-		} else if (data[0] < 0) {
-			heartBeatsPerMinute = ((data[0] & 0xFF) << 8) + (data[1] & 0xFF);
-		}
-		
-		energyExpended |= data[2] & 0xFF;
-		energyExpended |= ((data[3] & 0xFF) << 8);
-		
-		//Log.i(TAG, "parseData(): energyExpended="+energyExpended);
-		short[] rrIntervals = getRRIntervals(data, length-4);
-		if (mCallback != null) {
-			mCallback.onHRDataRecieved(heartBeatsPerMinute, energyExpended, rrIntervals);
-		}
+        try {
+            super.finalize();
+        } catch (Throwable ex) {
+            // nothing to do here
+        } finally {
+            disconnect();
+            cleanup();
+        }
+    }
 
-	}
-	
-	private short[] getRRIntervals(byte[] data, int length) {
-		System.out.println(data);
-        if(length <= 0) {
-			return new short[]{};
-		}
-		short[] result = new short[length/2];
-		for(int i=4; i<length+4; i+=2) {
-			result[(i-4)/2] = (short)(((data[i+1] & 0xFF) << 8) + (data[i] & 0xFF));
-		}
-		return result;
-	}
-	
-	private void showPairedDeviceSelectDialog(String deviceAddress) {
+    @SuppressWarnings("NewApi")
+    private void showConnectionDialog() {
+        Log.d(TAG, "showConnectionDialog()");
+        final BluetoothAdapter bluetoothAdapter = hrmService.getMonitor().getCurrentBluetoothAdapter();
 
-        if (deviceAddress != null) {
-            device = bluetoothAdapter.getRemoteDevice(deviceAddress);
+        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        final View layout_listview = inflater.inflate(R.layout.device_list, (ViewGroup) mActivity.findViewById(R.id.root_device_list));
 
-            if (device != null && callback1 != null && hrmUUID != null) {
-                ((DialogInterface) alertDialog).cancel();
-                try {
-                    int status = hrmService.connectLe(device, hrmUUID,
-                            callback1);
-                    if (status == BluetoothGatt.SUCCESS) {
-                        //Log.d(TAG, "mPairedListClickListener.onItemClick(): connectLe sent out succesfully.");
-                        setConnectionStatus(CONNECTING);
-                    } else {
-                        //Log.d(TAG, "mPairedListClickListener.onItemClick(): connectLe sent out but failed.");
-                        setConnectionStatus(INIT);
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(mActivity);
+        dialogBuilder.setView(layout_listview);
+
+        final ArrayList<String> discoveredDeviceNames = new ArrayList<String>();
+        final ArrayAdapter<String> mPairedDevicesArrayAdapter = new ArrayAdapter<String>(mActivity, R.layout.device_name, discoveredDeviceNames);
+        final ListView pairedListView = (ListView) layout_listview.findViewById(R.id.paired_devices);
+        mPairedDevicesArrayAdapter.clear();
+        pairedListView.setAdapter(mPairedDevicesArrayAdapter);
+        final Set<BluetoothDevice> discoveredDevices = new HashSet<BluetoothDevice>();
+
+        Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
+        discoveredDevices.addAll(pairedDevices);
+        boolean foundDevices = false;
+        if (pairedDevices.size() > 0) {
+
+            if (pairedDevices.size() > 0) {
+
+                // foundDevices = false;
+                for (BluetoothDevice device : pairedDevices) {
+                    for (String s : IMonitors.MonitorNamesPatternLE) {
+                        Pattern p_le = Pattern.compile(s);
+                        if (device.getName().matches(p_le.pattern())) {
+                            mPairedDevicesArrayAdapter.add(device.getName()  + "\n" + device.getAddress());
+                            foundDevices = true;
+                        }
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    setConnectionStatus(DISCONNECTED);
-                    leDisconnected = true;
                 }
             }
-            return;
+
+            if (foundDevices) {
+                layout_listview.findViewById(R.id.title_paired_devices)
+                        .setVisibility(View.VISIBLE);
+            } else {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                    layout_listview.findViewById(R.id.title_paired_devices)
+                            .setVisibility(View.GONE);
+                    String noDevices = "None devices have been paired";
+                    mPairedDevicesArrayAdapter.add(noDevices);
+                }
+            }
         }
 
-		OnItemClickListener mPairedListClickListener = new OnItemClickListener() {
-			public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
-			    bluetoothAdapter.cancelDiscovery();
+        dialogBuilder.setTitle(mContext.getText(R.string.select_device_to_connect));
+        alertSelectDevice = dialogBuilder.create();
+        final Object leScanCallback = (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2)
+                ? null : new BluetoothAdapter.LeScanCallback() {
+            @Override
+            public void onLeScan(final BluetoothDevice bluetoothDevice, int rssi, byte[] scanRecord) {
+                Log.i(TAG, "onLeScan(): bluetoothDevice.address="+bluetoothDevice.getAddress());
+                mActivity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        String deviceString = bluetoothDevice.getName() + "\n" + bluetoothDevice.getAddress();
+                        for (BluetoothDevice device : discoveredDevices) {
+                            if (device.getAddress().equals(bluetoothDevice.getAddress()))
+                                return;
+                        }
+                        discoveredDevices.add(bluetoothDevice);
+                        mPairedDevicesArrayAdapter.add(deviceString);
+                        mPairedDevicesArrayAdapter.notifyDataSetChanged();
+                    }
+                });
 
-				String info = ((TextView) v).getText().toString();
-				//Log.d(TAG, "mPairedListClickListener.onItemClick(): the total length is " + info.length());
-				String deviceAddress = info.substring(info.length() - 17);
+            }
+        };
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            alertSelectDevice.setOnShowListener(new DialogInterface.OnShowListener() {
+                @Override
+                public void onShow(DialogInterface dialogInterface) {
+                    scanLeDevice(bluetoothAdapter, true, (BluetoothAdapter.LeScanCallback) leScanCallback);
+                }
+            });
+        }
+        alertSelectDevice.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                    scanLeDevice(bluetoothAdapter, false, (BluetoothAdapter.LeScanCallback) leScanCallback);
+                }
+                if (hrmService == null)
+                    return;
+                LeHRMonitor monitor = hrmService.getMonitor();
+                if (monitor == null)
+                    return;
+                int status = monitor.getConnectionStatus();
+                if (status == LeHRMonitor.READY_STATUS || status == LeHRMonitor.INITIAL_STATUS) {
+                    hrmService.close();
+                }
+            }
+        });
+        AdapterView.OnItemClickListener mPairedListClickListener = new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> av, View v, int arg2, long arg3) {
+                bluetoothAdapter.cancelDiscovery();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                    scanLeDevice(bluetoothAdapter, false, (BluetoothAdapter.LeScanCallback) leScanCallback);
+                }
 
-				device = bluetoothAdapter.getRemoteDevice(deviceAddress);
+                String info = ((TextView) v).getText().toString();
+                //Log.d(TAG, "mPairedListClickListener.onItemClick(): the total length is " + info.length());
+                String deviceAddress = info.substring(info.lastIndexOf("\n")+1);
 
-				if (device != null && callback1 != null && hrmUUID != null) {
-					((DialogInterface) alertDialog).cancel();
-					try {
-						int status = hrmService.connectLe(device, hrmUUID,
-								 callback1);
-						if (status == BluetoothGatt.SUCCESS) {
-							//Log.d(TAG, "mPairedListClickListener.onItemClick(): connectLe sent out succesfully.");
-							setConnectionStatus(CONNECTING);
-						} else {
-							//Log.d(TAG, "mPairedListClickListener.onItemClick(): connectLe sent out but failed.");
-							setConnectionStatus(INIT);
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-						setConnectionStatus(DISCONNECTED);
-						leDisconnected = true;
-					}
-				}
+                try {
+                    hrmService.connect(deviceAddress);
+                } catch (Exception ex) {
+                    Log.e(TAG, "mBluetoothLeService.connect() failed to connect to the device '" + deviceAddress+"'", ex);
+                }
+                alertSelectDevice.dismiss();
+                alertSelectDevice = null;
+            }
+        };
+        pairedListView.setOnItemClickListener(mPairedListClickListener);
+        alertSelectDevice.show();
+    }
 
-			}
-		};
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+    private void scanLeDevice(final BluetoothAdapter bluetoothAdapter, final boolean enable, final BluetoothAdapter.LeScanCallback leScanCallback) {
+        if (enable) {
+            // Stops scanning after a pre-defined scan period.
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    if (mScanning) {
+                        mScanning = false;
+                        bluetoothAdapter.stopLeScan(leScanCallback);
+                        Log.d(TAG, "LeScan stopped.");
+                    }
+                }
+            }, SCAN_PERIOD);
 
-		LayoutInflater inflater = (LayoutInflater) mActivity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		final View layout_listview = inflater.inflate(R.layout.device_list, (ViewGroup) mActivity.findViewById(R.id.root_device_list));
-
-		alert_paired = new AlertDialog.Builder(mActivity);
-		alert_paired.setView(layout_listview);
-
-		mPairedDevicesArrayAdapter = new ArrayAdapter<String>(mContext, R.layout.device_name);
-		ListView pairedListView = (ListView) layout_listview.findViewById(R.id.paired_devices);
-		mPairedDevicesArrayAdapter.clear();
-		pairedListView.setAdapter(mPairedDevicesArrayAdapter);
-		pairedListView.setOnItemClickListener(mPairedListClickListener);
-
-		Set<BluetoothDevice> pairedDevices = bluetoothAdapter
-				.getBondedDevices();
-
-		if (pairedDevices.size() > 0) {
-			boolean foundDevices = false;
-
-			if (pairedDevices.size() > 0) {
-
-				// foundDevices = false;
-				for (BluetoothDevice device : pairedDevices) {
-					for (String s : IMonitors.MonitorNamesPatternLE) {
-						Pattern p_le = Pattern.compile(s);
-						if (device.getName().matches(p_le.pattern())) {
-							mPairedDevicesArrayAdapter.add(device.getName()
-									+ "\n" + device.getAddress());
-							foundDevices = true;
-						}
-					}
-				}
-			}
-
-			if (foundDevices) {
-				layout_listview.findViewById(R.id.title_paired_devices)
-						.setVisibility(View.VISIBLE);
-			} else {
-				layout_listview.findViewById(R.id.title_paired_devices)
-						.setVisibility(View.GONE);
-				String noDevices = "None devices have been paired";
-				mPairedDevicesArrayAdapter.add(noDevices);
-			}
-		} else {
-			layout_listview.findViewById(R.id.title_paired_devices)
-					.setVisibility(View.GONE);
-			String noDevices ="None devices have been paired";
-			mPairedDevicesArrayAdapter.add(noDevices);
-		}
-        alert_paired.setTitle("Select paired device for LE connect");
-        alertDialog = alert_paired.show();
+            mScanning = true;
+            bluetoothAdapter.startLeScan(new UUID[]{UUID.fromString("0000180d-0000-1000-8000-00805f9b34fb")}, leScanCallback);
+            Log.d(TAG, "LeScan started.");
+        } else {
+            mScanning = false;
+            bluetoothAdapter.stopLeScan(leScanCallback);
+            Log.d(TAG, "LeScan stopped.");
+        }
     }
 	
 	private void leStateChanged(int oldState, int newState) {
@@ -475,36 +424,26 @@ public class HeartRateMonitor {
 	}
 	
 	public static String getStringSensorLocation(int intLocation) {
-		String strLocation = null;
 		switch (intLocation) {
 		case 0:
-			strLocation = "Other";
-			break;
+			return "Other";
 		case 1:
-			strLocation = "Chest";
-			break;
+			return "Chest";
 		case 2:
-			strLocation = "Wrist";
-			break;
+			return "Wrist";
 		case 3:
-			strLocation = "Finger";
-			break;
+			return "Finger";
 		case 4:
-			strLocation = "Hand";
-			break;
+			return "Hand";
 		case 5:
-			strLocation = "Ear Lobe";
-			break;
+			return "Ear Lobe";
 		case 6:
-			strLocation = "Foot";
-			break;
+            return "Foot";
 		case 100:
-			strLocation = "No Skin Contact";
+            return "No Skin Contact";
 		default:
-			strLocation = "Unknown";
-			break;
+			return "Unknown";
 		}
-		return strLocation;
 	}
 	
 	public static String getStatusAsText(int leState) {
@@ -532,30 +471,20 @@ public class HeartRateMonitor {
 		return strStatus;
 	}
 
+    private static IntentFilter makeGattUpdateIntentFilter() {
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(LeHRMonitor.ACTION_HEART_RATE_DATA_RECEIVED);
+        intentFilter.addAction(LeHRMonitor.ACTION_BPM_CHANGED);
+        intentFilter.addAction(LeHRMonitor.ACTION_CONNECTION_STATUS_CHANGED);
+        return intentFilter;
+    }
+
 	public static interface Callback {
 
-		void onConnectionStateChange(int oldState, int newState);
+        void onConnectionStateChange(int oldState, int newState);
 
-		void onHRDataRecieved(int heartBeatsPerMinute, int energyExpended, short[] rrIntervals);
+        void onHRDataRecieved(int heartBeatsPerMinute, int energyExpended, short[] rrIntervals);
 
-		void onSensorLocationChange(int oldLocation, int newLocation);
-		
-	}
-	
-	public class BLECallback extends IBluetoothHrmCallback.Stub {
-		private String service;
-
-		public BLECallback(String serv) {
-			service = serv;
-		}
-
-		public void indicationLeCb(BluetoothDevice device, String service, int length, byte[] data) {
-                parseData(length, data);
-		}
-
-		public void notificationLeCb(BluetoothDevice device, String service, int length, byte[] data) {
-                parseData(length, data);
-		}
-	}
+    }
 	
 }
