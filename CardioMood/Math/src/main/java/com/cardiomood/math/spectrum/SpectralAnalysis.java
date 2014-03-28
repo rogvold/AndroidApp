@@ -17,7 +17,7 @@ public class SpectralAnalysis {
     private double HF = 0;
 
     public SpectralAnalysis(double[] x, double y[]) {
-        fft = new FFT(x, y, 1.0);
+        fft = new FFT(x, y);
         power = fft.getPower();
 
         final double step = fft.toFrequency(1)*1000;

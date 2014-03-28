@@ -22,28 +22,10 @@ public class Histogram128Ext extends Histogram {
 
     private void init() {
         int height = getHeight();
-        HRVTi = ((double) values.length) / ((double) height/STEP);
+        HRVTi = ((double) values.length) / ((double) height);
         WN1 = getWN(1.0);
         WN5 = getWN(5.0);
         WN10 = getWN(10.0);
-    }
-
-    public double getWN(double percent) {
-        int target = (int) Math.floor(values.length*percent/100);
-        int min = 0;
-        int max = (int) Math.floor(getAMo()*values.length/100);
-        int x = 0;
-        do {
-            x = (max + min) / 2;
-            int c = getCountBelow(x);
-            if (c < target)
-                min = x + 1;
-            else if (c > target)
-                max = x;
-            else break;
-        } while (max > min);
-        x = (max + min) / 2;
-        return getWidthAbove(x);
     }
 
     public double getWN1() {
@@ -60,15 +42,6 @@ public class Histogram128Ext extends Histogram {
 
     public double getHRVTi() {
         return HRVTi;
-    }
-
-    private int getCountBelow(int x) {
-        int sum = 0;
-        for (int c: count) {
-            if (c < x)
-                sum += c;
-        }
-        return sum;
     }
 
 }

@@ -18,6 +18,6 @@ public class PNN50Value extends AbstractSingleValue {
                 count++;
             n++;
         }
-        return ((double) count) / (double) n;
+        return ((double) 100*count) / (double) n;
     }
 }

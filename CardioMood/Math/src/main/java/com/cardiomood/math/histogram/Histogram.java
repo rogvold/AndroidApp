@@ -20,6 +20,7 @@ public class Histogram {
     private double IAB;
     private double ARRP; // ПАПР - Adequacy ratio of regulatory processes.
     private int height;
+    private double WN4;
 
     public Histogram(double values[], double step) {
         this.values = new double[values.length];
@@ -48,7 +49,8 @@ public class Histogram {
         Mo = index*step;
         AMo = ((double) count[index]) / ((double) values.length) * 100;
         mxDMn = step*(Math.ceil(StatUtils.max(values) / step) -  Math.floor(StatUtils.min(values)/step));
-        SI = 1e6*AMo/(2*Mo*mxDMn);
+        WN4 = getWN(4);
+        SI = 1e6*AMo/(2*Mo*WN4);
         mRR = StatUtils.mean(values);
         IAB = AMo/mRR;
         ARRP = AMo/Mo;
@@ -83,6 +85,33 @@ public class Histogram {
         if (i < 0)
             return 0;
         return count[i];
+    }
+
+    public double getWN(double percent) {
+        int target = (int) Math.floor(values.length*percent/100);
+        int min = 0;
+        int max = (int) Math.floor(getAMo()*values.length/100);
+        int x = 0;
+        do {
+            x = (max + min) / 2;
+            int c = getCountBelow(x);
+            if (c < target)
+                min = x + 1;
+            else if (c > target)
+                max = x;
+            else break;
+        } while (max > min);
+        x = (max + min) / 2;
+        return getWidthAbove(x);
+    }
+
+    private int getCountBelow(int x) {
+        int sum = 0;
+        for (int c: count) {
+            if (c < x)
+                sum += c;
+        }
+        return sum;
     }
 
     public double getStep() {
@@ -123,5 +152,9 @@ public class Histogram {
 
     public int[] getCount() {
         return count.clone();
+    }
+
+    public double getWN4() {
+        return WN4;
     }
 }

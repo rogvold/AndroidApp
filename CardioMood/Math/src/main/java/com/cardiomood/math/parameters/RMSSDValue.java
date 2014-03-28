@@ -14,9 +14,11 @@ public class RMSSDValue extends AbstractSingleValue {
     @Override
     public double evaluate(double[] x, double[] y, int begin, int length) {
         double s = 0.0;
+        int n = 0;
         for (int i=begin+1; i<length+begin && i<y.length; i++) {
-            s += y[i]-y[i-1];
+            s += (y[i]-y[i-1])*(y[i]-y[i-1]);
+            n++;
         }
-        return Math.sqrt(s);
+        return Math.sqrt(s/n);
     }
 }
