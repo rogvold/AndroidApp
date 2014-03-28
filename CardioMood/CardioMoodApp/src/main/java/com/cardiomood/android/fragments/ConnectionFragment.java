@@ -752,49 +752,6 @@ public class ConnectionFragment extends Fragment {
         }
     }
 
-//    private void saveAndOpenSessionView() {
-//        final List<HeartRateDataItem> data = new ArrayList<HeartRateDataItem>(collectedData);
-//        new AsyncTask<Void, Void, Long>() {
-//            @Override
-//            protected void onPreExecute() {
-//                showSavingSessionDialog();
-//            }
-//
-//            @Override
-//            protected Long doInBackground(Void... params) {
-//                if (data.isEmpty())
-//                    return null;
-//                HeartRateSessionDAO sessionDAO = new HeartRateSessionDAO();
-//                HeartRateSession session = new HeartRateSession();
-//                session.setDateStarted(data.get(0).getTimeStamp());
-//                session.setDateEnded(new Date());
-//                session.setStatus(SessionStatus.COMPLETED);
-//                session = sessionDAO.insert(session, data);
-//                Long sessionId = session.getId();
-//
-//                Map<String, String> args = new HashMap<String, String>();
-//                args.put("sessionId", sessionId+"");
-//                args.put("totalSessions", sessionDAO.getCount()+"");
-//                FlurryAgent.logEvent("session_saved", args);
-//
-//                return sessionId;
-//            }
-//
-//            @Override
-//            protected void onPostExecute(Long sessionId) {
-//                if (sessionId == null) {
-//                    return;
-//                }
-//                Intent intent = new Intent(getActivity(), SessionDetailsActivity.class);
-//                intent.putExtra(SessionDetailsActivity.SESSION_ID_EXTRA, sessionId);
-//                intent.putExtra(SessionDetailsActivity.POST_RENDER_ACTION_EXTRA, SessionDetailsActivity.RENAME_ACTION);
-//                startActivity(intent);
-//
-//                removeSavingSessionDialog();
-//            }
-//        }.execute();
-//    }
-
     private static IntentFilter makeGattUpdateIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(LeHRMonitor.ACTION_HEART_RATE_DATA_RECEIVED);

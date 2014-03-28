@@ -8,6 +8,7 @@ public abstract class WorkerThread<T> extends Thread {
 
     public static final long TIMEOUT = 200;
     private final BlockingQueue<T> queue = new LinkedBlockingQueue();
+    private boolean finished = false;
 
     @Override
     public void run() {
@@ -17,6 +18,9 @@ public abstract class WorkerThread<T> extends Thread {
                 T item = queue.poll(TIMEOUT, TimeUnit.MILLISECONDS);
                 if (!isInterrupted() && item != null) {
                     processItem(item);
+                }
+                if (queue.isEmpty() && finished) {
+                    break;
                 }
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
@@ -35,6 +39,10 @@ public abstract class WorkerThread<T> extends Thread {
 
     public void onStop() {
 
+    }
+
+    public void finishWork() {
+        finished = true;
     }
 
     public abstract void processItem(T item);

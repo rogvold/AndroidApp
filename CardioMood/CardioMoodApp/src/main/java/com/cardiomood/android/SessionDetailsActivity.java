@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,6 +34,11 @@ import com.cardiomood.android.fragments.details.ScatterogramReportFragment;
 import com.cardiomood.android.fragments.details.SpectralAnalysisReportFragment;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
+import com.cardiomood.data.CardioMoodServer;
+import com.cardiomood.data.DataServiceHelper;
+import com.cardiomood.data.async.ServerResponseCallbackRetry;
+import com.cardiomood.data.json.CardioSession;
+import com.cardiomood.data.json.JsonError;
 import com.flurry.android.FlurryAgent;
 
 import java.text.MessageFormat;
@@ -70,6 +76,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
     private HeartRateSessionDAO sessionDAO;
     private HeartRateDataItemDAO hrDAO;
     private PreferenceHelper pHelper;
+    private DataServiceHelper dataServiceHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -141,6 +148,9 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
         }
 
         hrDAO = new HeartRateDataItemDAO();
+
+        PreferenceHelper prefHelper = new PreferenceHelper(this, true);
+        dataServiceHelper = new DataServiceHelper(CardioMoodServer.INSTANCE.getService(), prefHelper);
 
         //Toast.makeText(this, getString(R.string.loading_data_for_measurement) + sessionId, Toast.LENGTH_SHORT).show();
     }
@@ -258,8 +268,8 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
                             public void onClick(DialogInterface dialog, int id) {
                                 // get user input and set it to result
                                 // edit text
-                                HeartRateSessionDAO dao = new HeartRateSessionDAO();
-                                HeartRateSession session = dao.findById(sessionId);
+                                final HeartRateSessionDAO dao = new HeartRateSessionDAO();
+                                final HeartRateSession session = dao.findById(sessionId);
                                 String newName = userInput.getText() == null ? "" : userInput.getText().toString();
                                 newName = newName.trim();
                                 if (newName.isEmpty())
@@ -269,7 +279,27 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
                                     session.setStatus(SessionStatus.COMPLETED);
                                 dao.update(session);
                                 Toast.makeText(SessionDetailsActivity.this, R.string.session_renamed, Toast.LENGTH_SHORT).show();
+                                if (session.getExternalId() != null) {
+                                    dataServiceHelper.updateSessionInfo(session.getExternalId(), session.getName(), session.getDescription(), new ServerResponseCallbackRetry<CardioSession>() {
+                                        @Override
+                                        public void retry() {
+                                          dataServiceHelper.updateSessionInfo(sessionId, session.getName(), session.getDescription(), this);
+                                        }
 
+                                        @Override
+                                        public void onResult(CardioSession result) {
+                                            session.setStatus(SessionStatus.SYNCHRONIZED);
+                                            session.setName(result.getName());
+                                            session.setDescription(result.getDescription());
+                                            dao.merge(session);
+                                        }
+
+                                        @Override
+                                        public void onError(JsonError error) {
+                                            Log.d(TAG, "updateSessionInfo failed, error="+error);
+                                        }
+                                    });
+                                }
                                 String name = session.getName();
                                 if (name == null || name.isEmpty()) {
                                     name = getText(R.string.dafault_measurement_name) + "# " + sessionId;
