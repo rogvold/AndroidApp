@@ -66,7 +66,9 @@ public class Histogram {
                 min = i;
             max = i;
         }
-        return step*(max-min);
+        if (min < 0)
+            return 0;
+        return step*(max-min+1);
     }
       
     public int getCountFor(double min, double max) {

@@ -11,7 +11,7 @@ import org.apache.commons.math3.transform.TransformType;
 /**
  * Created by danon on 21.02.14.
  */
-public class FFT {
+public class FFT implements SpectralPowerEvaluator {
 
     private final double[] t;
     private final double[] y;
@@ -35,6 +35,7 @@ public class FFT {
         result = transform(t, y, 0, t.length, n);
     }
 
+    @Override
     public double toFrequency(int i) {
         return ((double)i)/duration*1000;
     }
@@ -43,6 +44,7 @@ public class FFT {
         return maxFreq;
     }
 
+    @Override
     public double[] getPower() {
         double[] result = new double[n/2];
         for (int i=0; i<result.length; i++) {

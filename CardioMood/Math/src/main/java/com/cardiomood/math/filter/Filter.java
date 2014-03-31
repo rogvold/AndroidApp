@@ -4,4 +4,6 @@ public interface Filter {
 
     double[] doFilter(double[] rrIntervals);
 
+    int getArtifactsCount(double[] rrIntervals);
+
 }

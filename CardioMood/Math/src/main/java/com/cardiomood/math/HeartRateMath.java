@@ -1,5 +1,6 @@
 package com.cardiomood.math;
 
+import com.cardiomood.math.filter.SimpleBayevskyFilter;
 import com.cardiomood.math.histogram.Histogram;
 import com.cardiomood.math.parameters.AbstractSingleValue;
 import com.cardiomood.math.parameters.PNN50Value;
@@ -35,6 +36,7 @@ public class HeartRateMath {
         time = new ResizableDoubleArray();
         setWindow(new DataWindow.Unlimited(0, DEFAULT_WINDOW_STEP));
 
+        rrIntervals = new SimpleBayevskyFilter().doFilter(rrIntervals);
         this.rrIntervals.addElements(rrIntervals);
 
         this.duration = 0;
