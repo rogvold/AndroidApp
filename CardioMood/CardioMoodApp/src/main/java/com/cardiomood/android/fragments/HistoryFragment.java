@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.cardiomood.android.R;
 import com.cardiomood.android.SessionDetailsActivity;
+import com.cardiomood.android.db.HeartRateDBContract;
 import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
 import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.dao.UserDAO;
@@ -96,9 +97,9 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
                 @Override
                 public void run() {
                     refresh();
+                    initial = false;
                 }
             }, 1000);
-            initial = false;
         } else {
             refresh();
         }
@@ -177,6 +178,11 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
     }
 
     private void refresh() {
+        if (initial && hasUpdatedSessions()) {
+            sync();
+            return;
+        }
+
         Activity activity = getActivity();
         if (activity == null)
             return;
@@ -191,6 +197,12 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
         undoAdapter.setAbsListView(listView);
         undoAdapter.setDeleteItemCallback(HistoryFragment.this);
         listView.setAdapter(undoAdapter);
+    }
+
+    private boolean hasUpdatedSessions() {
+        HeartRateSessionDAO sessionDAO = new HeartRateSessionDAO();
+        List<HeartRateSession> sessions = sessionDAO.getSessions(HeartRateDBContract.Sessions.COLUMN_NAME_STATUS + " = ?", new String[]{String.valueOf(SessionStatus.COMPLETED)});
+        return !sessions.isEmpty();
     }
 
     private class DeleteItemTask extends AsyncTask<Void, Void, Boolean> {
@@ -311,7 +323,7 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
             try {
                 List<HeartRateSession> sessions = sessionDAO.getSessions(
                         "((" + HeartRateSession.COLUMN_NAME_EXTERNAL_ID + " is null) or ("
-                                + HeartRateSession.COLUMN_NAME_STATUS + " <> '" + SessionStatus.SYNCHRONIZED + "')) and "
+                                + HeartRateSession.COLUMN_NAME_STATUS + " == '" + SessionStatus.COMPLETED + "')) and "
                                 + HeartRateSession.COLUMN_NAME_USER_ID + "=?",
                         new String[]{String.valueOf(userId)}
                 );
@@ -342,49 +354,53 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
         }
 
         private void synchronizeSession(HeartRateSession session) {
+            if (isPredefinedSession(session.getId()))
+                return;
             if (session.getExternalId() == null) {
                 // Create Session on the server
                 JsonResponse<CardioSession> response1 = serviceHelper.createSession();
                 if (JsonResponse.RESPONSE_OK.equals(response1.getResponseCode())) {
-                    SessionStatus oldStatus = session.getStatus();
                     CardioSession cardioSession = response1.getData();
-                    cardioSession.setDataClassName("JsonRRInterval");
-                    cardioSession.setName(session.getName());
-                    cardioSession.setDescription(session.getDescription());
-                    cardioSession.setCreationTimestamp(session.getDateStarted() == null ? 0 : session.getDateStarted().getTime());
-                    session.setExternalId(cardioSession.getId());
-                    session.setStatus(SessionStatus.SYNCHRONIZING);
-                    sessionDAO.merge(session);
+                    rewriteSessionData(session, cardioSession);
+                }
+            } else if (session.getStatus() == SessionStatus.COMPLETED) {
+                CardioSession cardioSession = new CardioSession();
+                cardioSession.setId(session.getExternalId());
+                rewriteSessionData(session, cardioSession);
+            }
+        }
 
-                    // Upload sessionData
-                    List<HeartRateDataItem> items = itemDAO.getItemsBySessionId(session.getId());
-                    CardioSessionWithData sessionWithData = new CardioSessionWithData(cardioSession);
-                    List<CardioDataItem> dataItems = new ArrayList<CardioDataItem>(items.size());
-                    long i = 0;
-                    for (HeartRateDataItem hrItem: items) {
-                        CardioDataItem cardioDataItem = new CardioDataItem();
-                        cardioDataItem.setNumber(i++);
-                        cardioDataItem.setCreationTimestamp(hrItem.getTimeStamp().getTime());
-                        cardioDataItem.setSessionId(cardioSession.getId());
-                        cardioDataItem.setDataItem(new JsonRRInterval((int) hrItem.getRrTime()).toString());
-                        dataItems.add(cardioDataItem);
-                    }
-                    sessionWithData.setDataItems(dataItems);
-                    JsonResponse<String> response2 = serviceHelper.appendDataToSession(sessionWithData);
-                    if (JsonResponse.RESPONSE_OK.equals(response2.getResponseCode())) {
-                        session.setStatus(SessionStatus.SYNCHRONIZED);
-                        sessionDAO.merge(session);
-                    } else {
-                        session.setStatus(oldStatus);
-                    }
-                }
-            } else if (session.getStatus() != SessionStatus.SYNCHRONIZED) {
-                JsonResponse<String> response = serviceHelper.deleteSession(session.getExternalId());
-                if (JsonResponse.RESPONSE_OK.equals(response.getResponseCode())) {
-                    session.setExternalId(null);
-                    session = sessionDAO.merge(session);
-                    synchronizeSession(session);
-                }
+        private void rewriteSessionData(HeartRateSession session, CardioSession cardioSession) {
+            SessionStatus oldStatus = session.getStatus();
+            cardioSession.setDataClassName("JsonRRInterval");
+            cardioSession.setName(session.getName());
+            cardioSession.setDescription(session.getDescription());
+            cardioSession.setCreationTimestamp(session.getDateStarted() == null ? 0 : session.getDateStarted().getTime());
+            session.setExternalId(cardioSession.getId());
+            session.setStatus(SessionStatus.SYNCHRONIZING);
+            sessionDAO.merge(session);
+
+            // Upload sessionData
+            List<HeartRateDataItem> items = itemDAO.getItemsBySessionId(session.getId());
+            CardioSessionWithData sessionWithData = new CardioSessionWithData(cardioSession);
+            List<CardioDataItem> dataItems = new ArrayList<CardioDataItem>(items.size());
+            long i = 0;
+            for (HeartRateDataItem hrItem: items) {
+                CardioDataItem cardioDataItem = new CardioDataItem();
+                cardioDataItem.setNumber(i++);
+                cardioDataItem.setCreationTimestamp(hrItem.getTimeStamp().getTime());
+                cardioDataItem.setSessionId(cardioSession.getId());
+                cardioDataItem.setDataItem(new JsonRRInterval((int) hrItem.getRrTime()).toString());
+                dataItems.add(cardioDataItem);
+            }
+            sessionWithData.setDataItems(dataItems);
+            JsonResponse<String> response2 = serviceHelper.rewriteCardioSessionData(sessionWithData);
+            if (JsonResponse.RESPONSE_OK.equals(response2.getResponseCode())) {
+                session.setStatus(SessionStatus.SYNCHRONIZED);
+                sessionDAO.merge(session);
+            } else {
+                session.setStatus(oldStatus);
+                sessionDAO.merge(session);
             }
         }
 

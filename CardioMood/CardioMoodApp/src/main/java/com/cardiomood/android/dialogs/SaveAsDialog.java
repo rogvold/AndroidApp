@@ -121,7 +121,7 @@ public class SaveAsDialog extends Dialog {
 
     public static interface SavingCallback {
         void onBeginSave();
-        void onEndSave(String filaName);
+        void onEndSave(String fileName);
         void onError();
     }
 
@@ -132,8 +132,7 @@ public class SaveAsDialog extends Dialog {
             if (!Environment.MEDIA_MOUNTED.equals(status)) {
                 return SaveAsDialog.this.mContext.getFilesDir();
             } else {
-                File dir = null;
-                dir = new File(Environment.getExternalStorageDirectory(), "CardioMood");
+                File dir = new File(Environment.getExternalStorageDirectory(), "CardioMood");
                 dir = new File(dir, "txt");
                 dir.mkdirs();
                 return dir;

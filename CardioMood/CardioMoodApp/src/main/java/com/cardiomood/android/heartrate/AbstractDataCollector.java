@@ -69,7 +69,7 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
     public void onStartCollecting() {
         // do nothing
         currentSession = new HeartRateSession();
-        currentSession.setDateStarted(new Date());
+        currentSession.setDateStarted(null);
         currentSession.setStatus(SessionStatus.NEW);
         Long userId = preferenceHelper.getLong(ConfigurationConstants.USER_ID, -1);
         if (userId < 0)
@@ -81,6 +81,10 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
         // call listener
         if (listener != null)
             listener.onStart();
+    }
+
+    public void onFirstDataRecieved() {
+        currentSession.setDateStarted(new Date());
 
         // send to server
         dataService.createSession(new ServerResponseCallbackRetry<CardioSession>() {
@@ -129,8 +133,27 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
             // call listener
             if (listener != null)
                 listener.onDataSaved(currentSession);
-            CommonTools.vibrate(service, 1000);
+        } else {
+            if (cardioSession != null) {
+                dataService.deleteSession(cardioSession.getId(), new ServerResponseCallbackRetry<String>() {
+                    @Override
+                    public void retry() {
+                        dataService.deleteSession(cardioSession.getId(), this);
+                    }
+
+                    @Override
+                    public void onResult(String result) {
+                        cardioSession = null;
+                    }
+
+                    @Override
+                    public void onError(JsonError error) {
+
+                    }
+                });
+            }
         }
+        CommonTools.vibrate(service, 1000);
     }
 
     @Override
@@ -145,6 +168,8 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
     @Override
     public void addData(int bpm, short[] rrIntervals) {
         if (getStatus() == Status.COLLECTING) {
+            if (getIntervalsCount() == 0)
+                onFirstDataRecieved();
             for (short rr: rrIntervals) {
                 heartRateDataItems.add(new HeartRateDataItem(bpm, rr));
                 math.addIntervals(rr);
@@ -209,7 +234,7 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
     }
 
     public boolean enoughDataCollected() {
-        return true;
+        return getIntervalsCount() > 0;
     }
 
     protected void processCollectedData() {

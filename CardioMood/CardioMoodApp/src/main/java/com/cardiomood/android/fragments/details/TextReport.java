@@ -1,6 +1,7 @@
 package com.cardiomood.android.fragments.details;
 
 import com.cardiomood.math.HeartRateMath;
+import com.cardiomood.math.filter.SimpleBayevskyFilter;
 import com.cardiomood.math.histogram.Histogram;
 import com.cardiomood.math.histogram.Histogram128Ext;
 import com.cardiomood.math.spectrum.SpectralAnalysis;
@@ -21,7 +22,7 @@ public class TextReport {
                     "\n" +
                     "Date: \t\t\t%1$s\n" +
                     "Measurement time:\t%2$s\n" +
-                    "Intervals count:\t%3$d\n" +
+                    "Intervals count:\t%3$d with %33$d artifacts (%34$d%%)\n" +
                     "Tag: %4$s\n" +
                     "\n" +
                     "\n" +
@@ -36,7 +37,7 @@ public class TextReport {
                     "\n" +
                     "\n" +
                     "Frequency analysis:\n" +
-                    "TP  =\t%10$f\t\t\tln TP  = %17$f \n" +
+                    "TP  =\t%10$f\t\t\t\tln TP  = %17$f \n" +
                     "VLF =\t%11$f\tVLF%% =\t%14$f\tln VLF = %18$f\n" +
                     "LF  =\t%12$f\tLF%%  =\t%15$f\tln LF  = %19$f\n" +
                     "HF  =\t%13$f\tHF%%  =\t%16$f\tln HF  = %20$f\n" +
@@ -141,6 +142,7 @@ public class TextReport {
 
     @Override
     public String toString() {
+        int artifactsCount = new SimpleBayevskyFilter().getArtifactsCount(rrIntervals);
         return String.format(
                 getReportFormat(),
                 DATE_FORMAT.format(getStartDate()),
@@ -174,7 +176,9 @@ public class TextReport {
                 getHistogram50().getMxDMn(),
                 getHistogram128().getWN5(),
                 getHistogram128().getWN10(),
-                getHistogram128().getHRVTi()
+                getHistogram128().getHRVTi(),
+                artifactsCount,
+                Math.round(artifactsCount*100.0f/rrIntervals.length)
         );
     }
 

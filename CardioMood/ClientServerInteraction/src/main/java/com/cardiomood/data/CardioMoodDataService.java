@@ -49,4 +49,7 @@ public interface CardioMoodDataService {
     @POST @Path("cardioSession/appendDataToCardioSession")
     JsonResponse<String> appendDataToSession(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serializedData") String serializedData);
 
+    @POST @Path("cardioSession/rewriteCardioSessionData")
+    JsonResponse<String> rewriteCardioSessionData(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serializedData") String serializedData);
+
 }

@@ -88,6 +88,11 @@ public class ServiceStub implements CardioMoodDataService {
         return null;
     }
 
+    @Override
+    public JsonResponse<String> rewriteCardioSessionData(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serializedData") String serializedData) {
+        return null;
+    }
+
     private ApiToken generateApiToken() {
         final ApiToken token = new ApiToken(USER_ID, "this_is_a_test_token_"+random.nextInt(), System.currentTimeMillis()+TOKEN_LIFE_TIME);
         token.setId(random.nextLong());

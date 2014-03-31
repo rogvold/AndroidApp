@@ -291,6 +291,33 @@ public class DataServiceHelper {
         }.execute(sessionId);
     }
 
+    public JsonResponse<String> rewriteCardioSessionData(CardioSessionWithData serializedData) {
+        try {
+            if (isSignedIn()) {
+                String token = getTokenString();
+                Long userId = getUserId();
+                return mService.rewriteCardioSessionData(token, userId, GSON.toJson(serializedData));
+            } else {
+                throw new IllegalStateException("Not signed in.");
+            }
+        } catch (Exception ex) {
+            Log.w(TAG, "rewriteCardioSessionData() -> failed with an exception", ex);
+            return new JsonResponse<String>(new JsonError("Service error: " + ex.getLocalizedMessage(), JsonError.SERVICE_ERROR));
+        }
+    }
+
+    public void rewriteCardioSessionData(CardioSessionWithData serializedData, ServerResponseCallbackRetry<String> callback) {
+        if (isOfflineMode())
+            return;
+        new ServiceTask<String>(new HandleTokenExpiredCallback<String>(callback)) {
+
+            @Override
+            protected JsonResponse<String> doInBackground(Object... params) {
+                return rewriteCardioSessionData((CardioSessionWithData) params[0]);
+            }
+        }.execute(serializedData);
+    }
+
     public JsonResponse<String> appendDataToSession(CardioSessionWithData serializedData) {
         try {
             if (isSignedIn()) {
