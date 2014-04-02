@@ -48,7 +48,6 @@ public class HeartRateDataItemDAO extends BaseDAO<HeartRateDataItem> implements 
     @Override
     public HeartRateDataItem loadFromCursor(Cursor cursor) {
         HeartRateDataItem item = new HeartRateDataItem(cursor);
-        cursor.close();
         return item;
     }
 

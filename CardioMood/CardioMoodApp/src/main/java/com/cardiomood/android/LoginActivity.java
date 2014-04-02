@@ -18,11 +18,13 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cardiomood.android.db.HeartRateDBContract;
 import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.dao.UserDAO;
 import com.cardiomood.android.db.model.HeartRateSession;
 import com.cardiomood.android.db.model.User;
 import com.cardiomood.android.db.model.UserStatus;
+import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.data.CardioMoodServer;
@@ -253,6 +255,18 @@ public class LoginActivity extends Activity implements ConfigurationConstants {
             mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
             showProgress(true);
 
+            UserDAO userDAO = new UserDAO();
+            List<User> users = userDAO.select(
+                    HeartRateDBContract.Users.COLUMN_NAME_EMAIL + "=? and " + HeartRateDBContract.Users.COLUMN_NAME_PASSWORD + "=?",
+                    new String[] {mEmail, CommonTools.SHA256(mPassword)}
+            );
+            if (users.size() == 1) {
+                User user = users.get(0);
+                performLogIn(new ApiToken(user.getExternalId(), "0", System.currentTimeMillis()));
+                startMainActivity();
+                return;
+            }
+
             // TODO: it is strongly recommended to send SHA2 hash of the password
             DataServiceHelper service = new DataServiceHelper(CardioMoodServer.INSTANCE.getService());
             service.login(mEmail, mPassword, new ServerResponseCallback<ApiToken>() {
@@ -322,6 +336,7 @@ public class LoginActivity extends Activity implements ConfigurationConstants {
     protected void performLogIn(ApiToken t) {
         final Long userId = t.getUserId();
         final String email = mEmail;
+        final String password = mPassword;
 
         prefHelper.putBoolean(USER_LOGGED_IN, true);
         prefHelper.putString(USER_EMAIL_KEY, email);
@@ -338,6 +353,7 @@ public class LoginActivity extends Activity implements ConfigurationConstants {
                     User user = userDAO.findByExternalId(userId);
                     if (user == null) {
                         user = new User(userId, email, UserStatus.NEW);
+                        user.setPassword(CommonTools.SHA256(password));
                         user = userDAO.insert(user);
                         HeartRateSessionDAO sessionDAO = new HeartRateSessionDAO();
                         List<HeartRateSession> sessions = sessionDAO.getAllSessions();
@@ -347,6 +363,9 @@ public class LoginActivity extends Activity implements ConfigurationConstants {
                                 sessionDAO.merge(session);
                             }
                         }
+                    } else {
+                        user.setPassword(CommonTools.SHA256(password));
+                        user = userDAO.merge(user);
                     }
                     prefHelper.putLong(USER_ID, user.getId());
                 } catch (Exception ex) {

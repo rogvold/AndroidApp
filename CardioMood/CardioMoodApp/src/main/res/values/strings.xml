@@ -100,7 +100,7 @@
     <string name="feedback_submission_failed">Failed to submit feedback. Try again later.</string>
     <string name="submitting_feedback_message">Submitting your feedback. Please, wait...</string>
     <string name="menu_feedback_condensed">Rate</string>
->                <string name="title_activity_session_details_activity2">Session Details</string>
+>                    <string name="title_activity_session_details_activity2">Session Details</string>
     <string name="title_activity_session_details2">SessionDetails2Activity</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="title_activity_monitoring">Monitoring</string>
@@ -142,8 +142,14 @@
     <string name="menu_start_measurement">Start measurement</string>
     <string name="menu_stop_measurement_condensed">Stop</string>
     <string name="menu_start_measurement_condensed">Start</string>
-    <string name="spectrum_chart_description" />
+    <string name="spectrum_chart_description"></string>
     <string name="historgam_description">Histogram shows distribution of R-R intervals by various interval ranges. It allows to see how wide is an amplitude of your heart beats.</string>
     <string name="scatterogram_description">Scattergram is a graphical representation of R-R intervlas distribution (current is on X and previous is on Y). It allows to measure activity of sympathicus.                          Points at scattergram can be visually combined into an ellipse.</string>
+    <string name="title_activity_report_preview">Report file</string>
+    <string name="file_doesnt_exist">File doesn\'t exist.</string>
+    <string name="file_cannot_be_read">Unable to open file.</string>
+    <string name="menu_delete_and_close">Delete</string>
+    <string name="file_has_been_deleted">File has been deleted.</string>
+    <string name="unable_to_delete_file">Unable to delete file.</string>
 
 </resources>

@@ -46,9 +46,19 @@ public class Histogram {
             }
         }
 
+//        int iMn = -1, iMx = -1;
+//        for (int i=0; i<count.length; i++) {
+//            if (count[i] * 100.0 / height < 3.0)
+//                continue;
+//            if (iMn < 0)
+//                iMn = i;
+//            iMx = i;
+//        }
+
+
         Mo = index*step;
         AMo = ((double) count[index]) / ((double) values.length) * 100;
-        mxDMn = step*(Math.ceil(StatUtils.max(values) / step) -  Math.floor(StatUtils.min(values)/step));
+        mxDMn = getWidthAbove((int) Math.ceil(values.length*0.03)); //(iMx >= 0) ? step*(iMx - iMn + 1) : 0;
         WN4 = getWN(4);
         SI = 1e6*AMo/(2*Mo*WN4);
         mRR = StatUtils.mean(values);
@@ -91,20 +101,20 @@ public class Histogram {
 
     public double getWN(double percent) {
         int target = (int) Math.floor(values.length*percent/100);
-        int min = 0;
-        int max = (int) Math.floor(getAMo()*values.length/100);
-        int x = 0;
-        do {
-            x = (max + min) / 2;
-            int c = getCountBelow(x);
-            if (c < target)
-                min = x + 1;
-            else if (c > target)
-                max = x;
-            else break;
-        } while (max > min);
-        x = (max + min) / 2;
-        return getWidthAbove(x);
+//        int min = 0;
+//        int max = (int) Math.floor(getAMo()*values.length/100);
+//        int x = 0;
+//        do {
+//            x = (max + min) / 2;
+//            int c = getCountBelow(x);
+//            if (c < target)
+//                min = x + 1;
+//            else if (c > target)
+//                max = x;
+//            else break;
+//        } while (max > min);
+//        x = (max + min) / 2;
+        return getWidthAbove(target);
     }
 
     private int getCountBelow(int x) {

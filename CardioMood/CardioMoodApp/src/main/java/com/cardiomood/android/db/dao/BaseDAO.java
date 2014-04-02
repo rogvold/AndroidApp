@@ -9,7 +9,9 @@ import android.util.Log;
 import com.cardiomood.android.CardioMoodApplication;
 import com.cardiomood.android.db.model.Entity;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public abstract class BaseDAO<T extends Entity> implements BaseColumns {
     private static final String TAG = "CardioMood.BaseDAO";
@@ -177,6 +179,21 @@ public abstract class BaseDAO<T extends Entity> implements BaseColumns {
             cursor.close();
         }
         return result;
+    }
+
+    public List<T> select(String selection, String[] selectionArgs) {
+        List<T> entities = new ArrayList<T>();
+        final SQLiteDatabase db = getDatabase();
+        synchronized (db) {
+            Cursor cursor = db.query(getTableName(), getColumnNames(), selection, selectionArgs, null, null, _ID + " asc");
+            if (cursor.moveToFirst()) {
+                do {
+                    entities.add(loadFromCursor(cursor));
+                } while (cursor.moveToNext());
+            }
+            cursor.close();
+        }
+        return entities;
     }
 
     public abstract ContentValues getContentValues(T item);

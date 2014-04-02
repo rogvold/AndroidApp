@@ -65,7 +65,13 @@ public class ScatterogramReportFragment extends AbstractSessionReportFragment {
         ShinobiChart chart = getChart();
         chart.setTitle("Scatterogram");
         Axis xAxis = chart.getXAxis();
+        xAxis.setTitle("RR[i-1], ms");
+        xAxis.getStyle().getTitleStyle().setTextSize(12);
+        xAxis.getStyle().getTickStyle().setLabelTextSize(10);
         Axis yAxis = chart.getYAxis();
+        yAxis.setTitle("RR[i], ms");
+        yAxis.getStyle().getTitleStyle().setTextSize(12);
+        yAxis.getStyle().getTickStyle().setLabelTextSize(10);
 
         double rr[] = hrm.getRrIntervals();
 

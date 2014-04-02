@@ -11,6 +11,7 @@ public class User extends Entity implements HeartRateDBContract.Users {
 
     private Long externalId;
     private String email;
+    private String password;
     private UserStatus status;
 
     public User() {
@@ -31,6 +32,7 @@ public class User extends Entity implements HeartRateDBContract.Users {
     public User(Cursor cursor) {
         super(cursor);
         this.email = cursor.getString(cursor.getColumnIndex(COLUMN_NAME_EMAIL));
+        this.password = cursor.getString(cursor.getColumnIndex(COLUMN_NAME_PASSWORD));
         this.externalId = cursor.getLong(cursor.getColumnIndex(COLUMN_NAME_EXTERNAL_ID));
         if (externalId == 0L)
             externalId = null;
@@ -59,5 +61,13 @@ public class User extends Entity implements HeartRateDBContract.Users {
 
     public void setStatus(UserStatus status) {
         this.status = status;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

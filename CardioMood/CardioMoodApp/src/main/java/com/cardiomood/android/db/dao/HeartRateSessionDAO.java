@@ -53,7 +53,6 @@ public class HeartRateSessionDAO extends BaseDAO<HeartRateSession> implements He
     @Override
     public HeartRateSession loadFromCursor(Cursor cursor) {
         HeartRateSession session = new HeartRateSession(cursor);
-        cursor.close();
         return session;
     }
 

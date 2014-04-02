@@ -56,7 +56,8 @@ public class TextReport {
                     "\n" +
                     "Variation range (Var) =\t%29$f\n" +
                     "WN5   =\t%30$f\n" +
-                    "WN10  = %31$f\n" +
+                    "WN1   =\t%31$f\n" +
+                    "WN4   =\t%35$f\n" +
                     "WAM5  =\tN/A\n" +
                     "WAM10 = N/A\n" +
                     "\n" +
@@ -175,10 +176,11 @@ public class TextReport {
                 getHistogram50().getSI(),
                 getHistogram50().getMxDMn(),
                 getHistogram128().getWN5(),
-                getHistogram128().getWN10(),
+                getHistogram128().getWN1(),
                 getHistogram128().getHRVTi(),
                 artifactsCount,
-                Math.round(artifactsCount*100.0f/rrIntervals.length)
+                Math.round(artifactsCount*100.0f/rrIntervals.length),
+                getHistogram128().getWN4()
         );
     }
 
@@ -217,6 +219,7 @@ public class TextReport {
 
         public TextReport build() {
             HeartRateMath math = new HeartRateMath(report.rrIntervals);
+            report.rrIntervals = math.getRrIntervals();
 
             if (report.endDate == null)
                 report.endDate = new Date(report.startDate.getTime() + Math.round(math.getDuration()));

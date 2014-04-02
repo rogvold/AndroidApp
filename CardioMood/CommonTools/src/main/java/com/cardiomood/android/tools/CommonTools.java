@@ -11,6 +11,7 @@ import android.view.inputmethod.InputMethodManager;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.MessageDigest;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -80,6 +81,54 @@ public abstract class CommonTools {
             Log.d(TAG, "isNetworkAvailable() exception", e);
         }
         return false;
+    }
+
+    public static String encryptString(String s, String algo) {
+        if (s == null) {
+            return null;
+        }
+        try {
+            MessageDigest md = MessageDigest.getInstance(algo);
+            md.update(s.getBytes());
+            s = null;
+            return toHexString(md.digest());
+        } catch (Exception ex) {
+            Log.e(TAG, "encryptString(): Couldn't calculate MD5 of string", ex);
+            throw new RuntimeException("Couldn't calculate MD5 of string", ex);
+        }
+    }
+
+    public static String toHexString(byte[] byteData) {
+        if (byteData == null) {
+            return null;
+        }
+        StringBuilder hexString = new StringBuilder();
+        for (int i = 0; i < byteData.length; i++) {
+            String hex = Integer.toHexString(0xff & byteData[i]);
+            if (hex.length() == 1) {
+                hexString.append('0');
+            }
+            hexString.append(hex);
+        }
+        return hexString.toString();
+    }
+
+    public static byte[] fromHexString(String s) {
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+                    + Character.digit(s.charAt(i + 1), 16));
+        }
+        return data;
+    }
+
+    public static String SHA256(String s) {
+        return encryptString(s, "SHA-256");
+    }
+
+    public static String MD5(String s) {
+        return encryptString(s, "MD5");
     }
 
 }

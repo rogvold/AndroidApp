@@ -9,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.NavUtils;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -82,6 +83,8 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session_details);
+
+        //getActionBar().setDisplayHomeAsUpEnabled(true);
 
         pHelper = new PreferenceHelper(this);
 
@@ -344,6 +347,9 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
             case R.id.menu_rename:
                 FlurryAgent.logEvent("menu_rename_clicked");
                 showRenameSessionDialog();
+                return true;
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
                 return true;
         }
         return super.onOptionsItemSelected(item);

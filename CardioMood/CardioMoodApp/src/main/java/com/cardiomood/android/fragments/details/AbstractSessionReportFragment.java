@@ -23,6 +23,7 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.cardiomood.android.R;
+import com.cardiomood.android.ReportPreviewActivity;
 import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.model.HeartRateSession;
 import com.cardiomood.android.dialogs.SaveAsDialog;
@@ -217,6 +218,10 @@ public abstract class AbstractSessionReportFragment extends Fragment {
                 if (fileName == null) {
                     return;
                 }
+
+                Intent previewIntent = new Intent(getActivity(), ReportPreviewActivity.class);
+                previewIntent.putExtra(ReportPreviewActivity.EXTRA_FILE_PATH, fileName);
+                startActivity(previewIntent);
 
                 if (!fileName.toLowerCase().endsWith(".png")) {
                     // saved as not *.png

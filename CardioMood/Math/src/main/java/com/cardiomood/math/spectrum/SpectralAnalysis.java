@@ -30,7 +30,7 @@ public class SpectralAnalysis {
 
         int i = 1;
         // ULF: [0.0 .. 0.0033 Hz]
-        for (; spe.toFrequency(i) < 0.0033; i++) {
+        for (; spe.toFrequency(i) <= 0.0033; i++) {
             ULF += power[i];
         }
         ULF *= step;
@@ -44,7 +44,7 @@ public class SpectralAnalysis {
         TP += VLF;
 
         // LF: [0.04 .. 0.15 Hz]
-        for (; spe.toFrequency(i) < 0.15; i++) {
+        for (; spe.toFrequency(i) <= 0.15; i++) {
             LF += power[i];
         }
         LF *= step;
@@ -57,7 +57,7 @@ public class SpectralAnalysis {
         HF *= step;
         TP += HF;
 
-        for (; spe.toFrequency(i) < 0.5; i++)
+        for (; spe.toFrequency(i) <= 0.5 && i < power.length; i++)
             TP += power[i]*step;
 
     }

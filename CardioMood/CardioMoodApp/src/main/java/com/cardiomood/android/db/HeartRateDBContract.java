@@ -9,7 +9,7 @@ import android.provider.BaseColumns;
 public interface HeartRateDBContract {
 	
 	String DATABASE_NAME = "heart_rate.db";
-	int DATABASE_VERSION = 22;
+	int DATABASE_VERSION = 23;
 	
 	public static interface HeartRateData extends BaseColumns {
 		String TABLE_NAME = "heart_rate_data";
@@ -34,6 +34,7 @@ public interface HeartRateDBContract {
         String TABLE_NAME = "users";
         String COLUMN_NAME_EXTERNAL_ID = "external_id";
         String COLUMN_NAME_EMAIL = "email";
+        String COLUMN_NAME_PASSWORD = "password";
         String COLUMN_NAME_STATUS = "status";
     }
 	
@@ -68,6 +69,7 @@ public interface HeartRateDBContract {
                 "CREATE TABLE " + Users.TABLE_NAME + " (" +
                  Users._ID + " INTEGER PRIMARY KEY" + COMMA_SEP +
                  Users.COLUMN_NAME_EMAIL + TEXT_TYPE + " UNIQUE" + COMMA_SEP +
+                 Users.COLUMN_NAME_PASSWORD + TEXT_TYPE + " NOT NULL" + COMMA_SEP +
                  Users.COLUMN_NAME_EXTERNAL_ID + " INTEGER UNIQUE" + COMMA_SEP +
                  Users.COLUMN_NAME_STATUS + TEXT_TYPE +
                 " )";

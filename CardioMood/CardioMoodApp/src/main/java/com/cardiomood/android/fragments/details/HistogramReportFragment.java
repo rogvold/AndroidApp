@@ -1,5 +1,7 @@
 package com.cardiomood.android.fragments.details;
 
+import android.graphics.Color;
+
 import com.cardiomood.android.R;
 import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
 import com.cardiomood.android.db.model.HeartRateDataItem;
@@ -13,22 +15,20 @@ import com.shinobicontrols.charts.DataAdapter;
 import com.shinobicontrols.charts.DataPoint;
 import com.shinobicontrols.charts.NumberAxis;
 import com.shinobicontrols.charts.Series;
+import com.shinobicontrols.charts.SeriesStyle;
 import com.shinobicontrols.charts.ShinobiChart;
 import com.shinobicontrols.charts.SimpleDataAdapter;
 
 import org.apache.commons.math3.stat.StatUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
 public class HistogramReportFragment extends AbstractSessionReportFragment {
 
     private static final String TAG = HistogramReportFragment.class.getSimpleName();
-
-    private static final double[] GOOD_RR = new double[] {
-            695,710,710,703,710,679,695,664,687,656,671,679,710,703,726,718,710,718,734,695,710,726,718,710,703,710,703,726,703,710,703,726,695,718,710,718,726,710,710,718,695,695,703,695,718,726,734,718,750,734,734,710,718,726,710,718,703,710,687,687,679,679,679,671,664,640,648,632,640,656,656,664,703,703,726,757,757,750,726,734,687,695,679,679,664,679,695,695,679,671,656,648,664,671,679,718,710,742,726,710,679,664,664,640,617,617,617,625,625,664,687,695,695,718,718,718,718,742,726,710,679,687,687,726,718,710,703,710,695,679,671,671,656,632,640,617,632,656,687,718,757,773,789,765,757,742,757,734,742,742,710,726,687,671,640,632,640,664,664,656,671,679,656,656,625,640,625,609,609,601,609,585,585,562,578,570,539,554,539,562,554,546,554,554,585,585,617,617,640,656,671,656,664,664,640,648,671,664,648,656,625,632,617,617,632,617,625,601,609,593,593,570,593,570,578,585,585,609,648,664,671,679,679,687,664,679,656,671,664,679,656,656,640,640,609,617,601,593,570,593,609,625,679,687,718,726,742,734,726,726,718,726,679,703,718,710,710,687,664,664,648,648,648,656,671,687,687,671,664,679,664,671,671,687,671,656,656,648,648,632,632,609,640,648,648,640,679,687,710,695,718,734,734,710,718,718,718,703,664,664,648,671,664,710,734,750,742,734,710,710,679,679,648,656,625,625,617,632,625,617,625,601,593,593,593,601,632,664,687,703,703,695,710,695,687,656,664,648,656,648,664,640,656,640,640,632,617,625,617,640,640,648,656,851,828,781,757,710,710,679,687,664,695,671,671,664,687,656,656,648,640,632,632,609,625,601,601,601,601,617    };
-
 
     private HeartRateDataItemDAO hrDAO = new HeartRateDataItemDAO();
 
@@ -67,15 +67,18 @@ public class HistogramReportFragment extends AbstractSessionReportFragment {
         double rr[] = hrm.getRrIntervals();
 
         // Histogram Chart
-        xAxis.getStyle().setInterSeriesSetPadding(2.0f);
         xAxis.enableGesturePanning(true);
         xAxis.enableGestureZooming(true);
         xAxis.setMajorTickFrequency(100.0);
         xAxis.getStyle().getTickStyle().setMinorTicksShown(false);
         xAxis.getStyle().getTickStyle().setMajorTicksShown(true);
         xAxis.getStyle().getTickStyle().setLabelTextSize(10);
+        xAxis.setTitle("NN-interval, ms");
+        xAxis.getStyle().getTitleStyle().setTextSize(12);
 
         yAxis.getStyle().getTickStyle().setLabelTextSize(10);
+        yAxis.setTitle("%");
+        yAxis.getStyle().getTitleStyle().setTextSize(12);
 
         // Clear
         List<Series<?>> series = new ArrayList<Series<?>>(chart.getSeries());
@@ -83,27 +86,49 @@ public class HistogramReportFragment extends AbstractSessionReportFragment {
             chart.removeSeries(s);
 
 
-        chart.addSeries(getSeriesForIntervals(rr));
+        List<ColumnSeries> dataSeries = getSeriesForIntervals(rr);
+        for (Series<?> s: dataSeries) {
+            chart.addSeries(s);
+        }
         chart.redrawChart();
     }
 
-    private ColumnSeries getSeriesForIntervals(double rr[]) {
-        DataAdapter<Integer, Integer> dataAdapter2 = new SimpleDataAdapter<Integer, Integer>();
+    private List<ColumnSeries> getSeriesForIntervals(double rr[]) {
+        DataAdapter<Integer, Double> dataAdapter = new SimpleDataAdapter<Integer, Double>();
         double maxRR = StatUtils.max(rr);
         double minRR = StatUtils.min(rr);
         Histogram histogram = new Histogram(rr, 50);
         if (minRR < 100)
             minRR = 100;
         for (double x=Math.floor((minRR-100)/50)*50; x<=Math.ceil((maxRR+50)/50)*50; x+=50) {
-            if (x <= maxRR)
-                dataAdapter2.add(new DataPoint<Integer, Integer>((int) x, histogram.getCountFor(x)));
-            else
-                dataAdapter2.add(new DataPoint<Integer, Integer>((int) x, 0));
+            if (x <= maxRR && 100.0*histogram.getCountFor(x)/rr.length >= 4.0) {
+                dataAdapter.add(new DataPoint<Integer, Double>((int) x, Math.round(100 * 100.0 * histogram.getCountFor(x) / rr.length) / 100.0));
+            } else
+                dataAdapter.add(new DataPoint<Integer, Double>((int) x, 0.0));
         }
+
+        DataAdapter<Integer, Double> dataAdapter2 = new SimpleDataAdapter<Integer, Double>();
+        for (double x=Math.floor((minRR-100)/50)*50; x<=Math.ceil((maxRR+50)/50)*50; x+=50) {
+            if (x >= minRR && x <= maxRR)
+                continue;
+            if (x <= maxRR && 100.0*histogram.getCountFor(x)/rr.length < 4.0) {
+                dataAdapter2.add(new DataPoint<Integer, Double>((int) x, Math.round(100 * 100.0 * histogram.getCountFor(x) / rr.length) / 100.0));
+            } else
+                dataAdapter2.add(new DataPoint<Integer, Double>((int) x, 0.0));
+        }
+
+        ColumnSeries series = new ColumnSeries();
+        series.getStyle().setLineShown(true);
+        series.setDataAdapter(dataAdapter);
 
         ColumnSeries series2 = new ColumnSeries();
         series2.setDataAdapter(dataAdapter2);
-        return series2;
+        series2.getStyle().setAreaColor(Color.LTGRAY);
+        series2.getStyle().setLineColor(Color.GRAY);
+        series2.getStyle().setFillStyle(SeriesStyle.FillStyle.FLAT);
+        series2.getStyle().setLineShown(true);
+
+        return Arrays.asList(series, series2);
     }
 
     @Override

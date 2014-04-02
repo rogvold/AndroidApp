@@ -13,7 +13,7 @@ import com.cardiomood.android.db.model.User;
 public class UserDAO extends BaseDAO<User> implements HeartRateDBContract.Users {
 
     public static final String[] COLUMN_NAMES = new String[] {
-        _ID, COLUMN_NAME_EXTERNAL_ID, COLUMN_NAME_EMAIL, COLUMN_NAME_STATUS
+        _ID, COLUMN_NAME_EXTERNAL_ID, COLUMN_NAME_EMAIL, COLUMN_NAME_PASSWORD, COLUMN_NAME_STATUS
     };
 
     @Override
@@ -21,6 +21,7 @@ public class UserDAO extends BaseDAO<User> implements HeartRateDBContract.Users 
         ContentValues cv = new ContentValues();
         cv.put(_ID, item.getId());
         cv.put(COLUMN_NAME_EMAIL, item.getEmail());
+        cv.put(COLUMN_NAME_PASSWORD, item.getPassword());
         cv.put(COLUMN_NAME_EXTERNAL_ID, item.getExternalId());
         cv.put(COLUMN_NAME_STATUS, String.valueOf(item.getStatus()));
         return cv;
@@ -39,7 +40,6 @@ public class UserDAO extends BaseDAO<User> implements HeartRateDBContract.Users 
     @Override
     public User loadFromCursor(Cursor cursor) {
         User user = new User(cursor);
-        cursor.close();
         return user;
     }
 

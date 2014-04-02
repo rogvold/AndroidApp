@@ -64,7 +64,14 @@ public class SpectralAnalysisReportFragment extends AbstractSessionReportFragmen
         ShinobiChart chart = getChart();
         chart.setTitle("Spectral Power");
         Axis xAxis = chart.getXAxis();
+        xAxis.setTitle("Frequency, Hz");
+        xAxis.getStyle().getTickStyle().setLabelTextSize(10);
+        xAxis.getStyle().getTitleStyle().setTextSize(12);
+
         Axis yAxis = chart.getYAxis();
+        yAxis.setTitle("Power, ms2/Hz");
+        yAxis.getStyle().getTickStyle().setLabelTextSize(10);
+        yAxis.getStyle().getTitleStyle().setTextSize(12);
 
         // prepare source data
         double rr[] = hrm.getRrIntervals();

@@ -85,38 +85,15 @@ public class HeartRateDBHelper extends SQLiteOpenHelper implements HeartRateDBCo
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		// Upgrade or downgrade the database schema
-		if (oldVersion <= 20) {
-            // New DB Version: 21+
-            try {
-                db.execSQL(SQL.CREATE_TABLE_USERS);
-
-                String ADD_COLUMN_EXTERNAL_ID = "ALTER TABLE " + Sessions.TABLE_NAME
-                        + " ADD COLUMN " + Sessions.COLUMN_NAME_EXTERNAL_ID + " INTEGER";
-                db.execSQL(ADD_COLUMN_EXTERNAL_ID);
-            } catch (Exception e) {
-                Log.d(TAG, "onUpgrade() exception", e);
-            }
-
-        }
-
-        // New DB Version: 22
-        try {
-            db.execSQL("UPDATE " + Sessions.TABLE_NAME + " SET " + Sessions.COLUMN_NAME_STATUS + " = '" + SessionStatus.COMPLETED + "'");
-            db.execSQL("DELETE FROM " + Sessions.TABLE_NAME + " WHERE " + Sessions._ID + " NOT IN ("
-                        + "SELECT " + HeartRateData.COLUMN_NAME_SESSION_ID
-                        + " FROM " + HeartRateData.TABLE_NAME
-                        + " GROUP BY " + HeartRateData.COLUMN_NAME_SESSION_ID
-                    +")");
-        } catch (Exception e) {
-            Log.d(TAG, "onUpgrade() exception", e);
-        }
-
+		new DBUpgradeHelper(db).performUpgrade(oldVersion, newVersion);
+        // Create sample sessions for current user
         createSampleSessions(db);
 	}
 	
 	@Override
 	public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		onUpgrade(db, oldVersion, newVersion);
+		//onUpgrade(db, oldVersion, newVersion);
+        // do nothing
 	}
 
     private void createSampleSessions(SQLiteDatabase db) {
