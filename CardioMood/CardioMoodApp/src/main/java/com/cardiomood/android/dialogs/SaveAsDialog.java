@@ -112,7 +112,7 @@ public class SaveAsDialog extends Dialog {
         }
     }
 
-    private void saveAsTxt() {
+    public void saveAsTxt() {
         if (!savingInProgress) {
             setSavingInProgress(true);
             new SaveAsTextTask().execute(sessionId);

@@ -266,7 +266,7 @@ public abstract class AbstractSessionReportFragment extends Fragment {
                 getActivity().invalidateOptionsMenu();
             }
         });
-        dlg.show();
+        dlg.saveAsTxt();
     }
 
 
