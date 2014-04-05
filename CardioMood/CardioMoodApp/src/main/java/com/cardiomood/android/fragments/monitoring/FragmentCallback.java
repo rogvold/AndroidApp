@@ -1,12 +1,16 @@
 package com.cardiomood.android.fragments.monitoring;
 
-import com.cardiomood.android.heartrate.CardioMoodHeartRateLeService;
-
 /**
- * Created by danon on 04.03.14.
+ * Created by danon on 04.04.2014.
  */
 public interface FragmentCallback {
 
-    CardioMoodHeartRateLeService getService();
+    void notifyBPM(int bpm);
+
+    void notifyRRIntervals(short rr[]);
+
+    void notifyConnectionStatus(int oldStatus, int newStatus);
+
+    void notifyProgress(double progress, int count, long duration);
 
 }

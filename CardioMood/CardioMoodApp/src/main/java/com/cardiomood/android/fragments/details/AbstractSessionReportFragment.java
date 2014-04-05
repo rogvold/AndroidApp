@@ -109,6 +109,7 @@ public abstract class AbstractSessionReportFragment extends Fragment {
 
         chartView = (ChartView) v.findViewById(R.id.chart);
         chartView.setDrawingCacheEnabled(true);
+        chartView.onCreate(savedInstanceState);
         chart = chartView.getShinobiChart();
         chart.setLicenseKey(ConfigurationConstants.SHINOBI_CHARTS_API_KEY);
 
@@ -142,6 +143,18 @@ public abstract class AbstractSessionReportFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        chartView.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        chartView.onPause();
+    }
+
+    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_session_report, menu);
@@ -165,6 +178,12 @@ public abstract class AbstractSessionReportFragment extends Fragment {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        chartView.onDestroy();
     }
 
     protected void refresh() {

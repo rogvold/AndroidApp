@@ -127,7 +127,7 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
             serverSyncWorker.finishWork();
         }
 
-        if (enoughDataCollected()) {
+        if (getStatus() == Status.COLLECTING && enoughDataCollected()) {
             currentSession.setDateEnded(new Date());
             processCollectedData();
             // call listener
@@ -216,6 +216,8 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
                 onStartCollecting();
             else if (this.status == Status.COLLECTING && status == Status.COMPLETED)
                 onCompleteCollecting();
+            else if (this.status == Status.NOT_STARTED && status == Status.COMPLETED)
+                onCompleteCollecting();
             else throw new IllegalStateException("Illegal status change: " + this.status + " => " + status);
             this.status = status;
         }
@@ -234,7 +236,7 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
     }
 
     public boolean enoughDataCollected() {
-        return getIntervalsCount() > 0;
+        return getIntervalsCount() > 30;
     }
 
     protected void processCollectedData() {

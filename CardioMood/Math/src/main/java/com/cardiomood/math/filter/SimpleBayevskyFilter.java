@@ -12,12 +12,10 @@ public class SimpleBayevskyFilter implements Filter {
             double a = rrIntervals[i-1];
             double x = rrIntervals[i];
             double b = rrIntervals[i+1];
-            if (Math.abs(x-a) > 100)
-                rrIntervals[i] = Math.abs((a + b)) / 2;
-//            if (Math.abs(x/b-1) > 0.2) {
-//                rrIntervals[i] = Math.abs((a + b) / 2);
-//            } else if (Math.abs(x/a-1) > 0.2)
-//                rrIntervals[i] = Math.abs((a + b) / 2);
+            if (Math.abs(x/b-1) > 0.2) {
+                rrIntervals[i] = Math.abs((a + b) / 2);
+            } else if (Math.abs(x/a-1) > 0.2)
+                rrIntervals[i] = Math.abs((a + b) / 2);
         }
         return rrIntervals;
     }
@@ -29,13 +27,11 @@ public class SimpleBayevskyFilter implements Filter {
             double a = rr[i-1];
             double x = rr[i];
             double b = rr[i+1];
-            if (Math.abs(x-a) > 100)
+            if (Math.abs(x/b-1) > 0.2) {
                 count++;
-//            if (Math.abs(x/b-1) > 0.2) {
-//                count++;
-//            } else if (Math.abs(x/a-1) > 0.2) {
-//                count++;
-//            }
+            } else if (Math.abs(x/a-1) > 0.2) {
+                count++;
+            }
         }
         return count;
     }

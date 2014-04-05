@@ -251,6 +251,9 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
     }
 
     private void showRenameSessionDialog() {
+
+        getIntent().putExtra(POST_RENDER_ACTION_EXTRA, DO_NOTHING_ACTION);
+
         // get prompts.xml view
         LayoutInflater li = LayoutInflater.from(this);
         View promptsView = li.inflate(R.layout.dialog_input_text, null);

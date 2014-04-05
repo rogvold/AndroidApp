@@ -53,7 +53,8 @@
         <activity
             android:name="com.cardiomood.android.MainActivity"
             android:label="@string/title_activity_main"
-            android:screenOrientation="portrait" >
+            android:screenOrientation="portrait"
+            android:hardwareAccelerated="false" >
         </activity>
         <activity
             android:name="com.cardiomood.android.SessionDetailsActivity"

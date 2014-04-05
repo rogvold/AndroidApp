@@ -138,26 +138,27 @@ public abstract class DataWindow {
             // add element
             double duration = getDuration();
             double windowSize = getWindowSize();
-
-            System.out.println("TimedWindow.addIntervalAndMove(): duration=" + duration + ", windowSize="+windowSize +", interval=" + interval);
+            boolean flag = getIndexPosition() == 0;
 
             if (duration + interval > windowSize) {
                 // callback.onMove() will be invoked
                 getIntervals().addElementRolling(interval);
-                System.out.println("TimedWindow.addIntervalAndMove(): window moved");
-
             } else {
                 getIntervals().addElement(interval);
+            }
+
+            if (flag && getIndexPosition() == 1) {
+                // position was 0 and now is 1
+                return true;
             }
 
             // notify about next step if necessary
             double stepSize = getStepSize();
             double position = getTimePosition();
-            System.out.println("TimedWindow.addIntervalAndMove(): lastPosition=" + lastPosition + ", stepSize="+stepSize +", position=" + position);
 
             if (position - lastPosition >= stepSize) {
                 // callback.onStep() will be invoked
-                lastPosition = position;
+                lastPosition = Math.floor(position / stepSize) * stepSize;
                 return true;
             }
 
@@ -195,7 +196,7 @@ public abstract class DataWindow {
         }
     }
 
-    public class IntervalsCount extends DataWindow {
+    public static class IntervalsCount extends DataWindow {
 
         private int lastPosition = 0;
 
@@ -208,7 +209,7 @@ public abstract class DataWindow {
             // add element
             int count = getIntervals().getNumElements();
             double windowSize = getWindowSize();
-
+            boolean flag = getIndexPosition() == 0;
             if (count + 1 > windowSize) {
                 // callback.onMove() will be invoked
                 getIntervals().addElementRolling(interval);
@@ -216,12 +217,16 @@ public abstract class DataWindow {
                 getIntervals().addElement(interval);
             }
 
+            if (flag && getIndexPosition() == 1) {
+                // position was 0 and now is 1
+                return true;
+            }
             // notify about next step if necessary
-            double stepSize = getStepSize();
+            int stepSize = (int) Math.round(getStepSize());
             int position = getIndexPosition();
             if (position - lastPosition >= stepSize) {
                 // callback.onStep() will be invoked
-                lastPosition = position;
+                lastPosition = (position / stepSize) * stepSize;
                 return true;
             }
 

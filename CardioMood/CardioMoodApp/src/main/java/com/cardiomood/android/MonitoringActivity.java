@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 import com.cardiomood.android.components.CustomViewPager;
 import com.cardiomood.android.db.model.HeartRateSession;
+import com.cardiomood.android.fragments.monitoring.ActivityCallback;
 import com.cardiomood.android.fragments.monitoring.FragmentCallback;
 import com.cardiomood.android.fragments.monitoring.HeartRateMonitoringFragment;
 import com.cardiomood.android.heartrate.AbstractDataCollector;
@@ -30,9 +31,12 @@ import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.heartrate.bluetooth.LeHRMonitor;
 import com.flurry.android.FlurryAgent;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Locale;
+import java.util.Set;
 
-public class MonitoringActivity extends ActionBarActivity implements ActionBar.TabListener, FragmentCallback {
+public class MonitoringActivity extends ActionBarActivity implements ActionBar.TabListener, ActivityCallback {
 
     private static final String TAG = MonitoringActivity.class.getSimpleName();
 
@@ -40,6 +44,8 @@ public class MonitoringActivity extends ActionBarActivity implements ActionBar.T
     private CardioMoodHeartRateLeService mBluetoothLeService;
     private boolean receiverRegistered = false;
     private boolean serviceBound = false;
+
+    private final Set<FragmentCallback> fragments = Collections.synchronizedSet(new LinkedHashSet<FragmentCallback>());
 
     // Code to manage Service lifecycle.
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -80,6 +86,32 @@ public class MonitoringActivity extends ActionBarActivity implements ActionBar.T
     private final BroadcastReceiver dataReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            if (LeHRMonitor.ACTION_CONNECTION_STATUS_CHANGED.equals(action)) {
+                final int newStatus = intent.getIntExtra(LeHRMonitor.EXTRA_NEW_STATUS, -100);
+                final int oldStatus = intent.getIntExtra(LeHRMonitor.EXTRA_OLD_STATUS, -100);
+                for (FragmentCallback c: fragments) {
+                    c.notifyConnectionStatus(oldStatus, newStatus);
+                }
+            }
+
+            if (LeHRMonitor.ACTION_BPM_CHANGED.equals(action)) {
+                final int bpm = intent.getIntExtra(LeHRMonitor.EXTRA_NEW_BPM, -1);
+                for (FragmentCallback c: fragments) {
+                    c.notifyBPM(bpm);
+                }
+            }
+
+            if (LeHRMonitor.ACTION_HEART_RATE_DATA_RECEIVED.equals(action)) {
+                final short[] rr = intent.getShortArrayExtra(LeHRMonitor.EXTRA_INTERVALS);
+                AbstractDataCollector collector = (AbstractDataCollector) mBluetoothLeService.getDataCollector();
+                for (FragmentCallback c: fragments) {
+                    if (collector != null)
+                        c.notifyProgress(collector.getProgress(), collector.getIntervalsCount(), (long) collector.getDuration());
+                    c.notifyRRIntervals(rr);
+                }
+            }
+
             updateView();
         }
     };
@@ -236,10 +268,7 @@ public class MonitoringActivity extends ActionBarActivity implements ActionBar.T
 
     }
 
-    @Override
-    public CardioMoodHeartRateLeService getService() {
-        return mBluetoothLeService;
-    }
+
 
     private int getCurrentBPM() {
         if (mBluetoothLeService == null)
@@ -268,6 +297,16 @@ public class MonitoringActivity extends ActionBarActivity implements ActionBar.T
         AbstractDataCollector collector = (AbstractDataCollector) mBluetoothLeService.getDataCollector();
         if (collector != null)
             collector.stopCollecting();
+    }
+
+    @Override
+    public void registerFragmentCallback(FragmentCallback callback) {
+        fragments.add(callback);
+    }
+
+    @Override
+    public void unregisterFragmentCallback(FragmentCallback callback) {
+        fragments.remove(callback);
     }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {

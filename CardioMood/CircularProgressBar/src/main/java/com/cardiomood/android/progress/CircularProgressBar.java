@@ -181,7 +181,7 @@ public class CircularProgressBar extends View {
         // Clear canvas
         canvas.drawColor(Color.TRANSPARENT);
 
-        RectF oval = getOval(canvas, 1);
+        RectF oval = getOval(getWidth(), getHeight(), 1);
 
         // background circle
         mPaint.setStrokeWidth(lineWidth);
@@ -204,10 +204,10 @@ public class CircularProgressBar extends View {
         }
     }
 
-    private RectF getOval(Canvas canvas, float factor) {
+    private RectF getOval(int w, int h, float factor) {
         RectF oval;
-        final int canvasWidth = canvas.getWidth() - getPaddingLeft() - getPaddingRight() - (int) getLineWidth();
-        final int canvasHeight = canvas.getHeight() - getPaddingTop() - getPaddingBottom() - (int) getLineWidth();
+        final int canvasWidth = w - getPaddingLeft() - getPaddingRight() - (int) getLineWidth();
+        final int canvasHeight = h - getPaddingTop() - getPaddingBottom() - (int) getLineWidth();
 
         if (canvasHeight >= canvasWidth) {
             oval = new RectF(0, 0, canvasWidth*factor, canvasWidth*factor);

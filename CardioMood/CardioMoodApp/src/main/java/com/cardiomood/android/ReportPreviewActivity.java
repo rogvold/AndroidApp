@@ -87,4 +87,8 @@ public class ReportPreviewActivity extends Activity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        finish();
+    }
 }

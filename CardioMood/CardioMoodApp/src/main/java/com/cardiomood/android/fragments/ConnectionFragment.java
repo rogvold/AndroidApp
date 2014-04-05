@@ -39,6 +39,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cardiomood.android.MonitoringActivity;
 import com.cardiomood.android.R;
 import com.cardiomood.android.SessionDetailsActivity;
 import com.cardiomood.android.db.model.HeartRateSession;
@@ -160,6 +161,7 @@ public class ConnectionFragment extends Fragment {
                 if (newStatus == LeHRMonitor.INITIAL_STATUS) {
                     setDisconnectedView();
                 }
+
             }
 
             updateView();
@@ -240,6 +242,12 @@ public class ConnectionFragment extends Fragment {
             public String getLabelFor(float progress, float max, Paint paint) {
                 paint.setTypeface(Typeface.DEFAULT_BOLD);
                 return mBluetoothLeService.getMonitor().getLastBPM() + " bpm";
+            }
+        });
+        measurementProgress.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openMonitor();
             }
         });
 
@@ -375,8 +383,8 @@ public class ConnectionFragment extends Fragment {
     }
 
     private void openMonitor() {
-        Toast.makeText(getActivity(), R.string.this_feature_will_be_available_soon, Toast.LENGTH_SHORT).show();
-        //startActivity(new Intent(getActivity(), MonitoringActivity.class));
+        //Toast.makeText(getActivity(), R.string.this_feature_will_be_available_soon, Toast.LENGTH_SHORT).show();
+        startActivity(new Intent(getActivity(), MonitoringActivity.class));
     }
 
     private void setDisconnectedView() {
