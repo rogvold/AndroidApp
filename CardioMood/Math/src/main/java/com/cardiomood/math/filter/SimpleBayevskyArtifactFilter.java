@@ -3,7 +3,7 @@ package com.cardiomood.math.filter;
 /**
  * Created by danon on 03.03.14.
  */
-public class SimpleBayevskyFilter implements Filter {
+public class SimpleBayevskyArtifactFilter implements ArtifactFilter {
 
     @Override
     public double[] doFilter(double[] rr) {
@@ -12,9 +12,9 @@ public class SimpleBayevskyFilter implements Filter {
             double a = rrIntervals[i-1];
             double x = rrIntervals[i];
             double b = rrIntervals[i+1];
-            if (Math.abs(x/b-1) > 0.2) {
+            if (Math.abs(x/b-1) >= 0.2) {
                 rrIntervals[i] = Math.abs((a + b) / 2);
-            } else if (Math.abs(x/a-1) > 0.2)
+            } else if (Math.abs(x/a-1) >= 0.2)
                 rrIntervals[i] = Math.abs((a + b) / 2);
         }
         return rrIntervals;
@@ -27,9 +27,9 @@ public class SimpleBayevskyFilter implements Filter {
             double a = rr[i-1];
             double x = rr[i];
             double b = rr[i+1];
-            if (Math.abs(x/b-1) > 0.2) {
+            if (Math.abs(x/b-1) >= 0.2) {
                 count++;
-            } else if (Math.abs(x/a-1) > 0.2) {
+            } else if (Math.abs(x/a-1) >= 0.2) {
                 count++;
             }
         }

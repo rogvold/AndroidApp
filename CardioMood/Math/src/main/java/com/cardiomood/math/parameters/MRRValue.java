@@ -5,7 +5,7 @@ import org.apache.commons.math3.stat.StatUtils;
 /**
  * Created by danon on 18.02.14.
  */
-public class MeanValue extends AbstractSingleValue {
+public class MRRValue extends AbstractSingleValue {
 
     @Override
     public String getName() {

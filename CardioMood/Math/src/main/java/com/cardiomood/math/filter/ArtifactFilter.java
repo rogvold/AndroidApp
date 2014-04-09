@@ -1,6 +1,6 @@
 package com.cardiomood.math.filter;
 
-public interface Filter {
+public interface ArtifactFilter {
 
     double[] doFilter(double[] rrIntervals);
 
