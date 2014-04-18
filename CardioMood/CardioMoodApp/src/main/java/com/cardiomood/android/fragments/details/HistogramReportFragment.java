@@ -6,7 +6,6 @@ import com.cardiomood.android.R;
 import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
 import com.cardiomood.android.db.model.HeartRateDataItem;
 import com.cardiomood.android.db.model.HeartRateSession;
-import com.cardiomood.math.HeartRateMath;
 import com.cardiomood.math.histogram.Histogram;
 import com.shinobicontrols.charts.Axis;
 import com.shinobicontrols.charts.CategoryAxis;
@@ -47,24 +46,22 @@ public class HistogramReportFragment extends AbstractSessionReportFragment {
     }
 
     @Override
-    protected HeartRateMath collectDataInBackground(HeartRateSession session) {
+    protected double[] collectDataInBackground(HeartRateSession session) {
         List<HeartRateDataItem> items = hrDAO.getItemsBySessionId(session.getId());
 
         double[] rr = new double[items.size()];
         for (int i=0; i<items.size(); i++) {
             rr[i] = items.get(i).getRrTime();
         }
-        return new HeartRateMath(rr);
+        return rr;
     }
 
     @Override
-    protected void displayData(HeartRateMath hrm) {
+    protected void displayData(double[] rr) {
         ShinobiChart chart = getChart();
         chart.setTitle("Histogram");
         Axis xAxis = chart.getXAxis();
         Axis yAxis = chart.getYAxis();
-        // prepare source data
-        double rr[] = hrm.getRrIntervals();
 
         // Histogram Chart
         xAxis.enableGesturePanning(true);

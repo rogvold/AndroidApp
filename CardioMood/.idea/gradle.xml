@@ -8,15 +8,15 @@
         <option name="modules">
           <set>
             <option value="D:\Develop\android\CardioMood\CardioMood" />
+            <option value="D:\Develop\android\CardioMood\CardioMood\AndroidControls" />
             <option value="D:\Develop\android\CardioMood\CardioMood\CardioMoodApp" />
             <option value="D:\Develop\android\CardioMood\CardioMood\CardioSportApp" />
-            <option value="D:\Develop\android\CardioMood\CardioMood\CircularProgressBar" />
             <option value="D:\Develop\android\CardioMood\CardioMood\ClientServerInteraction" />
             <option value="D:\Develop\android\CardioMood\CardioMood\CommonTools" />
             <option value="D:\Develop\android\CardioMood\CardioMood\HeartRate" />
+            <option value="D:\Develop\android\CardioMood\CardioMood\HeartRateApp" />
             <option value="D:\Develop\android\CardioMood\CardioMood\Math" />
             <option value="D:\Develop\android\CardioMood\CardioMood\ShinobiCharts" />
-            <option value="D:\Develop\android\CardioMood\CardioMood\SpeedometerView" />
           </set>
         </option>
       </GradleProjectSettings>

@@ -90,8 +90,7 @@
     <orderEntry type="library" exported="" name="GraphView-3.0" level="project" />
     <orderEntry type="module" module-name="ShinobiCharts" exported="" />
     <orderEntry type="module" module-name="CommonTools" exported="" />
-    <orderEntry type="module" module-name="CircularProgressBar" exported="" />
-    <orderEntry type="module" module-name="SpeedometerView" exported="" />
+    <orderEntry type="module" module-name="AndroidControls" exported="" />
     <orderEntry type="module" module-name="Math" exported="" />
     <orderEntry type="module" module-name="ClientServerInteraction" exported="" />
     <orderEntry type="module" module-name="HeartRate" exported="" />

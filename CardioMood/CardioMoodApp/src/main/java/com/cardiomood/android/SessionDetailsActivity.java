@@ -30,9 +30,11 @@ import com.cardiomood.android.db.model.HeartRateSession;
 import com.cardiomood.android.db.model.SessionStatus;
 import com.cardiomood.android.fragments.details.AbstractSessionReportFragment;
 import com.cardiomood.android.fragments.details.HistogramReportFragment;
+import com.cardiomood.android.fragments.details.OrganizationAReportFragment;
 import com.cardiomood.android.fragments.details.OveralSessionReportFragment;
 import com.cardiomood.android.fragments.details.ScatterogramReportFragment;
 import com.cardiomood.android.fragments.details.SpectralAnalysisReportFragment;
+import com.cardiomood.android.fragments.details.StressIndexReportFragment;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.data.CardioMoodServer;
@@ -44,8 +46,10 @@ import com.flurry.android.FlurryAgent;
 
 import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 public class SessionDetailsActivity extends ActionBarActivity implements ActionBar.TabListener {
 
@@ -78,6 +82,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
     private HeartRateDataItemDAO hrDAO;
     private PreferenceHelper pHelper;
     private DataServiceHelper dataServiceHelper;
+    private Set<AbstractSessionReportFragment> reportFragments = new HashSet<AbstractSessionReportFragment>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,7 +109,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
         // Set up the ViewPager with the sections adapter.
         mViewPager = (CustomViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-        mViewPager.setOffscreenPageLimit(4);
+        mViewPager.setOffscreenPageLimit(6);
         mViewPager.setPagingEnabled(true);
 
         // When swiping between different sections, select the corresponding
@@ -204,10 +209,14 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
                 case 0:
                     return AbstractSessionReportFragment.newInstance(OveralSessionReportFragment.class, sessionId);
                 case 1:
-                    return AbstractSessionReportFragment.newInstance(SpectralAnalysisReportFragment.class, sessionId);
+                    return AbstractSessionReportFragment.newInstance(StressIndexReportFragment.class, sessionId);
                 case 2:
-                    return AbstractSessionReportFragment.newInstance(HistogramReportFragment.class, sessionId);
+                    return AbstractSessionReportFragment.newInstance(OrganizationAReportFragment.class, sessionId);
                 case 3:
+                    return AbstractSessionReportFragment.newInstance(SpectralAnalysisReportFragment.class, sessionId);
+                case 4:
+                    return AbstractSessionReportFragment.newInstance(HistogramReportFragment.class, sessionId);
+                case 5:
                     return AbstractSessionReportFragment.newInstance(ScatterogramReportFragment.class, sessionId);
             }
             return null;
@@ -215,8 +224,8 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
 
         @Override
         public int getCount() {
-            // Show 4 total pages.
-            return 4;
+            // Show 6 total pages.
+            return 6;
         }
 
         @Override
@@ -226,10 +235,14 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
                 case 0:
                     return "General Info".toUpperCase(l);
                 case 1:
-                    return "Spectral Analysis".toUpperCase(l);
+                    return "Stress Index".toUpperCase(l);
                 case 2:
-                    return "Histogram".toUpperCase(l);
+                    return "\"A\" Organization".toUpperCase(l);
                 case 3:
+                    return "Spectral Analysis".toUpperCase(l);
+                case 4:
+                    return "Histogram".toUpperCase(l);
+                case 5:
                     return "Scatterogram".toUpperCase(l);
             }
             return null;
@@ -354,6 +367,12 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
             case android.R.id.home:
                 NavUtils.navigateUpFromSameTask(this);
                 return true;
+            case R.id.menu_remove_artifacts:
+                removeArtifacts();
+                return true;
+            case R.id.menu_undo_remove_artifacts:
+                undoRemoveArtifacts();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -363,6 +382,26 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
         MenuItem item = menu.findItem(R.id.menu_rename);
         item.setEnabled(!isPredefinedSession(sessionId));
         return super.onPrepareOptionsMenu(menu);
+    }
+
+    public void registerFragment(AbstractSessionReportFragment fragment) {
+        reportFragments.add(fragment);
+    }
+
+    public void unregisterFragment(AbstractSessionReportFragment fragment) {
+        reportFragments.remove(fragment);
+    }
+
+    private void removeArtifacts() {
+        for (AbstractSessionReportFragment fragment: reportFragments) {
+            fragment.removeArtifacts();
+        }
+    }
+
+    private void undoRemoveArtifacts() {
+        for (AbstractSessionReportFragment fragment: reportFragments) {
+            fragment.undoRemoveArtifacts();
+        }
     }
 
     private boolean isPredefinedSession(long sessionId) {

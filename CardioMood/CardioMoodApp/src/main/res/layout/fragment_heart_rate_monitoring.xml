@@ -62,26 +62,88 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <com.cardiomood.android.progress.CircularProgressBar
+            <com.cardiomood.android.controls.progress.CircularProgressBar
                 android:layout_width="150dp"
                 android:layout_height="150dp"
                 android:layout_gravity="center_horizontal"
                 android:id="@+id/measurement_progress"
-                app:lineWidth="32dp"
-                app:textSize="22sp" />
+                app:lineWidth="24dp"
+                android:padding="8dp"
+                app:textSize="20sp" />
 
-            <com.cardiomood.android.progress.BatteryIndicatorGauge
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:orientation="horizontal"
-                app:max="3.5"
-                android:id="@+id/battery"
-            />
+                android:orientation="vertical">
 
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingBottom="8dp"
+                    android:paddingTop="8dp">
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_weight="1">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:textAppearance="?android:attr/textAppearanceMedium"
+                            android:text="@string/stress_index" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:textAppearance="?android:attr/textAppearanceLarge"
+                            android:text="N/A"
+                            android:id="@+id/stressIndexValue"
+                            android:textStyle="bold"/>
+                        <com.cardiomood.android.controls.gauge.SpeedometerGauge
+                            android:id="@+id/stressIndicator"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center"
+                            android:layout_weight="1"
+                            android:layout_margin="8dp"
+                            />
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_weight="3">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:textAppearance="?android:attr/textAppearanceMedium"
+                            android:text="@string/energy" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:textAppearance="?android:attr/textAppearanceLarge"
+                            android:text="N/A"
+                            android:id="@+id/energy_level"
+                            android:textStyle="bold"/>
+                        <com.cardiomood.android.controls.gauge.BatteryIndicatorGauge
+                            android:layout_width="fill_parent"
+                            android:layout_height="fill_parent"
+                            app:orientation="vertical"
+                            app:max="100"
+                            android:layout_margin="8dp"
+                            android:id="@+id/battery"
+                            android:layout_weight="3"
+                            android:layout_gravity="center"
+                            />
+                    </LinearLayout>
+                </LinearLayout>
 
+            </LinearLayout>
 
         </LinearLayout>
-
     </ScrollView>
 
  </FrameLayout>

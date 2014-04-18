@@ -59,7 +59,6 @@ dependencies {
     compile project(':CommonTools')
     compile project(':Math')
     compile project(':ShinobiCharts')
-    compile project(':SpeedometerView')
-    compile project(':CircularProgressBar')
+    compile project(':AndroidControls')
     compile project(':ClientServerInteraction')
 }

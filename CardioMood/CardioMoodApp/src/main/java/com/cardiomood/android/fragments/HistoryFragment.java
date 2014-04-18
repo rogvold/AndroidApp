@@ -322,7 +322,8 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
 
             try {
                 List<HeartRateSession> sessions = sessionDAO.getSessions(
-                        "((" + HeartRateSession.COLUMN_NAME_EXTERNAL_ID + " is null) or ("
+                        "((" + HeartRateSession.COLUMN_NAME_EXTERNAL_ID + " is null and "
+                                + HeartRateSession.COLUMN_NAME_STATUS + " <> '" + SessionStatus.IN_PROGRESS + "') or ("
                                 + HeartRateSession.COLUMN_NAME_STATUS + " == '" + SessionStatus.COMPLETED + "')) and "
                                 + HeartRateSession.COLUMN_NAME_USER_ID + "=?",
                         new String[]{String.valueOf(userId)}

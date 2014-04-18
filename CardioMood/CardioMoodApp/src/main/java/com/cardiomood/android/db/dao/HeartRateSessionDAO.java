@@ -8,6 +8,7 @@ import android.util.Log;
 import com.cardiomood.android.db.HeartRateDBContract;
 import com.cardiomood.android.db.model.HeartRateDataItem;
 import com.cardiomood.android.db.model.HeartRateSession;
+import com.cardiomood.android.db.model.SessionStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.List;
 public class HeartRateSessionDAO extends BaseDAO<HeartRateSession> implements HeartRateDBContract.Sessions {
 	
 	private static final String [] ALL_COLUMNS = new String[] {
-		_ID, COLUMN_NAME_USER_ID, COLUMN_NAME_EXTERNAL_ID, COLUMN_NAME_NAME, COLUMN_NAME_DESCRIPTION, COLUMN_NAME_DATE_STARTED,
+		_ID, COLUMN_NAME_USER_ID, COLUMN_NAME_EXTERNAL_ID, COLUMN_NAME_ORIGINAL_SESSION_ID, COLUMN_NAME_NAME, COLUMN_NAME_DESCRIPTION, COLUMN_NAME_DATE_STARTED,
 		COLUMN_NAME_DATE_ENDED, COLUMN_NAME_STATUS
 	};
 
@@ -32,6 +33,7 @@ public class HeartRateSessionDAO extends BaseDAO<HeartRateSession> implements He
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME_USER_ID, item.getUserId());
         values.put(COLUMN_NAME_EXTERNAL_ID, item.getExternalId());
+        values.put(COLUMN_NAME_ORIGINAL_SESSION_ID, item.getOriginalSessionId());
         values.put(COLUMN_NAME_NAME, item.getName());
         values.put(COLUMN_NAME_DESCRIPTION, item.getDescription());
         values.put(COLUMN_NAME_DATE_STARTED, item.getDateStarted() == null ? null : item.getDateStarted().getTime());
@@ -130,8 +132,8 @@ public class HeartRateSessionDAO extends BaseDAO<HeartRateSession> implements He
             Cursor cursor = db.query(
                     getTableName(),
                     getColumnNames(),
-                    COLUMN_NAME_USER_ID +"=?",
-                    new String[]{String.valueOf(userId)},
+                    COLUMN_NAME_USER_ID +"=? and " + COLUMN_NAME_STATUS + "<>?",
+                    new String[]{String.valueOf(userId), String.valueOf(SessionStatus.IN_PROGRESS)},
                     null,
                     null,
                     _ID + " desc limit "+step+" offset " + from);

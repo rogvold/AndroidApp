@@ -8,11 +8,12 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.cardiomood.android.R;
+import com.cardiomood.android.controls.gauge.SpeedometerGauge;
 import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
 import com.cardiomood.android.db.model.HeartRateDataItem;
 import com.cardiomood.android.db.model.HeartRateSession;
-import com.cardiomood.android.speedometer.SpeedometerView;
-import com.cardiomood.math.HeartRateMath;
+import com.cardiomood.math.HeartRateUtils;
+import com.cardiomood.math.window.DataWindow;
 import com.shinobicontrols.charts.Axis;
 import com.shinobicontrols.charts.DataAdapter;
 import com.shinobicontrols.charts.DataPoint;
@@ -40,7 +41,7 @@ public class OveralSessionReportFragment extends AbstractSessionReportFragment {
     // Components in this fragment view:
     private TextView meanHeartRate;
     private TextView meanStressIndex;
-    private SpeedometerView speedometer;
+    private SpeedometerGauge speedometer;
 
 
     @Override
@@ -56,8 +57,8 @@ public class OveralSessionReportFragment extends AbstractSessionReportFragment {
         meanHeartRate = (TextView) v.findViewById(R.id.mean_hear_rate);
         meanStressIndex = (TextView) v.findViewById(R.id.mean_stress);
 
-        speedometer = (SpeedometerView) v.findViewById(R.id.speedometer);
-        speedometer.setLabelConverter(new SpeedometerView.LabelConverter() {
+        speedometer = (SpeedometerGauge) v.findViewById(R.id.speedometer);
+        speedometer.setLabelConverter(new SpeedometerGauge.LabelConverter() {
             @Override
             public String getLabelFor(double progress, double maxProgress) {
                 return String.valueOf((int) Math.round(progress));
@@ -89,7 +90,7 @@ public class OveralSessionReportFragment extends AbstractSessionReportFragment {
     }
 
     @Override
-    protected HeartRateMath collectDataInBackground(HeartRateSession session) {
+    protected double[] collectDataInBackground(HeartRateSession session) {
         long sessionId = session.getId();
         List<HeartRateDataItem> items = hrDAO.getItemsBySessionId(sessionId);
 
@@ -97,28 +98,28 @@ public class OveralSessionReportFragment extends AbstractSessionReportFragment {
         for (int i=0; i<items.size(); i++) {
             rr[i] = items.get(i).getRrTime();
         }
-        HeartRateMath math = new HeartRateMath(rr);
-        return math;
+        return rr;
     }
 
     @Override
-    protected void displayData(HeartRateMath hrm) {
+    protected void displayData(double[] rr) {
         ShinobiChart chart = getChart();
         chart.setTitle("Heart Rate");
         Axis xAxis = chart.getXAxis();
         Axis yAxis = chart.getYAxis();
 
-        double rr[] = hrm.getRrIntervals();
-        double time[] = hrm.getTime();
+        double time[] = new double[rr.length];
+        for (int i=1; i<rr.length; i++)
+            time[i] = time[i-1] + rr[i];
         double bpm[] = new double[rr.length];
         for (int i=0; i<rr.length; i++)
             bpm[i] = 1000*60/rr[i];
 
         double meanBPM = StatUtils.mean(bpm);
         meanHeartRate.setText(String.valueOf(Math.round(meanBPM)));
-        double stressIndex = hrm.getTotalStressIndex();
+        double stressIndex = StatUtils.mean(HeartRateUtils.getSI(rr, new DataWindow.Timed(2 * 1000 * 60, 5000))[1]);
         meanStressIndex.setText(String.valueOf(Math.round(stressIndex)));
-        speedometer.setSpeed(stressIndex, 1200, 400);
+        speedometer.setSpeed(stressIndex, 1200, 200);
 
         SplineInterpolator interpol = new SplineInterpolator();
         PolynomialSplineFunction f = interpol.interpolate(time, bpm);

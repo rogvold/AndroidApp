@@ -22,33 +22,7 @@ public abstract class DataWindow {
         this.windowSize = windowSize;
         this.stepSize = stepSize;
 
-        intervals = new ResizableDoubleArray() {
-            @Override
-            public synchronized double addElementRolling(double value) {
-                if (callback != null) {
-                    callback.onMove(DataWindow.this, duration, value);
-                }
-
-                double discarded = super.addElementRolling(value);
-                time.addElementRolling(duration);
-                duration += value - discarded;
-                indexPosition++;
-                timePosition += discarded;
-
-                return discarded;
-            }
-
-            @Override
-            public synchronized void addElement(double value) {
-                if (callback != null) {
-                    value = callback.onAdd(DataWindow.this, duration, value);
-                }
-                super.addElement(value);
-                time.addElement(duration);
-                duration += value;
-            }
-
-        };
+        intervals = new LocalResizableDoubleArray();
         time = new ResizableDoubleArray();
     }
 
@@ -57,9 +31,17 @@ public abstract class DataWindow {
     public final void add(double... intervals) {
         for (double interval: intervals) {
             if (addIntervalAndMove(interval) && callback != null) {
-                   callback.onStep(this, duration, interval);
+                   callback.onStep(this, indexPosition + getCount(), duration+timePosition, interval);
             }
         }
+    }
+
+    public void clear() {
+        timePosition = 0;
+        indexPosition = 0;
+        intervals.clear();
+        time.clear();
+        duration = 0;
     }
 
     public DoubleArray getIntervals() {
@@ -102,27 +84,47 @@ public abstract class DataWindow {
         return time;
     }
 
-    public interface Callback {
+    public int getCount() {
+        return getIntervals().getNumElements();
+    }
+
+    public interface Callback<T extends DataWindow> {
         /**
          * Invoked before window is moved (i.e. before calling addElementRolling()).
          * @param window Instance, representing current window instance.
          * @param t Time (x) of the interval.
          * @param value Value (y) that is going to be added to the window.
-         * @param <T> Specific implementation (class) of abstract window
          */
-        <T extends DataWindow> void onMove(T window, double t, double value);
+        void onMove(T window, double t, double value);
 
         /**
          * Always invoked before adding next element to the window.
          * @param window Instance, representing current window instance.
          * @param t Time (x) of the interval.
          * @param value Value (y) that is going to be added to the window.
-         * @param <T> Specific implementation (class) of abstract window.
          * @return Actual value that will be added to the window.
          */
-        <T extends DataWindow> double onAdd(T window, double t, double value);
+        double onAdd(T window, double t, double value);
 
-        <T extends DataWindow> void onStep(T window, double t, double value);
+        void onStep(T window, int index, double t, double value);
+    }
+
+    public static class CallbackAdapter<T  extends DataWindow> implements Callback<T> {
+
+        @Override
+        public void onMove(T window, double t, double value) {
+
+        }
+
+        @Override
+        public double onAdd(T window, double t, double value) {
+            return value;
+        }
+
+        @Override
+        public void onStep(T window, int index, double t, double value) {
+
+        }
     }
 
     public static class Timed extends DataWindow {
@@ -158,7 +160,7 @@ public abstract class DataWindow {
 
             if (position - lastPosition >= stepSize) {
                 // callback.onStep() will be invoked
-                lastPosition = Math.floor(position / stepSize) * stepSize;
+                lastPosition = (Math.round(position) / ((long) stepSize)) * (long) stepSize;
                 return true;
             }
 
@@ -167,22 +169,22 @@ public abstract class DataWindow {
         }
     }
 
-    public static class Unlimited extends DataWindow {
+    public static class UnlimitedWithTimeStep extends DataWindow {
 
         private double lastDuration = 0;
 
-        public Unlimited(double windowSize, double stepSize) {
-            super(windowSize, stepSize);
+        public UnlimitedWithTimeStep(double stepSize) {
+            super(0, stepSize);
         }
 
         @Override
         protected boolean addIntervalAndMove(double interval) {
             // add element and update window size
             getIntervals().addElement(interval);
-            setWindowSize(getDuration());
+            double duration = getDuration();
+            setWindowSize(duration);
 
             // notify about next step if necessary
-            double duration = getDuration();
             double stepSize = getStepSize();
             if (duration - lastDuration < stepSize) {
                 // onStep() will not be invoked!
@@ -191,6 +193,36 @@ public abstract class DataWindow {
 
             // next window step
             lastDuration = duration;
+            // onStep() will be invoked
+            return true;
+        }
+    }
+
+    public static class UnlimitedWithCountStep extends DataWindow {
+
+        private int lastCount = 0;
+
+        public UnlimitedWithCountStep(double stepSize) {
+            super(0, stepSize);
+        }
+
+        @Override
+        protected boolean addIntervalAndMove(double interval) {
+            // add element and update window size
+            getIntervals().addElement(interval);
+            int count = getCount();
+            setWindowSize(getIntervals().getNumElements());
+
+            // notify about next step if necessary
+
+            double stepSize = getStepSize();
+            if (count - lastCount < stepSize) {
+                // onStep() will not be invoked!
+                return false;
+            }
+
+            // next window step
+            lastCount = count;
             // onStep() will be invoked
             return true;
         }
@@ -207,20 +239,18 @@ public abstract class DataWindow {
         @Override
         protected boolean addIntervalAndMove(double interval) {
             // add element
-            int count = getIntervals().getNumElements();
+            int count = getCount();
             double windowSize = getWindowSize();
-            boolean flag = getIndexPosition() == 0;
             if (count + 1 > windowSize) {
                 // callback.onMove() will be invoked
                 getIntervals().addElementRolling(interval);
             } else {
                 getIntervals().addElement(interval);
+                if (getCount() == (int) Math.round(getWindowSize())) {
+                    return true;
+                }
             }
 
-            if (flag && getIndexPosition() == 1) {
-                // position was 0 and now is 1
-                return true;
-            }
             // notify about next step if necessary
             int stepSize = (int) Math.round(getStepSize());
             int position = getIndexPosition();
@@ -235,4 +265,30 @@ public abstract class DataWindow {
         }
     }
 
+    private class LocalResizableDoubleArray extends ResizableDoubleArray {
+        @Override
+        public synchronized double addElementRolling(double value) {
+            if (callback != null) {
+                callback.onMove(DataWindow.this, duration + timePosition, value);
+            }
+
+            double discarded = super.addElementRolling(value);
+            time.addElementRolling(duration);
+            duration += value - discarded;
+            indexPosition++;
+            timePosition += discarded;
+
+            return discarded;
+        }
+
+        @Override
+        public synchronized void addElement(double value) {
+            if (callback != null) {
+                value = callback.onAdd(DataWindow.this, duration + timePosition, value);
+            }
+            super.addElement(value);
+            time.addElement(duration);
+            duration += value;
+        }
+    }
 }

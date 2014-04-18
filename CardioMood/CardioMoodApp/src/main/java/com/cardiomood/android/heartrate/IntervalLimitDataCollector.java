@@ -20,24 +20,13 @@ public class IntervalLimitDataCollector extends AbstractDataCollector {
 
     @Override
     public boolean needToStopCollecting() {
-        return math.getCount() >= intervalsLimit;
+        return getIntervalsCount() >= intervalsLimit;
     }
 
-    @Override
-    public void onCompleteCollecting() {
-        super.onCompleteCollecting();
-
-        // save data :)
-        if (needToStopCollecting()) {
-            // enough data were collected
-        } else {
-            // remove session
-        }
-    }
 
     @Override
     public double getProgress() {
-        double progress = (100.0*math.getCount()) / intervalsLimit;
+        double progress = (100.0*getIntervalsCount()) / intervalsLimit;
         if (progress > 100)
             progress = 100;
         return progress;

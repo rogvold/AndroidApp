@@ -6,7 +6,6 @@ import com.cardiomood.android.R;
 import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
 import com.cardiomood.android.db.model.HeartRateDataItem;
 import com.cardiomood.android.db.model.HeartRateSession;
-import com.cardiomood.math.HeartRateMath;
 import com.cardiomood.math.spectrum.SpectralAnalysis;
 import com.shinobicontrols.charts.Axis;
 import com.shinobicontrols.charts.DataPoint;
@@ -50,17 +49,19 @@ public class SpectralAnalysisReportFragment extends AbstractSessionReportFragmen
     }
 
     @Override
-    protected HeartRateMath collectDataInBackground(HeartRateSession session) {
-        List<HeartRateDataItem> items = hrDAO.getItemsBySessionId(session.getId());
+    protected double[] collectDataInBackground(HeartRateSession session) {
+        long sessionId = session.getId();
+        List<HeartRateDataItem> items = hrDAO.getItemsBySessionId(sessionId);
+
         double[] rr = new double[items.size()];
         for (int i=0; i<items.size(); i++) {
             rr[i] = items.get(i).getRrTime();
         }
-        return new HeartRateMath(rr);
+        return rr;
     }
 
     @Override
-    protected void displayData(HeartRateMath hrm) {
+    protected void displayData(double[] rr) {
         ShinobiChart chart = getChart();
         chart.setTitle("Spectral Power");
         Axis xAxis = chart.getXAxis();
@@ -74,8 +75,9 @@ public class SpectralAnalysisReportFragment extends AbstractSessionReportFragmen
         yAxis.getStyle().getTitleStyle().setTextSize(12);
 
         // prepare source data
-        double rr[] = hrm.getRrIntervals();
-        double time[] = hrm.getTime();
+        double time[] = new double[rr.length];
+        for (int i=1; i<rr.length; i++)
+            time[i] = time[i-1] + rr[i];
         double bpm[] = new double[rr.length];
         for (int i=0; i<rr.length; i++)
             bpm[i] = 1000*60/rr[i];

@@ -66,6 +66,21 @@ public class Histogram {
         ARRP = AMo/Mo;
     }
 
+    public double getA() {
+        double H = 0;
+        int a = (int) Math.floor(300/step);
+        int b = (int) Math.floor(2200/step);
+        int n = 0;
+        for (int i=a; i<count.length && i<=b; i++) {
+            double p = (double) count[i] / values.length;
+            if (p > 1e-10)
+                H -= p * Math.log(p);
+            n++;
+        }
+        double Hm = Math.log(n);
+        return 1.0 - H/Hm;
+    }
+
     public double getWidthAbove(int x) {
         int min = -1;
         int max = -1;

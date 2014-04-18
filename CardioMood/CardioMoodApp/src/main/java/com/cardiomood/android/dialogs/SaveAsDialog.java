@@ -40,16 +40,16 @@ public class SaveAsDialog extends Dialog {
     private long sessionId;
     private Context mContext;
     private ListView mListView;
-    private View viewToSave;
+    private int filterCount = 0;
 
     private boolean savingInProgress = false;
     private SavingCallback savingCallback;
 
-    public SaveAsDialog(Context context, long sessionId, View viewToSave) {
+    public SaveAsDialog(Context context, long sessionId, int filterCount) {
         super(context, android.R.style.Theme_Holo_Light_Dialog);
         mContext = context;
         this.sessionId = sessionId;
-        this.viewToSave = viewToSave;
+        this.filterCount = filterCount;
     }
 
     @Override
@@ -179,10 +179,11 @@ public class SaveAsDialog extends Dialog {
                 for (int i=0; i<items.size(); i++)
                     rr[i] = items.get(i).getRrTime();
                 reportBuilder.setRRIntervals(rr);
+                reportBuilder.setFilterCount(filterCount);
                 pw.println(reportBuilder.build().toString());
                 pw.println();
                 pw.flush();
-                pw.println("Source data:");
+                pw.println("The numbers above were calculated using following data:");
                 pw.printf("%4s  %-14s  %-4s %-3s%n", "n", "timestamp", "rr", "bpm");
                 int i = 1;
                 for (HeartRateDataItem item: items) {

@@ -1,10 +1,12 @@
 package com.cardiomood.android.fragments.details;
 
-import com.cardiomood.math.HeartRateMath;
-import com.cardiomood.math.filter.SimpleBayevskyFilter;
+import com.cardiomood.math.HeartRateUtils;
+import com.cardiomood.math.filter.ArtifactFilter;
+import com.cardiomood.math.filter.PisarukArtifactFilter;
 import com.cardiomood.math.histogram.Histogram;
 import com.cardiomood.math.histogram.Histogram128Ext;
 import com.cardiomood.math.spectrum.SpectralAnalysis;
+import com.cardiomood.math.window.DataWindow;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -22,7 +24,7 @@ public class TextReport {
                     "\n" +
                     "Date: \t\t\t%1$s\n" +
                     "Measurement time:\t%2$s\n" +
-                    "Intervals count:\t%3$d with %33$d artifacts (%34$d%%)\n" +
+                    "Intervals count:\t%3$d with %33$d artifacts present (%34$d%%)\n" +
                     "Tag: %4$s\n" +
                     "\n" +
                     "\n" +
@@ -69,11 +71,14 @@ public class TextReport {
                     "L/W =\tN/A\n" +
                     "S   =\tN/A\n";
 
+    private static final ArtifactFilter FILTER = new PisarukArtifactFilter();
+
     private String reportFormat = DEFAULT_REPORT_FORMAT;
     private Date startDate;
     private Date endDate;
     private String tag;
     private double[] rrIntervals;
+    private int artifactsCount = 0;
 
     private double heartRate;
     private double mRR;
@@ -143,7 +148,6 @@ public class TextReport {
 
     @Override
     public String toString() {
-        int artifactsCount = new SimpleBayevskyFilter().getArtifactsCount(rrIntervals);
         return String.format(
                 getReportFormat(),
                 DATE_FORMAT.format(getStartDate()),
@@ -187,6 +191,7 @@ public class TextReport {
     public static class Builder {
 
         private TextReport report;
+        private int filterCount;
 
         public Builder() {
             report = new TextReport();
@@ -218,22 +223,37 @@ public class TextReport {
         }
 
         public TextReport build() {
-            HeartRateMath math = new HeartRateMath(report.rrIntervals);
-            report.rrIntervals = math.getRrIntervals();
-
             if (report.endDate == null)
-                report.endDate = new Date(report.startDate.getTime() + Math.round(math.getDuration()));
+                report.endDate = new Date(report.startDate.getTime() + Math.round(HeartRateUtils.getSum(report.rrIntervals)));
 
-            report.spectrum = new SpectralAnalysis(math.getTime(), math.getRrIntervals());
+            for (int i=0; i<filterCount; i++) {
+                report.rrIntervals = FILTER.doFilter(report.rrIntervals);
+            }
+            report.artifactsCount = FILTER.getArtifactsCount(report.rrIntervals);
+
+
+            double[][] si = HeartRateUtils.getSI(report.rrIntervals, new DataWindow.Timed(2*60*1000, 5000));
+            double[][] d = HeartRateUtils.getSDNN(report.rrIntervals, new DataWindow.IntervalsCount(20, 5));
+            System.out.println(si.length + " " + d.length);
+
+            report.spectrum = new SpectralAnalysis(report.rrIntervals);
             report.histogram50 = new Histogram(report.rrIntervals, 50);
-            report.mRR = math.getMean();
+            report.mRR = HeartRateUtils.getMRR(report.rrIntervals);
             report.heartRate = 60*1000 / report.mRR;
-            report.SDNN = math.getSDNN();
-            report.RMSSD = math.getRMSSD();
-            report.pNN50 = math.getPNN50();
+            report.SDNN = HeartRateUtils.getSDNN(report.rrIntervals);
+            report.RMSSD = HeartRateUtils.getRMSSD(report.rrIntervals);
+            report.pNN50 = HeartRateUtils.getPNN50(report.rrIntervals);
             report.histogram128 = new Histogram128Ext(report.rrIntervals);
 
             return report;
+        }
+
+        public void setFilterCount(int filterCount) {
+            this.filterCount = filterCount;
+        }
+
+        public int getFilterCount() {
+            return filterCount;
         }
     }
 }

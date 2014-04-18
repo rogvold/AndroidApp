@@ -24,7 +24,7 @@ public class TimeLimitDataCollector extends AbstractDataCollector {
 
     @Override
     public double getProgress() {
-        double progress = 100 * math.getDuration() / timeLimit;
+        double progress = 100 * getDuration() / timeLimit;
         if (progress > 100)
             progress = 100;
         return progress;

@@ -8,22 +8,27 @@ public abstract class WorkerThread<T> extends Thread {
 
     public static final long TIMEOUT = 200;
     private final BlockingQueue<T> queue = new LinkedBlockingQueue();
-    private boolean finished = false;
+    private volatile boolean finished = false;
 
     @Override
     public void run() {
         onStart();
-        while (!isInterrupted()) {
+        while (!finished && !isInterrupted()) {
             try {
                 T item = queue.poll(TIMEOUT, TimeUnit.MILLISECONDS);
                 if (!isInterrupted() && item != null) {
                     processItem(item);
                 }
-                if (queue.isEmpty() && finished) {
-                    break;
-                }
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
+            }
+        }
+        if (finished) {
+            int k = queue.size();
+            while (k > 0) {
+                T item = queue.poll();
+                processItem(item);
+                k--;
             }
         }
         onStop();
@@ -38,7 +43,14 @@ public abstract class WorkerThread<T> extends Thread {
     }
 
     public void onStop() {
+    }
 
+    public boolean hasMoreElements() {
+        return !queue.isEmpty();
+    }
+
+    public int getQueueSize() {
+        return queue.size();
     }
 
     public void finishWork() {

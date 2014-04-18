@@ -20,9 +20,9 @@ public class SDNNValue extends AbstractSingleValue {
         return Math.sqrt(StatUtils.populationVariance(y, begin, length));
     }
 
-    protected final double evaluateSDANNt(double[] x, double[] y, int begin, int length, double t) {
+    public double evaluateSDANNt(double[] x, double[] y, int begin, int length, double t) {
         DoubleArray rr = new ResizableDoubleArray();
-        org.apache.commons.math3.stat.descriptive.moment.StandardDeviation stdDev = new StandardDeviation();
+        StandardDeviation stdDev = new StandardDeviation();
         double t0 = 0;
         int i = begin;
         while (i < begin + length) {

@@ -65,6 +65,33 @@ public class DBUpgradeHelper {
                 }
             }
         });
+
+        addUpgrader(23, 24, new DBUpgrader.Callback() {
+
+            @Override
+            public void onUpgrade(SQLiteDatabase db) {
+                try {
+                    String RESET_SESSIONS = "UPDATE " + HeartRateDBContract.Sessions.TABLE_NAME
+                            + " SET " + HeartRateDBContract.Sessions.COLUMN_NAME_STATUS + "=?";
+                    db.execSQL(RESET_SESSIONS, new String[] {String.valueOf(SessionStatus.COMPLETED)});
+                } catch (Exception e) {
+                    Log.d(TAG, "onUpgrade() exception", e);
+                }
+            }
+        });
+        addUpgrader(24, 25, new DBUpgrader.Callback() {
+
+            @Override
+            public void onUpgrade(SQLiteDatabase db) {
+                try {
+                    String ADD_COLUMN_ORIGINAL_SESSION_ID = "ALTER TABLE " + HeartRateDBContract.Sessions.TABLE_NAME
+                            + " ADD COLUMN " + HeartRateDBContract.Sessions.COLUMN_NAME_ORIGINAL_SESSION_ID + " INTEGER";
+                    db.execSQL(ADD_COLUMN_ORIGINAL_SESSION_ID);
+                } catch (Exception e) {
+                    Log.d(TAG, "onUpgrade() exception", e);
+                }
+            }
+        });
     }
 
     public void addUpgrader(int oldVersion, int newVersion, DBUpgrader.Callback callback) {

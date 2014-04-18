@@ -17,6 +17,7 @@ public class HeartRateSession extends Entity implements HeartRateDBContract.Sess
 	private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("h:mm:ss");
 
     private Long externalId;
+    private Long originalSessionId;
 	private Long userId;
 	private String name;
 	private String description;
@@ -34,7 +35,7 @@ public class HeartRateSession extends Entity implements HeartRateDBContract.Sess
         userId = cursor.getLong(cursor.getColumnIndex(COLUMN_NAME_USER_ID));
         if (userId == 0)
             userId = null;
-        this.externalId = cursor.getLong(cursor.getColumnIndex(COLUMN_NAME_EXTERNAL_ID));
+        externalId = cursor.getLong(cursor.getColumnIndex(COLUMN_NAME_EXTERNAL_ID));
         if (externalId == 0L)
             externalId = null;
         name = cursor.getString(cursor.getColumnIndex(COLUMN_NAME_NAME));
@@ -44,6 +45,9 @@ public class HeartRateSession extends Entity implements HeartRateDBContract.Sess
         dateEnded = (ts == 0) ? null : new Date(ts);
         ts = cursor.getLong(cursor.getColumnIndex(COLUMN_NAME_DATE_STARTED));
         dateStarted = (ts == 0) ? null : new Date(ts);
+        originalSessionId = cursor.getLong(cursor.getColumnIndex(COLUMN_NAME_ORIGINAL_SESSION_ID));
+        if (originalSessionId == 0L)
+            originalSessionId = null;
     }
 
     public Long getUserId() {
@@ -82,13 +86,17 @@ public class HeartRateSession extends Entity implements HeartRateDBContract.Sess
 	public void setDateEnded(Date dateEnded) {
 		this.dateEnded = dateEnded;
 	}
-
     public Long getExternalId() {
         return externalId;
     }
-
     public void setExternalId(Long externalId) {
         this.externalId = externalId;
+    }
+    public Long getOriginalSessionId() {
+        return originalSessionId;
+    }
+    public void setOriginalSessionId(Long originalSessionId) {
+        this.originalSessionId = originalSessionId;
     }
 
     @Override

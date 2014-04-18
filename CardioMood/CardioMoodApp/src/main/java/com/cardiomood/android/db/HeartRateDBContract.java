@@ -9,7 +9,7 @@ import android.provider.BaseColumns;
 public interface HeartRateDBContract {
 	
 	String DATABASE_NAME = "heart_rate.db";
-	int DATABASE_VERSION = 23;
+	int DATABASE_VERSION = 25;
 	
 	public static interface HeartRateData extends BaseColumns {
 		String TABLE_NAME = "heart_rate_data";
@@ -22,6 +22,7 @@ public interface HeartRateDBContract {
 	public static interface Sessions extends BaseColumns {
 		String TABLE_NAME = "heart_rate_sessions";
         String COLUMN_NAME_EXTERNAL_ID = "external_id";
+        String COLUMN_NAME_ORIGINAL_SESSION_ID = "original_session_id";
 		String COLUMN_NAME_USER_ID = "user_id";
 		String COLUMN_NAME_NAME = "name";
 		String COLUMN_NAME_DESCRIPTION = "description";
@@ -56,14 +57,17 @@ public interface HeartRateDBContract {
 				"CREATE TABLE " + Sessions.TABLE_NAME + " (" +
 				Sessions._ID + " INTEGER PRIMARY KEY" + COMMA_SEP +
                 Sessions.COLUMN_NAME_EXTERNAL_ID + " INTEGER" + COMMA_SEP +
-			    Sessions.COLUMN_NAME_NAME + TEXT_TYPE + COMMA_SEP +
+                Sessions.COLUMN_NAME_ORIGINAL_SESSION_ID + " INTEGER" + COMMA_SEP +
+                Sessions.COLUMN_NAME_NAME + TEXT_TYPE + COMMA_SEP +
 			    Sessions.COLUMN_NAME_DESCRIPTION + TEXT_TYPE + COMMA_SEP +
 			    Sessions.COLUMN_NAME_USER_ID + " INTEGER" + COMMA_SEP +
 			    Sessions.COLUMN_NAME_DATE_STARTED + " INTEGER" + COMMA_SEP +
 			    Sessions.COLUMN_NAME_DATE_ENDED + " INTEGER" + COMMA_SEP +
 			    Sessions.COLUMN_NAME_STATUS + " INTEGER" + COMMA_SEP +
                 "FOREIGN KEY(" + Sessions.COLUMN_NAME_USER_ID+ ") REFERENCES " +
-                Users.TABLE_NAME + "(" + Users._ID + ")" +
+                Users.TABLE_NAME + "(" + Users._ID + ")" + COMMA_SEP +
+                "FOREIGN KEY(" + Sessions.COLUMN_NAME_ORIGINAL_SESSION_ID + ") REFERENCES " +
+                Sessions.TABLE_NAME + "(" + Sessions._ID + ")" +
 			    " )";
         public static final String CREATE_TABLE_USERS =
                 "CREATE TABLE " + Users.TABLE_NAME + " (" +

@@ -17,6 +17,14 @@ public class SpectralAnalysis {
     private double LF = 0;
     private double HF = 0;
 
+    public SpectralAnalysis(double[] y) {
+        this.algorithm = Algorithm.ACF;
+        spe = algorithm.getInstance(null, y);
+        power = spe.getPower();
+
+        init();
+    }
+
     public SpectralAnalysis(double[] x, double[] y) {
         this(x, y, Algorithm.ACF);
     }
@@ -26,6 +34,10 @@ public class SpectralAnalysis {
         spe = algorithm.getInstance(x, y);
         power = spe.getPower();
 
+        init();
+    }
+
+    private void init() {
         final double step = spe.toFrequency(1);
 
         int i = 1;
@@ -59,7 +71,6 @@ public class SpectralAnalysis {
 
         for (; spe.toFrequency(i) <= 0.5 && i < power.length; i++)
             TP += power[i]*step;
-
     }
 
     public Algorithm getAlgorithm() {
@@ -108,7 +119,7 @@ public class SpectralAnalysis {
         ACF;
 
         public SpectralPowerEvaluator getInstance(double t[], double rr[]) {
-            //rr = new SimpleBayevskyFilter().doFilter(rr);
+            //rr = new SimpleBayevskyArtifactFilter().doFilter(rr);
             switch (this) {
                 case FFT:
                     return new FFT(t, rr);

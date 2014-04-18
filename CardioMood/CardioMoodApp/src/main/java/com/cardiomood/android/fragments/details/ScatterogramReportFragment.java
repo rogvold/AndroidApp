@@ -7,7 +7,6 @@ import com.cardiomood.android.R;
 import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
 import com.cardiomood.android.db.model.HeartRateDataItem;
 import com.cardiomood.android.db.model.HeartRateSession;
-import com.cardiomood.math.HeartRateMath;
 import com.shinobicontrols.charts.Axis;
 import com.shinobicontrols.charts.DataAdapter;
 import com.shinobicontrols.charts.DataPoint;
@@ -51,17 +50,19 @@ public class ScatterogramReportFragment extends AbstractSessionReportFragment {
     }
 
     @Override
-    protected HeartRateMath collectDataInBackground(HeartRateSession session) {
-        List<HeartRateDataItem> items = hrDAO.getItemsBySessionId(session.getId());
+    protected double[] collectDataInBackground(HeartRateSession session) {
+        long sessionId = session.getId();
+        List<HeartRateDataItem> items = hrDAO.getItemsBySessionId(sessionId);
+
         double[] rr = new double[items.size()];
         for (int i=0; i<items.size(); i++) {
             rr[i] = items.get(i).getRrTime();
         }
-        return new HeartRateMath(rr);
+        return rr;
     }
 
     @Override
-    protected void displayData(HeartRateMath hrm) {
+    protected void displayData(double[] rr) {
         ShinobiChart chart = getChart();
         chart.setTitle("Scatterogram");
         Axis xAxis = chart.getXAxis();
@@ -72,8 +73,6 @@ public class ScatterogramReportFragment extends AbstractSessionReportFragment {
         yAxis.setTitle("RR[i], ms");
         yAxis.getStyle().getTitleStyle().setTextSize(12);
         yAxis.getStyle().getTickStyle().setLabelTextSize(10);
-
-        double rr[] = hrm.getRrIntervals();
 
         xAxis.enableGesturePanning(true);
         xAxis.enableGestureZooming(true);

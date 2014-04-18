@@ -1,6 +1,7 @@
 package com.cardiomood.android.fragments.monitoring;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.os.Handler;
@@ -11,10 +12,15 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.cardiomood.android.R;
-import com.cardiomood.android.progress.BatteryIndicatorGauge;
-import com.cardiomood.android.progress.CircularProgressBar;
+import com.cardiomood.android.controls.gauge.BatteryIndicatorGauge;
+import com.cardiomood.android.controls.gauge.SpeedometerGauge;
+import com.cardiomood.android.controls.progress.CircularProgressBar;
+import com.cardiomood.android.heartrate.AbstractDataCollector;
+import com.cardiomood.android.heartrate.CardioMoodHeartRateLeService;
 import com.cardiomood.android.tools.CommonTools;
-import com.cardiomood.math.HeartRateMath;
+import com.cardiomood.math.filter.ArtifactFilter;
+import com.cardiomood.math.filter.SimpleInterpolationArtifactFilter;
+import com.cardiomood.math.histogram.Histogram;
 import com.cardiomood.math.window.DataWindow;
 
 import org.apache.commons.math3.stat.StatUtils;
@@ -27,16 +33,75 @@ public class HeartRateMonitoringFragment extends Fragment implements FragmentCal
     private ActivityCallback mCallback = null;
 
     private int currentBPM = -1;
-    private double currentProgress = 0;
 
     private CircularProgressBar progressBar;
     private TextView intervalsCollected;
     private TextView timeElapsed;
     private BatteryIndicatorGauge batteryIndicator;
-
-    private HeartRateMath hrm;
+    private SpeedometerGauge stressIndicator;
+    private TextView stressIndexValue;
+    private TextView energyLevel;
 
     private Handler handler;
+
+    private double lastStressIndex = -1;
+    private double lastEnergyLevel = -1;
+
+    private static final DataWindow.IntervalsCount batteryWindow = new DataWindow.IntervalsCount(20, 5);
+    private static final DataWindow.Timed stressWindow = new DataWindow.Timed(2 * 60 * 1000, 500);
+
+    private final DataWindow.Callback batteryWindowCallback = new DataWindow.CallbackAdapter<DataWindow.IntervalsCount>() {
+
+        @Override
+        public void onStep(final DataWindow.IntervalsCount window, int index, double t, double value) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    double[] rr = window.getIntervals().getElements();
+                    rr = filter.doFilter(rr);
+                    double d = Math.sqrt(StatUtils.variance(rr));
+                    if (d < 15){
+                        d *= 6.0;
+                    } else {
+                        d = (100 - 50.0 / (14.85 * Math.log(d) - 40));
+                    }
+                    lastEnergyLevel = d;
+                    if (batteryIndicator != null) {
+                        if (d >= batteryIndicator.getMax() - 0.001)
+                            batteryIndicator.setValue(batteryIndicator.getMax(), 4000, 0);
+                        else
+                            batteryIndicator.setValue((float) d, 4000, 0);
+                        if (energyLevel != null) {
+                            energyLevel.setText(String.valueOf(Math.round(d)) + "%");
+                        }
+                    }
+                }
+            });
+        }
+    };
+    private final DataWindow.Callback stressWindowCallback = new DataWindow.CallbackAdapter<DataWindow.Timed>() {
+        @Override
+        public void onStep(final DataWindow.Timed window, int index, double t, double value) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    double[] rr = window.getIntervals().getElements();
+                    rr = filter.doFilter(rr);
+                    Histogram histogram = new Histogram(rr, 50);
+                    final double SI = histogram.getSI();
+                    lastStressIndex = SI;
+                    if (stressIndicator != null) {
+                        stressIndicator.setSpeed(SI, 4000, 0);
+                    }
+                    if (stressIndexValue != null) {
+                        stressIndexValue.setText(String.valueOf(Math.round(SI)));
+                    }
+                }
+            });
+        }
+    };
+
+    private static final ArtifactFilter filter = new SimpleInterpolationArtifactFilter();
 
 
     public static HeartRateMonitoringFragment newInstance() {
@@ -47,35 +112,6 @@ public class HeartRateMonitoringFragment extends Fragment implements FragmentCal
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         handler = new Handler();
-
-        hrm = new HeartRateMath();
-        hrm.setWindow(new DataWindow.IntervalsCount(30, 5));
-        hrm.getWindow().setCallback(new DataWindow.Callback() {
-            @Override
-            public <T extends DataWindow> void onMove(T window, double t, double value) {
-            }
-
-            @Override
-            public <T extends DataWindow> double onAdd(T window, double t, double value) {
-                return value;
-            }
-
-            @Override
-            public <T extends DataWindow> void onStep(T window, double t, double value) {
-                double[] rr = window.getIntervals().getElements();
-                final double d = Math.sqrt(StatUtils.variance(rr)) / StatUtils.mean(rr) * 100;
-                handler.post(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        if (d > batteryIndicator.getMax())
-                            batteryIndicator.setValue(batteryIndicator.getMax(), 1000, 0);
-                        else
-                            batteryIndicator.setValue((float) d, 1000, 0);
-                    }
-                });
-            }
-        });
     }
 
     @Override
@@ -94,8 +130,29 @@ public class HeartRateMonitoringFragment extends Fragment implements FragmentCal
 
         intervalsCollected = (TextView) v.findViewById(R.id.intervalsCollected);
         timeElapsed = (TextView) v.findViewById(R.id.timeElapsed);
-
         batteryIndicator = (BatteryIndicatorGauge) v.findViewById(R.id.battery);
+        stressIndicator = (SpeedometerGauge) v.findViewById(R.id.stressIndicator);
+        stressIndicator.setLabelConverter(new SpeedometerGauge.LabelConverter() {
+            @Override
+            public String getLabelFor(double progress, double maxProgress) {
+                return String.valueOf((int) Math.round(progress));
+            }
+        });
+        stressIndicator.setMaxSpeed(300);
+        stressIndicator.setMajorTickStep(30);
+        stressIndicator.setMinorTicks(2);
+        stressIndicator.addColoredRange(30, 140, Color.GREEN);
+        stressIndicator.addColoredRange(140, 180, Color.YELLOW);
+        stressIndicator.addColoredRange(180, 400, Color.RED);
+
+        stressIndexValue = (TextView) v.findViewById(R.id.stressIndexValue);
+        if (lastStressIndex > 0) {
+            stressIndexValue.setText(String.valueOf(Math.round(lastStressIndex)));
+        }
+        energyLevel = (TextView) v.findViewById(R.id.energy_level);
+        if (lastEnergyLevel > 0) {
+            energyLevel.setText(String.valueOf(Math.round(lastEnergyLevel)) + "%");
+        }
 
         return v;
     }
@@ -115,30 +172,46 @@ public class HeartRateMonitoringFragment extends Fragment implements FragmentCal
     @Override
     public void onDetach() {
         super.onDetach();
-        mCallback.unregisterFragmentCallback(this);
-        mCallback = null;
-    }
 
-    @Override
-    public void notifyBPM(int bpm) {
-        currentBPM = bpm;
-    }
-
-    @Override
-    public void notifyRRIntervals(short[] rr) {
-        for (short r: rr) {
-            hrm.addIntervals((double) r);
+        if (mCallback != null) {
+            mCallback.unregisterFragmentCallback(this);
+            mCallback = null;
         }
     }
 
     @Override
-    public void notifyConnectionStatus(int oldStatus, int newStatus) {
+    public void onStart() {
+        super.onStart();
+        batteryWindow.setCallback(batteryWindowCallback);
+        stressWindow.setCallback(stressWindowCallback);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        stressWindow.setCallback(null);
+        batteryWindow.setCallback(null);
+    }
+
+    @Override
+    public void notifyBPM(CardioMoodHeartRateLeService service, int bpm) {
+        currentBPM = bpm;
+    }
+
+
+    @Override
+    public void notifyConnectionStatus(CardioMoodHeartRateLeService service, int oldStatus, int newStatus) {
 
     }
 
     @Override
-    public void notifyProgress(double progress, int count, long duration) {
-        currentProgress = progress;
+    public void notifyProgress(CardioMoodHeartRateLeService service, double progress, int count, long duration) {
+        AbstractDataCollector collector = (AbstractDataCollector) service.getDataCollector();
+        collector.addWindow(batteryWindow);
+        collector.addWindow(stressWindow);
+
+
         progressBar.setProgress((float) progress, 300);
         intervalsCollected.setText(String.valueOf(count));
         timeElapsed.setText(CommonTools.timeToHumanString(duration));

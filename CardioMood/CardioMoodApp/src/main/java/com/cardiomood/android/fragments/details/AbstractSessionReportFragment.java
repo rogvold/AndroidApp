@@ -1,5 +1,6 @@
 package com.cardiomood.android.fragments.details;
 
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -21,20 +22,28 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cardiomood.android.R;
 import com.cardiomood.android.ReportPreviewActivity;
+import com.cardiomood.android.SessionDetailsActivity;
+import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
 import com.cardiomood.android.db.dao.HeartRateSessionDAO;
+import com.cardiomood.android.db.model.HeartRateDataItem;
 import com.cardiomood.android.db.model.HeartRateSession;
+import com.cardiomood.android.db.model.SessionStatus;
 import com.cardiomood.android.dialogs.SaveAsDialog;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
-import com.cardiomood.math.HeartRateMath;
+import com.cardiomood.math.filter.ArtifactFilter;
+import com.cardiomood.math.filter.PisarukArtifactFilter;
 import com.shinobicontrols.charts.Axis;
 import com.shinobicontrols.charts.ChartView;
 import com.shinobicontrols.charts.ShinobiChart;
 
 import java.io.File;
 import java.text.DateFormat;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created by danon on 11.03.14.
@@ -60,6 +69,15 @@ public abstract class AbstractSessionReportFragment extends Fragment {
     private ShinobiChart chart;
     private FrameLayout topCustomSection;
     private FrameLayout bottomCustomSection;
+
+    private int filterCount = 0;
+    private int artifactsLeft = 0;
+    private boolean refreshing = false;
+
+    private static final ArtifactFilter FILTER = new PisarukArtifactFilter();
+    private int artifactsFiltered = 0;
+    private SessionDetailsActivity mHostActivity = null;
+    private double rr[] = null;
 
 
     /**
@@ -123,15 +141,20 @@ public abstract class AbstractSessionReportFragment extends Fragment {
             inflater.inflate(bottomCustomLayoutId, bottomCustomSection, true);
         }
 
-        v.invalidate();
-
         if (xAxis == null)
             xAxis = getXAxis();
+        else
+            chart.removeXAxis(xAxis);
+
         if (yAxis == null)
             yAxis = getYAxis();
+        else
+            chart.removeYAxis(yAxis);
 
         chart.setXAxis(xAxis);
         chart.setYAxis(yAxis);
+
+        v.invalidate();
 
         return v;
     }
@@ -164,7 +187,7 @@ public abstract class AbstractSessionReportFragment extends Fragment {
     public void onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
         MenuItem item = menu.findItem(R.id.menu_save_as);
-        item.setEnabled(! savingInProgress);
+        item.setEnabled(!savingInProgress);
     }
 
     @Override
@@ -176,8 +199,18 @@ public abstract class AbstractSessionReportFragment extends Fragment {
             case R.id.menu_save_as:
                 showSaveAsDialog();
                 return true;
+            case R.id.menu_save_this_revision:
+                saveThisRevision();
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void saveThisRevision() {
+        if (!savingInProgress) {
+            savingInProgress = true;
+            new SaveThisRevisionTask().execute();
+        }
     }
 
     @Override
@@ -186,8 +219,29 @@ public abstract class AbstractSessionReportFragment extends Fragment {
         chartView.onDestroy();
     }
 
-    protected void refresh() {
-        new DataLoadingTask().execute(sessionId);
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        if (mHostActivity != null) {
+            mHostActivity.unregisterFragment(this);
+            mHostActivity = null;
+        }
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        if (activity instanceof SessionDetailsActivity) {
+            mHostActivity = (SessionDetailsActivity) activity;
+            mHostActivity.registerFragment(this);
+        }
+    }
+
+    public void refresh() {
+        if (!refreshing) {
+            refreshing = true;
+            new DataLoadingTask().execute(sessionId);
+        }
     }
 
     protected int getTopCustomLayoutId() {
@@ -201,6 +255,37 @@ public abstract class AbstractSessionReportFragment extends Fragment {
     public long getSessionId() {
         return sessionId;
     }
+
+    public int getArtifactsFiltered() {
+        return artifactsFiltered;
+    }
+
+    public int getFilterCount() {
+        return filterCount;
+    }
+
+    public void setFilterCount(int filterCount) {
+        this.filterCount = filterCount;
+    }
+
+    public int getArtifactsLeft() {
+        return artifactsLeft;
+    }
+
+    public void removeArtifacts() {
+        if (artifactsLeft > 0) {
+            filterCount++;
+            refresh();
+        }
+    }
+
+    public void undoRemoveArtifacts() {
+        if (filterCount > 0) {
+            filterCount--;
+            refresh();
+        }
+    }
+
 
     protected void showProgress() {
         scrollView.setVisibility(View.GONE);
@@ -219,7 +304,7 @@ public abstract class AbstractSessionReportFragment extends Fragment {
     }
 
     private void showSaveAsDialog() {
-        SaveAsDialog dlg = new SaveAsDialog(getActivity(), sessionId, scrollView);
+        SaveAsDialog dlg = new SaveAsDialog(getActivity(), sessionId, filterCount);
         dlg.setTitle(R.string.save_as_dlg_title);
         dlg.setSavingCallback(new SaveAsDialog.SavingCallback() {
 
@@ -291,15 +376,15 @@ public abstract class AbstractSessionReportFragment extends Fragment {
 
     protected abstract Axis getXAxis();
     protected abstract Axis getYAxis();
-    protected abstract HeartRateMath collectDataInBackground(HeartRateSession session);
-    protected abstract void displayData(HeartRateMath math);
+    protected abstract double[] collectDataInBackground(HeartRateSession session);
+    protected abstract void displayData(double rr[]);
 
-
-    private class DataLoadingTask extends AsyncTask<Long, Void, HeartRateMath> {
+    private class DataLoadingTask extends AsyncTask<Long, Void, double[]> {
 
         private HeartRateSessionDAO sessionDAO = new HeartRateSessionDAO();
         private String name;
         private String date;
+        private int artifactsRemoved = 0;
 
         @Override
         protected void onPreExecute() {
@@ -307,7 +392,7 @@ public abstract class AbstractSessionReportFragment extends Fragment {
         }
 
         @Override
-        protected HeartRateMath doInBackground(Long... params) {
+        protected double[] doInBackground(Long... params) {
             long sessionId = params[0];
             HeartRateSession session = sessionDAO.findById(sessionId);
             name = session.getName();
@@ -319,17 +404,34 @@ public abstract class AbstractSessionReportFragment extends Fragment {
             }
             if (session.getDateStarted() != null)
                 date = DATE_FORMAT.format(session.getDateStarted());
-            return collectDataInBackground(session);
+            rr = collectDataInBackground(session);
+            int oldArtifactsFiltered = artifactsFiltered;
+            artifactsFiltered = 0;
+            for (int i=0; i<filterCount; i++) {
+                artifactsFiltered += FILTER.getArtifactsCount(rr);
+                rr = FILTER.doFilter(rr);
+            }
+            artifactsRemoved = artifactsFiltered - oldArtifactsFiltered;
+            artifactsLeft = FILTER.getArtifactsCount(rr);
+            return rr;
         }
 
         @Override
-        protected void onPostExecute(HeartRateMath math) {
+        protected void onPostExecute(double[] rr) {
             AbstractSessionReportFragment.this.sessionName.setText(name);
             if (date != null)
                 sessionDate.setText(date);
             else sessionDate.setVisibility(View.GONE);
-            displayData(math);
+            displayData(rr);
             hideProgress();
+            refreshing = false;
+            if (filterCount > 0 && artifactsLeft == 0) {
+                Toast.makeText(
+                        getActivity(),
+                        R.string.no_more_artifacts_detected,
+                        Toast.LENGTH_SHORT
+                ).show();
+            }
         }
 
         public String getName() {
@@ -346,6 +448,62 @@ public abstract class AbstractSessionReportFragment extends Fragment {
 
         public void setDate(String date) {
             this.date = date;
+        }
+    }
+
+    private class SaveThisRevisionTask extends AsyncTask {;
+
+        @Override
+        protected Object doInBackground(Object[] params) {
+            HeartRateSessionDAO sessionDAO = new HeartRateSessionDAO();
+            HeartRateSession session = sessionDAO.findById(sessionId);
+            session.setOriginalSessionId(sessionId);
+            session.setStatus(SessionStatus.COMPLETED);
+            session.setExternalId(null);
+            session.setId(null);
+
+            String name = session.getName();
+            if (name == null || name.trim().isEmpty()) {
+                name = "Measurement #" + sessionId;
+            } else name = name.trim();
+
+            name += " (corrected)";
+            session.setName(name);
+
+            HeartRateDataItemDAO hrDAO = new HeartRateDataItemDAO();
+            List<HeartRateDataItem> items = hrDAO.getItemsBySessionId(sessionId);
+            int i=0;
+            long duration = 0L;
+            for (HeartRateDataItem item: items) {
+                item.setId(null);
+                item.setRrTime(rr[i]);
+                int bpm = 0;
+                if (rr[i] < 1) {
+                    bpm = 0;
+                } else {
+                    bpm = (int) Math.round(60*1000.0/rr[i]);
+                }
+                duration += Math.round(rr[i]);
+                item.setHeartBeatsPerMinute(bpm);
+                i++;
+            }
+            session.setDateStarted(new Date());
+            session.setDateEnded(new Date(session.getDateStarted().getTime() + duration));
+            session = sessionDAO.insert(session, items);
+            return session;
+        }
+
+        @Override
+        protected void onPostExecute(Object result) {
+            Activity activity = getActivity();
+            HeartRateSession session = (HeartRateSession) result;
+            if (result != null && activity != null) {
+                Intent intent = new Intent(activity, SessionDetailsActivity.class);
+                intent.putExtra(SessionDetailsActivity.SESSION_ID_EXTRA, session.getId());
+                intent.putExtra(SessionDetailsActivity.POST_RENDER_ACTION_EXTRA, SessionDetailsActivity.RENAME_ACTION);
+                startActivity(intent);
+                activity.finish();
+            }
         }
     }
 

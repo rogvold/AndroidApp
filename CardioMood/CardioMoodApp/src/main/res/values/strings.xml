@@ -151,5 +151,12 @@
     <string name="menu_delete_and_close">Delete</string>
     <string name="file_has_been_deleted">File has been deleted.</string>
     <string name="unable_to_delete_file">Unable to delete file.</string>
+    <string name="stress_index">Stress Index</string>
+    <string name="energy">Energy</string>
+    <string name="menu_remove_artifacts">Remove artifacts</string>
+    <string name="artifacts_removed_and_left">%1$d artifacts removed, %2$d artifacts left.</string>
+    <string name="no_more_artifacts_detected">No more artifacts detected.</string>
+    <string name="menu_save_this_revision">Save this revision</string>
+    <string name="menu_undo_remove_artifacts">Undo Remove artifacts</string>
 
 </resources>

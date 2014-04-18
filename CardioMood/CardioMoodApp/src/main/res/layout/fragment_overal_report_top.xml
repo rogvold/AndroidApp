@@ -60,7 +60,7 @@
         </LinearLayout>
     </LinearLayout>
 
-    <com.cardiomood.android.speedometer.SpeedometerView
+    <com.cardiomood.android.controls.gauge.SpeedometerGauge
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:padding="8dp"

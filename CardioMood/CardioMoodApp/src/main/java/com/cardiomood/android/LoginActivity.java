@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,6 +23,7 @@ import com.cardiomood.android.db.HeartRateDBContract;
 import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.dao.UserDAO;
 import com.cardiomood.android.db.model.HeartRateSession;
+import com.cardiomood.android.db.model.SessionStatus;
 import com.cardiomood.android.db.model.User;
 import com.cardiomood.android.db.model.UserStatus;
 import com.cardiomood.android.tools.CommonTools;
@@ -74,6 +76,8 @@ public class LoginActivity extends Activity implements ConfigurationConstants {
 
         //loadConfigs();
 
+        fixBrokenSessions();
+
         if (isLoggedIn()) {
             startMainActivity();
             return;
@@ -122,6 +126,33 @@ public class LoginActivity extends Activity implements ConfigurationConstants {
                         attemptRegister();
                     }
                 });
+    }
+
+    private void fixBrokenSessions() {
+        // fix broken sessions (IN_PROGRESS -> COMPLETED)
+        try {
+
+            HeartRateSessionDAO session = new HeartRateSessionDAO();
+            final SQLiteDatabase db = session.getDatabase();
+            synchronized (db) {
+                try {
+                    db.beginTransaction();
+                    db.execSQL(
+                            "UPDATE " + HeartRateDBContract.Sessions.TABLE_NAME +
+                                    " SET " + HeartRateDBContract.Sessions.COLUMN_NAME_STATUS + "=? " +
+                                    " WHERE " + HeartRateDBContract.Sessions.COLUMN_NAME_STATUS + "=?",
+                            new String[] {
+                                    String.valueOf(SessionStatus.COMPLETED),
+                                    String.valueOf(SessionStatus.IN_PROGRESS)
+                            });
+                    db.setTransactionSuccessful();
+                } finally {
+                    db.endTransaction();
+                }
+            }
+        } catch (Exception ex) {
+
+        }
     }
 
     public void startMainActivity() {

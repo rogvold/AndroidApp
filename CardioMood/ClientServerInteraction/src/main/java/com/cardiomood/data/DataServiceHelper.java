@@ -346,11 +346,17 @@ public class DataServiceHelper {
     }
 
     public void refreshToken() {
+        refreshToken(false);
+    }
+
+    public void refreshToken(boolean sync) {
         if (!isSignedIn())
             return;
         String login = getEmail();
         String password = getPassword();
-        login(login, password, null);
+        if (sync)
+            login(login, password);
+        else login(login, password, null);
     }
 
     public void checkInternetAvailable(Context context, final ServerResponseCallback<Boolean> callback) {

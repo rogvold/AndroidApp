@@ -91,14 +91,14 @@ public class MonitoringActivity extends ActionBarActivity implements ActionBar.T
                 final int newStatus = intent.getIntExtra(LeHRMonitor.EXTRA_NEW_STATUS, -100);
                 final int oldStatus = intent.getIntExtra(LeHRMonitor.EXTRA_OLD_STATUS, -100);
                 for (FragmentCallback c: fragments) {
-                    c.notifyConnectionStatus(oldStatus, newStatus);
+                    c.notifyConnectionStatus(mBluetoothLeService, oldStatus, newStatus);
                 }
             }
 
             if (LeHRMonitor.ACTION_BPM_CHANGED.equals(action)) {
                 final int bpm = intent.getIntExtra(LeHRMonitor.EXTRA_NEW_BPM, -1);
                 for (FragmentCallback c: fragments) {
-                    c.notifyBPM(bpm);
+                    c.notifyBPM(mBluetoothLeService, bpm);
                 }
             }
 
@@ -107,8 +107,8 @@ public class MonitoringActivity extends ActionBarActivity implements ActionBar.T
                 AbstractDataCollector collector = (AbstractDataCollector) mBluetoothLeService.getDataCollector();
                 for (FragmentCallback c: fragments) {
                     if (collector != null)
-                        c.notifyProgress(collector.getProgress(), collector.getIntervalsCount(), (long) collector.getDuration());
-                    c.notifyRRIntervals(rr);
+                        c.notifyProgress(mBluetoothLeService, collector.getProgress(), collector.getIntervalsCount(), (long) collector.getDuration());
+                   // c.notifyRRIntervals(mBluetoothLeService, rr);
                 }
             }
 
@@ -307,6 +307,11 @@ public class MonitoringActivity extends ActionBarActivity implements ActionBar.T
     @Override
     public void unregisterFragmentCallback(FragmentCallback callback) {
         fragments.remove(callback);
+    }
+
+    @Override
+    public CardioMoodHeartRateLeService getService() {
+        return mBluetoothLeService;
     }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {

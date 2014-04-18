@@ -2,16 +2,16 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/AndroidControls/AndroidControls.iml" filepath="$PROJECT_DIR$/AndroidControls/AndroidControls.iml" />
       <module fileurl="file://$PROJECT_DIR$/CardioMood.iml" filepath="$PROJECT_DIR$/CardioMood.iml" />
       <module fileurl="file://$PROJECT_DIR$/CardioMoodApp/CardioMoodApp.iml" filepath="$PROJECT_DIR$/CardioMoodApp/CardioMoodApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/CardioSportApp/CardioSportApp.iml" filepath="$PROJECT_DIR$/CardioSportApp/CardioSportApp.iml" />
-      <module fileurl="file://$PROJECT_DIR$/CircularProgressBar/CircularProgressBar.iml" filepath="$PROJECT_DIR$/CircularProgressBar/CircularProgressBar.iml" />
       <module fileurl="file://$PROJECT_DIR$/ClientServerInteraction/ClientServerInteraction.iml" filepath="$PROJECT_DIR$/ClientServerInteraction/ClientServerInteraction.iml" />
       <module fileurl="file://$PROJECT_DIR$/CommonTools/CommonTools.iml" filepath="$PROJECT_DIR$/CommonTools/CommonTools.iml" />
       <module fileurl="file://$PROJECT_DIR$/HeartRate/HeartRate.iml" filepath="$PROJECT_DIR$/HeartRate/HeartRate.iml" />
+      <module fileurl="file://$PROJECT_DIR$/HeartRateApp/HeartRateApp.iml" filepath="$PROJECT_DIR$/HeartRateApp/HeartRateApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/Math/Math.iml" filepath="$PROJECT_DIR$/Math/Math.iml" />
       <module fileurl="file://$PROJECT_DIR$/ShinobiCharts/ShinobiCharts.iml" filepath="$PROJECT_DIR$/ShinobiCharts/ShinobiCharts.iml" />
-      <module fileurl="file://$PROJECT_DIR$/SpeedometerView/SpeedometerView.iml" filepath="$PROJECT_DIR$/SpeedometerView/SpeedometerView.iml" />
     </modules>
   </component>
 </project>

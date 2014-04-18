@@ -14,12 +14,12 @@ public class TimeAndIntervalLimitDataCollector extends TimeLimitDataCollector {
 
     @Override
     public boolean needToStopCollecting() {
-        return super.needToStopCollecting() || (math.getCount() >= intervalsLimit);
+        return super.needToStopCollecting() || (getIntervalsCount() >= intervalsLimit);
     }
 
     @Override
     public double getProgress() {
-        double progress = (100.0*math.getCount()) / intervalsLimit;
+        double progress = (100.0*getIntervalsCount()) / intervalsLimit;
         progress = Math.max(progress, super.getProgress());
         if (progress > 100)
             progress = 100;

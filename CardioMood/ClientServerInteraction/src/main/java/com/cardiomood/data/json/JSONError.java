@@ -8,8 +8,8 @@ import java.io.Serializable;
  */
 public class JsonError implements Serializable {
 
-    public static final Integer INVALID_TOKEN_ERROR = 20;
-    public static final Integer UNKNOWN_ERROR = 21;
+    public static final Integer NORMAL_ERROR = 20;
+    public static final Integer INVALID_TOKEN_ERROR = 21;
     public static final Integer LOGIN_FAILED_ERROR = 22;
     public static final Integer NOT_AUTHORIZED_ERROR = 23;
     public static final Integer ACCESS_DENIED_ERROR = 24;
@@ -23,7 +23,7 @@ public class JsonError implements Serializable {
 
     public JsonError(String message) {
         this.message = message;
-        this.code = UNKNOWN_ERROR;
+        this.code = NORMAL_ERROR;
     }
 
     public JsonError(String message, Integer code) {
