@@ -3,6 +3,7 @@
     package="com.cardiomood.heartrate.android">
 
     <application
+        android:name="com.cardiomood.heartrate.android.Application"
         android:allowBackup="true"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
