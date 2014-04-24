@@ -3,6 +3,7 @@ package com.cardiomood.heartrate.android.fragments;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
+import android.preference.ListPreference;
 
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.settings.PreferenceActivityBase;
@@ -19,6 +20,7 @@ public class SettingsFragment extends PreferenceActivityBase.AbstractMainFragmen
 
     private CheckBoxPreference mDisableBluetoothOnClosePref;
     private CheckBoxPreference mDisableSplashScreenPref;
+    private ListPreference mPreferredMeasurementSystemPref;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -29,15 +31,17 @@ public class SettingsFragment extends PreferenceActivityBase.AbstractMainFragmen
         PreferenceHelper helper = new PreferenceHelper(getActivity().getApplicationContext(), true);
         helper.putBoolean(CONNECTION_DISABLE_BT_ON_CLOSE, helper.getBoolean(CONNECTION_DISABLE_BT_ON_CLOSE));
         helper.putBoolean(DISABLE_SPLASH_SCREEN, helper.getBoolean(DISABLE_SPLASH_SCREEN));
+        helper.putString(PREFERRED_MEASUREMENT_SYSTEM, helper.getString(PREFERRED_MEASUREMENT_SYSTEM));
 
         mDisableBluetoothOnClosePref = (CheckBoxPreference) findPreference(CONNECTION_DISABLE_BT_ON_CLOSE);
         mDisableSplashScreenPref = (CheckBoxPreference) findPreference(DISABLE_SPLASH_SCREEN);
+        mPreferredMeasurementSystemPref = (ListPreference) findPreference(PREFERRED_MEASUREMENT_SYSTEM);
 
         refreshSummaries();
     }
 
     private void refreshSummaries() {
-        updatePrefSummary(mDisableBluetoothOnClosePref, mDisableSplashScreenPref);
+        updatePrefSummary(mDisableBluetoothOnClosePref, mDisableSplashScreenPref, mPreferredMeasurementSystemPref);
     }
 
     @Override

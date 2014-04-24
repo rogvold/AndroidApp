@@ -33,8 +33,9 @@ public interface ConfigurationConstants {
     String CONNECTION_DISABLE_BT_ON_CLOSE = "connection.disable_bluetooth_on_close";
 
     // General app parameters
-    String APP_DATE_FORMAT          = "app.date_format";
-    String DISABLE_SPLASH_SCREEN    = "app.disable_splash_screen";
-    String DISABLE_ADS              = "app.disable_ads";
-    String DO_NOT_ASK_INFO_ON_START = "app.do_not_ask_info_on_start";
+    String APP_DATE_FORMAT              = "app.date_format";
+    String DISABLE_SPLASH_SCREEN        = "app.disable_splash_screen";
+    String DISABLE_ADS                  = "app.disable_ads";
+    String DO_NOT_ASK_INFO_ON_START     = "app.do_not_ask_info_on_start";
+    String PREFERRED_MEASUREMENT_SYSTEM = "app.preferred_measurement_system";
 }

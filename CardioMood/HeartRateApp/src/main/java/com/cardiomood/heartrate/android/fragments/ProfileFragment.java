@@ -41,6 +41,8 @@ public class ProfileFragment extends Fragment implements ConfigurationConstants,
     private EditText weightView;
     private EditText heightView;
 
+    private Callback callback;
+
     private Calendar myCalendar = Calendar.getInstance();
 
     private final DatePickerDialog.OnDateSetListener dateChangeListener = new DatePickerDialog.OnDateSetListener() {
@@ -141,6 +143,8 @@ public class ProfileFragment extends Fragment implements ConfigurationConstants,
         prefHelper.putString(USER_WEIGHT_KEY, weightView.getText().toString());
         prefHelper.putString(USER_HEIGHT_KEY, heightView.getText().toString());
         prefHelper.putString(USER_EMAIL_KEY, emailView.getText().toString());
+        if (callback != null)
+            callback.onSave();
     }
 
     @Override
@@ -152,5 +156,13 @@ public class ProfileFragment extends Fragment implements ConfigurationConstants,
     public boolean onKey(View v, int keyCode, KeyEvent event) {
         save();
         return false;
+    }
+
+    public void setCallback(Callback callback) {
+        this.callback = callback;
+    }
+
+    public static interface Callback {
+        void onSave();
     }
 }

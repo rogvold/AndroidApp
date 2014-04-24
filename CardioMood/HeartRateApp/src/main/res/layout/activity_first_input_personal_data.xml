@@ -18,20 +18,37 @@
             android:paddingTop="@dimen/activity_vertical_margin"
             android:paddingBottom="@dimen/activity_vertical_margin">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/welcome_to_cardio_mood"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textStyle="bold"
-                />
+                android:orientation="horizontal">
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_weight="10">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/welcome_to_cardio_mood"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        android:textStyle="bold"
+                        />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/specify_your_personal_information"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/specify_your_personal_information"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        />
+                </LinearLayout>
+                <ImageView
+                    android:layout_width="96dp"
+                    android:padding="8dp"
+                    android:layout_height="fill_parent"
+                    android:src="@drawable/img_cardiomood_logo_notext"
+                    android:scaleType="centerInside" />
+            </LinearLayout>
 
             <fragment
                 android:layout_width="fill_parent"
@@ -46,17 +63,33 @@
                 android:text="@string/you_may_skip_this"
                 android:textAppearance="?android:attr/textAppearanceSmall"
                 />
-            <LinearLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="right">
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:text="@string/button_skip"
+                    android:id="@+id/button_skip"
+                    android:clickable="true"
+                    android:linksClickable="true"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginLeft="39dp" />
+
                 <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:id="@+id/button_continue"
-                    android:text="@string/button_continue"/>
-            </LinearLayout>
+                    android:text="@string/button_continue"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true" />
+            </RelativeLayout>
         </LinearLayout>
 
     </ScrollView>

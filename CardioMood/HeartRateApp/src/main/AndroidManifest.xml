@@ -62,7 +62,8 @@
         </activity>
         <activity
             android:name="com.cardiomood.heartrate.android.FirstInputPersonalDataActivity"
-            android:label="@string/title_activity_first_input_personal_data" >
+            android:label="@string/title_activity_first_input_personal_data"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name="com.cardiomood.heartrate.android.FeedbackActivity"

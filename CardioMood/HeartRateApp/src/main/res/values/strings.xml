@@ -40,5 +40,7 @@
     <string name="submitting_feedback_message">Submitting your feedback...</string>
     <string name="please_rate_our_app">Please, rate our app</string>
     <string name="you_can_report_a_bug_or">You can report an issue or provide a feature request.</string>
+    <string name="title_settings_preferred_measurement_system">Preferred units system</string>
+    <string name="button_skip">Skip</string>
 
 </resources>

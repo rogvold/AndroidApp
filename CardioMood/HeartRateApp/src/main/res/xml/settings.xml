@@ -7,6 +7,11 @@
             android:key="app.disable_splash_screen"
             android:title="@string/title_settings_disable_splash_screen"
             android:summary="@string/summary_disable_splash_screen" />
+        <ListPreference
+            android:key="app.preferred_measurement_system"
+            android:title="@string/title_settings_preferred_measurement_system"
+            android:entries="@array/measurement_system_titles"
+            android:entryValues="@array/measurement_system_values"/>
     </PreferenceCategory>
 
 
