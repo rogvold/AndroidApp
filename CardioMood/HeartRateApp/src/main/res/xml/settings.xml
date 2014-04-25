@@ -11,7 +11,8 @@
             android:key="app.preferred_measurement_system"
             android:title="@string/title_settings_preferred_measurement_system"
             android:entries="@array/measurement_system_titles"
-            android:entryValues="@array/measurement_system_values"/>
+            android:entryValues="@array/measurement_system_values"
+            android:defaultValue="METRIC"/>
     </PreferenceCategory>
 
 

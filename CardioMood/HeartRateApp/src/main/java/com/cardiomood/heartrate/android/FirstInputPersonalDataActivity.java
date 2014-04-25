@@ -11,7 +11,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.heartrate.android.fragments.ProfileFragment;
@@ -121,6 +120,5 @@ public class FirstInputPersonalDataActivity extends FragmentActivity implements 
     @Override
     public void onSave() {
         buttonContinue.setEnabled(allDataSpecified());
-        Toast.makeText(this, "Hello!", Toast.LENGTH_SHORT).show();
     }
 }

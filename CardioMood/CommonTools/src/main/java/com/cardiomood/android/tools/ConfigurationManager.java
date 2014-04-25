@@ -21,6 +21,10 @@ public class ConfigurationManager {
 		loadProperties("application.properties");
 	}
 
+    public void remove(String key) {
+        config.remove(key);
+    }
+
     private static class Holder {
 		private static final ConfigurationManager instance = new ConfigurationManager();
 	}

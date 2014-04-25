@@ -77,8 +77,8 @@ public class PreferenceHelper {
         ConfigurationManager.getInstance().set(key, value);
     }
 
-    public synchronized void putFloat(String key, String value) {
-        putString(key, value, isPersistent());
+    public synchronized void putFloat(String key, Float value) {
+        putFloat(key, value, isPersistent());
     }
 
     public synchronized Float getFloat(String key, Float defValue, boolean persistent) {
@@ -211,5 +211,17 @@ public class PreferenceHelper {
     public synchronized void unregisterListener(SharedPreferences.OnSharedPreferenceChangeListener listener) {
         final SharedPreferences sharedPref =  PreferenceManager.getDefaultSharedPreferences(context);
         sharedPref.unregisterOnSharedPreferenceChangeListener(listener);
+    }
+
+    public synchronized void remove(String key) {
+        if (isPersistent()) {
+            final SharedPreferences sharedPref =  PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.remove(key);
+            editor.commit();
+        } else {
+            ConfigurationManager.getInstance().remove(key);
+        }
+
     }
 }

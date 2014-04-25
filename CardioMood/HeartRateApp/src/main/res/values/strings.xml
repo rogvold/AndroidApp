@@ -42,5 +42,15 @@
     <string name="you_can_report_a_bug_or">You can report an issue or provide a feature request.</string>
     <string name="title_settings_preferred_measurement_system">Preferred units system</string>
     <string name="button_skip">Skip</string>
+    <string name="your_height_imperial">Your height (ft)</string>
+    <string name="your_weight_imperial">Your weight (lb)</string>
+    <string name="weight_units_kg">kg</string>
+    <string name="height_units_cm">cm</string>
+    <string name="height_units_in">in.</string>
+    <string name="weight_units_lb">lb.</string>
+    <string name="height_units_ft">ft.</string>
+    <string name="feedback_has_been_submitted">Thank you! Your feedback has been submitted.</string>
+    <string name="feedback_submission_failed">Failed to submit your feedback. Try again later.</string>
+    <string name="provide_rating">Please, provide a valid rating value (1 - 5).</string>
 
 </resources>

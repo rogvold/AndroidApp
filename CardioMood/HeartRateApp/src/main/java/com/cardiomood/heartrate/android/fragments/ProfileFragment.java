@@ -3,6 +3,8 @@ package com.cardiomood.heartrate.android.fragments;
 import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +13,7 @@ import android.widget.AdapterView;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.heartrate.android.R;
@@ -19,6 +22,7 @@ import com.cardiomood.heartrate.android.tools.ConfigurationConstants;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Project: CardioMood
@@ -28,6 +32,7 @@ import java.util.Calendar;
  */
 public class ProfileFragment extends Fragment implements ConfigurationConstants, View.OnKeyListener {
 
+    private static final String TAG = ProfileFragment.class.getSimpleName();
     private static final DateFormat DATE_FORMAT = SimpleDateFormat.getDateInstance(java.text.DateFormat.SHORT);
 
     private PreferenceHelper prefHelper;
@@ -40,6 +45,8 @@ public class ProfileFragment extends Fragment implements ConfigurationConstants,
     private EditText birthdayView;
     private EditText weightView;
     private EditText heightView;
+    private TextView weightUnitsView;
+    private TextView heightUnitsView;
 
     private Callback callback;
 
@@ -72,23 +79,18 @@ public class ProfileFragment extends Fragment implements ConfigurationConstants,
         View v = inflater.inflate(R.layout.fragment_profile, container, false);
 
         emailView = (EditText) v.findViewById(R.id.editTextEmail);
-        emailView.setText(prefHelper.getString(USER_EMAIL_KEY));
         emailView.setOnKeyListener(this);
 
         firstNameView = (EditText) v.findViewById(R.id.editTextFirstName);
-        firstNameView.setText(prefHelper.getString(USER_FIRST_NAME_KEY));
         firstNameView.setOnKeyListener(this);
 
         lastNameView = (EditText) v.findViewById(R.id.editTextLastName);
-        lastNameView.setText(prefHelper.getString(USER_LAST_NAME_KEY));
         lastNameView.setOnKeyListener(this);
 
         phoneNumberView = (EditText) v.findViewById(R.id.editTextPhoneNumber);
-        phoneNumberView.setText(prefHelper.getString(USER_PHONE_NUMBER_KEY));
         phoneNumberView.setOnKeyListener(this);
 
         genderView = (Spinner) v.findViewById(R.id.gender);
-        genderView.setSelection(prefHelper.getInt(USER_SEX_KEY, 2));
         genderView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -102,7 +104,6 @@ public class ProfileFragment extends Fragment implements ConfigurationConstants,
         });
 
         birthdayView = (EditText) v.findViewById(R.id.birth_date);
-        birthdayView.setText(prefHelper.getString(USER_BIRTH_DATE_KEY));
         birthdayView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -119,14 +120,64 @@ public class ProfileFragment extends Fragment implements ConfigurationConstants,
         });
 
         weightView = (EditText) v.findViewById(R.id.weight);
-        weightView.setText(prefHelper.getString(USER_WEIGHT_KEY));
         weightView.setOnKeyListener(this);
 
         heightView = (EditText) v.findViewById(R.id.height);
-        heightView.setText(prefHelper.getString(USER_HEIGHT_KEY));
         heightView.setOnKeyListener(this);
 
+        weightUnitsView = (TextView) v.findViewById(R.id.weight_units);
+        heightUnitsView = (TextView) v.findViewById(R.id.height_units);
+
         return v;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // refresh hints (due to possible settings modifications)
+        final String unitSystem = prefHelper.getString(PREFERRED_MEASUREMENT_SYSTEM, "METRIC");
+        if ("IMPERIAL".equalsIgnoreCase(unitSystem)) {
+            heightView.setHint(R.string.your_height_imperial);
+            weightView.setHint(R.string.your_weight_imperial);
+            heightUnitsView.setText(R.string.height_units_ft);
+            weightUnitsView.setText(R.string.weight_units_lb);
+        } else {
+            heightView.setHint(R.string.your_height);
+            weightView.setHint(R.string.your_weight);
+            heightUnitsView.setText(R.string.height_units_cm);
+            weightUnitsView.setText(R.string.weight_units_kg);
+        }
+
+        emailView.setText(prefHelper.getString(USER_EMAIL_KEY));
+        firstNameView.setText(prefHelper.getString(USER_FIRST_NAME_KEY));
+        lastNameView.setText(prefHelper.getString(USER_LAST_NAME_KEY));
+        phoneNumberView.setText(prefHelper.getString(USER_PHONE_NUMBER_KEY));
+
+        String gender = prefHelper.getString(USER_SEX_KEY, "UNSPECIFIED");
+        if ("MALE".equalsIgnoreCase(gender))
+            genderView.setSelection(0);
+        else if ("FEMALE".equalsIgnoreCase(gender))
+            genderView.setSelection(1);
+        else
+            genderView.setSelection(2);
+
+        long birthDate = prefHelper.getLong(USER_BIRTH_DATE_KEY, 0L);
+        if (birthDate > 0)
+            birthdayView.setText(DATE_FORMAT.format(new Date(birthDate)));
+        else birthdayView.setText(null);
+
+        float weight = prefHelper.getFloat(USER_WEIGHT_KEY, 0.0f);
+        if ("IMPERIAL".equalsIgnoreCase(unitSystem))
+            weight *= 2.20462;
+        if (weight > 0.0f)
+            weightView.setText(String.valueOf(weight));
+
+        float height = prefHelper.getFloat(USER_HEIGHT_KEY, 0.0f);
+        if ("IMPERIAL".equalsIgnoreCase(unitSystem))
+            height *= 0.0328084;
+        if (height > 0.0f)
+            heightView.setText(String.valueOf(height));
     }
 
     @Override
@@ -135,14 +186,42 @@ public class ProfileFragment extends Fragment implements ConfigurationConstants,
     }
 
     public void save() {
-        prefHelper.putString(USER_FIRST_NAME_KEY, firstNameView.getText().toString());
-        prefHelper.putString(USER_LAST_NAME_KEY, lastNameView.getText().toString());
-        prefHelper.putString(USER_PHONE_NUMBER_KEY, phoneNumberView.getText().toString());
-        prefHelper.putInt(USER_SEX_KEY, genderView.getSelectedItemPosition());
-        prefHelper.putString(USER_BIRTH_DATE_KEY, birthdayView.getText().toString());
-        prefHelper.putString(USER_WEIGHT_KEY, weightView.getText().toString());
-        prefHelper.putString(USER_HEIGHT_KEY, heightView.getText().toString());
-        prefHelper.putString(USER_EMAIL_KEY, emailView.getText().toString());
+        try {
+            final String unitSystem = prefHelper.getString(PREFERRED_MEASUREMENT_SYSTEM, "METRIC");
+
+            prefHelper.putString(USER_EMAIL_KEY, emailView.getText().toString());
+            prefHelper.putString(USER_FIRST_NAME_KEY, firstNameView.getText().toString());
+            prefHelper.putString(USER_LAST_NAME_KEY, lastNameView.getText().toString());
+            prefHelper.putString(USER_PHONE_NUMBER_KEY, phoneNumberView.getText().toString());
+
+            int gender = genderView.getSelectedItemPosition();
+            if (gender == 0) {
+                prefHelper.putString(USER_SEX_KEY, "MALE");
+            } else if (gender == 1) {
+                prefHelper.putString(USER_SEX_KEY, "FEMALE");
+            } else
+                prefHelper.remove(USER_SEX_KEY);
+
+            if (!TextUtils.isEmpty(weightView.getText().toString())) {
+                float weight = Float.parseFloat(weightView.getText().toString());
+                if ("IMPERIAL".equalsIgnoreCase(unitSystem))
+                    weight /= 2.20462;
+                prefHelper.putFloat(USER_WEIGHT_KEY, weight);
+            } else prefHelper.remove(USER_WEIGHT_KEY);
+
+            if (!TextUtils.isEmpty(heightView.getText().toString())) {
+                float height = Float.parseFloat(heightView.getText().toString());
+                if ("IMPERIAL".equalsIgnoreCase(unitSystem))
+                    height /= 0.0328084;
+                prefHelper.putFloat(USER_HEIGHT_KEY, height);
+            } else prefHelper.remove(USER_HEIGHT_KEY);
+
+            if (!TextUtils.isEmpty(birthdayView.getText().toString()))
+                prefHelper.putLong(USER_BIRTH_DATE_KEY, DATE_FORMAT.parse(birthdayView.getText().toString()).getTime());
+            else prefHelper.remove(USER_BIRTH_DATE_KEY);
+        } catch (Exception ex) {
+            Log.w(TAG, "save() failed with exception", ex);
+        }
         if (callback != null)
             callback.onSave();
     }
@@ -150,6 +229,12 @@ public class ProfileFragment extends Fragment implements ConfigurationConstants,
     @Override
     public void onDestroy() {
         super.onDestroy();
+    }
+
+    @Override
+    public void onDetach() {
+        save();
+        super.onDetach();
     }
 
     @Override

@@ -26,6 +26,7 @@ import com.cardiomood.heartrate.android.tools.ConfigurationConstants;
 import com.cardiomood.heartrate.bluetooth.LeHRMonitor;
 import com.flurry.android.FlurryAgent;
 import com.j256.ormlite.android.apptools.OrmLiteBaseActivity;
+import com.parse.ParseAnalytics;
 
 
 public class MainActivity extends OrmLiteBaseActivity<DatabaseHelper> {
@@ -117,6 +118,8 @@ public class MainActivity extends OrmLiteBaseActivity<DatabaseHelper> {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ParseAnalytics.trackAppOpened(getIntent());
 
 
         // initialize utilities

@@ -15,10 +15,13 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.RatingBar;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.heartrate.android.tools.ConfigurationConstants;
+import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.SaveCallback;
 
 public class FeedbackActivity extends Activity {
 
@@ -32,8 +35,6 @@ public class FeedbackActivity extends Activity {
                     .add(R.id.container, new FeedbackFragment())
                     .commit();
         }
-
-       // Parse.initialize(this, "D00uihFFqj0K9yAoecTzR5t4VxJeSGfYOee4LciN", "vaqte7MiPMce9h4HFCnmTnkieIOarA9WPoCcxVnk");
     }
 
 
@@ -96,6 +97,11 @@ public class FeedbackActivity extends Activity {
         }
 
         private void submitFeedback() {
+            if (userRating.getRating() == 0) {
+                Toast.makeText(getActivity(), R.string.provide_rating, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             progressDialog = new ProgressDialog(getActivity());
             progressDialog.setMessage(getText(R.string.submitting_feedback_message));
             progressDialog.setCancelable(false);
@@ -118,23 +124,24 @@ public class FeedbackActivity extends Activity {
             feedback.put("user_message", userMessage.getText().toString());
             feedback.put("user_email", prefHelper.getString(ConfigurationConstants.USER_EMAIL_KEY));
 
-//            feedback.saveInBackground(new SaveCallback() {
-//                @Override
-//                public void done(ParseException e) {
-//                    if (progressDialog != null) {
-//                        if (progressDialog.isShowing())
-//                            progressDialog.dismiss();
-//                        progressDialog = null;
-//                    }
-//                    if (e == null) {
-//                        Toast.makeText(getActivity(), R.string.feedback_has_been_submitted, Toast.LENGTH_SHORT).show();
-//                        getActivity().finish();
-//                    } else {
-//                        Toast.makeText(getActivity(), R.string.feedback_submission_failed, Toast.LENGTH_SHORT).show();
-//                        Log.e("FeedbackActivity", "submitFeedback() -> saveInBackground() failed with exception.", e);
-//                    }
-//                }
-//            });
+            feedback.saveInBackground(new SaveCallback() {
+                @Override
+                public void done(ParseException e) {
+                    if (progressDialog != null) {
+                        if (progressDialog.isShowing())
+                            progressDialog.dismiss();
+                        progressDialog = null;
+                    }
+                    if (e == null) {
+                        Toast.makeText(getActivity(), R.string.feedback_has_been_submitted, Toast.LENGTH_SHORT).show();
+                        getActivity().finish();
+                    } else {
+                        Toast.makeText(getActivity(), R.string.feedback_submission_failed, Toast.LENGTH_SHORT).show();
+                        Log.e("FeedbackActivity", "submitFeedback() -> saveInBackground() failed with exception.", e);
+                    }
+                }
+
+            });
         }
 
     }

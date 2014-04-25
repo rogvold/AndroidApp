@@ -48,7 +48,6 @@
                 android:id="@+id/gender"
                 android:entries="@array/gender_names"
                 />
-
         <EditText
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
@@ -56,19 +55,44 @@
                 android:hint="@string/birth_date"
                 android:inputType="date"
                 android:id="@+id/birth_date"/>
-        <EditText
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <EditText
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/your_weight"
                 android:text=""
                 android:inputType="number"
-                android:id="@+id/weight"/>
-        <EditText
-            android:layout_width="fill_parent"
+                android:id="@+id/weight"
+                android:layout_weight="1"/>
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/weight_units"
+                android:text="@string/weight_units_kg"
+                android:layout_weight="10"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/your_height"
-            android:text=""
-            android:inputType="number"
-            android:id="@+id/height"/>
+            android:orientation="horizontal">
+            <EditText
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/your_height"
+                android:text=""
+                android:inputType="number"
+                android:id="@+id/height"
+                android:layout_weight="1"/>
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/height_units"
+                android:text="@string/height_units_cm"
+                android:layout_weight="10"/>
+        </LinearLayout>
     </LinearLayout>
 </ScrollView> 

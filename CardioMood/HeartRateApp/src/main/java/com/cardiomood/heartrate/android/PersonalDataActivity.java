@@ -1,7 +1,9 @@
 package com.cardiomood.heartrate.android;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.RelativeLayout;
 
@@ -54,12 +56,27 @@ public class PersonalDataActivity extends FragmentActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.activity_personal_data, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 onBackPressed();
                 return true;
+            case R.id.action_settings:
+                FlurryAgent.logEvent("menu_settings_clicked");
+                openSettingsActivity();
+                return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void openSettingsActivity() {
+        startActivity(new Intent(this, SettingsActivity.class));
     }
 }
