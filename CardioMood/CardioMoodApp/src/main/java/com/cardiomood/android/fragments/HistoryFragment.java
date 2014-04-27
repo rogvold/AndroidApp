@@ -37,9 +37,9 @@ import com.cardiomood.data.async.ServerResponseCallback;
 import com.cardiomood.data.json.CardioDataItem;
 import com.cardiomood.data.json.CardioSession;
 import com.cardiomood.data.json.CardioSessionWithData;
-import com.cardiomood.data.json.JsonError;
+import com.cardiomood.data.json.JSONError;
+import com.cardiomood.data.json.JSONResponse;
 import com.cardiomood.data.json.JsonRRInterval;
-import com.cardiomood.data.json.JsonResponse;
 import com.flurry.android.FlurryAgent;
 import com.haarman.listviewanimations.itemmanipulation.contextualundo.ContextualUndoAdapter;
 
@@ -171,7 +171,7 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
             }
 
             @Override
-            public void onError(JsonError error) {
+            public void onError(JSONError error) {
 
             }
         });
@@ -220,7 +220,7 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
             try {
 
                 if (session.getExternalId() != null) {
-                    final JsonResponse<String> response = serviceHelper.deleteSession(session.getExternalId());
+                    final JSONResponse<String> response = serviceHelper.deleteSession(session.getExternalId());
                     Log.e("Fuck!", response.toString());
                     if (!response.isOk()) {
                         handler.post(new Runnable() {
@@ -340,8 +340,8 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
                 }
 
                 progress = 0;
-                JsonResponse<List<CardioSession>> response = serviceHelper.getSessions();
-                if (JsonResponse.RESPONSE_OK.equals(response.getResponseCode())) {
+                JSONResponse<List<CardioSession>> response = serviceHelper.getSessions();
+                if (JSONResponse.RESPONSE_OK.equals(response.getResponseCode())) {
                     List<CardioSession> cardioSessions = response.getData();
                     if (cardioSessions == null)
                         return null;
@@ -362,8 +362,8 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
                 return;
             if (session.getExternalId() == null) {
                 // Create Session on the server
-                JsonResponse<CardioSession> response1 = serviceHelper.createSession();
-                if (JsonResponse.RESPONSE_OK.equals(response1.getResponseCode())) {
+                JSONResponse<CardioSession> response1 = serviceHelper.createSession();
+                if (JSONResponse.RESPONSE_OK.equals(response1.getResponseCode())) {
                     CardioSession cardioSession = response1.getData();
                     rewriteSessionData(session, cardioSession);
                 }
@@ -398,8 +398,8 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
                 dataItems.add(cardioDataItem);
             }
             sessionWithData.setDataItems(dataItems);
-            JsonResponse<String> response2 = serviceHelper.rewriteCardioSessionData(sessionWithData);
-            if (JsonResponse.RESPONSE_OK.equals(response2.getResponseCode())) {
+            JSONResponse<String> response2 = serviceHelper.rewriteCardioSessionData(sessionWithData);
+            if (JSONResponse.RESPONSE_OK.equals(response2.getResponseCode())) {
                 session.setStatus(SessionStatus.SYNCHRONIZED);
                 sessionDAO.merge(session);
             } else {
@@ -421,8 +421,8 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
                 session.setName(cardioSession.getName());
                 session = sessionDAO.insert(session);
 
-                JsonResponse<CardioSessionWithData> response = serviceHelper.getSessionData(cardioSession.getId());
-                if (JsonResponse.RESPONSE_OK.equals(response.getResponseCode())) {
+                JSONResponse<CardioSessionWithData> response = serviceHelper.getSessionData(cardioSession.getId());
+                if (JSONResponse.RESPONSE_OK.equals(response.getResponseCode())) {
                     List<CardioDataItem> dataItems = response.getData().getDataItems();
                     if (dataItems == null)
                         dataItems = Collections.emptyList();

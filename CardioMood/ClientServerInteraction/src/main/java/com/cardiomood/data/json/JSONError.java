@@ -6,7 +6,7 @@ import java.io.Serializable;
  *
  * @author Shaykhlislamov Sabir (email: sha-sabir@yandex.ru)
  */
-public class JsonError implements Serializable {
+public class JSONError implements Serializable {
 
     public static final Integer NORMAL_ERROR = 20;
     public static final Integer INVALID_TOKEN_ERROR = 21;
@@ -21,17 +21,17 @@ public class JsonError implements Serializable {
     private String message;
     private Integer code;
 
-    public JsonError(String message) {
+    public JSONError(String message) {
         this.message = message;
         this.code = NORMAL_ERROR;
     }
 
-    public JsonError(String message, Integer code) {
+    public JSONError(String message, Integer code) {
         this.message = message;
         this.code = code;
     }
 
-    public JsonError() {
+    public JSONError() {
     }
 
     public Integer getCode() {

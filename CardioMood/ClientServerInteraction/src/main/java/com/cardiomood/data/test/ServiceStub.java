@@ -5,8 +5,8 @@ import com.cardiomood.data.json.AccountStatusEnum;
 import com.cardiomood.data.json.ApiToken;
 import com.cardiomood.data.json.CardioSession;
 import com.cardiomood.data.json.CardioSessionWithData;
-import com.cardiomood.data.json.JsonError;
-import com.cardiomood.data.json.JsonResponse;
+import com.cardiomood.data.json.JSONError;
+import com.cardiomood.data.json.JSONResponse;
 import com.cardiomood.data.json.UserProfile;
 import com.cardiomood.data.json.UserRoleEnum;
 import com.cardiomood.data.json.UserStatusEnum;
@@ -29,67 +29,67 @@ public class ServiceStub implements CardioMoodDataService {
     private final Random random = new Random(System.currentTimeMillis());
 
     @Override
-    public JsonResponse<UserProfile> register(@FormParam("email") String email, @FormParam("password") String password) {
+    public JSONResponse<UserProfile> register(@FormParam("email") String email, @FormParam("password") String password) {
         sleep(500L);
         if ((email == null || email.isEmpty())) {
-            return new JsonResponse<UserProfile>(new JsonError("Email is empty", JsonError.REGISTRATION_FAILED_ERROR));
+            return new JSONResponse<UserProfile>(new JSONError("Email is empty", JSONError.REGISTRATION_FAILED_ERROR));
         }
         if ((password == null || password.isEmpty())) {
-            return new JsonResponse<UserProfile>(new JsonError("Password is empty", JsonError.REGISTRATION_FAILED_ERROR));
+            return new JSONResponse<UserProfile>(new JSONError("Password is empty", JSONError.REGISTRATION_FAILED_ERROR));
         }
         if (EMAIL.equalsIgnoreCase(email) && PASSWORD.equals(password))
-            return new JsonResponse<UserProfile>(getUser());
+            return new JSONResponse<UserProfile>(getUser());
         else
-            return new JsonResponse<UserProfile>(new JsonError(email+" already exists in the system.", JsonError.REGISTRATION_FAILED_ERROR));
+            return new JSONResponse<UserProfile>(new JSONError(email+" already exists in the system.", JSONError.REGISTRATION_FAILED_ERROR));
     }
 
     @Override
-    public JsonResponse<ApiToken> login(@FormParam("email") String email, @FormParam("password") String password) {
+    public JSONResponse<ApiToken> login(@FormParam("email") String email, @FormParam("password") String password) {
         sleep(300L);
         if ((email == null || email.isEmpty())) {
-            return new JsonResponse<ApiToken>(new JsonError("Email is empty", JsonError.LOGIN_FAILED_ERROR));
+            return new JSONResponse<ApiToken>(new JSONError("Email is empty", JSONError.LOGIN_FAILED_ERROR));
         }
         if ((password == null || password.isEmpty())) {
-            return new JsonResponse<ApiToken>(new JsonError("Password is empty", JsonError.LOGIN_FAILED_ERROR));
+            return new JSONResponse<ApiToken>(new JSONError("Password is empty", JSONError.LOGIN_FAILED_ERROR));
         }
         if (EMAIL.equalsIgnoreCase(email) && PASSWORD.equals(password))
-            return new JsonResponse<ApiToken>(generateApiToken());
+            return new JSONResponse<ApiToken>(generateApiToken());
         else
-            return new JsonResponse<ApiToken>(new JsonError("Incorrect login and/or password.", JsonError.LOGIN_FAILED_ERROR));
+            return new JSONResponse<ApiToken>(new JSONError("Incorrect login and/or password.", JSONError.LOGIN_FAILED_ERROR));
     }
 
     @Override
-    public JsonResponse<CardioSession> createSession(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serverId") Long serverId) {
+    public JSONResponse<CardioSession> createSession(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serverId") Long serverId) {
         return null;
     }
 
     @Override
-    public JsonResponse<List<CardioSession>> getSessionsOfUser(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serverId") Long serverId) {
+    public JSONResponse<List<CardioSession>> getSessionsOfUser(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serverId") Long serverId) {
         return null;
     }
 
     @Override
-    public JsonResponse<CardioSession> updateSessionInfo(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("sessionId") Long sessionId, @FormParam("name") String name, @FormParam("description") String description) {
+    public JSONResponse<CardioSession> updateSessionInfo(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("sessionId") Long sessionId, @FormParam("name") String name, @FormParam("description") String description) {
         return null;
     }
 
     @Override
-    public JsonResponse<CardioSessionWithData> getSessionData(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("sessionId") Long sessionId) {
+    public JSONResponse<CardioSessionWithData> getSessionData(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("sessionId") Long sessionId) {
         return null;
     }
 
     @Override
-    public JsonResponse<String> deleteSession(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("sessionId") Long sessionId) {
+    public JSONResponse<String> deleteSession(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("sessionId") Long sessionId) {
         return null;
     }
 
     @Override
-    public JsonResponse<String> appendDataToSession(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serializedData") String serializedData) {
+    public JSONResponse<String> appendDataToSession(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serializedData") String serializedData) {
         return null;
     }
 
     @Override
-    public JsonResponse<String> rewriteCardioSessionData(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serializedData") String serializedData) {
+    public JSONResponse<String> rewriteCardioSessionData(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serializedData") String serializedData) {
         return null;
     }
 

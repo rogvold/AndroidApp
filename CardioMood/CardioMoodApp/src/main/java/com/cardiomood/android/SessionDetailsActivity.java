@@ -41,7 +41,7 @@ import com.cardiomood.data.CardioMoodServer;
 import com.cardiomood.data.DataServiceHelper;
 import com.cardiomood.data.async.ServerResponseCallbackRetry;
 import com.cardiomood.data.json.CardioSession;
-import com.cardiomood.data.json.JsonError;
+import com.cardiomood.data.json.JSONError;
 import com.flurry.android.FlurryAgent;
 
 import java.text.MessageFormat;
@@ -340,7 +340,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
                                         }
 
                                         @Override
-                                        public void onError(JsonError error) {
+                                        public void onError(JSONError error) {
                                             Log.d(TAG, "updateSessionInfo failed, error="+error);
                                         }
                                     });

@@ -3,10 +3,10 @@ package com.cardiomood.data.async;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.cardiomood.data.json.JsonError;
-import com.cardiomood.data.json.JsonResponse;
+import com.cardiomood.data.json.JSONError;
+import com.cardiomood.data.json.JSONResponse;
 
-public abstract class ServiceTask<T> extends AsyncTask<Object, Object, JsonResponse<T>> {
+public abstract class ServiceTask<T> extends AsyncTask<Object, Object, JSONResponse<T>> {
 
     private static final String TAG = ServiceTask.class.getSimpleName();
 
@@ -21,28 +21,28 @@ public abstract class ServiceTask<T> extends AsyncTask<Object, Object, JsonRespo
     }
 
     @Override
-    protected void onPostExecute(JsonResponse<T> response) {
+    protected void onPostExecute(JSONResponse<T> response) {
         if (callback == null) {
             Log.d(TAG, "onPostExecute(): callback = null, response = " + response);
             return;
         }
         if (response == null) {
             Log.d(TAG, "onPostExecute(): response is null");
-            callback.onError(new JsonError("Network error: empty response", JsonError.EMPTY_RESPONSE_ERROR));
+            callback.onError(new JSONError("Network error: empty response", JSONError.EMPTY_RESPONSE_ERROR));
             return;
         }
-        if (JsonResponse.RESPONSE_ERROR.equals(response.getResponseCode())) {
+        if (JSONResponse.RESPONSE_ERROR.equals(response.getResponseCode())) {
             Log.d(TAG, "onPostExecute(): response error code -> " + response.getResponseCode());
             callback.onError(response.getError());
             return;
         }
-        if (JsonResponse.RESPONSE_OK.equals(response.getResponseCode())) {
+        if (JSONResponse.RESPONSE_OK.equals(response.getResponseCode())) {
             callback.onResult(response.getData());
             return;
         }
         Log.d(TAG, "onPostExecute(): invalid response code -> " + response.getResponseCode());
-        callback.onError(new JsonError("Network error: Invalid response code " + response.getResponseCode(), JsonError.INVALID_RESPONSE_CODE_ERROR));
+        callback.onError(new JSONError("Network error: Invalid response code " + response.getResponseCode(), JSONError.INVALID_RESPONSE_CODE_ERROR));
     }
 
-    abstract protected JsonResponse<T> doInBackground(Object... params);
+    abstract protected JSONResponse<T> doInBackground(Object... params);
 }

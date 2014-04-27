@@ -33,7 +33,7 @@ import com.cardiomood.data.CardioMoodServer;
 import com.cardiomood.data.DataServiceHelper;
 import com.cardiomood.data.async.ServerResponseCallback;
 import com.cardiomood.data.json.ApiToken;
-import com.cardiomood.data.json.JsonError;
+import com.cardiomood.data.json.JSONError;
 import com.cardiomood.data.json.UserProfile;
 import com.flurry.android.FlurryAgent;
 import com.parse.ParseObject;
@@ -256,7 +256,7 @@ public class LoginActivity extends Activity implements ConfigurationConstants {
                 }
 
                 @Override
-                public void onError(JsonError error) {
+                public void onError(JSONError error) {
                     mPasswordView.setError(error == null ? "Unexpected error." : error.getMessage());
                     mPasswordView.requestFocus();
                     showProgress(false);
@@ -346,7 +346,7 @@ public class LoginActivity extends Activity implements ConfigurationConstants {
                 }
 
                 @Override
-                public void onError(JsonError error) {
+                public void onError(JSONError error) {
                     mPasswordView.setError(error == null ? "Unexpected error." : error.getMessage());
                     mPasswordView.requestFocus();
                     showProgress(false);

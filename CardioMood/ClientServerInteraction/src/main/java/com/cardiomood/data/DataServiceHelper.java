@@ -12,8 +12,8 @@ import com.cardiomood.data.async.ServiceTask;
 import com.cardiomood.data.json.ApiToken;
 import com.cardiomood.data.json.CardioSession;
 import com.cardiomood.data.json.CardioSessionWithData;
-import com.cardiomood.data.json.JsonError;
-import com.cardiomood.data.json.JsonResponse;
+import com.cardiomood.data.json.JSONError;
+import com.cardiomood.data.json.JSONResponse;
 import com.cardiomood.data.json.UserProfile;
 import com.google.gson.Gson;
 
@@ -111,12 +111,12 @@ public class DataServiceHelper {
         email = null;
     }
 
-    public JsonResponse<ApiToken> login(String email, String password) {
+    public JSONResponse<ApiToken> login(String email, String password) {
         try {
             return mService.login(email, password);
         } catch (Exception ex) {
             Log.w(TAG, "login() -> failed with an exception", ex);
-            return new JsonResponse<ApiToken>(new JsonError("Service error: " + ex.getLocalizedMessage(), JsonError.SERVICE_ERROR));
+            return new JSONResponse<ApiToken>(new JSONError("Service error: " + ex.getLocalizedMessage(), JSONError.SERVICE_ERROR));
         }
     }
 
@@ -126,19 +126,19 @@ public class DataServiceHelper {
         new ServiceTask<ApiToken>(new LoginCallback(email, password, callback)) {
 
             @Override
-            protected JsonResponse<ApiToken> doInBackground(Object... params) {
+            protected JSONResponse<ApiToken> doInBackground(Object... params) {
                     Log.d(TAG, "email = " + params[0] + "; password = " + params[1]);
                     return login((String) params[0], (String) params[1]);
             }
         }.execute(email, password);
     }
 
-    public JsonResponse<UserProfile> register(String email, String password) {
+    public JSONResponse<UserProfile> register(String email, String password) {
         try {
             return mService.register(email, password);
         } catch (Exception ex) {
             Log.w(TAG, "register() -> failed with an exception", ex);
-            return new JsonResponse<UserProfile>(new JsonError("Service error: " + ex.getLocalizedMessage(), JsonError.SERVICE_ERROR));
+            return new JSONResponse<UserProfile>(new JSONError("Service error: " + ex.getLocalizedMessage(), JSONError.SERVICE_ERROR));
         }
     }
 
@@ -148,14 +148,14 @@ public class DataServiceHelper {
         new ServiceTask<UserProfile>(callback) {
 
             @Override
-            protected JsonResponse<UserProfile> doInBackground(Object... params) {
+            protected JSONResponse<UserProfile> doInBackground(Object... params) {
                 Log.d(TAG, "email = " + params[0] + "; password = " + params[1]);
                 return register((String) params[0], (String) params[1]);
             }
         }.execute(email, password);
     }
 
-    public JsonResponse<CardioSession> createSession() {
+    public JSONResponse<CardioSession> createSession() {
         try {
             if (isSignedIn()) {
                 String token = getTokenString();
@@ -166,7 +166,7 @@ public class DataServiceHelper {
             }
         } catch (Exception ex) {
             Log.w(TAG, "createSession() -> failed with an exception", ex);
-            return new JsonResponse<CardioSession>(new JsonError("Service error: " + ex.getLocalizedMessage(), JsonError.SERVICE_ERROR));
+            return new JSONResponse<CardioSession>(new JSONError("Service error: " + ex.getLocalizedMessage(), JSONError.SERVICE_ERROR));
         }
     }
 
@@ -176,13 +176,13 @@ public class DataServiceHelper {
         new ServiceTask<CardioSession>(new HandleTokenExpiredCallback<CardioSession>(callback)) {
 
             @Override
-            protected JsonResponse<CardioSession> doInBackground(Object... params) {
+            protected JSONResponse<CardioSession> doInBackground(Object... params) {
                 return createSession();
             }
         }.execute();
     }
 
-    public JsonResponse<List<CardioSession>> getSessions() {
+    public JSONResponse<List<CardioSession>> getSessions() {
         try {
             if (isSignedIn()) {
                 String token = getTokenString();
@@ -193,7 +193,7 @@ public class DataServiceHelper {
             }
         } catch (Exception ex) {
             Log.w(TAG, "getSessions() -> failed with an exception", ex);
-            return new JsonResponse<List<CardioSession>>(new JsonError("Service error: " + ex.getLocalizedMessage(), JsonError.SERVICE_ERROR));
+            return new JSONResponse<List<CardioSession>>(new JSONError("Service error: " + ex.getLocalizedMessage(), JSONError.SERVICE_ERROR));
         }
     }
 
@@ -203,13 +203,13 @@ public class DataServiceHelper {
         new ServiceTask<List<CardioSession>>(new HandleTokenExpiredCallback<List<CardioSession>>(callback)) {
 
             @Override
-            protected JsonResponse<List<CardioSession>> doInBackground(Object... params) {
+            protected JSONResponse<List<CardioSession>> doInBackground(Object... params) {
                 return getSessions();
             }
         }.execute();
     }
 
-    public JsonResponse<CardioSession> updateSessionInfo(Long sessionId, String name, String description) {
+    public JSONResponse<CardioSession> updateSessionInfo(Long sessionId, String name, String description) {
         try {
             if (isSignedIn()) {
                 String token = getTokenString();
@@ -220,7 +220,7 @@ public class DataServiceHelper {
             }
         } catch (Exception ex) {
             Log.w(TAG, "updateSessionInfo() -> failed with an exception", ex);
-            return new JsonResponse<CardioSession>(new JsonError("Service error: " + ex.getLocalizedMessage(), JsonError.SERVICE_ERROR));
+            return new JSONResponse<CardioSession>(new JSONError("Service error: " + ex.getLocalizedMessage(), JSONError.SERVICE_ERROR));
         }
     }
 
@@ -230,13 +230,13 @@ public class DataServiceHelper {
         new ServiceTask<CardioSession>(new HandleTokenExpiredCallback<CardioSession>(callback)) {
 
             @Override
-            protected JsonResponse<CardioSession> doInBackground(Object... params) {
+            protected JSONResponse<CardioSession> doInBackground(Object... params) {
                 return updateSessionInfo((Long) params[0], (String) params[1], (String) params[2]);
             }
         }.execute(sessionId, name, description);
     }
 
-    public JsonResponse<CardioSessionWithData> getSessionData(Long sessionId) {
+    public JSONResponse<CardioSessionWithData> getSessionData(Long sessionId) {
         try {
             if (isSignedIn()) {
                 String token = getTokenString();
@@ -247,7 +247,7 @@ public class DataServiceHelper {
             }
         } catch (Exception ex) {
             Log.w(TAG, "getSessionData() -> failed with an exception", ex);
-            return new JsonResponse<CardioSessionWithData>(new JsonError("Service error: " + ex.getLocalizedMessage(), JsonError.SERVICE_ERROR));
+            return new JSONResponse<CardioSessionWithData>(new JSONError("Service error: " + ex.getLocalizedMessage(), JSONError.SERVICE_ERROR));
         }
     }
 
@@ -257,14 +257,14 @@ public class DataServiceHelper {
         new ServiceTask<CardioSessionWithData>(new HandleTokenExpiredCallback<CardioSessionWithData>(callback)) {
 
             @Override
-            protected JsonResponse<CardioSessionWithData> doInBackground(Object... params) {
+            protected JSONResponse<CardioSessionWithData> doInBackground(Object... params) {
                 return getSessionData((Long) params[0]);
             }
         }.execute(sessionId);
     }
 
 
-    public JsonResponse<String> deleteSession(Long sessionId) {
+    public JSONResponse<String> deleteSession(Long sessionId) {
         try {
             if (isSignedIn()) {
                 String token = getTokenString();
@@ -275,7 +275,7 @@ public class DataServiceHelper {
             }
         } catch (Exception ex) {
             Log.w(TAG, "deleteSession() -> failed with an exception", ex);
-            return new JsonResponse<String>(new JsonError("Service error: " + ex.getLocalizedMessage(), JsonError.SERVICE_ERROR));
+            return new JSONResponse<String>(new JSONError("Service error: " + ex.getLocalizedMessage(), JSONError.SERVICE_ERROR));
         }
     }
 
@@ -285,13 +285,13 @@ public class DataServiceHelper {
         new ServiceTask<String>(new HandleTokenExpiredCallback<String>(callback)) {
 
             @Override
-            protected JsonResponse<String> doInBackground(Object... params) {
+            protected JSONResponse<String> doInBackground(Object... params) {
                 return deleteSession((Long) params[0]);
             }
         }.execute(sessionId);
     }
 
-    public JsonResponse<String> rewriteCardioSessionData(CardioSessionWithData serializedData) {
+    public JSONResponse<String> rewriteCardioSessionData(CardioSessionWithData serializedData) {
         try {
             if (isSignedIn()) {
                 String token = getTokenString();
@@ -302,7 +302,7 @@ public class DataServiceHelper {
             }
         } catch (Exception ex) {
             Log.w(TAG, "rewriteCardioSessionData() -> failed with an exception", ex);
-            return new JsonResponse<String>(new JsonError("Service error: " + ex.getLocalizedMessage(), JsonError.SERVICE_ERROR));
+            return new JSONResponse<String>(new JSONError("Service error: " + ex.getLocalizedMessage(), JSONError.SERVICE_ERROR));
         }
     }
 
@@ -312,13 +312,13 @@ public class DataServiceHelper {
         new ServiceTask<String>(new HandleTokenExpiredCallback<String>(callback)) {
 
             @Override
-            protected JsonResponse<String> doInBackground(Object... params) {
+            protected JSONResponse<String> doInBackground(Object... params) {
                 return rewriteCardioSessionData((CardioSessionWithData) params[0]);
             }
         }.execute(serializedData);
     }
 
-    public JsonResponse<String> appendDataToSession(CardioSessionWithData serializedData) {
+    public JSONResponse<String> appendDataToSession(CardioSessionWithData serializedData) {
         try {
             if (isSignedIn()) {
                 String token = getTokenString();
@@ -329,7 +329,7 @@ public class DataServiceHelper {
             }
         } catch (Exception ex) {
             Log.w(TAG, "appendDataToSession() -> failed with an exception", ex);
-            return new JsonResponse<String>(new JsonError("Service error: " + ex.getLocalizedMessage(), JsonError.SERVICE_ERROR));
+            return new JSONResponse<String>(new JSONError("Service error: " + ex.getLocalizedMessage(), JSONError.SERVICE_ERROR));
         }
     }
 
@@ -339,7 +339,7 @@ public class DataServiceHelper {
         new ServiceTask<String>(new HandleTokenExpiredCallback<String>(callback)) {
 
             @Override
-            protected JsonResponse<String> doInBackground(Object... params) {
+            protected JSONResponse<String> doInBackground(Object... params) {
                 return appendDataToSession((CardioSessionWithData) params[0]);
             }
         }.execute(serializedData);
@@ -397,8 +397,8 @@ public class DataServiceHelper {
         }
 
         @Override
-        public void onError(JsonError error) {
-            if (error != null && JsonError.INVALID_TOKEN_ERROR.equals(error.getCode())) {
+        public void onError(JSONError error) {
+            if (error != null && JSONError.INVALID_TOKEN_ERROR.equals(error.getCode())) {
                 String email = getEmail();
                 String password = getPassword();
                 logout();
@@ -412,7 +412,7 @@ public class DataServiceHelper {
                     }
 
                     @Override
-                    public void onError(JsonError error) {
+                    public void onError(JSONError error) {
                         if (externalCallback != null)
                             externalCallback.onError(error);
                     }
@@ -452,7 +452,7 @@ public class DataServiceHelper {
         }
 
         @Override
-        public void onError(JsonError error) {
+        public void onError(JSONError error) {
             if (externalCallback != null) {
                 externalCallback.onError(error);
             }

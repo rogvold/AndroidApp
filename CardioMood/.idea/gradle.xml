@@ -7,16 +7,16 @@
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">
           <set>
-            <option value="D:\Develop\android\CardioMood\CardioMood" />
-            <option value="D:\Develop\android\CardioMood\CardioMood\AndroidControls" />
-            <option value="D:\Develop\android\CardioMood\CardioMood\CardioMoodApp" />
-            <option value="D:\Develop\android\CardioMood\CardioMood\CardioSportApp" />
-            <option value="D:\Develop\android\CardioMood\CardioMood\ClientServerInteraction" />
-            <option value="D:\Develop\android\CardioMood\CardioMood\CommonTools" />
-            <option value="D:\Develop\android\CardioMood\CardioMood\HeartRate" />
-            <option value="D:\Develop\android\CardioMood\CardioMood\HeartRateApp" />
-            <option value="D:\Develop\android\CardioMood\CardioMood\Math" />
-            <option value="D:\Develop\android\CardioMood\CardioMood\ShinobiCharts" />
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/AndroidControls" />
+            <option value="$PROJECT_DIR$/CardioMoodApp" />
+            <option value="$PROJECT_DIR$/CardioSportApp" />
+            <option value="$PROJECT_DIR$/ClientServerInteraction" />
+            <option value="$PROJECT_DIR$/CommonTools" />
+            <option value="$PROJECT_DIR$/HeartRate" />
+            <option value="$PROJECT_DIR$/HeartRateApp" />
+            <option value="$PROJECT_DIR$/Math" />
+            <option value="$PROJECT_DIR$/ShinobiCharts" />
           </set>
         </option>
       </GradleProjectSettings>

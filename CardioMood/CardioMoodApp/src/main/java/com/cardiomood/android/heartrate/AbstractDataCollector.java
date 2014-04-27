@@ -17,9 +17,9 @@ import com.cardiomood.data.async.ServerResponseCallbackRetry;
 import com.cardiomood.data.json.CardioDataItem;
 import com.cardiomood.data.json.CardioSession;
 import com.cardiomood.data.json.CardioSessionWithData;
-import com.cardiomood.data.json.JsonError;
+import com.cardiomood.data.json.JSONError;
+import com.cardiomood.data.json.JSONResponse;
 import com.cardiomood.data.json.JsonRRInterval;
-import com.cardiomood.data.json.JsonResponse;
 import com.cardiomood.heartrate.bluetooth.HeartRateLeService;
 import com.cardiomood.math.DataWindowSet;
 import com.cardiomood.math.window.DataWindow;
@@ -126,7 +126,7 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
                 }
 
                 @Override
-                public void onError(JsonError error) {
+                public void onError(JSONError error) {
                     creatingSession = false;
                     Log.d(TAG, "createSession() failed: " + error);
                 }
@@ -172,7 +172,7 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
                     }
 
                     @Override
-                    public void onError(JsonError error) {
+                    public void onError(JSONError error) {
 
                     }
                 });
@@ -353,13 +353,13 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
                 return;
             final CardioSessionWithData session = new CardioSessionWithData(cardioSession);
             session.setDataItems(buffer);
-            JsonResponse<String> response = dataService.appendDataToSession(session);
+            JSONResponse<String> response = dataService.appendDataToSession(session);
             if (response != null) {
                 if (response != null && response.isOk()) {
                     buffer.clear();
                 } else {
-                    JsonError error = response.getError();
-                    if (error != null && error.getCode() == JsonError.INVALID_TOKEN_ERROR) {
+                    JSONError error = response.getError();
+                    if (error != null && error.getCode() == JSONError.INVALID_TOKEN_ERROR) {
                         dataService.refreshToken(true);
                         response = dataService.appendDataToSession(session);
                         if (response != null || response.isOk()) {
