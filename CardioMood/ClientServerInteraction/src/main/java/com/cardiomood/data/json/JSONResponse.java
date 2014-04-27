@@ -66,4 +66,13 @@ public class JsonResponse<T> implements Serializable {
     public boolean isOk() {
         return RESPONSE_OK.equals(responseCode);
     }
+
+    @Override
+    public String toString() {
+        return "JsonResponse{" +
+                "responseCode=" + responseCode +
+                ", error=" + error +
+                ", data=" + (data == null ? "null" : "<some data>") +
+                '}';
+    }
 }
