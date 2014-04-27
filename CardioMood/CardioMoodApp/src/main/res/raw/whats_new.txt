@@ -1,4 +1,15 @@
-<p><b>New in CardioMood 1.2 (current):</b><p>
+<p><b>New in CardioMood 1.3:</b><p>
+<p>
++++ Added filtering feature.
+<br/>
++++ Online monitoring of stress and energy level.
+<br/>
++++ Stress graph added.
+<br/>
+=== Many bugfixes.
+</p>
+<br/>
+<p><b>New in CardioMood 1.2.x:</b><p>
 <p>
 +++ Cloud storage (experimental).
 <br/>

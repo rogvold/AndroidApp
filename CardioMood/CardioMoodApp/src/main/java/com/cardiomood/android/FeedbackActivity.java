@@ -20,7 +20,6 @@ import android.widget.Toast;
 import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.SaveCallback;
@@ -37,8 +36,6 @@ public class FeedbackActivity extends Activity {
                     .add(R.id.container, new FeedbackFragment())
                     .commit();
         }
-
-        Parse.initialize(this, "D00uihFFqj0K9yAoecTzR5t4VxJeSGfYOee4LciN", "vaqte7MiPMce9h4HFCnmTnkieIOarA9WPoCcxVnk");
     }
 
 

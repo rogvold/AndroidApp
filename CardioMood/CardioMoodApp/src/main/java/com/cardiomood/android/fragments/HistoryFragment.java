@@ -221,13 +221,16 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
 
                 if (session.getExternalId() != null) {
                     final JsonResponse<String> response = serviceHelper.deleteSession(session.getExternalId());
+                    Log.e("Fuck!", response.toString());
                     if (!response.isOk()) {
                         handler.post(new Runnable() {
 
                             @Override
                             public void run() {
-                                if (getActivity() != null)
-                                    Toast.makeText(getActivity(), response.getError().getMessage(), Toast.LENGTH_SHORT).show();
+                                if (getActivity() != null) {
+                                    if (response.getError() != null)
+                                        Toast.makeText(getActivity(), response.getError().getMessage(), Toast.LENGTH_SHORT).show();
+                                }
                             }
                         });
                         return null;
