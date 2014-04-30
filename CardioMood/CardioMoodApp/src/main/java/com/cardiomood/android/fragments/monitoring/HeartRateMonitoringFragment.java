@@ -60,10 +60,12 @@ public class HeartRateMonitoringFragment extends Fragment implements FragmentCal
                     double[] rr = window.getIntervals().getElements();
                     rr = filter.doFilter(rr);
                     double d = Math.sqrt(StatUtils.variance(rr));
-                    if (d < 15){
+                    if (d <= 0) {
+                        d = 0.0;
+                    } else if (d < 15){
                         d *= 6.0;
                     } else {
-                        d = (100 - 50.0 / (14.85 * Math.log(d) - 40));
+                        d = (100 - 50.0 / (16.6171 * Math.log(d) - 40));
                     }
                     lastEnergyLevel = d;
                     if (batteryIndicator != null) {

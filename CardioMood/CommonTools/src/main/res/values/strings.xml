@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="height_units_ft">ft.</string>
+    <string name="weight_units_lb">lb.</string>
+    <string name="height_units_in">in.</string>
+    <string name="weight_units_oz">oz.</string>
+    <string name="height_units_m">m</string>
+    <string name="weight_units_kg">kg</string>
+    <string name="height_units_cm">cm</string>
+    <string name="weight_units_g">g</string>
+    <string name="birth_date_dlg_title">Birth date</string>
+    <string name="email">Email</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="phone_number_hint">Phone Number</string>
+    <string name="birth_date">Birth date</string>
+    <string name="weight">Weight:</string>
+    <string name="height">Height:</string>
+    <string name="you_can_select_unit_system_in_settings">*** You can choose preferred unit system in Settings</string>
+</resources>

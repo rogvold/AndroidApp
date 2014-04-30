@@ -1,4 +1,4 @@
-package com.cardiomood.heartrate.android.fragments;
+package com.cardiomood.android.tools.fragments;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -16,8 +17,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.cardiomood.android.tools.PreferenceHelper;
-import com.cardiomood.heartrate.android.R;
-import com.cardiomood.heartrate.android.tools.ConfigurationConstants;
+import com.cardiomood.android.tools.R;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -30,10 +30,27 @@ import java.util.Date;
  * Date: 15.06.13
  * Time: 18:36
  */
-public class ProfileFragment extends Fragment implements ConfigurationConstants, View.OnKeyListener {
+public class ProfileFragment extends Fragment implements View.OnKeyListener {
 
     private static final String TAG = ProfileFragment.class.getSimpleName();
-    private static final DateFormat DATE_FORMAT = SimpleDateFormat.getDateInstance(java.text.DateFormat.SHORT);
+    private static final DateFormat DATE_FORMAT = SimpleDateFormat.getDateInstance(DateFormat.SHORT);
+
+    // user profile editable parameters
+    public static final String USER_EMAIL_KEY			= "user.email";
+    public static final String USER_FIRST_NAME_KEY		= "user.first_name";
+    public static final String USER_LAST_NAME_KEY		= "user.last_name";
+    public static final String USER_ABOUT_KEY			= "user.about";
+    public static final String USER_DESCRIPTION_KEY		= "user.description";
+    public static final String USER_DIAGNOSIS_KEY		= "user.diagnosis";
+    public static final String USER_STATUS_KEY			= "user.status";
+    public static final String USER_DEPARTMENT_KEY		= "user.department";
+    public static final String USER_WEIGHT_KEY			= "user.weight";
+    public static final String USER_HEIGHT_KEY			= "user.height";
+    public static final String USER_BIRTH_DATE_KEY      = "user.age";
+    public static final String USER_SEX_KEY				= "user.sex";
+    public static final String USER_PHONE_NUMBER_KEY    = "user.phone_number";
+
+    public static final String PREFERRED_MEASUREMENT_SYSTEM = "app.preferred_measurement_system";
 
     private PreferenceHelper prefHelper;
 
@@ -54,7 +71,7 @@ public class ProfileFragment extends Fragment implements ConfigurationConstants,
 
     private Callback callback;
 
-    private Calendar myCalendar = Calendar.getInstance();
+    private final Calendar myCalendar = Calendar.getInstance();
 
     private final DatePickerDialog.OnDateSetListener dateChangeListener = new DatePickerDialog.OnDateSetListener() {
 
@@ -81,6 +98,14 @@ public class ProfileFragment extends Fragment implements ConfigurationConstants,
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_profile, container, false);
+
+        v.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                save();
+                return false;
+            }
+        });
 
         emailView = (EditText) v.findViewById(R.id.editTextEmail);
         emailView.setOnKeyListener(this);
@@ -120,6 +145,14 @@ public class ProfileFragment extends Fragment implements ConfigurationConstants,
                 );
                 dlg.setTitle(R.string.birth_date_dlg_title);
                 dlg.show();
+            }
+        });
+        birthdayView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    v.callOnClick();
+                }
             }
         });
 
@@ -184,7 +217,7 @@ public class ProfileFragment extends Fragment implements ConfigurationConstants,
         if ("IMPERIAL".equalsIgnoreCase(unitSystem)) {
             weight *= 2.20462;
             if (weight > 0.0f) {
-                weightMajorView.setText(String.valueOf(Math.floor(weight)));
+                weightMajorView.setText(String.valueOf(Math.round(Math.floor(weight))));
                 weightMinorView.setText(String.valueOf(Math.round((weight - Math.floor(weight))*16)));
             } else {
                 weightMajorView.setText(null);
@@ -192,7 +225,7 @@ public class ProfileFragment extends Fragment implements ConfigurationConstants,
             }
         } else {
             if (weight > 0.0f) {
-                weightMajorView.setText(String.valueOf(Math.floor(weight)));
+                weightMajorView.setText(String.valueOf(Math.round(Math.floor(weight))));
                 weightMinorView.setText(String.valueOf(Math.round((weight - Math.floor(weight))*1000)));
             } else {
                 weightMajorView.setText(null);
@@ -203,9 +236,9 @@ public class ProfileFragment extends Fragment implements ConfigurationConstants,
 
         float height = prefHelper.getFloat(USER_HEIGHT_KEY, 0.0f);
         if ("IMPERIAL".equalsIgnoreCase(unitSystem)) {
-            height *= 0.0328084;
+            height *= 3.28084;
             if (height > 0.0f) {
-                heightMajorView.setText(String.valueOf((int) Math.floor(height)));
+                heightMajorView.setText(String.valueOf(Math.round(Math.floor(height))));
                 heightMinorView.setText(String.valueOf(Math.round((height - Math.floor(height))*12)));
             } else {
                 heightMajorView.setText(null);
@@ -213,13 +246,19 @@ public class ProfileFragment extends Fragment implements ConfigurationConstants,
             }
         } else {
             if (height > 0.0f) {
-                heightMajorView.setText(String.valueOf((int) Math.floor(height)));
+                heightMajorView.setText(String.valueOf(Math.round(Math.floor(height))));
                 heightMinorView.setText(String.valueOf(Math.round((height - Math.floor(height)) * 100)));
             } else {
                 heightMajorView.setText(null);
                 heightMinorView.setText(null);
             }
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        save();
     }
 
     @Override
@@ -267,25 +306,25 @@ public class ProfileFragment extends Fragment implements ConfigurationConstants,
             }
 
             if ("IMPERIAL".equalsIgnoreCase(unitSystem)) {
-                float lb = 0;
-                float oz = 0;
-                if (!TextUtils.isEmpty(weightMajorView.getText().toString())) {
-                    lb = Float.parseFloat(weightMajorView.getText().toString());
+                float ft = 0;
+                float in = 0;
+                if (!TextUtils.isEmpty(heightMajorView.getText().toString())) {
+                    ft = Float.parseFloat(heightMajorView.getText().toString());
                 }
-                if (!TextUtils.isEmpty(weightMinorView.getText().toString())) {
-                    oz = Float.parseFloat(weightMinorView.getText().toString());
+                if (!TextUtils.isEmpty(heightMinorView.getText().toString())) {
+                    in = Float.parseFloat(heightMinorView.getText().toString());
                 }
-                prefHelper.putFloat(USER_WEIGHT_KEY, lb/2.20462f + oz/16f/2.20462f);
+                prefHelper.putFloat(USER_HEIGHT_KEY, ft*3.28084f + in*3.28084f/12);
             } else {
-                float kg = 0;
-                float g = 0;
-                if (!TextUtils.isEmpty(weightMajorView.getText().toString())) {
-                    kg = Float.parseFloat(weightMajorView.getText().toString());
+                float m = 0;
+                float cm = 0;
+                if (!TextUtils.isEmpty(heightMajorView.getText().toString())) {
+                    m = Float.parseFloat(heightMajorView.getText().toString());
                 }
-                if (!TextUtils.isEmpty(weightMinorView.getText().toString())) {
-                    g = Float.parseFloat(weightMinorView.getText().toString());
+                if (!TextUtils.isEmpty(heightMinorView.getText().toString())) {
+                    cm = Float.parseFloat(heightMinorView.getText().toString());
                 }
-                prefHelper.putFloat(USER_WEIGHT_KEY, kg + g/1000);
+                prefHelper.putFloat(USER_HEIGHT_KEY, m + cm/100);
             }
 
             if (!TextUtils.isEmpty(birthdayView.getText().toString()))

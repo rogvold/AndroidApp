@@ -9,7 +9,7 @@ import android.provider.BaseColumns;
 public interface HeartRateDBContract {
 	
 	String DATABASE_NAME = "heart_rate.db";
-	int DATABASE_VERSION = 25;
+	int DATABASE_VERSION = 26;
 	
 	public static interface HeartRateData extends BaseColumns {
 		String TABLE_NAME = "heart_rate_data";

@@ -88,6 +88,14 @@ public class HeartRateDBHelper extends SQLiteOpenHelper implements HeartRateDBCo
 		new DBUpgradeHelper(db).performUpgrade(oldVersion, newVersion);
         // Create sample sessions for current user
         createSampleSessions(db);
+
+        if (oldVersion < 26) {
+            // due to update in ProfileFragment
+            pHelper.remove(ConfigurationConstants.USER_BIRTH_DATE_KEY);
+            pHelper.remove(ConfigurationConstants.USER_SEX_KEY);
+            pHelper.remove(ConfigurationConstants.USER_WEIGHT_KEY);
+            pHelper.remove(ConfigurationConstants.USER_HEIGHT_KEY);
+        }
 	}
 	
 	@Override

@@ -39,9 +39,6 @@ public interface ConfigurationConstants {
     String USER_PHONE_NUMBER_KEY    = "user.phone_number";
     String USER_LOGGED_IN           = "user.logged_in";
 
-    // measurement settings
-    String MEASUREMENT_UNLIMITED_LENGTH = "measurement.unlimited_length";
-
     // connection settings
     String CONNECTION_DISABLE_BT_ON_CLOSE = "connection.disable_bluetooth_on_close";
 	
@@ -59,6 +56,10 @@ public interface ConfigurationConstants {
 
     // General app parameters
     String APP_DATE_FORMAT          = "app.date_format";
+    String DISABLE_SPLASH_SCREEN        = "app.disable_splash_screen";
+    String DISABLE_ADS                  = "app.disable_ads";
+    String DO_NOT_ASK_INFO_ON_START     = "app.do_not_ask_info_on_start";
+    String PREFERRED_MEASUREMENT_SYSTEM = "app.preferred_measurement_system";
 
     // Special DB constants
     String DB_GOOD_SESSION_ID       = "db.good_session_id";

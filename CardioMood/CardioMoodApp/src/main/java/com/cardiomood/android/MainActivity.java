@@ -21,10 +21,10 @@ import com.cardiomood.android.dialogs.AboutDialog;
 import com.cardiomood.android.dialogs.WhatsNewDialog;
 import com.cardiomood.android.fragments.ConnectionFragment;
 import com.cardiomood.android.fragments.HistoryFragment;
-import com.cardiomood.android.fragments.ProfileFragment;
 import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
+import com.cardiomood.android.tools.fragments.ProfileFragment;
 import com.flurry.android.FlurryAgent;
 
 import java.util.Locale;

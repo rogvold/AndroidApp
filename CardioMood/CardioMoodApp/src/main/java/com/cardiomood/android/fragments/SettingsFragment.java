@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
+import android.preference.ListPreference;
 
 import com.cardiomood.android.R;
 import com.cardiomood.android.tools.PreferenceActivityBase;
@@ -20,6 +21,8 @@ public class SettingsFragment extends PreferenceActivityBase.AbstractMainFragmen
     private EditTextPreference mPortPref;
     private EditTextPreference mPathPref;
     private CheckBoxPreference mDisableBluetoothOnClosePref;
+    private ListPreference mPreferredUnitSystemPref;
+    private CheckBoxPreference mDisableSplashScreenPref;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -33,20 +36,24 @@ public class SettingsFragment extends PreferenceActivityBase.AbstractMainFragmen
         helper.putString(SERVICE_PROTOCOL, helper.getString(SERVICE_PROTOCOL, DEFAULT_SERVICE_PROTOCOL));
         helper.putString(SERVICE_PORT, helper.getString(SERVICE_PORT, DEFAULT_SERVICE_PORT));
         helper.putString(SERVICE_PATH, helper.getString(SERVICE_PATH, DEFAULT_SERVICE_PATH));
-        helper.putBoolean(MEASUREMENT_UNLIMITED_LENGTH, helper.getBoolean(MEASUREMENT_UNLIMITED_LENGTH));
         helper.putBoolean(CONNECTION_DISABLE_BT_ON_CLOSE, helper.getBoolean(CONNECTION_DISABLE_BT_ON_CLOSE));
+        helper.putBoolean(DISABLE_SPLASH_SCREEN, helper.getBoolean(DISABLE_SPLASH_SCREEN));
+        helper.putString(PREFERRED_MEASUREMENT_SYSTEM, helper.getString(PREFERRED_MEASUREMENT_SYSTEM));
 
         mProtocolPref = (EditTextPreference) findPreference(SERVICE_PROTOCOL);
         mHostPref = (EditTextPreference) findPreference(SERVICE_HOST);
         mPortPref = (EditTextPreference) findPreference(SERVICE_PORT);
         mPathPref = (EditTextPreference) findPreference(SERVICE_PATH);
         mDisableBluetoothOnClosePref = (CheckBoxPreference) findPreference(CONNECTION_DISABLE_BT_ON_CLOSE);
+        mDisableSplashScreenPref = (CheckBoxPreference) findPreference(DISABLE_SPLASH_SCREEN);
+        mPreferredUnitSystemPref = (ListPreference) findPreference(PREFERRED_MEASUREMENT_SYSTEM);
 
         refreshSummaries();
     }
 
     private void refreshSummaries() {
-        updatePrefSummary(mProtocolPref, mHostPref, mPortPref, mPathPref, mDisableBluetoothOnClosePref);
+        updatePrefSummary(mProtocolPref, mHostPref, mPortPref, mPathPref,
+                mDisableBluetoothOnClosePref, mDisableSplashScreenPref, mPreferredUnitSystemPref);
     }
 
     @Override

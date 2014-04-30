@@ -64,4 +64,24 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_submit"
+        android:id="@+id/button_submit"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/button_open_google_play"
+        android:id="@+id/button_open_google_play"
+        android:layout_above="@+id/button_submit"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignLeft="@+id/button_submit"
+        android:layout_alignStart="@+id/button_submit" />
+
 </RelativeLayout>

@@ -14,23 +14,26 @@
         android:layout_width="match_parent"
         android:orientation="vertical"
         android:gravity="center"
-        android:paddingTop="20dp">
+        android:paddingTop="16dp">
         <TextView android:id="@+id/fullscreen_content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:keepScreenOn="true"
-            android:textColor="#ff4848"
+            android:textColor="#ffc46767"
             android:textStyle="bold"
             android:textSize="40sp"
-            android:paddingTop="40dp"
+            android:paddingTop="32dp"
             android:layout_gravity="center"
             android:text="@string/dummy_content" />
         <ImageView
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:id="@+id/imageView"
-            android:src="@drawable/img_cardiomood_notext"
-            android:padding="48sp"/>
+            android:src="@drawable/img_cardiomood_square"
+            android:paddingBottom="48dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            />
 
     </LinearLayout>
 

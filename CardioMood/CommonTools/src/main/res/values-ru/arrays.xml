@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="feedback_types">
+        <item>Общий обзор</item>
+        <item>Сообщение об ошибке</item>
+        <item>Предложение о новой функции</item>
+    </string-array>
+    <string-array name="gender_names">
+        <item>Мужской</item>
+        <item>Женский</item>
+        <item>Пол не указан</item>
+    </string-array>
+
+    <string-array name="measurement_system_titles">
+        <item>Метрическая (кг, см)</item>
+        <item>Американская (фунт, фут)</item>
+    </string-array>
+</resources>

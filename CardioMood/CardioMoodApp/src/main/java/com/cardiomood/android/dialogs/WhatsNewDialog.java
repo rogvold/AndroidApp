@@ -21,7 +21,7 @@ public class WhatsNewDialog extends Dialog {
 
     private static final String TAG = WhatsNewDialog.class.getSimpleName();
 
-    public static final String CONFIG_SHOW_DIALOG_ON_STARTUP = "app.whats_new.show_on_startup_v130";
+    public static final String CONFIG_SHOW_DIALOG_ON_STARTUP = "app.whats_new.show_on_startup_v131";
 
     private Context mContext;
 
@@ -38,6 +38,7 @@ public class WhatsNewDialog extends Dialog {
         TextView tv = (TextView) findViewById(R.id.whats_new_text);
         tv.setText(Html.fromHtml(readRawTextFile(R.raw.whats_new)));
         tv.setLinkTextColor(Color.RED);
+        tv.setLinksClickable(true);
     }
 
     public String readRawTextFile(int id) {

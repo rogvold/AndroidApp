@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="height_units_ft">ft.</string>
+    <string name="weight_units_lb">lb.</string>
+    <string name="height_units_in">in.</string>
+    <string name="weight_units_oz">oz.</string>
+    <string name="height_units_m">m</string>
+    <string name="weight_units_kg">кг</string>
+    <string name="height_units_cm">см</string>
+    <string name="weight_units_g">г</string>
+    <string name="birth_date_dlg_title">Укажите дату рождения</string>
+    <string name="email">Email</string>
+    <string name="first_name">Ваше имя</string>
+    <string name="last_name">Ваша фамилия</string>
+    <string name="phone_number_hint">Номер телефона</string>
+    <string name="birth_date">Дата рождения</string>
+    <string name="weight">Вес:</string>
+    <string name="height">Рост:</string>
+    <string name="you_can_select_unit_system_in_settings">*** Систему единиц можно изменить в настройках программы.</string>
+</resources>

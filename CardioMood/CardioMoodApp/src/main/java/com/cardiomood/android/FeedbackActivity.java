@@ -3,7 +3,9 @@ package com.cardiomood.android;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RatingBar;
 import android.widget.Spinner;
@@ -61,6 +64,8 @@ public class FeedbackActivity extends Activity {
         private EditText userMessage;
         private Spinner feedbackType;
         private RatingBar userRating;
+        private Button buttonSubmit;
+        private Button buttonOpenGooglePlay;
         private PreferenceHelper prefHelper;
 
         public FeedbackFragment() {
@@ -80,8 +85,34 @@ public class FeedbackActivity extends Activity {
             userRating = (RatingBar) rootView.findViewById(R.id.ratingBar);
             userMessage = (EditText) rootView.findViewById(R.id.editText);
             feedbackType = (Spinner) rootView.findViewById(R.id.spinner);
+            buttonSubmit = (Button) rootView.findViewById(R.id.button_submit);
+            buttonOpenGooglePlay = (Button) rootView.findViewById(R.id.button_open_google_play);
+
+            buttonSubmit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    submitFeedback();
+                }
+            });
+
+            buttonOpenGooglePlay.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    openGooglePlay();
+                }
+            });
 
             return rootView;
+        }
+
+        private void openGooglePlay() {
+            try {
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse("market://details?id=com.cardiomood.android"));
+                startActivity(intent);
+            } catch (Exception ex) {
+                Log.w("FeedbackActivity", "failed to start google play", ex);
+            }
         }
 
         @Override
@@ -98,6 +129,11 @@ public class FeedbackActivity extends Activity {
         }
 
         private void submitFeedback() {
+            if (userRating.getRating() <= 0) {
+                Toast.makeText(getActivity(), R.string.invalid_rating_value, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             progressDialog = new ProgressDialog(getActivity());
             progressDialog.setMessage(getText(R.string.submitting_feedback_message));
             progressDialog.setCancelable(false);

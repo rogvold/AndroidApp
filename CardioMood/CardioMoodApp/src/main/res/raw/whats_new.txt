@@ -1,3 +1,18 @@
+<p><b>New in CardioMood 1.3.1:</b><p>
+<p>
++++ Web-site launched!
+<br/>Visit <a href="http://goo.gl/w9gwrv">beta.cardiomood.com</a>
+<br/>
++++ Profile screen updated.
+<br/>
++++ You can choose to use metric or imperial unit system and disable splash screen.
+<br/>
+=== Fixed a couple of bugs.
+<br/>
+<br/>
+<b>Rate our app</b> on <a href="https://play.google.com/store/apps/details?id=com.cardiomood.android">Google Play</a>!
+</p>
+<br/>
 <p><b>New in CardioMood 1.3:</b><p>
 <p>
 +++ Added filtering feature.

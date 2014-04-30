@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.android.util.SystemUiHider;
 import com.flurry.android.FlurryAgent;
@@ -53,9 +54,17 @@ public class SplashScreenActivity extends Activity {
     private long timeToStart = 3000;
     private AsyncTask startMainActivityTask = null;
 
+    private PreferenceHelper prefHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        prefHelper = new PreferenceHelper(getApplicationContext(), true);
+        if (prefHelper.getBoolean(ConfigurationConstants.DISABLE_SPLASH_SCREEN)) {
+            openNextActivity();
+            return;
+        }
 
         setContentView(R.layout.activity_splash_screen);
 
@@ -126,6 +135,11 @@ public class SplashScreenActivity extends Activity {
                 timeToStart = 0;
             }
         });
+    }
+
+    private void openNextActivity() {
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
     }
 
     @Override

@@ -2,12 +2,18 @@
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!--<PreferenceCategory android:title="@string/measurement_settings_title">-->
-        <!--<CheckBoxPreference-->
-            <!--android:key="measurement.unlimited_length"-->
-            <!--android:title="@string/title_settings_unlimited_measurement_length"-->
-            <!--android:summary="@string/summary_settings_unlimited_measurement_length" />-->
-    <!--</PreferenceCategory>-->
+    <PreferenceCategory android:title="@string/general_settings_title">
+        <CheckBoxPreference
+            android:key="app.disable_splash_screen"
+            android:title="@string/title_settings_disable_splash_screen"
+            android:summary="@string/summary_disable_splash_screen" />
+        <ListPreference
+            android:key="app.preferred_measurement_system"
+            android:title="@string/title_settings_preferred_measurement_system"
+            android:entries="@array/measurement_system_titles"
+            android:entryValues="@array/measurement_system_values"
+            android:defaultValue="METRIC"/>
+    </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/connection_settings_title">
         <CheckBoxPreference

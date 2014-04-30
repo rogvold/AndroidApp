@@ -52,5 +52,10 @@
     <string name="feedback_has_been_submitted">Thank you! Your feedback has been submitted.</string>
     <string name="feedback_submission_failed">Failed to submit your feedback. Try again later.</string>
     <string name="provide_rating">Please, provide a valid rating value (1 - 5).</string>
+    <string name="weight">Weight:</string>
+    <string name="height">Height:</string>
+    <string name="height_units_m">m</string>
+    <string name="weight_units_g">g</string>
+    <string name="weight_units_oz">oz.</string>
 
 </resources>

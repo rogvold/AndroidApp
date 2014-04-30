@@ -14,7 +14,7 @@
                 android:id="@+id/editTextEmail"
                 android:layout_height="wrap_content"
                 android:hint="@string/email"
-                android:inputType="textEmailAddress"
+                android:inputType="none"
                 android:layout_width="fill_parent"
                 android:editable="false">
         </EditText>
@@ -54,7 +54,8 @@
                 android:text=""
                 android:hint="@string/birth_date"
                 android:inputType="date"
-                android:id="@+id/birth_date"/>
+                android:id="@+id/birth_date"
+         />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -63,7 +64,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/weight"/>
+                android:text="@string/weight"
+                android:paddingRight="16dp"/>
             <EditText
                 android:layout_width="0px"
                 android:layout_height="wrap_content"
@@ -95,10 +97,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/height"/>
+                android:text="@string/height"
+                android:paddingRight="16dp"/>
             <EditText
                 android:layout_width="0px"
                 android:layout_height="wrap_content"
@@ -126,5 +130,11 @@
                 android:text="@string/height_units_cm"
                 android:layout_weight="1"/>
         </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/you_can_select_unit_system_in_settings" />
     </LinearLayout>
 </ScrollView> 
