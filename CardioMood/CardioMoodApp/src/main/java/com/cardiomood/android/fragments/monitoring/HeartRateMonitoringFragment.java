@@ -19,7 +19,7 @@ import com.cardiomood.android.heartrate.AbstractDataCollector;
 import com.cardiomood.android.heartrate.CardioMoodHeartRateLeService;
 import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.math.filter.ArtifactFilter;
-import com.cardiomood.math.filter.SimpleInterpolationArtifactFilter;
+import com.cardiomood.math.filter.PisarukArtifactFilter;
 import com.cardiomood.math.histogram.Histogram;
 import com.cardiomood.math.window.DataWindow;
 
@@ -46,9 +46,10 @@ public class HeartRateMonitoringFragment extends Fragment implements FragmentCal
 
     private double lastStressIndex = -1;
     private double lastEnergyLevel = -1;
+    private double artifactsPercentage = 0.0;
 
     private static final DataWindow.IntervalsCount batteryWindow = new DataWindow.IntervalsCount(20, 5);
-    private static final DataWindow.Timed stressWindow = new DataWindow.Timed(2 * 60 * 1000, 500);
+    private static final DataWindow.Timed stressWindow = new DataWindow.Timed(2 * 60 * 1000, 5000);
 
     private final DataWindow.Callback batteryWindowCallback = new DataWindow.CallbackAdapter<DataWindow.IntervalsCount>() {
 
@@ -58,6 +59,7 @@ public class HeartRateMonitoringFragment extends Fragment implements FragmentCal
                 @Override
                 public void run() {
                     double[] rr = window.getIntervals().getElements();
+                    artifactsPercentage = (filter.getArtifactsCount(rr) * 100.0) / rr.length;
                     rr = filter.doFilter(rr);
                     double d = Math.sqrt(StatUtils.variance(rr));
                     if (d <= 0) {
@@ -103,7 +105,7 @@ public class HeartRateMonitoringFragment extends Fragment implements FragmentCal
         }
     };
 
-    private static final ArtifactFilter filter = new SimpleInterpolationArtifactFilter();
+    private static final ArtifactFilter filter = new PisarukArtifactFilter();
 
 
     public static HeartRateMonitoringFragment newInstance() {

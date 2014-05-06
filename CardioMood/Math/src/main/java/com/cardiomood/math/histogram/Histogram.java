@@ -34,6 +34,7 @@ public class Histogram {
     private void init() {
         for (double value: values) {
             int i = (int) Math.floor(value / step);
+            if (i < 0) i = 0;
             this.count[i]++;
         }
 
@@ -46,19 +47,9 @@ public class Histogram {
             }
         }
 
-//        int iMn = -1, iMx = -1;
-//        for (int i=0; i<count.length; i++) {
-//            if (count[i] * 100.0 / height < 3.0)
-//                continue;
-//            if (iMn < 0)
-//                iMn = i;
-//            iMx = i;
-//        }
-
-
         Mo = index*step;
         AMo = ((double) count[index]) / ((double) values.length) * 100;
-        mxDMn = getWidthAbove((int) Math.ceil(values.length*0.03)); //(iMx >= 0) ? step*(iMx - iMn + 1) : 0;
+        mxDMn = getWidthAbove((int) Math.ceil(values.length*0.03));
         WN4 = getWN(4);
         SI = 1e6*AMo/(2*Mo*WN4);
         mRR = StatUtils.mean(values);

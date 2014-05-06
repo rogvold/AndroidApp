@@ -151,14 +151,18 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
         }
 
         if (getStatus() == Status.COLLECTING && enoughDataCollected()) {
-            currentSession.setDateEnded(new Date());
-            currentSession.setStatus(SessionStatus.COMPLETED);
-            processCollectedData();
-            // call listener
-            if (listener != null)
-                listener.onDataSaved(currentSession);
+            if (currentSession != null) {
+                currentSession.setDateEnded(new Date());
+                currentSession.setStatus(SessionStatus.COMPLETED);
+                processCollectedData();
+                // call listener
+                if (listener != null)
+                    listener.onDataSaved(currentSession);
+            }
         } else {
-            sessionDAO.delete(currentSession.getId());
+            if (currentSession != null) {
+                sessionDAO.delete(currentSession.getId());
+            }
             if (cardioSession != null) {
                 dataService.deleteSession(cardioSession.getId(), new ServerResponseCallbackRetry<String>() {
                     @Override

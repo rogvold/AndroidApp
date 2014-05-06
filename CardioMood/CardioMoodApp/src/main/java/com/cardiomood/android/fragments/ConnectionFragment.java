@@ -60,7 +60,6 @@ import com.flurry.android.FlurryAgent;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
@@ -724,7 +723,8 @@ public class ConnectionFragment extends Fragment {
             }, SCAN_PERIOD);
 
             mScanning = true;
-            bluetoothAdapter.startLeScan(new UUID[]{UUID.fromString("0000180d-0000-1000-8000-00805f9b34fb")}, leScanCallback);
+            //bluetoothAdapter.startLeScan(new UUID[]{UUID.fromString("0000180d-0000-1000-8000-00805f9b34fb")}, leScanCallback);
+            bluetoothAdapter.startLeScan(leScanCallback);
             Log.d(TAG, "LeScan started.");
         } else {
             mScanning = false;
