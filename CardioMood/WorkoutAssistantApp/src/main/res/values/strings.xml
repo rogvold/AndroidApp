@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Workout Assistant</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="billing_permission_description">Required for your account upgrades</string>
+    <string name="connection_settings_title">Connection settings</string>
+    <string name="title_settings_disable_bluetooth_on_close">Disable Bluetooth on close</string>
+    <string name="summary_disable_bluetooth_on_close">When checked, application will automatically turn off Bluetooth if it was enabled by the app</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="general_settings_title">General Settings</string>
+    <string name="title_settings_disable_splash_screen">Disable splash screen</string>
+    <string name="summary_disable_splash_screen">Do not show splash screen on application start</string>
+    <string name="cardio_mood_com">CardioMood.Com</string>
+    <string name="tap_to_skip">Tap to skip this</string>
+    <string name="title_activity_splash_screen">CardioMood Heart Rate</string>
+    <string name="action_about">About...</string>
+    <string name="title_about_dialog">About CardioMood</string>
+    <string name="action_bt_settings">Bluetooth Settings</string>
+    <string name="action_feedback">Leave feedback</string>
+    <string name="birth_date_dlg_title">Select birth date</string>
+    <string name="title_activity_personal_data">Personal Data</string>
+    <string name="your_profile">Your personal data</string>
+    <string name="email">Email, e.g. hello@example.com</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="phone_number_hint">Phone Number</string>
+    <string name="birth_date">Date of birth</string>
+    <string name="your_weight">Your weight (kg)</string>
+    <string name="your_height">Your height (cm)</string>
+    <string name="action_personal_data">Edit personal info</string>
+    <string name="title_activity_first_input_personal_data">Welcome!</string>
+    <string name="welcome_to_cardio_mood">Welcome to CardioMood HeartRate!</string>
+    <string name="specify_your_personal_information">Please, specify your personal information.</string>
+    <string name="you_may_skip_this">You may skip this.\nHowever this information may be required in the future.</string>
+    <string name="button_continue">Continue with CardioMood</string>
+    <string name="menu_action_send_feedback">Send Feedback</string>
+    <string name="title_activity_feedback">Feedback</string>
+    <string name="submitting_feedback_message">Submitting your feedback...</string>
+    <string name="please_rate_our_app">Please, rate our app</string>
+    <string name="you_can_report_a_bug_or">You can report an issue or provide a feature request.</string>
+    <string name="title_settings_preferred_measurement_system">Preferred units system</string>
+    <string name="button_skip">Skip</string>
+    <string name="your_height_imperial">Your height (ft)</string>
+    <string name="your_weight_imperial">Your weight (lb)</string>
+    <string name="weight_units_kg">kg</string>
+    <string name="height_units_cm">cm</string>
+    <string name="height_units_in">in.</string>
+    <string name="weight_units_lb">lb.</string>
+    <string name="height_units_ft">ft.</string>
+    <string name="feedback_has_been_submitted">Thank you! Your feedback has been submitted.</string>
+    <string name="feedback_submission_failed">Failed to submit your feedback. Try again later.</string>
+    <string name="provide_rating">Please, provide a valid rating value (1 - 5).</string>
+
+</resources>

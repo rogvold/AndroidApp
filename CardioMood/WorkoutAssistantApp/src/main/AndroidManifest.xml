@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.cardiomood.wa.android" >
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <permission android:protectionLevel="signature"
+        android:name="com.cardiomood.wa.android.permission.C2D_MESSAGE" />
+    <uses-permission android:name="com.cardiomood.wa.android.permission.C2D_MESSAGE" />
+
+    <uses-permission
+        android:name="com.android.vending.BILLING"
+        android:description="@string/billing_permission_description" />
+
+    <uses-feature
+        android:name="android.hardware.bluetooth_le"
+        android:required="false" />
+
+    <application
+        android:name="com.cardiomood.wa.android.Application"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <activity
+            android:name="com.cardiomood.wa.android.SplashScreenActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_splash_screen"
+            android:noHistory="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/FullscreenTheme" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.cardiomood.wa.android.MainActivity"
+            android:label="@string/app_name" >
+        </activity>
+        <activity
+            android:name="com.google.android.gms.ads.AdActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize" />
+        <activity
+            android:name="com.cardiomood.wa.android.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName="com.cardiomood.wa.android.MainActivity"
+            android:screenOrientation="portrait" />
+        <service
+            android:name="com.cardiomood.wa.android.service.BluetoothHRMService"
+            android:enabled="true" />
+
+        <activity
+            android:name="com.cardiomood.wa.android.PersonalDataActivity"
+            android:label="@string/title_activity_personal_data"
+            android:windowSoftInputMode="adjustPan">
+        </activity>
+        <activity
+            android:name="com.cardiomood.wa.android.FirstInputPersonalDataActivity"
+            android:label="@string/title_activity_first_input_personal_data"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity
+            android:name="com.cardiomood.wa.android.FeedbackActivity"
+            android:label="@string/title_activity_feedback"
+            android:parentActivityName="com.cardiomood.wa.android.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.cardiomood.wa.android.MainActivity" />
+        </activity>
+
+        <!-- START Parse Push Notifications Config -->
+        <service android:name="com.parse.PushService" />
+        <receiver android:name="com.parse.ParseBroadcastReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name="com.parse.GcmBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+                <category android:name="com.cardiomood.wa.android" />
+            </intent-filter>
+        </receiver>
+        <!-- END Parse Push Notifications Config -->
+
+    </application>
+
+</manifest>

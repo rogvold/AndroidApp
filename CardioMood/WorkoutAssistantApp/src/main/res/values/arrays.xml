@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="feedback_types">
+        <item>Bug report</item>
+        <item>Feature request</item>
+        <item>General review</item>
+    </string-array>
+    <string-array name="gender_names">
+        <item>Male</item>
+        <item>Female</item>
+        <item>Not specified</item>
+    </string-array>
+    <string-array name="gender_values">
+        <item>MALE</item>
+        <item>FEMALE</item>
+        <item>NOT_SPECIFIED</item>
+    </string-array>
+
+
+    <string-array name="measurement_system_titles">
+        <item>Metric (kg, cm)</item>
+        <item>Imperial (lb, ft)</item>
+    </string-array>
+    <string-array name="measurement_system_values">
+        <item>METRIC</item>
+        <item>IMPERIAL</item>
+    </string-array>
+</resources>
