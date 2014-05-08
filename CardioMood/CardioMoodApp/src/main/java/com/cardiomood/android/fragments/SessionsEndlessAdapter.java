@@ -8,7 +8,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
-import com.cardiomood.android.R;
 import com.cardiomood.android.db.dao.HeartRateSessionDAO;
 import com.cardiomood.android.db.dao.UserDAO;
 import com.cardiomood.android.db.model.HeartRateSession;
@@ -46,10 +45,9 @@ public class SessionsEndlessAdapter extends EndlessAdapter {
 
     @Override
     protected View getPendingView(ViewGroup parent) {
-        View row = LayoutInflater.from(parent.getContext()).inflate(R.layout.history_item, parent, false);
+        View row = LayoutInflater.from(parent.getContext()).inflate(android.R.layout.simple_list_item_2, null);
         ((TextView) row.findViewById(android.R.id.text1)).setText("Loading content...");
         ((TextView) row.findViewById(android.R.id.text2)).setText("Please wait.");
-        parent.removeView(row);
         return row;
     }
 

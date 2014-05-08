@@ -166,5 +166,8 @@
     <string name="button_submit">Submit to CardioMood</string>
     <string name="button_open_google_play">Rate on Google Play...</string>
     <string name="invalid_rating_value">Invalid rating value. Please, provide a valid rating (1 to 5 stars)</string>
+    <string name="menu_delete_item">Delete</string>
+    <string name="menu_rename_item">Rename</string>
+    <string name="duration">Duration:</string>
 
 </resources>

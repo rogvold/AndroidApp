@@ -1,5 +1,21 @@
 <resources>
 
     <color name="black_overlay">#66000000</color>
+    <color name="theme_black">#393939</color>
+    <drawable name="theme_black">#393939</drawable>
+    <color name="theme_dark">#443434</color>
+
+    <color name="red_light">#e74c3c</color>
+    <color name="gray_dk">#313031</color>
+    <color name="white_smoke">#F7F7F7</color>
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+    <color name="transparent">#00000000</color>
+    <color name="blue_sky">#33b5e5</color>
+    <color name="gray">#5B5B5B</color>
+    <drawable name="trans_draw">#00000000</drawable>
+    <color name="background">#ECECEC</color>
+    <color name="tab_bg_red">#ffc46767</color>
+    <color name="gray_border">#cfcfcf</color>
 
 </resources>

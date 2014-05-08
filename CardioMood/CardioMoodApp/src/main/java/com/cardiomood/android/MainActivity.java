@@ -17,6 +17,7 @@ import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
+import com.cardiomood.android.components.CustomViewPager;
 import com.cardiomood.android.dialogs.AboutDialog;
 import com.cardiomood.android.dialogs.WhatsNewDialog;
 import com.cardiomood.android.fragments.ConnectionFragment;
@@ -50,7 +51,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     /**
      * The {@link ViewPager} that will host the section contents.
      */
-    ViewPager mViewPager;
+    CustomViewPager mViewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,9 +70,10 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.pager);
+        mViewPager = (CustomViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
         mViewPager.setOffscreenPageLimit(3);
+        mViewPager.setPagingEnabled(true);
 
         // When swiping between different sections, select the corresponding
         // tab. We can also use ActionBar.Tab#select() to do this if we have

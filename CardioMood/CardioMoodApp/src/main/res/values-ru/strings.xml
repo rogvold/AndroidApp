@@ -149,5 +149,6 @@
     <string name="no_more_artifacts_detected">No more artifacts detected.</string>
     <string name="menu_save_this_revision">Save this revision</string>
     <string name="menu_undo_remove_artifacts">Undo Remove artifacts</string>
+    <string name="duration">Duration:</string>
 
 </resources>

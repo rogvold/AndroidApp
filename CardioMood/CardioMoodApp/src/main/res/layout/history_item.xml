@@ -1,26 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    android:orientation="vertical"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:background="@drawable/background_texture">
 
     <TextView
-        android:id="@android:id/text1"
-        android:layout_width="match_parent"
+        android:id="@+id/item_date"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dip"
-        android:layout_marginLeft="8dip"
-        android:textAppearance="?android:attr/textAppearanceListItem" />
+        android:layout_margin="5dp"
+        android:paddingLeft="3dp"
+        android:text="[SESSION DATE]"
+        android:textColor="@color/gray" />
 
-    <TextView
-        android:id="@android:id/text2"
+    <View
+        android:id="@+id/top_separator"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/gray_border" />
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@android:id/text1"
-        android:layout_alignStart="@android:id/text1"
-        android:layout_marginBottom="8dip"
-        android:layout_marginLeft="8dip"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:gravity="center_vertical">
+
+        <View
+            android:id="@+id/view1"
+            android:layout_width="5dp"
+            android:layout_height="match_parent"
+            android:background="@color/tab_bg_red" />
+
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginBottom="15dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginTop="15dp"
+            android:src="@drawable/img_cardiomood_notext_small" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/item_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="[session name]"
+                android:textColor="@color/gray"
+                android:textStyle="bold"
+                android:ellipsize="end"/>
+
+            <TextView
+                android:id="@+id/item_extra"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="[duration]"
+                android:textColor="@color/gray"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <com.cardiomood.android.controls.CircledTextView
+            android:id="@+id/average_heart_rate"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:textStyle="bold"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:layout_marginRight="15dp"
+            />
+
+        <!--<ImageView-->
+            <!--android:id="@+id/eye_button"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginRight="15dp"-->
+            <!--android:src="@drawable/ic_eye" />-->
+
+        <!--<ImageView-->
+            <!--android:id="@+id/comment_button"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginRight="15dp"-->
+            <!--android:src="@drawable/ic_comment" />-->
+
+        <!--<ImageView-->
+            <!--android:id="@+id/heart_button"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginRight="15dp"-->
+            <!--android:src="@drawable/ic_heart" />-->
+
+    </LinearLayout>
+
+    <View
+        android:id="@+id/bottom_separator"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/gray_border" />
+
 </LinearLayout>

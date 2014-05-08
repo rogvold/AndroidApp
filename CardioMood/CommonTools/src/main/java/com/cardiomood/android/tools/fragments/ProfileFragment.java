@@ -1,6 +1,7 @@
 package com.cardiomood.android.tools.fragments;
 
 import android.app.DatePickerDialog;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
@@ -91,8 +92,7 @@ public class ProfileFragment extends Fragment implements View.OnKeyListener {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        prefHelper = new PreferenceHelper(getActivity().getApplicationContext());
-        prefHelper.setPersistent(true);
+        prefHelper = new PreferenceHelper(getActivity().getApplicationContext(), true);
     }
 
     @Override
@@ -151,7 +151,8 @@ public class ProfileFragment extends Fragment implements View.OnKeyListener {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
-                    v.callOnClick();
+                    if (Build.VERSION.SDK_INT >= 15)
+                        v.callOnClick();
                 }
             }
         });

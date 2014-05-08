@@ -1,14 +1,17 @@
 package com.cardiomood.android.fragments;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.ActionMode;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,7 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -34,6 +37,7 @@ import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.data.CardioMoodServer;
 import com.cardiomood.data.DataServiceHelper;
 import com.cardiomood.data.async.ServerResponseCallback;
+import com.cardiomood.data.async.ServerResponseCallbackRetry;
 import com.cardiomood.data.json.CardioDataItem;
 import com.cardiomood.data.json.CardioSession;
 import com.cardiomood.data.json.CardioSessionWithData;
@@ -41,7 +45,6 @@ import com.cardiomood.data.json.JSONError;
 import com.cardiomood.data.json.JSONResponse;
 import com.cardiomood.data.json.JsonRRInterval;
 import com.flurry.android.FlurryAgent;
-import com.haarman.listviewanimations.itemmanipulation.contextualundo.ContextualUndoAdapter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,21 +54,78 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+;
+
 /**
  * Created by danshin on 01.11.13.
  */
-public class HistoryFragment extends Fragment implements ContextualUndoAdapter.DeleteItemCallback, ListView.OnItemClickListener {
+public class HistoryFragment extends Fragment
+        implements ListView.OnItemClickListener, AdapterView.OnItemLongClickListener {
+
+    private static final String TAG = HistoryFragment.class.getSimpleName();
 
     private ListView listView;
     private View root;
-    private ArrayAdapter<HeartRateSession> listAdapter = null;
-    private ContextualUndoAdapter undoAdapter = null;
+    private SessionsArrayAdapter listAdapter = null;
     private PreferenceHelper pHelper;
     private DataServiceHelper serviceHelper;
     private ProgressDialog pDialog = null;
+    private ActionMode mActionMode = null;
 
     // work around for 'view already has a parent...'
     private boolean initial = true;
+
+    private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+
+        // Called when the action mode is created; startActionMode() was called
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            FlurryAgent.logEvent("action_mode_started");
+            // Inflate a menu resource providing context menu items
+            MenuInflater inflater = mode.getMenuInflater();
+            inflater.inflate(R.menu.history_context_menu, menu);
+            return true;
+        }
+
+        // Called each time the action mode is shown. Always called after onCreateActionMode, but
+        // may be called multiple times if the mode is invalidated.
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false; // Return false if nothing is done
+        }
+
+        // Called when the user selects a contextual menu item
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.menu_delete:
+                    FlurryAgent.logEvent("menu_delete_item_clicked");
+                    if (listAdapter.getSelectedItem() >= 0)
+                        deleteItem(listAdapter.getSelectedItem());
+                    mode.finish(); // Action picked, so close the CAB
+                    return true;
+                case R.id.menu_rename_item:
+                    FlurryAgent.logEvent("menu_rename_item_clicked");
+                    if (listAdapter.getSelectedItem() >= 0)
+                        renameItem(listAdapter.getSelectedItem());
+                    mode.finish(); // Action picked, so close the CAB
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        // Called when the user exits the action mode
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            FlurryAgent.logEvent("action_mode_finished");
+            mActionMode = null;
+            if (listAdapter != null) {
+                listAdapter.setSelectedItem(-1);
+                listAdapter.notifyDataSetChanged();
+            }
+        }
+    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -75,6 +135,7 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
         root = inflater.inflate(R.layout.fragment_history, container, false);
         listView = (ListView) root.findViewById(R.id.sessionList);
         listView.setOnItemClickListener(this);
+        listView.setOnItemLongClickListener(this);
         setHasOptionsMenu(true);
 
         serviceHelper = new DataServiceHelper(CardioMoodServer.INSTANCE.getService(), pHelper);
@@ -131,7 +192,6 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
         return ids.contains(sessionId);
     }
 
-    @Override
     public void deleteItem(int i) {
         HeartRateSession session = listAdapter.getItem(i);
         if (isPredefinedSession(session.getId())) {
@@ -141,14 +201,98 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
         new DeleteItemTask(session).execute();
     }
 
+    public void renameItem(int i) {
+        final HeartRateSession itemSession = listAdapter.getItem(i);
+        final long sessionId = itemSession.getId();
+        HeartRateSessionDAO sessionDAO = new HeartRateSessionDAO();
+        // get prompts.xml view
+        LayoutInflater li = LayoutInflater.from(getActivity());
+        View promptsView = li.inflate(R.layout.dialog_input_text, null);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+
+        // set prompts.xml to alertdialog builder
+        alertDialogBuilder.setView(promptsView);
+
+        final EditText userInput = (EditText) promptsView.findViewById(R.id.editTextDialogUserInput);
+        userInput.setText(sessionDAO.findById(sessionId).getName());
+
+        // set dialog message
+        alertDialogBuilder
+                .setCancelable(false)
+                .setPositiveButton("OK",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // get user input and set it to result
+                                // edit text
+                                final HeartRateSessionDAO dao = new HeartRateSessionDAO();
+                                final HeartRateSession session = dao.findById(sessionId);
+                                String newName = userInput.getText() == null ? "" : userInput.getText().toString();
+                                newName = newName.trim();
+                                if (newName.isEmpty())
+                                    newName = null;
+                                session.setName(newName);
+                                if (session.getStatus() == SessionStatus.SYNCHRONIZED)
+                                    session.setStatus(SessionStatus.COMPLETED);
+                                dao.update(session);
+                                Toast.makeText(HistoryFragment.this.getActivity(), R.string.session_renamed, Toast.LENGTH_SHORT).show();
+                                if (session.getExternalId() != null) {
+                                    serviceHelper.updateSessionInfo(session.getExternalId(), session.getName(), session.getDescription(), new ServerResponseCallbackRetry<CardioSession>() {
+                                        @Override
+                                        public void retry() {
+                                            serviceHelper.updateSessionInfo(sessionId, session.getName(), session.getDescription(), this);
+                                        }
+
+                                        @Override
+                                        public void onResult(CardioSession result) {
+                                            session.setStatus(SessionStatus.SYNCHRONIZED);
+                                            session.setName(result.getName());
+                                            session.setDescription(result.getDescription());
+                                            dao.merge(session);
+                                        }
+
+                                        @Override
+                                        public void onError(JSONError error) {
+                                            Log.d(TAG, "updateSessionInfo failed, error="+error);
+                                        }
+                                    });
+                                }
+                                itemSession.setName(session.getName());
+                                listAdapter.notifyDataSetChanged();
+                                FlurryAgent.logEvent("session_renamed");
+                            }
+                        }
+                )
+                .setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        }
+                )
+                .setTitle(R.string.rename_session);
+
+        // create alert dialog
+        AlertDialog alertDialog = alertDialogBuilder.create();
+
+        // show it
+        alertDialog.show();
+    }
+
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        HeartRateSession session = listAdapter.getItem(position);
-        if (session != null) {
-            Toast.makeText(getActivity(), R.string.opening_measurement, Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(getActivity(), SessionDetailsActivity.class);
-            intent.putExtra(SessionDetailsActivity.SESSION_ID_EXTRA, session.getId());
-            getActivity().startActivity(intent);
+        if (mActionMode == null) {
+            HeartRateSession session = listAdapter.getItem(position);
+            if (session != null) {
+                Toast.makeText(getActivity(), R.string.opening_measurement, Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(getActivity(), SessionDetailsActivity.class);
+                intent.putExtra(SessionDetailsActivity.SESSION_ID_EXTRA, session.getId());
+                getActivity().startActivity(intent);
+            }
+        } else {
+            view.setSelected(true);
+            listAdapter.setSelectedItem(position);
+            listAdapter.notifyDataSetChanged();
         }
     }
 
@@ -178,6 +322,10 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
     }
 
     private void refresh() {
+        if (mActionMode != null) {
+            return;
+        }
+
         if (initial && hasUpdatedSessions()) {
             sync();
             return;
@@ -188,21 +336,33 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
             return;
 
         if (listAdapter != null) {
+            listAdapter.setSelectedItem(-1);
             listAdapter.clear();
             listAdapter.notifyDataSetChanged();
         }
         listAdapter = new SessionsArrayAdapter(activity, new ArrayList<HeartRateSession>(100));
         SessionsEndlessAdapter endlessAdapter = new SessionsEndlessAdapter(listAdapter, getActivity().getApplicationContext());
-        undoAdapter = new ContextualUndoAdapter(endlessAdapter, R.layout.history_item_undo, R.id.btn_undo_deletion);
-        undoAdapter.setAbsListView(listView);
-        undoAdapter.setDeleteItemCallback(HistoryFragment.this);
-        listView.setAdapter(undoAdapter);
+        listView.setAdapter(endlessAdapter);
     }
 
     private boolean hasUpdatedSessions() {
         HeartRateSessionDAO sessionDAO = new HeartRateSessionDAO();
         List<HeartRateSession> sessions = sessionDAO.getSessions(HeartRateDBContract.Sessions.COLUMN_NAME_STATUS + " = ?", new String[]{String.valueOf(SessionStatus.COMPLETED)});
         return !sessions.isEmpty();
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        if (mActionMode != null) {
+            return false;
+        }
+
+        // Start the CAB using the ActionMode.Callback defined above
+        mActionMode = getActivity().startActionMode(mActionModeCallback);
+        view.setSelected(true);
+        listAdapter.setSelectedItem(position);
+        listAdapter.notifyDataSetChanged();
+        return true;
     }
 
     private class DeleteItemTask extends AsyncTask<Void, Void, Boolean> {
@@ -427,17 +587,20 @@ public class HistoryFragment extends Fragment implements ContextualUndoAdapter.D
                     if (dataItems == null)
                         dataItems = Collections.emptyList();
                     List<HeartRateDataItem> items = new ArrayList<HeartRateDataItem>(dataItems.size());
+                    long duration = 0;
                     for (CardioDataItem dataItem: dataItems) {
                         HeartRateDataItem item = new HeartRateDataItem();
                         item.setSessionId(session.getId());
                         item.setTimeStamp(new Date(dataItem.getCreationTimestamp()));
                         JsonRRInterval rr = JsonRRInterval.fromJson(dataItem.getDataItem());
                         item.setRrTime(rr.getR());
+                        duration += rr.getR();
                         if (rr.getR() > 0)
                             item.setHeartBeatsPerMinute(Math.round(60*1000.0f/rr.getR()));
                         items.add(item);
                     }
                     itemDAO.bulkInsert(items);
+                    session.setDateEnded(new Date(session.getDateStarted().getTime() + duration));
                     session.setStatus(SessionStatus.SYNCHRONIZED);
                     sessionDAO.merge(session);
                 }
