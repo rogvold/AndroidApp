@@ -1,3 +1,18 @@
+<p><b>New in CardioMood 1.3.3:</b><p>
+<p>
++++ Мы запустили тестовый Web-site! Подробнее <a href="http://goo.gl/w9gwrv">beta.cardiomood.com</a>
+<br/>
++++ Обновлена страница профиля.
+<br/>
++++ Обновлена страница истории измерений
+<br/>
++++ В настройках можно выбрать систему единиц и отключить заставку.
+<br/>
+=== Исправлены найденные ошибки.
+<br/>
+<b>Оставьте отзыв на GooglePlay</b>: https://play.google.com/store/apps/details?id=com.cardiomood.android
+</p>
+</p>
 <p><b>New in CardioMood 1.3.1:</b><p>
 <p>
 +++ Мы запустили тестовый Web-site! Подробнее <a href="http://goo.gl/w9gwrv">beta.cardiomood.com</a>

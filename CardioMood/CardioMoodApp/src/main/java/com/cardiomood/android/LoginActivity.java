@@ -36,6 +36,7 @@ import com.cardiomood.data.json.ApiToken;
 import com.cardiomood.data.json.JSONError;
 import com.cardiomood.data.json.UserProfile;
 import com.flurry.android.FlurryAgent;
+import com.parse.ParseAnalytics;
 import com.parse.ParseObject;
 
 import java.util.List;
@@ -73,6 +74,8 @@ public class LoginActivity extends Activity implements ConfigurationConstants {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        ParseAnalytics.trackAppOpened(getIntent());
+
         prefHelper = new PreferenceHelper(getApplicationContext());
         prefHelper.setPersistent(true);
 
