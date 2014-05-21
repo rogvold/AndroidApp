@@ -31,7 +31,11 @@
 -keep class com.shinobicontrols.charts.** { *; }
 -dontwarn com.shinobicontrols.charts.**
 
--keep class com.cardiomood.data.** {*;}
+-keep class com.cardiomood.data.** { *; }
+
+-keep class android.bluetooth.** { *; }
+
+-keep class com.motorola.** { *; }
 
 -optimizationpasses 5
 -dontusemixedcaseclassnames

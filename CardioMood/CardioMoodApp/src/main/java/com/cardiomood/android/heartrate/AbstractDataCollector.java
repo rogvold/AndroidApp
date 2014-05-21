@@ -121,8 +121,6 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
                         serverSyncWorker = new ServerSyncWorkerThread(cardioSession);
                         serverSyncWorker.start();
                     }
-
-                    creatingSession = false;
                 }
 
                 @Override
@@ -198,7 +196,7 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
     @Override
     public void addData(int bpm, short[] rrIntervals) {
         if (getStatus() == Status.COLLECTING) {
-            if (getIntervalsCount() == 0)
+            if (getIntervalsCount() == 0 && rrIntervals.length > 0)
                 onFirstDataRecieved();
             for (short rr: rrIntervals) {
                 math.addIntervals(rr);
