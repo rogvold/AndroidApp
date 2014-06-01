@@ -14,12 +14,12 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.cardiomood.android.R;
-import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
-import com.cardiomood.android.db.dao.HeartRateSessionDAO;
-import com.cardiomood.android.db.model.HeartRateDataItem;
-import com.cardiomood.android.db.model.HeartRateSession;
+import com.cardiomood.android.db.DatabaseHelper;
+import com.cardiomood.android.db.entity.HRSessionEntity;
+import com.cardiomood.android.db.entity.RRIntervalEntity;
 import com.cardiomood.android.fragments.details.TextReport;
 import com.flurry.android.FlurryAgent;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -41,13 +41,15 @@ public class SaveAsDialog extends Dialog {
     private Context mContext;
     private ListView mListView;
     private int filterCount = 0;
+    private DatabaseHelper databaseHelper;
 
     private boolean savingInProgress = false;
     private SavingCallback savingCallback;
 
-    public SaveAsDialog(Context context, long sessionId, int filterCount) {
+    public SaveAsDialog(Context context, DatabaseHelper databaseHelper, long sessionId, int filterCount) {
         super(context, android.R.style.Theme_Holo_Light_Dialog);
         mContext = context;
+        this.databaseHelper = databaseHelper;
         this.sessionId = sessionId;
         this.filterCount = filterCount;
     }
@@ -159,8 +161,8 @@ public class SaveAsDialog extends Dialog {
                 File outputFile = new File(getTextStorageDirectory(), generateFileName());
                 pw = new PrintWriter(new FileWriter(outputFile));
 
-                HeartRateSessionDAO sessionDAO = new HeartRateSessionDAO();
-                HeartRateSession session = sessionDAO.findById(sessionId);
+                RuntimeExceptionDao<HRSessionEntity, Long> sessionDAO = databaseHelper.getRuntimeExceptionDao(HRSessionEntity.class);
+                HRSessionEntity session = sessionDAO.queryForId(sessionId);
                 if (session == null) {
                     throw new IllegalArgumentException("Session doesn't exist: sessionId = " + sessionId);
                 }
@@ -174,7 +176,10 @@ public class SaveAsDialog extends Dialog {
                 else reportBuilder.setStartDate(new Date());
                 reportBuilder.setEndDate(session.getDateEnded());
                 reportBuilder.setTag(name);
-                List<HeartRateDataItem> items = new HeartRateDataItemDAO().getItemsBySessionId(sessionId);
+                RuntimeExceptionDao<RRIntervalEntity, Long> hrDAO = databaseHelper.getRuntimeExceptionDao(RRIntervalEntity.class);
+                final List<RRIntervalEntity> items = hrDAO.queryBuilder()
+                        .orderBy("_id", true).where().eq("session_id", session.getId())
+                        .query();
                 double rr[] = new double[items.size()];
                 for (int i=0; i<items.size(); i++)
                     rr[i] = items.get(i).getRrTime();
@@ -186,7 +191,7 @@ public class SaveAsDialog extends Dialog {
                 pw.println("The numbers above were calculated using following data:");
                 pw.printf("%4s  %-14s  %-4s %-3s%n", "n", "timestamp", "rr", "bpm");
                 int i = 1;
-                for (HeartRateDataItem item: items) {
+                for (RRIntervalEntity item: items) {
                     pw.printf("%4d  %14d  %4d %3d%n", i++, item.getTimeStamp().getTime(), (int)item.getRrTime(), item.getHeartBeatsPerMinute());
                 }
                 pw.println();

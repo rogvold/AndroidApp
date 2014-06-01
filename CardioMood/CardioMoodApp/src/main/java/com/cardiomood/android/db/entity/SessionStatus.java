@@ -1,4 +1,4 @@
-package com.cardiomood.android.db.model;
+package com.cardiomood.android.db.entity;
 
 /**
  * Created by danshin on 31.10.13.

@@ -5,7 +5,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.util.Log;
 
-import com.cardiomood.android.db.HeartRateDBHelper;
+import com.cardiomood.android.db.DatabaseHelper;
+import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.parse.Parse;
 import com.parse.PushService;
 
@@ -22,7 +23,7 @@ public class CardioMoodApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        database = new HeartRateDBHelper(this).getWritableDatabase();
+        database = OpenHelperManager.getHelper(this, DatabaseHelper.class).getWritableDatabase();
 
         try {
             String country = getResources().getConfiguration().locale.getCountry();
@@ -50,12 +51,5 @@ public class CardioMoodApplication extends Application {
             database.close();
             database = null;
         }
-    }
-
-    /**
-     * @return an open database.
-     */
-    public static SQLiteDatabase getOpenDatabase() {
-        return database;
     }
 }

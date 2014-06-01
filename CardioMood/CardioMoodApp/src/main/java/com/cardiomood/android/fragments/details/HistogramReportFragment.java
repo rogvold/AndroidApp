@@ -1,12 +1,13 @@
 package com.cardiomood.android.fragments.details;
 
 import android.graphics.Color;
+import android.util.Log;
 
 import com.cardiomood.android.R;
-import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
-import com.cardiomood.android.db.model.HeartRateDataItem;
-import com.cardiomood.android.db.model.HeartRateSession;
+import com.cardiomood.android.db.entity.HRSessionEntity;
+import com.cardiomood.android.db.entity.RRIntervalEntity;
 import com.cardiomood.math.histogram.Histogram;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.shinobicontrols.charts.Axis;
 import com.shinobicontrols.charts.CategoryAxis;
 import com.shinobicontrols.charts.ColumnSeries;
@@ -20,6 +21,7 @@ import com.shinobicontrols.charts.SimpleDataAdapter;
 
 import org.apache.commons.math3.stat.StatUtils;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,10 +31,11 @@ public class HistogramReportFragment extends AbstractSessionReportFragment {
 
     private static final String TAG = HistogramReportFragment.class.getSimpleName();
 
-    private HeartRateDataItemDAO hrDAO = new HeartRateDataItemDAO();
+    private RuntimeExceptionDao<RRIntervalEntity, Long> hrDAO;
 
     public HistogramReportFragment() {
         // Required empty public constructor
+        hrDAO = getRRIntervalDao();
     }
 
     @Override
@@ -46,14 +49,21 @@ public class HistogramReportFragment extends AbstractSessionReportFragment {
     }
 
     @Override
-    protected double[] collectDataInBackground(HeartRateSession session) {
-        List<HeartRateDataItem> items = hrDAO.getItemsBySessionId(session.getId());
+    protected double[] collectDataInBackground(HRSessionEntity session) {
+        try {
+            List<RRIntervalEntity> items = hrDAO.queryBuilder()
+                    .orderBy("_id", true).where().eq("session_id", session.getId())
+                    .query();
 
-        double[] rr = new double[items.size()];
-        for (int i=0; i<items.size(); i++) {
-            rr[i] = items.get(i).getRrTime();
+            double[] rr = new double[items.size()];
+            for (int i = 0; i < items.size(); i++) {
+                rr[i] = items.get(i).getRrTime();
+            }
+            return rr;
+        } catch (SQLException ex) {
+            Log.e(TAG, "collectDataInBackground() failed", ex);
         }
-        return rr;
+        return new double[0];
     }
 
     @Override

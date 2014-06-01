@@ -24,10 +24,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cardiomood.android.components.CustomViewPager;
-import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
-import com.cardiomood.android.db.dao.HeartRateSessionDAO;
-import com.cardiomood.android.db.model.HeartRateSession;
-import com.cardiomood.android.db.model.SessionStatus;
+import com.cardiomood.android.db.DatabaseHelper;
+import com.cardiomood.android.db.entity.HRSessionEntity;
+import com.cardiomood.android.db.entity.RRIntervalEntity;
+import com.cardiomood.android.db.entity.SessionStatus;
 import com.cardiomood.android.fragments.details.AbstractSessionReportFragment;
 import com.cardiomood.android.fragments.details.HistogramReportFragment;
 import com.cardiomood.android.fragments.details.OrganizationAReportFragment;
@@ -43,7 +43,10 @@ import com.cardiomood.data.async.ServerResponseCallbackRetry;
 import com.cardiomood.data.json.CardioSession;
 import com.cardiomood.data.json.JSONError;
 import com.flurry.android.FlurryAgent;
+import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 
+import java.sql.SQLException;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,11 +82,12 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
 
     private long sessionId = 0;
     private int postRenderAction;
-    private HeartRateSessionDAO sessionDAO;
-    private HeartRateDataItemDAO hrDAO;
+    private RuntimeExceptionDao<HRSessionEntity, Long> sessionDAO;
+    private RuntimeExceptionDao<RRIntervalEntity, Long> hrDAO;
     private PreferenceHelper pHelper;
     private DataServiceHelper dataServiceHelper;
     private Set<AbstractSessionReportFragment> reportFragments = new HashSet<AbstractSessionReportFragment>();
+    private DatabaseHelper databaseHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,15 +101,21 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
             finish();
         }
 
-        sessionDAO = new HeartRateSessionDAO();
-
-        if (!sessionDAO.exists(sessionId)) {
+        sessionDAO = getHelper().getRuntimeExceptionDao(HRSessionEntity.class);
+        if (sessionDAO.queryForId(sessionId) == null) {
             Toast.makeText(this, MessageFormat.format(getText(R.string.session_doesnt_exist).toString(), sessionId), Toast.LENGTH_SHORT).show();
             finish();
         }
 
-        hrDAO = new HeartRateDataItemDAO();
-        if (hrDAO.getItemsBySessionId(sessionId).size() < 30) {
+        long count = 0;
+        try {
+            hrDAO = getHelper().getRuntimeExceptionDao(RRIntervalEntity.class);
+            count = hrDAO.queryBuilder().where().eq("session_id", sessionId).countOf();
+        } catch (SQLException ex) {
+            Log.w(TAG, "onCreate() SQLException", ex);
+        }
+
+        if (count < 30) {
             Toast.makeText(this, R.string.measurement_contains_too_few_data, Toast.LENGTH_SHORT).show();
             finish();
         }
@@ -303,7 +313,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
         alertDialogBuilder.setView(promptsView);
 
         final EditText userInput = (EditText) promptsView.findViewById(R.id.editTextDialogUserInput);
-        userInput.setText(sessionDAO.findById(sessionId).getName());
+        userInput.setText(sessionDAO.queryForId(sessionId).getName());
 
         // set dialog message
         alertDialogBuilder
@@ -313,8 +323,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
                             public void onClick(DialogInterface dialog, int id) {
                                 // get user input and set it to result
                                 // edit text
-                                final HeartRateSessionDAO dao = new HeartRateSessionDAO();
-                                final HeartRateSession session = dao.findById(sessionId);
+                                final HRSessionEntity session = sessionDAO.queryForId(sessionId);
                                 String newName = userInput.getText() == null ? "" : userInput.getText().toString();
                                 newName = newName.trim();
                                 if (newName.isEmpty())
@@ -322,7 +331,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
                                 session.setName(newName);
                                 if (session.getStatus() == SessionStatus.SYNCHRONIZED)
                                     session.setStatus(SessionStatus.COMPLETED);
-                                dao.update(session);
+                                sessionDAO.update(session);
                                 Toast.makeText(SessionDetailsActivity.this, R.string.session_renamed, Toast.LENGTH_SHORT).show();
                                 if (session.getExternalId() != null) {
                                     dataServiceHelper.updateSessionInfo(session.getExternalId(), session.getName(), session.getDescription(), new ServerResponseCallbackRetry<CardioSession>() {
@@ -336,7 +345,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
                                             session.setStatus(SessionStatus.SYNCHRONIZED);
                                             session.setName(result.getName());
                                             session.setDescription(result.getDescription());
-                                            dao.merge(session);
+                                            sessionDAO.update(session);
                                         }
 
                                         @Override
@@ -416,6 +425,14 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
 
     public void unregisterFragment(AbstractSessionReportFragment fragment) {
         reportFragments.remove(fragment);
+    }
+
+    private DatabaseHelper getHelper() {
+        if (databaseHelper == null) {
+            databaseHelper =
+                    OpenHelperManager.getHelper(this, DatabaseHelper.class);
+        }
+        return databaseHelper;
     }
 
     private void removeArtifacts() {

@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.ContentLoadingProgressBar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,23 +28,26 @@ import android.widget.Toast;
 import com.cardiomood.android.R;
 import com.cardiomood.android.ReportPreviewActivity;
 import com.cardiomood.android.SessionDetailsActivity;
-import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
-import com.cardiomood.android.db.dao.HeartRateSessionDAO;
-import com.cardiomood.android.db.model.HeartRateDataItem;
-import com.cardiomood.android.db.model.HeartRateSession;
-import com.cardiomood.android.db.model.SessionStatus;
+import com.cardiomood.android.db.DatabaseHelper;
+import com.cardiomood.android.db.entity.HRSessionEntity;
+import com.cardiomood.android.db.entity.RRIntervalEntity;
+import com.cardiomood.android.db.entity.SessionStatus;
 import com.cardiomood.android.dialogs.SaveAsDialog;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.math.filter.ArtifactFilter;
 import com.cardiomood.math.filter.PisarukArtifactFilter;
+import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.shinobicontrols.charts.Axis;
 import com.shinobicontrols.charts.ChartView;
 import com.shinobicontrols.charts.ShinobiChart;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * Created by danon on 11.03.14.
@@ -78,6 +82,7 @@ public abstract class AbstractSessionReportFragment extends Fragment {
     private int artifactsFiltered = 0;
     private SessionDetailsActivity mHostActivity = null;
     private double rr[] = null;
+    private DatabaseHelper databaseHelper;
 
 
     /**
@@ -206,6 +211,16 @@ public abstract class AbstractSessionReportFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+
+
+    protected DatabaseHelper getHelper() {
+        if (databaseHelper == null) {
+            databaseHelper =
+                    OpenHelperManager.getHelper(getActivity(), DatabaseHelper.class);
+        }
+        return databaseHelper;
+    }
+
     private void saveThisRevision() {
         if (!savingInProgress) {
             savingInProgress = true;
@@ -217,6 +232,11 @@ public abstract class AbstractSessionReportFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         chartView.onDestroy();
+
+        if (databaseHelper != null) {
+            OpenHelperManager.releaseHelper();
+            databaseHelper = null;
+        }
     }
 
     @Override
@@ -304,7 +324,7 @@ public abstract class AbstractSessionReportFragment extends Fragment {
     }
 
     private void showSaveAsDialog() {
-        SaveAsDialog dlg = new SaveAsDialog(getActivity(), sessionId, filterCount);
+        SaveAsDialog dlg = new SaveAsDialog(getActivity(), databaseHelper, sessionId, filterCount);
         dlg.setTitle(R.string.save_as_dlg_title);
         dlg.setSavingCallback(new SaveAsDialog.SavingCallback() {
 
@@ -373,18 +393,29 @@ public abstract class AbstractSessionReportFragment extends Fragment {
         dlg.saveAsTxt();
     }
 
+    protected RuntimeExceptionDao<HRSessionEntity, Long> getSessionDao() {
+        return getHelper().getRuntimeExceptionDao(HRSessionEntity.class);
+    }
+
+    protected RuntimeExceptionDao<RRIntervalEntity, Long> getRRIntervalDao() {
+        return getHelper().getRuntimeExceptionDao(RRIntervalEntity.class);
+    }
 
     protected abstract Axis getXAxis();
     protected abstract Axis getYAxis();
-    protected abstract double[] collectDataInBackground(HeartRateSession session);
+    protected abstract double[] collectDataInBackground(HRSessionEntity session);
     protected abstract void displayData(double rr[]);
 
     private class DataLoadingTask extends AsyncTask<Long, Void, double[]> {
 
-        private HeartRateSessionDAO sessionDAO = new HeartRateSessionDAO();
+        private RuntimeExceptionDao<HRSessionEntity, Long> sessionDAO;
         private String name;
         private String date;
         private int artifactsRemoved = 0;
+
+        private DataLoadingTask() {
+            sessionDAO = getSessionDao();
+        }
 
         @Override
         protected void onPreExecute() {
@@ -394,7 +425,7 @@ public abstract class AbstractSessionReportFragment extends Fragment {
         @Override
         protected double[] doInBackground(Long... params) {
             long sessionId = params[0];
-            HeartRateSession session = sessionDAO.findById(sessionId);
+            HRSessionEntity session = sessionDAO.queryForId(sessionId);
             name = session.getName();
             if (name == null)
                 name = "";
@@ -455,8 +486,8 @@ public abstract class AbstractSessionReportFragment extends Fragment {
 
         @Override
         protected Object doInBackground(Object[] params) {
-            HeartRateSessionDAO sessionDAO = new HeartRateSessionDAO();
-            HeartRateSession session = sessionDAO.findById(sessionId);
+            final RuntimeExceptionDao<HRSessionEntity, Long> sessionDAO = getSessionDao();
+            final HRSessionEntity session = sessionDAO.queryForId(sessionId);
             session.setOriginalSessionId(sessionId);
             session.setStatus(SessionStatus.COMPLETED);
             session.setExternalId(null);
@@ -470,33 +501,50 @@ public abstract class AbstractSessionReportFragment extends Fragment {
             name += " (corrected)";
             session.setName(name);
 
-            HeartRateDataItemDAO hrDAO = new HeartRateDataItemDAO();
-            List<HeartRateDataItem> items = hrDAO.getItemsBySessionId(sessionId);
-            int i=0;
-            long duration = 0L;
-            for (HeartRateDataItem item: items) {
-                item.setId(null);
-                item.setRrTime(rr[i]);
-                int bpm = 0;
-                if (rr[i] < 1) {
-                    bpm = 0;
-                } else {
-                    bpm = (int) Math.round(60*1000.0/rr[i]);
+            final RuntimeExceptionDao<RRIntervalEntity, Long> hrDAO = getRRIntervalDao();
+            try {
+                final List<RRIntervalEntity> items = hrDAO.queryBuilder()
+                        .orderBy("_id", true).where().eq("session_id", session.getId())
+                        .query();
+                int i = 0;
+                long duration = 0L;
+                for (RRIntervalEntity item : items) {
+                    item.setId(null);
+                    item.setRrTime(rr[i]);
+                    int bpm = 0;
+                    if (rr[i] < 1) {
+                        bpm = 0;
+                    } else {
+                        bpm = (int) Math.round(60 * 1000.0 / rr[i]);
+                    }
+                    duration += Math.round(rr[i]);
+                    item.setHeartBeatsPerMinute(bpm);
+                    i++;
                 }
-                duration += Math.round(rr[i]);
-                item.setHeartBeatsPerMinute(bpm);
-                i++;
+                session.setDateStarted(new Date());
+                session.setDateEnded(new Date(session.getDateStarted().getTime() + duration));
+                sessionDAO.callBatchTasks(new Callable() {
+                    @Override
+                    public Object call() throws Exception {
+                        sessionDAO.createIfNotExists(session);
+                        for (RRIntervalEntity item : items) {
+                            item.setSessionId(session.getId());
+                            hrDAO.create(item);
+                        }
+                        return null;
+                    }
+                });
+                return session;
+            } catch (SQLException ex) {
+                Log.w(TAG, "SaveThisRevisionTask.doInBackground() failed", ex);
+                return null;
             }
-            session.setDateStarted(new Date());
-            session.setDateEnded(new Date(session.getDateStarted().getTime() + duration));
-            session = sessionDAO.insert(session, items);
-            return session;
         }
 
         @Override
         protected void onPostExecute(Object result) {
             Activity activity = getActivity();
-            HeartRateSession session = (HeartRateSession) result;
+            HRSessionEntity session = (HRSessionEntity) result;
             if (result != null && activity != null) {
                 Intent intent = new Intent(activity, SessionDetailsActivity.class);
                 intent.putExtra(SessionDetailsActivity.SESSION_ID_EXTRA, session.getId());

@@ -9,7 +9,7 @@ import android.provider.BaseColumns;
 public interface HeartRateDBContract {
 	
 	String DATABASE_NAME = "heart_rate.db";
-	int DATABASE_VERSION = 27;
+	int DATABASE_VERSION = 28;
 	
 	public static interface HeartRateData extends BaseColumns {
 		String TABLE_NAME = "heart_rate_data";
@@ -38,7 +38,8 @@ public interface HeartRateDBContract {
         String COLUMN_NAME_PASSWORD = "password";
         String COLUMN_NAME_STATUS = "status";
     }
-	
+
+    @Deprecated
 	public static abstract class SQL {
 		private static final String TEXT_TYPE = " TEXT";
 		private static final String COMMA_SEP = ",";

@@ -3,7 +3,10 @@ package com.cardiomood.android.db;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.cardiomood.android.db.model.SessionStatus;
+import com.cardiomood.android.db.entity.GPSLocationEntity;
+import com.cardiomood.android.db.entity.GPSSessionEntity;
+import com.cardiomood.android.db.entity.SessionStatus;
+import com.j256.ormlite.table.TableUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +19,11 @@ public class DBUpgradeHelper {
     public static final String TAG = DBUpgradeHelper.class.getSimpleName();
 
     private SQLiteDatabase database;
+    private DatabaseHelper databaseHelper;
 
-    public DBUpgradeHelper(SQLiteDatabase database) {
-        this.database = database;
+    public DBUpgradeHelper(final DatabaseHelper databaseHelper) {
+        this.databaseHelper = databaseHelper;
+        this.database = databaseHelper.getWritableDatabase();
 
         addUpgrader(19, 21, new DBUpgrader.Callback() {
 
@@ -106,6 +111,20 @@ public class DBUpgradeHelper {
                             + "WHERE hr." + HeartRateDBContract.HeartRateData.COLUMN_NAME_SESSION_ID + " = " + HeartRateDBContract.Sessions.TABLE_NAME + "." + HeartRateDBContract.Sessions._ID
                             + ")" + " WHERE " + HeartRateDBContract.Sessions.COLUMN_NAME_DATE_ENDED + " IS NULL";
                     db.execSQL(sql);
+                } catch (Exception e) {
+                    Log.d(TAG, "onUpgrade() exception", e);
+                }
+            }
+        });
+
+        addUpgrader(27, 28, new DBUpgrader.Callback() {
+
+            @Override
+            public void onUpgrade(SQLiteDatabase db) {
+                try {
+                    // update SESSIONS s set s.end_date = s.start_date + (select sum(rrTime) from HEART_RATE_DATA where session_id = s._id);
+                    TableUtils.createTable(databaseHelper.getConnectionSource(), GPSSessionEntity.class);
+                    TableUtils.createTable(databaseHelper.getConnectionSource(), GPSLocationEntity.class);
                 } catch (Exception e) {
                     Log.d(TAG, "onUpgrade() exception", e);
                 }

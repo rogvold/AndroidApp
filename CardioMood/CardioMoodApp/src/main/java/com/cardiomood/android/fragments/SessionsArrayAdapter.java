@@ -13,9 +13,9 @@ import android.widget.TextView;
 
 import com.cardiomood.android.R;
 import com.cardiomood.android.controls.CircledTextView;
+import com.cardiomood.android.db.DatabaseHelper;
 import com.cardiomood.android.db.HeartRateDBContract;
-import com.cardiomood.android.db.dao.HeartRateSessionDAO;
-import com.cardiomood.android.db.model.HeartRateSession;
+import com.cardiomood.android.db.entity.HRSessionEntity;
 import com.cardiomood.android.tools.CommonTools;
 
 import java.text.DateFormat;
@@ -24,13 +24,16 @@ import java.util.List;
 /**
  * Created by danshin on 03.11.13.
  */
-public class SessionsArrayAdapter extends ArrayAdapter<HeartRateSession> {
+public class SessionsArrayAdapter extends ArrayAdapter<HRSessionEntity> {
 
     private static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.MEDIUM);;
     private int selectedPosition = -1;
+    private DatabaseHelper databaseHelper;
 
-    public SessionsArrayAdapter(Context context, List<HeartRateSession> objects) {
+
+    public SessionsArrayAdapter(Context context, DatabaseHelper databaseHelper, List<HRSessionEntity> objects) {
         super(context, R.layout.history_item, objects);
+        this.databaseHelper = databaseHelper;
     }
 
     public void setSelectedItem(int position) {
@@ -56,7 +59,7 @@ public class SessionsArrayAdapter extends ArrayAdapter<HeartRateSession> {
         TextView date = (TextView) itemView.findViewById(R.id.item_date);
         TextView duration = (TextView) itemView.findViewById(R.id.item_extra);
         CircledTextView avgHeartRate = (CircledTextView) itemView.findViewById(R.id.average_heart_rate);
-        HeartRateSession session = getItem(position);
+        HRSessionEntity session = getItem(position);
 
         if (session.getName() != null)
             name.setText(session.getName());
@@ -85,8 +88,7 @@ public class SessionsArrayAdapter extends ArrayAdapter<HeartRateSession> {
 
             @Override
             protected Object doInBackground(Object[] params) {
-                HeartRateSessionDAO sessionDAO = new HeartRateSessionDAO();
-                SQLiteDatabase db = sessionDAO.getDatabase();
+                SQLiteDatabase db = databaseHelper.getWritableDatabase();
                 Cursor cursor = db.query(
                         HeartRateDBContract.HeartRateData.TABLE_NAME,
                         new String[]{"sum("+ HeartRateDBContract.HeartRateData.COLUMN_NAME_BPM+"*"+ HeartRateDBContract.HeartRateData.COLUMN_NAME_RR_TIME + ")/sum(" + HeartRateDBContract.HeartRateData.COLUMN_NAME_RR_TIME + ") as AVG_BPM"},

@@ -3,9 +3,11 @@ package com.cardiomood.android.tools;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 
@@ -159,6 +161,46 @@ public abstract class CommonTools {
         }
 
         return age;
+    }
+
+    public static String getAndroidDeviceID(Context context) {
+        return Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+    }
+
+    public static short[] parseArrayOfShort(String s) {
+        if (s == null || s.isEmpty()) {
+            return new short[0];
+        }
+        int len = s.length();
+        short[] data = new short[len / 4];
+        for (int i = 0; i < len; i += 4) {
+            data[i / 2] = (short) ((Character.digit(s.charAt(i), 16) << 12)
+                    + Character.digit(s.charAt(i+1), 16) << 8
+                    + Character.digit(s.charAt(i+2), 16) << 4
+                    + Character.digit(s.charAt(i+3), 16));
+        }
+        return data;
+    }
+
+    public static String arrayOfShortToHexString(short[] a) {
+        if (a == null)
+            a = new short[0];
+        final char[] hexArray = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+        char[] hexChars = new char[a.length * 4];
+        int v;
+        for ( int j = 0; j < a.length; j++ ) {
+            v = a[j] & 0xFFFF;
+            hexChars[j * 4] = hexArray[v >>> 12];
+            hexChars[j * 4 + 1] = hexArray[(v & 0x0F00) >>> 8];
+            hexChars[j * 4 + 1] = hexArray[(v & 0x00F0) >>> 4];
+            hexChars[j * 4 + 3] = hexArray[v & 0x000F];
+        }
+        return new String(hexChars);
+    }
+
+    public static boolean isGPSEnabled(Context context) {
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
 
 }

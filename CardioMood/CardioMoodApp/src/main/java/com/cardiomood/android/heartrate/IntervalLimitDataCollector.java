@@ -1,5 +1,7 @@
 package com.cardiomood.android.heartrate;
 
+import com.cardiomood.android.db.DatabaseHelper;
+
 /**
  * Created by danon on 05.03.14.
  */
@@ -9,8 +11,8 @@ public class IntervalLimitDataCollector extends AbstractDataCollector {
 
     private int intervalsLimit;
 
-    public IntervalLimitDataCollector(CardioMoodHeartRateLeService service, int intervalsLimit) {
-        super(service);
+    public IntervalLimitDataCollector(CardioMoodHeartRateLeService service, DatabaseHelper helper, int intervalsLimit) {
+        super(service, helper);
         if (intervalsLimit <= 0)
             throw new IllegalArgumentException("intervalsLimit must be positive.");
 

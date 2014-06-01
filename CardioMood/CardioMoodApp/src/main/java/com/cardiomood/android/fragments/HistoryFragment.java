@@ -25,13 +25,11 @@ import android.widget.Toast;
 
 import com.cardiomood.android.R;
 import com.cardiomood.android.SessionDetailsActivity;
-import com.cardiomood.android.db.HeartRateDBContract;
-import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
-import com.cardiomood.android.db.dao.HeartRateSessionDAO;
-import com.cardiomood.android.db.dao.UserDAO;
-import com.cardiomood.android.db.model.HeartRateDataItem;
-import com.cardiomood.android.db.model.HeartRateSession;
-import com.cardiomood.android.db.model.SessionStatus;
+import com.cardiomood.android.db.DatabaseHelper;
+import com.cardiomood.android.db.entity.HRSessionEntity;
+import com.cardiomood.android.db.entity.RRIntervalEntity;
+import com.cardiomood.android.db.entity.SessionStatus;
+import com.cardiomood.android.db.entity.UserEntity;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.data.CardioMoodServer;
@@ -45,7 +43,13 @@ import com.cardiomood.data.json.JSONError;
 import com.cardiomood.data.json.JSONResponse;
 import com.cardiomood.data.json.JsonRRInterval;
 import com.flurry.android.FlurryAgent;
+import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
+import com.j256.ormlite.stmt.PreparedQuery;
+import com.j256.ormlite.stmt.QueryBuilder;
+import com.j256.ormlite.stmt.Where;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -53,6 +57,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 ;
 
@@ -71,6 +76,7 @@ public class HistoryFragment extends Fragment
     private DataServiceHelper serviceHelper;
     private ProgressDialog pDialog = null;
     private ActionMode mActionMode = null;
+    private Long userId = null;
 
     // work around for 'view already has a parent...'
     private boolean initial = true;
@@ -126,11 +132,13 @@ public class HistoryFragment extends Fragment
             }
         }
     };
+    private DatabaseHelper databaseHelper = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        pHelper = new PreferenceHelper(getActivity().getApplicationContext());
-        pHelper.setPersistent(true);
+        pHelper = new PreferenceHelper(getActivity().getApplicationContext(), true);
+
+        userId = pHelper.getLong(ConfigurationConstants.USER_ID);
 
         root = inflater.inflate(R.layout.fragment_history, container, false);
         listView = (ListView) root.findViewById(R.id.sessionList);
@@ -193,7 +201,7 @@ public class HistoryFragment extends Fragment
     }
 
     public void deleteItem(int i) {
-        HeartRateSession session = listAdapter.getItem(i);
+        HRSessionEntity session = listAdapter.getItem(i);
         if (isPredefinedSession(session.getId())) {
             Toast.makeText(getActivity(), R.string.cannot_delete_predefined_data, Toast.LENGTH_SHORT).show();
             return;
@@ -202,9 +210,9 @@ public class HistoryFragment extends Fragment
     }
 
     public void renameItem(int i) {
-        final HeartRateSession itemSession = listAdapter.getItem(i);
+        final HRSessionEntity itemSession = listAdapter.getItem(i);
         final long sessionId = itemSession.getId();
-        HeartRateSessionDAO sessionDAO = new HeartRateSessionDAO();
+        RuntimeExceptionDao<HRSessionEntity, Long> sessionDAO = getHelper().getRuntimeExceptionDao(HRSessionEntity.class);
         // get prompts.xml view
         LayoutInflater li = LayoutInflater.from(getActivity());
         View promptsView = li.inflate(R.layout.dialog_input_text, null);
@@ -215,7 +223,7 @@ public class HistoryFragment extends Fragment
         alertDialogBuilder.setView(promptsView);
 
         final EditText userInput = (EditText) promptsView.findViewById(R.id.editTextDialogUserInput);
-        userInput.setText(sessionDAO.findById(sessionId).getName());
+        userInput.setText(sessionDAO.queryForId(sessionId).getName());
 
         // set dialog message
         alertDialogBuilder
@@ -225,8 +233,8 @@ public class HistoryFragment extends Fragment
                             public void onClick(DialogInterface dialog, int id) {
                                 // get user input and set it to result
                                 // edit text
-                                final HeartRateSessionDAO dao = new HeartRateSessionDAO();
-                                final HeartRateSession session = dao.findById(sessionId);
+                                final RuntimeExceptionDao<HRSessionEntity, Long> dao = getHelper().getRuntimeExceptionDao(HRSessionEntity.class);
+                                final HRSessionEntity session = dao.queryForId(sessionId);
                                 String newName = userInput.getText() == null ? "" : userInput.getText().toString();
                                 newName = newName.trim();
                                 if (newName.isEmpty())
@@ -248,7 +256,7 @@ public class HistoryFragment extends Fragment
                                             session.setStatus(SessionStatus.SYNCHRONIZED);
                                             session.setName(result.getName());
                                             session.setDescription(result.getDescription());
-                                            dao.merge(session);
+                                            dao.update(session);
                                         }
 
                                         @Override
@@ -282,7 +290,7 @@ public class HistoryFragment extends Fragment
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (mActionMode == null) {
-            HeartRateSession session = listAdapter.getItem(position);
+            HRSessionEntity session = listAdapter.getItem(position);
             if (session != null) {
                 Toast.makeText(getActivity(), R.string.opening_measurement, Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getActivity(), SessionDetailsActivity.class);
@@ -294,6 +302,16 @@ public class HistoryFragment extends Fragment
             listAdapter.setSelectedItem(position);
             listAdapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        if (databaseHelper != null) {
+            OpenHelperManager.releaseHelper();
+            databaseHelper = null;
+        }
+
+        super.onDestroy();
     }
 
     private void sync() {
@@ -340,15 +358,35 @@ public class HistoryFragment extends Fragment
             listAdapter.clear();
             listAdapter.notifyDataSetChanged();
         }
-        listAdapter = new SessionsArrayAdapter(activity, new ArrayList<HeartRateSession>(100));
-        SessionsEndlessAdapter endlessAdapter = new SessionsEndlessAdapter(listAdapter, getActivity().getApplicationContext());
+        listAdapter = new SessionsArrayAdapter(activity, getHelper(), new ArrayList<HRSessionEntity>(100));
+        SessionsEndlessAdapter endlessAdapter = new SessionsEndlessAdapter(listAdapter, getActivity(), getHelper());
         listView.setAdapter(endlessAdapter);
     }
 
+    private DatabaseHelper getHelper() {
+        if (databaseHelper == null) {
+            databaseHelper =
+                    OpenHelperManager.getHelper(getActivity(), DatabaseHelper.class);
+        }
+        return databaseHelper;
+    }
+
     private boolean hasUpdatedSessions() {
-        HeartRateSessionDAO sessionDAO = new HeartRateSessionDAO();
-        List<HeartRateSession> sessions = sessionDAO.getSessions(HeartRateDBContract.Sessions.COLUMN_NAME_STATUS + " = ?", new String[]{String.valueOf(SessionStatus.COMPLETED)});
-        return !sessions.isEmpty();
+        Map<String, Object> values = new HashMap<String, Object>();
+        values.put("status", SessionStatus.COMPLETED);
+        values.put("user_id", userId);
+        RuntimeExceptionDao<HRSessionEntity, Long> sessionDAO = getHelper()
+                .getRuntimeExceptionDao(HRSessionEntity.class);
+        try {
+            long count = sessionDAO.queryBuilder()
+                    .where().eq("status", SessionStatus.COMPLETED)
+                    .and().eq("user_id", userId)
+                    .countOf();
+            return (count > 0);
+        } catch (SQLException ex) {
+            Log.w(TAG, "hasUpdatedSessions() failed", ex);
+            return false;
+        }
     }
 
     @Override
@@ -366,13 +404,13 @@ public class HistoryFragment extends Fragment
     }
 
     private class DeleteItemTask extends AsyncTask<Void, Void, Boolean> {
-
-        private HeartRateSessionDAO dao = new HeartRateSessionDAO();
-        private HeartRateSession session = null;
+        private HRSessionEntity session = null;
         private Handler handler = new Handler();
+        RuntimeExceptionDao<HRSessionEntity, Long> hrSessionDAO;
 
-        private DeleteItemTask(HeartRateSession session) {
+        private DeleteItemTask(HRSessionEntity session) {
             this.session = session;
+            hrSessionDAO = getHelper().getRuntimeExceptionDao(HRSessionEntity.class);
         }
 
         @Override
@@ -398,9 +436,9 @@ public class HistoryFragment extends Fragment
                 }
 
                 long sessionId = session.getId();
-                HeartRateSession session = dao.findById(sessionId);
+                HRSessionEntity session = hrSessionDAO.queryForId(sessionId);
                 if (session != null) {
-                    dao.delete(sessionId);
+                    hrSessionDAO.deleteById(sessionId);
                     logSessionDeletedEvent(session);
                 }
                 return true;
@@ -410,11 +448,11 @@ public class HistoryFragment extends Fragment
             }
         }
 
-        private void logSessionDeletedEvent(HeartRateSession session) {
+        private void logSessionDeletedEvent(HRSessionEntity session) {
             Map<String, String> args = new HashMap<String, String>();
             args.put("sessionId", session.getId()+"");
             args.put("sessionName", session.getName());
-            args.put("total_sessions", dao.getCount()+"");
+            args.put("total_sessions", hrSessionDAO.countOf()+"");
             FlurryAgent.logEvent("session_deleted", args);
         }
 
@@ -439,16 +477,16 @@ public class HistoryFragment extends Fragment
 
         private Context context = null;
 
-        private UserDAO userDAO;
-        private HeartRateSessionDAO sessionDAO;
-        private HeartRateDataItemDAO itemDAO;
+        private RuntimeExceptionDao<UserEntity, Long> userDAO;
+        private RuntimeExceptionDao<HRSessionEntity, Long> sessionDAO;
+        private RuntimeExceptionDao<RRIntervalEntity, Long> itemDAO;
         private Long userId;
 
         private SyncTask(Context context) {
             this.context = context;
-            userDAO = new UserDAO();
-            sessionDAO = new HeartRateSessionDAO();
-            itemDAO = new HeartRateDataItemDAO();
+            userDAO = getHelper().getRuntimeExceptionDao(UserEntity.class);
+            sessionDAO = getHelper().getRuntimeExceptionDao(HRSessionEntity.class);
+            itemDAO = getHelper().getRuntimeExceptionDao(RRIntervalEntity.class);
             userId = pHelper.getLong(ConfigurationConstants.USER_ID, -1);
         }
 
@@ -484,16 +522,19 @@ public class HistoryFragment extends Fragment
                 return null;
 
             try {
-                List<HeartRateSession> sessions = sessionDAO.getSessions(
-                        "((" + HeartRateSession.COLUMN_NAME_EXTERNAL_ID + " is null and "
-                                + HeartRateSession.COLUMN_NAME_STATUS + " <> '" + SessionStatus.IN_PROGRESS + "') or ("
-                                + HeartRateSession.COLUMN_NAME_STATUS + " == '" + SessionStatus.COMPLETED + "')) and "
-                                + HeartRateSession.COLUMN_NAME_USER_ID + "=?",
-                        new String[]{String.valueOf(userId)}
-                );
+
+                QueryBuilder<HRSessionEntity, Long> qb = sessionDAO.queryBuilder();
+                Where w = qb.where();
+                w.isNull("external_id");
+                w.ne("status", SessionStatus.IN_PROGRESS);
+                w.and(w, w);
+                w.or().eq("status", SessionStatus.COMPLETED);
+                w.eq("user_id", userId);
+                PreparedQuery<HRSessionEntity> pq = w.and(w, w).prepare();
+                List<HRSessionEntity> sessions = sessionDAO.query(pq);
 
                 int progress = 0;
-                for (HeartRateSession session : sessions) {
+                for (HRSessionEntity session : sessions) {
                     synchronizeSession(session);
                     progress++;
                     publishProgress(context.getString(R.string.progress_sending_data) +" " + Math.round(100.0f * progress / sessions.size()) + "%");
@@ -517,7 +558,7 @@ public class HistoryFragment extends Fragment
          return null;
         }
 
-        private void synchronizeSession(HeartRateSession session) {
+        private void synchronizeSession(HRSessionEntity session) {
             if (isPredefinedSession(session.getId()))
                 return;
             if (session.getExternalId() == null) {
@@ -534,7 +575,7 @@ public class HistoryFragment extends Fragment
             }
         }
 
-        private void rewriteSessionData(HeartRateSession session, CardioSession cardioSession) {
+        private void rewriteSessionData(HRSessionEntity session, CardioSession cardioSession) {
             SessionStatus oldStatus = session.getStatus();
             cardioSession.setDataClassName("JsonRRInterval");
             cardioSession.setName(session.getName());
@@ -542,69 +583,91 @@ public class HistoryFragment extends Fragment
             cardioSession.setCreationTimestamp(session.getDateStarted() == null ? 0 : session.getDateStarted().getTime());
             session.setExternalId(cardioSession.getId());
             session.setStatus(SessionStatus.SYNCHRONIZING);
-            sessionDAO.merge(session);
+            sessionDAO.update(session);
 
             // Upload sessionData
-            List<HeartRateDataItem> items = itemDAO.getItemsBySessionId(session.getId());
-            CardioSessionWithData sessionWithData = new CardioSessionWithData(cardioSession);
-            List<CardioDataItem> dataItems = new ArrayList<CardioDataItem>(items.size());
-            long i = 0;
-            for (HeartRateDataItem hrItem: items) {
-                CardioDataItem cardioDataItem = new CardioDataItem();
-                cardioDataItem.setNumber(i++);
-                cardioDataItem.setCreationTimestamp(hrItem.getTimeStamp().getTime());
-                cardioDataItem.setSessionId(cardioSession.getId());
-                cardioDataItem.setDataItem(new JsonRRInterval((int) hrItem.getRrTime()).toString());
-                dataItems.add(cardioDataItem);
-            }
-            sessionWithData.setDataItems(dataItems);
-            JSONResponse<String> response2 = serviceHelper.rewriteCardioSessionData(sessionWithData);
-            if (JSONResponse.RESPONSE_OK.equals(response2.getResponseCode())) {
-                session.setStatus(SessionStatus.SYNCHRONIZED);
-                sessionDAO.merge(session);
-            } else {
+            try {
+                List<RRIntervalEntity> items = itemDAO.queryBuilder().orderBy("_id", true)
+                        .where().eq("session_id", session.getId()).query();
+                CardioSessionWithData sessionWithData = new CardioSessionWithData(cardioSession);
+                List<CardioDataItem> dataItems = new ArrayList<CardioDataItem>(items.size());
+                long i = 0;
+                for (RRIntervalEntity hrItem : items) {
+                    CardioDataItem cardioDataItem = new CardioDataItem();
+                    cardioDataItem.setNumber(i++);
+                    cardioDataItem.setCreationTimestamp(hrItem.getTimeStamp().getTime());
+                    cardioDataItem.setSessionId(cardioSession.getId());
+                    cardioDataItem.setDataItem(new JsonRRInterval((int) hrItem.getRrTime()).toString());
+                    dataItems.add(cardioDataItem);
+                }
+                sessionWithData.setDataItems(dataItems);
+                JSONResponse<String> response2 = serviceHelper.rewriteCardioSessionData(sessionWithData);
+                if (JSONResponse.RESPONSE_OK.equals(response2.getResponseCode())) {
+                    session.setStatus(SessionStatus.SYNCHRONIZED);
+                    sessionDAO.update(session);
+                } else {
+                    session.setStatus(oldStatus);
+                    sessionDAO.update(session);
+                }
+            } catch (SQLException ex) {
                 session.setStatus(oldStatus);
-                sessionDAO.merge(session);
+                sessionDAO.update(session);
             }
         }
 
         private void synchronizeCardioSession(CardioSession cardioSession) {
-            List<HeartRateSession> sessions = sessionDAO.getSessions(HeartRateSession.COLUMN_NAME_EXTERNAL_ID + "=?", new String[] {String.valueOf(cardioSession.getId())});
-            if (sessions.isEmpty()) {
-                // create session
-                HeartRateSession session = new HeartRateSession();
-                session.setUserId(userId);
-                session.setStatus(SessionStatus.SYNCHRONIZING);
-                session.setDateStarted(new Date(cardioSession.getCreationTimestamp()));
-                session.setExternalId(cardioSession.getId());
-                session.setDescription(cardioSession.getDescription());
-                session.setName(cardioSession.getName());
-                session = sessionDAO.insert(session);
+            try {
+                long count = sessionDAO.queryBuilder()
+                        .where().eq("user_id", userId)
+                        .and().eq("external_id", cardioSession.getId())
+                        .countOf();
 
-                JSONResponse<CardioSessionWithData> response = serviceHelper.getSessionData(cardioSession.getId());
-                if (JSONResponse.RESPONSE_OK.equals(response.getResponseCode())) {
-                    List<CardioDataItem> dataItems = response.getData().getDataItems();
-                    if (dataItems == null)
-                        dataItems = Collections.emptyList();
-                    List<HeartRateDataItem> items = new ArrayList<HeartRateDataItem>(dataItems.size());
-                    long duration = 0;
-                    for (CardioDataItem dataItem: dataItems) {
-                        HeartRateDataItem item = new HeartRateDataItem();
-                        item.setSessionId(session.getId());
-                        item.setTimeStamp(new Date(dataItem.getCreationTimestamp()));
-                        JsonRRInterval rr = JsonRRInterval.fromJson(dataItem.getDataItem());
-                        item.setRrTime(rr.getR());
-                        duration += rr.getR();
-                        if (rr.getR() > 0)
-                            item.setHeartBeatsPerMinute(Math.round(60*1000.0f/rr.getR()));
-                        items.add(item);
+                if (count == 0) {
+                    // create session locally
+                    HRSessionEntity session = new HRSessionEntity();
+                    session.setUserId(userId);
+                    session.setStatus(SessionStatus.SYNCHRONIZING);
+                    session.setDateStarted(new Date(cardioSession.getCreationTimestamp()));
+                    session.setExternalId(cardioSession.getId());
+                    session.setDescription(cardioSession.getDescription());
+                    session.setName(cardioSession.getName());
+                    session = sessionDAO.createIfNotExists(session);
+
+                    JSONResponse<CardioSessionWithData> response = serviceHelper.getSessionData(cardioSession.getId());
+                    if (JSONResponse.RESPONSE_OK.equals(response.getResponseCode())) {
+                        List<CardioDataItem> dataItems = response.getData().getDataItems();
+                        if (dataItems == null)
+                            dataItems = Collections.emptyList();
+                        final List<RRIntervalEntity> items = new ArrayList<RRIntervalEntity>(dataItems.size());
+                        long duration = 0;
+                        for (CardioDataItem dataItem : dataItems) {
+                            RRIntervalEntity item = new RRIntervalEntity();
+                            item.setSessionId(session.getId());
+                            item.setTimeStamp(new Date(dataItem.getCreationTimestamp()));
+                            JsonRRInterval rr = JsonRRInterval.fromJson(dataItem.getDataItem());
+                            item.setRrTime(rr.getR());
+                            duration += rr.getR();
+                            if (rr.getR() > 0)
+                                item.setHeartBeatsPerMinute(Math.round(60 * 1000.0f / rr.getR()));
+                            items.add(item);
+                        }
+                        itemDAO.callBatchTasks(new Callable<Object>() {
+                            @Override
+                            public Object call() throws Exception {
+                                for (RRIntervalEntity item: items) {
+                                    itemDAO.create(item);
+                                }
+                                return null;
+                            }
+                        });
+                        session.setDateEnded(new Date(session.getDateStarted().getTime() + duration));
+                        session.setStatus(SessionStatus.SYNCHRONIZED);
+                        sessionDAO.update(session);
                     }
-                    itemDAO.bulkInsert(items);
-                    session.setDateEnded(new Date(session.getDateStarted().getTime() + duration));
-                    session.setStatus(SessionStatus.SYNCHRONIZED);
-                    sessionDAO.merge(session);
-                }
 
+                }
+            } catch (SQLException ex) {
+                Log.w(TAG, "synchronizeCardioSession() failed", ex);
             }
         }
     }

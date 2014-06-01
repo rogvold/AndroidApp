@@ -1,4 +1,4 @@
-package com.cardiomood.sport.android.system.gps;
+package com.cardiomood.android.gps;
 
 import android.app.Activity;
 import android.content.Context;
@@ -6,10 +6,11 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.cardiomood.android.tools.ConfigurationManager;
-import com.cardiomood.sport.android.tools.config.ConfigurationConstants;
+import com.cardiomood.android.tools.config.ConfigurationConstants;
 
 /**
  * Project: CardioSport
@@ -18,6 +19,8 @@ import com.cardiomood.sport.android.tools.config.ConfigurationConstants;
  * Time: 23:59
  */
 public class GPSMonitor implements ConfigurationConstants {
+
+    private static final String TAG = GPSMonitor.class.getSimpleName();
 
     private final ConfigurationManager config = ConfigurationManager.getInstance();
     private final Activity activity;
@@ -72,8 +75,8 @@ public class GPSMonitor implements ConfigurationConstants {
         if (isGPSEnabled()) {
             locationManager.requestLocationUpdates(
                     LocationManager.GPS_PROVIDER,
-                    config.getInt(GPS_UPDATE_TIME, 500),
-                    config.getFloat(GPS_UPDATE_DISTANCE, 1.0f),
+                    config.getInt(GPS_UPDATE_TIME, 1000),
+                    config.getFloat(GPS_UPDATE_DISTANCE, 5.0f),
                     _listener
             );
             collecting = true;
@@ -94,6 +97,15 @@ public class GPSMonitor implements ConfigurationConstants {
         public void onLocationChanged(Location location) {
             if (listener != null)
                 listener.onLocationChanged(location);
+            Log.d(TAG, "onLocationChanged(): lat="+location.getLatitude() + ", long=" + location.getLongitude());
+            if (location.hasSpeed())
+                Log.d(TAG, "onLocationChanged(): speed=" + location.getSpeed());
+            if (location.hasBearing())
+                Log.d(TAG, "onLocationChanged(): bearing=" + location.getBearing());
+            if (location.hasAccuracy())
+                Log.d(TAG, "onLocationChanged():  accuracy=" + location.getAccuracy());
+            if (location.hasAltitude())
+                Log.d(TAG, "onLocationChanged(): alt="+location.getAltitude());
 
             currentLocation = location;
         }

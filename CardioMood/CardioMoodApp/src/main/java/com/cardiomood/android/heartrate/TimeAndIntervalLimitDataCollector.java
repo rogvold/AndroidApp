@@ -1,5 +1,7 @@
 package com.cardiomood.android.heartrate;
 
+import com.cardiomood.android.db.DatabaseHelper;
+
 /**
  * Created by danon on 06.03.14.
  */
@@ -7,8 +9,8 @@ public class TimeAndIntervalLimitDataCollector extends TimeLimitDataCollector {
 
     private int intervalsLimit = 0;
 
-    public TimeAndIntervalLimitDataCollector(CardioMoodHeartRateLeService service, double timeLimit, int intervalsLimit) {
-        super(service, timeLimit);
+    public TimeAndIntervalLimitDataCollector(CardioMoodHeartRateLeService service, DatabaseHelper helper, double timeLimit, int intervalsLimit) {
+        super(service, helper, timeLimit);
         this.intervalsLimit = intervalsLimit;
     }
 

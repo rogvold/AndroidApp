@@ -3,13 +3,13 @@ package com.cardiomood.android;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,13 +19,14 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cardiomood.android.db.DatabaseHelper;
 import com.cardiomood.android.db.HeartRateDBContract;
-import com.cardiomood.android.db.dao.HeartRateSessionDAO;
+import com.cardiomood.android.db.dao.HRSessionDAO;
 import com.cardiomood.android.db.dao.UserDAO;
-import com.cardiomood.android.db.model.HeartRateSession;
-import com.cardiomood.android.db.model.SessionStatus;
-import com.cardiomood.android.db.model.User;
-import com.cardiomood.android.db.model.UserStatus;
+import com.cardiomood.android.db.entity.HRSessionEntity;
+import com.cardiomood.android.db.entity.SessionStatus;
+import com.cardiomood.android.db.entity.UserEntity;
+import com.cardiomood.android.db.entity.UserStatus;
 import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
@@ -36,10 +37,14 @@ import com.cardiomood.data.json.ApiToken;
 import com.cardiomood.data.json.JSONError;
 import com.cardiomood.data.json.UserProfile;
 import com.flurry.android.FlurryAgent;
+import com.j256.ormlite.android.apptools.OrmLiteBaseActivity;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.parse.ParseAnalytics;
 import com.parse.ParseObject;
 
+import java.sql.SQLException;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 /**
  * Project: CardioSport
@@ -47,7 +52,9 @@ import java.util.List;
  * Date: 15.06.13
  * Time: 14:16
  */
-public class LoginActivity extends Activity implements ConfigurationConstants {
+public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implements ConfigurationConstants {
+
+    private static final String TAG = LoginActivity.class.getSimpleName();
 
     /**
      * The default email to populate the email field with.
@@ -151,9 +158,7 @@ public class LoginActivity extends Activity implements ConfigurationConstants {
         // fix broken sessions (IN_PROGRESS -> COMPLETED)
         // and also sessions with 0 points
         try {
-
-            HeartRateSessionDAO session = new HeartRateSessionDAO();
-            final SQLiteDatabase db = session.getDatabase();
+            final SQLiteDatabase db = getHelper().getWritableDatabase();
             synchronized (db) {
                 try {
                     db.beginTransaction();
@@ -169,8 +174,8 @@ public class LoginActivity extends Activity implements ConfigurationConstants {
                     db.execSQL(
                             "DELETE FROM " + HeartRateDBContract.Sessions.TABLE_NAME +
                                     " WHERE " + HeartRateDBContract.Sessions._ID + " NOT IN (" +
-                                        "SELECT " + HeartRateDBContract.Sessions._ID + " FROM " + HeartRateDBContract.Sessions.TABLE_NAME +
-                                        "GROUP BY " +  HeartRateDBContract.Sessions._ID + " HAVING count(1) > 1" +
+                                        "SELECT " + HeartRateDBContract.HeartRateData.COLUMN_NAME_SESSION_ID + " FROM " + HeartRateDBContract.HeartRateData.TABLE_NAME + "\n" +
+                                        "GROUP BY " +  HeartRateDBContract.HeartRateData.COLUMN_NAME_SESSION_ID + " HAVING count(1) > 1" +
                                     ")"
                     );
                     db.setTransactionSuccessful();
@@ -179,7 +184,7 @@ public class LoginActivity extends Activity implements ConfigurationConstants {
                 }
             }
         } catch (Exception ex) {
-
+            Log.e(TAG, "fixBrokenSessions() -> Unexpected exception", ex);
         }
     }
 
@@ -320,43 +325,48 @@ public class LoginActivity extends Activity implements ConfigurationConstants {
             mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
             showProgress(true);
 
-            UserDAO userDAO = new UserDAO();
-            List<User> users = userDAO.select(
-                    HeartRateDBContract.Users.COLUMN_NAME_EMAIL + "=? and " + HeartRateDBContract.Users.COLUMN_NAME_PASSWORD + "=?",
-                    new String[] {mEmail, CommonTools.SHA256(mPassword)}
-            );
-            if (users.size() == 1) {
-                User user = users.get(0);
-                performLogIn(new ApiToken(user.getExternalId(), "0", System.currentTimeMillis()));
-                startMainActivity();
-                return;
-            }
+            try {
+                // query user locally
+                RuntimeExceptionDao<UserEntity, Long> userDAO = getHelper().getRuntimeExceptionDao(UserEntity.class);
 
-            // TODO: it is strongly recommended to send SHA2 hash of the password
-            DataServiceHelper service = new DataServiceHelper(CardioMoodServer.INSTANCE.getService());
-            service.login(mEmail, mPassword, new ServerResponseCallback<ApiToken>() {
-                @Override
-                public void onResult(ApiToken result) {
-                    if (result != null) {
-                        performLogIn(result);
-                        startMainActivity();
-                    } else {
-                        mPasswordView.setError("Incorrect email and/or password.");
-                        mPasswordView.requestFocus();
+                List<UserEntity> users = userDAO.queryBuilder()
+                    .where().eq("email", mEmail).and().eq("password", CommonTools.SHA256(mPassword)).query();
+
+                if (users.size() == 1) {
+                    UserEntity user = users.get(0);
+                    performLogIn(new ApiToken(user.getExternalId(), "0", System.currentTimeMillis()));
+                    startMainActivity();
+                    return;
+                }
+
+                // TODO: it is strongly recommended to send SHA2 hash of the password
+                DataServiceHelper service = new DataServiceHelper(CardioMoodServer.INSTANCE.getService());
+                service.login(mEmail, mPassword, new ServerResponseCallback<ApiToken>() {
+                    @Override
+                    public void onResult(ApiToken result) {
+                        if (result != null) {
+                            performLogIn(result);
+                            startMainActivity();
+                        } else {
+                            mPasswordView.setError("Incorrect email and/or password.");
+                            mPasswordView.requestFocus();
+                        }
+                        showProgress(false);
+                        loginInProgress = false;
                     }
-                    showProgress(false);
-                    loginInProgress = false;
-                }
 
-                @Override
-                public void onError(JSONError error) {
-                    mPasswordView.setError(error == null ? "Unexpected error." : error.getMessage());
-                    mPasswordView.requestFocus();
-                    showProgress(false);
-                    loginInProgress = false;
-                }
-            });
-            loginInProgress = true;
+                    @Override
+                    public void onError(JSONError error) {
+                        mPasswordView.setError(error == null ? "Unexpected error." : error.getMessage());
+                        mPasswordView.requestFocus();
+                        showProgress(false);
+                        loginInProgress = false;
+                    }
+                });
+                loginInProgress = true;
+            } catch (SQLException ex) {
+                Log.w(TAG, "attemptLogin() failed with exception", ex);
+            }
         }
     }
 
@@ -420,23 +430,30 @@ public class LoginActivity extends Activity implements ConfigurationConstants {
             @Override
             protected Object doInBackground(Object[] params) {
                 try {
-                    UserDAO userDAO = new UserDAO();
-                    User user = userDAO.findByExternalId(userId);
+                    UserDAO userDAO = getHelper().getDao(UserEntity.class);
+                    UserEntity user = userDAO.findByExternalId(userId);
                     if (user == null) {
-                        user = new User(userId, email, UserStatus.NEW);
+                        user = new UserEntity(userId, email, UserStatus.NEW);
                         user.setPassword(CommonTools.SHA256(password));
-                        user = userDAO.insert(user);
-                        HeartRateSessionDAO sessionDAO = new HeartRateSessionDAO();
-                        List<HeartRateSession> sessions = sessionDAO.getAllSessions();
-                        for (HeartRateSession session : sessions) {
-                            if (session.getUserId() == null) {
-                                session.setUserId(user.getId());
-                                sessionDAO.merge(session);
+                        user = userDAO.createIfNotExists(user);
+                        final Long userLocalId = user.getId();
+                        final HRSessionDAO sessionDAO = getHelper().getDao(HRSessionEntity.class);
+                        sessionDAO.callBatchTasks(new Callable<Object>() {
+                            @Override
+                            public Object call() throws Exception {
+                                List<HRSessionEntity> sessions = sessionDAO.queryForAll();
+                                for (HRSessionEntity session : sessions) {
+                                    if (session.getUserId() == null) {
+                                        session.setUserId(userLocalId);
+                                        sessionDAO.update(session);
+                                    }
+                                }
+                                return null;
                             }
-                        }
+                        });
                     } else {
                         user.setPassword(CommonTools.SHA256(password));
-                        user = userDAO.merge(user);
+                        userDAO.update(user);
                     }
                     prefHelper.putLong(USER_ID, user.getId());
                 } catch (Exception ex) {

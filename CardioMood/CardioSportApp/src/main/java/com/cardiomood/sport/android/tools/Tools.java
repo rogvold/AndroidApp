@@ -96,8 +96,8 @@ public class Tools {
         return new String(hexChars);
     }
 
-    public static boolean isGPSEnabled(Activity mainActivity) {
-        LocationManager locationManager = (LocationManager) mainActivity.getSystemService(Context.LOCATION_SERVICE);
+    public static boolean isGPSEnabled(Context context) {
+        LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
 }

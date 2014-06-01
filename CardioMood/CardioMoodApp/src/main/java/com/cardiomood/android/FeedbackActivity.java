@@ -1,6 +1,5 @@
 package com.cardiomood.android;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Intent;
@@ -20,14 +19,16 @@ import android.widget.RatingBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.cardiomood.android.db.dao.HeartRateSessionDAO;
+import com.cardiomood.android.db.DatabaseHelper;
+import com.cardiomood.android.db.entity.HRSessionEntity;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
+import com.j256.ormlite.android.apptools.OrmLiteBaseActivity;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.SaveCallback;
 
-public class FeedbackActivity extends Activity {
+public class FeedbackActivity extends OrmLiteBaseActivity<DatabaseHelper> {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +59,7 @@ public class FeedbackActivity extends Activity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class FeedbackFragment extends Fragment {
+    public class FeedbackFragment extends Fragment {
 
         private ProgressDialog progressDialog = null;
         private EditText userMessage;
@@ -150,11 +151,12 @@ public class FeedbackActivity extends Activity {
             } catch (Exception ex) {
                 Log.w("FeedbackActivity", "submitFeedback(): failed to get app_version", ex);
             }
+
             feedback.put("app_version", version);
             feedback.put("user_rating", userRating.getRating());
             feedback.put("user_feedback_type", feedbackType.getSelectedItem().toString());
             feedback.put("user_message", userMessage.getText().toString());
-            feedback.put("sessions_number", new HeartRateSessionDAO().getCount());
+            feedback.put("sessions_number", getHelper().getRuntimeExceptionDao(HRSessionEntity.class).countOf());
             feedback.put("user_email", prefHelper.getString(ConfigurationConstants.USER_EMAIL_KEY));
 
             feedback.saveInBackground(new SaveCallback() {

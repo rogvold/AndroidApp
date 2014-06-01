@@ -16,7 +16,7 @@ public class PreferenceHelper {
     }
 
     public PreferenceHelper(Context context, boolean persistent) {
-        this.context = context;
+        this.context = context.getApplicationContext();
         this.persistent = persistent;
     }
 

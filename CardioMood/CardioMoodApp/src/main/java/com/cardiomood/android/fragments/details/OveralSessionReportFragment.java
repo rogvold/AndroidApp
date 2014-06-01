@@ -2,6 +2,7 @@ package com.cardiomood.android.fragments.details;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,11 +10,11 @@ import android.widget.TextView;
 
 import com.cardiomood.android.R;
 import com.cardiomood.android.controls.gauge.SpeedometerGauge;
-import com.cardiomood.android.db.dao.HeartRateDataItemDAO;
-import com.cardiomood.android.db.model.HeartRateDataItem;
-import com.cardiomood.android.db.model.HeartRateSession;
+import com.cardiomood.android.db.entity.HRSessionEntity;
+import com.cardiomood.android.db.entity.RRIntervalEntity;
 import com.cardiomood.math.HeartRateUtils;
 import com.cardiomood.math.window.DataWindow;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.shinobicontrols.charts.Axis;
 import com.shinobicontrols.charts.DataAdapter;
 import com.shinobicontrols.charts.DataPoint;
@@ -28,6 +29,7 @@ import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.stat.StatUtils;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +38,7 @@ public class OveralSessionReportFragment extends AbstractSessionReportFragment {
 
     private static final String TAG = OveralSessionReportFragment.class.getSimpleName();
 
-    private HeartRateDataItemDAO hrDAO;
+    private RuntimeExceptionDao<RRIntervalEntity, Long> hrDAO;
 
     // Components in this fragment view:
     private TextView meanHeartRate;
@@ -48,7 +50,7 @@ public class OveralSessionReportFragment extends AbstractSessionReportFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        hrDAO = new HeartRateDataItemDAO();
+        hrDAO = getRRIntervalDao();
     }
 
     @Override
@@ -90,15 +92,21 @@ public class OveralSessionReportFragment extends AbstractSessionReportFragment {
     }
 
     @Override
-    protected double[] collectDataInBackground(HeartRateSession session) {
-        long sessionId = session.getId();
-        List<HeartRateDataItem> items = hrDAO.getItemsBySessionId(sessionId);
+    protected double[] collectDataInBackground(HRSessionEntity session) {
+        try {
+            final List<RRIntervalEntity> items = hrDAO.queryBuilder()
+                    .orderBy("_id", true).where().eq("session_id", session.getId())
+                    .query();
 
-        double[] rr = new double[items.size()];
-        for (int i=0; i<items.size(); i++) {
-            rr[i] = items.get(i).getRrTime();
+            double[] rr = new double[items.size()];
+            for (int i=0; i<items.size(); i++) {
+                rr[i] = items.get(i).getRrTime();
+            }
+            return rr;
+        } catch (SQLException ex) {
+            Log.e(TAG, "collectDataInBackground() failed", ex);
         }
-        return rr;
+        return new double[0];
     }
 
     @Override

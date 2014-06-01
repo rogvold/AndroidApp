@@ -21,7 +21,7 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.cardiomood.android.components.CustomViewPager;
-import com.cardiomood.android.db.model.HeartRateSession;
+import com.cardiomood.android.db.entity.HRSessionEntity;
 import com.cardiomood.android.fragments.monitoring.ActivityCallback;
 import com.cardiomood.android.fragments.monitoring.FragmentCallback;
 import com.cardiomood.android.fragments.monitoring.HeartRateMonitoringFragment;
@@ -63,7 +63,7 @@ public class MonitoringActivity extends ActionBarActivity implements ActionBar.T
             if (collector != null)
                 collector.setListener(new AbstractDataCollector.SimpleListener() {
                     @Override
-                    public void onDataSaved(HeartRateSession session) {
+                    public void onDataSaved(HRSessionEntity session) {
                         if (session != null && session.getId() != null) {
                             Intent intent = new Intent(MonitoringActivity.this, SessionDetailsActivity.class);
                             intent.putExtra(SessionDetailsActivity.SESSION_ID_EXTRA, session.getId());

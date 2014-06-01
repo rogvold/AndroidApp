@@ -8,13 +8,13 @@ import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 
-import com.cardiomood.android.db.dao.HeartRateSessionDAO;
-import com.cardiomood.android.db.dao.UserDAO;
-import com.cardiomood.android.db.model.HeartRateSession;
-import com.cardiomood.android.db.model.User;
+import com.cardiomood.android.db.DatabaseHelper;
+import com.cardiomood.android.db.entity.HRSessionEntity;
+import com.cardiomood.android.db.entity.UserEntity;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.commonsware.cwac.endless.EndlessAdapter;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,21 +26,22 @@ public class SessionsEndlessAdapter extends EndlessAdapter {
 
     private static final int STEP = 25;
 
-    private HeartRateSessionDAO sessionDAO;
+    private RuntimeExceptionDao<HRSessionEntity, Long> sessionDAO;
+    private RuntimeExceptionDao<UserEntity, Long> userDAO;
     private PreferenceHelper pHelper;
     private Long userId = null;
-    private final List<HeartRateSession> cachedSessions = new ArrayList<HeartRateSession>(STEP*2);
+    private final List<HRSessionEntity> cachedSessions = new ArrayList<HRSessionEntity>(STEP*2);
 
 
-    public SessionsEndlessAdapter(ListAdapter wrapped, Context context) {
+    public SessionsEndlessAdapter(ListAdapter wrapped, Context context, DatabaseHelper databaseHelper) {
         super(wrapped);
-        sessionDAO = new HeartRateSessionDAO();
+
         pHelper = new PreferenceHelper(context);
         pHelper.setPersistent(true);
-        long externalId = pHelper.getLong(ConfigurationConstants.USER_EXTERNAL_ID);
-        User u = new UserDAO().findByExternalId(externalId);
-        if (u != null)
-            userId = u.getId();
+        userId = pHelper.getLong(ConfigurationConstants.USER_ID);
+
+
+        sessionDAO = databaseHelper.getRuntimeExceptionDao(HRSessionEntity.class);
     }
 
     @Override
@@ -53,7 +54,11 @@ public class SessionsEndlessAdapter extends EndlessAdapter {
 
     @Override
     protected boolean cacheInBackground() throws Exception {
-        List<HeartRateSession> sessions =  sessionDAO.getAllSessionsOfUser(userId, STEP, getWrappedAdapter().getCount());
+        List<HRSessionEntity> sessions =  sessionDAO.queryBuilder()
+                .limit((long) STEP).offset((long) getWrappedAdapter().getCount())
+                .orderBy("date_started", false)
+                .where().eq("user_id", userId)
+                .query();
         if (sessions == null || sessions.isEmpty())
             return false;
         synchronized (cachedSessions) {
@@ -68,7 +73,7 @@ public class SessionsEndlessAdapter extends EndlessAdapter {
         ArrayAdapter a=(ArrayAdapter)getWrappedAdapter();
 
         synchronized (cachedSessions) {
-            for (HeartRateSession session: cachedSessions) {
+            for (HRSessionEntity session: cachedSessions) {
                 a.add(session);
             }
             cachedSessions.clear();

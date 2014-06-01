@@ -43,7 +43,9 @@ import com.cardiomood.android.MonitoringActivity;
 import com.cardiomood.android.R;
 import com.cardiomood.android.SessionDetailsActivity;
 import com.cardiomood.android.controls.progress.CircularProgressBar;
-import com.cardiomood.android.db.model.HeartRateSession;
+import com.cardiomood.android.db.DatabaseHelper;
+import com.cardiomood.android.db.entity.HRSessionEntity;
+import com.cardiomood.android.gps.GPSMonitor;
 import com.cardiomood.android.heartrate.AbstractDataCollector;
 import com.cardiomood.android.heartrate.CardioMoodHeartRateLeService;
 import com.cardiomood.android.heartrate.IntervalLimitDataCollector;
@@ -56,6 +58,7 @@ import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.heartrate.bluetooth.LeHRMonitor;
 import com.flurry.android.FlurryAgent;
+import com.j256.ormlite.android.apptools.OpenHelperManager;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -166,6 +169,7 @@ public class ConnectionFragment extends Fragment {
             updateView();
         }
     };
+    private DatabaseHelper databaseHelper;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -184,6 +188,9 @@ public class ConnectionFragment extends Fragment {
 
         mPrefHelper = new PreferenceHelper(getActivity().getApplicationContext());
         mPrefHelper.setPersistent(true);
+
+        GPSMonitor gpsMonitor = new GPSMonitor(getActivity());
+        gpsMonitor.start();
     }
 
     @Override
@@ -352,6 +359,11 @@ public class ConnectionFragment extends Fragment {
                     bluetoothAdapter.disable();
             }
         }
+
+        if (databaseHelper != null) {
+            OpenHelperManager.releaseHelper();
+            databaseHelper = null;
+        }
     }
 
     @Override
@@ -446,7 +458,7 @@ public class ConnectionFragment extends Fragment {
                     collector.setListener(new AbstractDataCollector.SimpleListener() {
 
                         @Override
-                        public void onDataSaved(HeartRateSession session) {
+                        public void onDataSaved(HRSessionEntity session) {
                             Activity activity = getActivity();
                             if (activity != null) {
                                 Intent intent = new Intent(activity, SessionDetailsActivity.class);
@@ -484,36 +496,36 @@ public class ConnectionFragment extends Fragment {
 
     private AbstractDataCollector createDataCollector() {
         switch (limitTypeSpinner.getSelectedItemPosition()) {
-            case 0: return new UnlimitedDataCollector(mBluetoothLeService);
+            case 0: return new UnlimitedDataCollector(mBluetoothLeService, getHelper());
             case 1:
                 switch (timeLimitSpinner.getSelectedItemPosition()) {
-                    case 0: return new TimeLimitDataCollector(mBluetoothLeService, 60*1000);
-                    case 1: return new TimeLimitDataCollector(mBluetoothLeService, 2*60*1000);
-                    case 2: return new TimeLimitDataCollector(mBluetoothLeService, 3*60*1000);
-                    case 3: return new TimeLimitDataCollector(mBluetoothLeService, 5*60*1000);
-                    case 4: return new TimeLimitDataCollector(mBluetoothLeService, 10*60*1000);
-                    case 5: return new TimeLimitDataCollector(mBluetoothLeService, 30*60*1000);
-                    case 6: return new TimeLimitDataCollector(mBluetoothLeService, 60*60*1000);
-                    case 7: return new TimeLimitDataCollector(mBluetoothLeService, 2*60*60*1000);
-                    case 8: return new TimeLimitDataCollector(mBluetoothLeService, 5*60*60*1000);
-                    case 9: return new TimeLimitDataCollector(mBluetoothLeService, 12*60*60*1000);
-                    case 10: return new TimeLimitDataCollector(mBluetoothLeService, 24*60*60*1000);
+                    case 0: return new TimeLimitDataCollector(mBluetoothLeService, getHelper(), 60*1000);
+                    case 1: return new TimeLimitDataCollector(mBluetoothLeService, getHelper(), 2*60*1000);
+                    case 2: return new TimeLimitDataCollector(mBluetoothLeService, getHelper(), 3*60*1000);
+                    case 3: return new TimeLimitDataCollector(mBluetoothLeService, getHelper(), 5*60*1000);
+                    case 4: return new TimeLimitDataCollector(mBluetoothLeService, getHelper(), 10*60*1000);
+                    case 5: return new TimeLimitDataCollector(mBluetoothLeService, getHelper(), 30*60*1000);
+                    case 6: return new TimeLimitDataCollector(mBluetoothLeService, getHelper(), 60*60*1000);
+                    case 7: return new TimeLimitDataCollector(mBluetoothLeService, getHelper(), 2*60*60*1000);
+                    case 8: return new TimeLimitDataCollector(mBluetoothLeService, getHelper(), 5*60*60*1000);
+                    case 9: return new TimeLimitDataCollector(mBluetoothLeService, getHelper(), 12*60*60*1000);
+                    case 10: return new TimeLimitDataCollector(mBluetoothLeService, getHelper(), 24*60*60*1000);
                 }
                 break;
             case 2:
                 switch (countLimitSpinner.getSelectedItemPosition()) {
-                    case 0: return new IntervalLimitDataCollector(mBluetoothLeService, 100);
-                    case 1: return new IntervalLimitDataCollector(mBluetoothLeService, 150);
-                    case 2: return new IntervalLimitDataCollector(mBluetoothLeService, 200);
-                    case 3: return new IntervalLimitDataCollector(mBluetoothLeService, 250);
-                    case 4: return new IntervalLimitDataCollector(mBluetoothLeService, 300);
-                    case 5: return new IntervalLimitDataCollector(mBluetoothLeService, 400);
-                    case 6: return new IntervalLimitDataCollector(mBluetoothLeService, 500);
-                    case 7: return new IntervalLimitDataCollector(mBluetoothLeService, 1000);
-                    case 8: return new IntervalLimitDataCollector(mBluetoothLeService, 2000);
-                    case 9: return new IntervalLimitDataCollector(mBluetoothLeService, 5000);
-                    case 10: return new IntervalLimitDataCollector(mBluetoothLeService, 10000);
-                    case 11: return new IntervalLimitDataCollector(mBluetoothLeService, 20000);
+                    case 0: return new IntervalLimitDataCollector(mBluetoothLeService, getHelper(), 100);
+                    case 1: return new IntervalLimitDataCollector(mBluetoothLeService, getHelper(), 150);
+                    case 2: return new IntervalLimitDataCollector(mBluetoothLeService, getHelper(), 200);
+                    case 3: return new IntervalLimitDataCollector(mBluetoothLeService, getHelper(), 250);
+                    case 4: return new IntervalLimitDataCollector(mBluetoothLeService, getHelper(), 300);
+                    case 5: return new IntervalLimitDataCollector(mBluetoothLeService, getHelper(), 400);
+                    case 6: return new IntervalLimitDataCollector(mBluetoothLeService, getHelper(), 500);
+                    case 7: return new IntervalLimitDataCollector(mBluetoothLeService, getHelper(), 1000);
+                    case 8: return new IntervalLimitDataCollector(mBluetoothLeService, getHelper(), 2000);
+                    case 9: return new IntervalLimitDataCollector(mBluetoothLeService, getHelper(), 5000);
+                    case 10: return new IntervalLimitDataCollector(mBluetoothLeService, getHelper(), 10000);
+                    case 11: return new IntervalLimitDataCollector(mBluetoothLeService, getHelper(), 20000);
                 }
                 break;
             case 3:
@@ -533,18 +545,26 @@ public class ConnectionFragment extends Fragment {
                 }
                 if (timeLimit > 0) {
                     if (countLimit > 0) {
-                        return new TimeAndIntervalLimitDataCollector(mBluetoothLeService, timeLimit, countLimit);
-                    } else return new TimeLimitDataCollector(mBluetoothLeService, timeLimit*1000);
+                        return new TimeAndIntervalLimitDataCollector(mBluetoothLeService, getHelper(), timeLimit, countLimit);
+                    } else return new TimeLimitDataCollector(mBluetoothLeService, getHelper(), timeLimit*1000);
                 } else {
                     if (countLimit > 0) {
-                        return new IntervalLimitDataCollector(mBluetoothLeService, countLimit);
+                        return new IntervalLimitDataCollector(mBluetoothLeService, getHelper(), countLimit);
                     } else {
-                        new UnlimitedDataCollector(mBluetoothLeService);
+                        new UnlimitedDataCollector(mBluetoothLeService, getHelper());
                     }
                 }
-            default: return new UnlimitedDataCollector(mBluetoothLeService);
+            default: return new UnlimitedDataCollector(mBluetoothLeService, getHelper());
         }
         return null;
+    }
+
+    private DatabaseHelper getHelper() {
+        if (databaseHelper == null) {
+            databaseHelper =
+                    OpenHelperManager.getHelper(getActivity(), DatabaseHelper.class);
+        }
+        return databaseHelper;
     }
 
     private boolean deviceConnected() {

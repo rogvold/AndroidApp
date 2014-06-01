@@ -1,5 +1,7 @@
 package com.cardiomood.android.heartrate;
 
+import com.cardiomood.android.db.DatabaseHelper;
+
 /**
  * Created by danon on 05.03.14.
  */
@@ -9,8 +11,8 @@ public class TimeLimitDataCollector extends AbstractDataCollector {
 
     private final double timeLimit;
 
-    public TimeLimitDataCollector(CardioMoodHeartRateLeService service, double timeLimit) {
-        super(service);
+    public TimeLimitDataCollector(CardioMoodHeartRateLeService service, DatabaseHelper helper, double timeLimit) {
+        super(service, helper);
 
         if (timeLimit <= 0)
             throw new IllegalArgumentException("Time limit must be positive.");
