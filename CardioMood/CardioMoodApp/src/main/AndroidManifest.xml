@@ -76,6 +76,10 @@
             android:name="com.cardiomood.android.heartrate.CardioMoodHeartRateLeService"
             android:enabled="true" />
 
+        <service
+            android:name="com.cardiomood.android.gps.CardioMoodGPSService"
+            android:enabled="true" />
+
         <activity
             android:name="com.cardiomood.android.FeedbackActivity"
             android:label="@string/title_activity_feedback"

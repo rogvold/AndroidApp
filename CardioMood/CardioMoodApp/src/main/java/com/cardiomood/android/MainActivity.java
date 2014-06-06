@@ -12,12 +12,16 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.cardiomood.android.components.CustomViewPager;
+import com.cardiomood.android.db.DatabaseHelper;
+import com.cardiomood.android.db.entity.UserEntity;
+import com.cardiomood.android.db.entity.UserStatus;
 import com.cardiomood.android.dialogs.AboutDialog;
 import com.cardiomood.android.dialogs.WhatsNewDialog;
 import com.cardiomood.android.fragments.ConnectionFragment;
@@ -27,10 +31,14 @@ import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.android.tools.fragments.ProfileFragment;
 import com.flurry.android.FlurryAgent;
+import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 
 import java.util.Locale;
 
 public class MainActivity extends ActionBarActivity implements ActionBar.TabListener, ConfigurationConstants {
+
+    private static final String TAG = MainActivity.class.getSimpleName();
 
     private Toast toast;
     private long lastBackPressTime = 0;
@@ -53,13 +61,14 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
      */
     CustomViewPager mViewPager;
 
+    private DatabaseHelper databaseHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mPrefHelper = new PreferenceHelper(getApplicationContext());
-        mPrefHelper.setPersistent(true);
+        mPrefHelper = new PreferenceHelper(this, true);
 
         // Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
@@ -146,6 +155,24 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         FlurryAgent.onEndSession(this);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (databaseHelper != null) {
+            OpenHelperManager.releaseHelper();
+            databaseHelper = null;
+        }
+    }
+
+    private DatabaseHelper getHelper() {
+        if (databaseHelper == null) {
+            databaseHelper =
+                    OpenHelperManager.getHelper(this, DatabaseHelper.class);
+        }
+        return databaseHelper;
+    }
+
     private void showWhatsNewDialog() {
         if (whatsNewDialogShown)
             return;
@@ -222,9 +249,17 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     private void logout() {
         mPrefHelper.putBoolean(USER_LOGGED_IN, false);
         mPrefHelper.putString(USER_EMAIL_KEY, mPrefHelper.getString(USER_EMAIL_KEY));
-        mPrefHelper.putString(USER_PASSWORD_KEY, null);
-        mPrefHelper.putString(USER_ACCESS_TOKEN_KEY, null);
-        mPrefHelper.putString(USER_EXTERNAL_ID, null);
+        mPrefHelper.remove(USER_PASSWORD_KEY);
+        mPrefHelper.remove(USER_ACCESS_TOKEN_KEY);
+        mPrefHelper.remove(USER_EXTERNAL_ID);
+        mPrefHelper.remove(USER_SEX_KEY);
+        mPrefHelper.remove(USER_ID);
+        mPrefHelper.remove(USER_WEIGHT_KEY);
+        mPrefHelper.remove(USER_HEIGHT_KEY);
+        mPrefHelper.remove(USER_PHONE_NUMBER_KEY);
+        mPrefHelper.remove(USER_FIRST_NAME_KEY);
+        mPrefHelper.remove(USER_LAST_NAME_KEY);
+        mPrefHelper.remove(USER_BIRTH_DATE_KEY);
         startActivity(new Intent(this, LoginActivity.class));
         finish();
     }
@@ -243,7 +278,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             switch (position) {
-                case 0: return new ProfileFragment();
+                case 0: return createProfileFragment();
                 case 1: return new ConnectionFragment();
                 case 2: return new HistoryFragment();
             }
@@ -268,6 +303,38 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                     return getString(R.string.title_section3).toUpperCase(l);
             }
             return null;
+        }
+
+        private ProfileFragment createProfileFragment() {
+            ProfileFragment fragment = new ProfileFragment();
+
+            fragment.setCallback(new ProfileFragment.Callback() {
+                @Override
+                public void onSave() {
+                    UserEntity user = new UserEntity();
+                    user.setId(mPrefHelper.getLong(USER_ID));
+                    user.setExternalId(mPrefHelper.getLong(USER_EXTERNAL_ID));
+                    user.setEmail(mPrefHelper.getString(USER_EMAIL_KEY));
+                    user.setPassword(CommonTools.SHA256(mPrefHelper.getString(USER_PASSWORD_KEY)));
+                    user.setFirstName(mPrefHelper.getString(USER_FIRST_NAME_KEY));
+                    user.setLastName(mPrefHelper.getString(USER_LAST_NAME_KEY));
+                    user.setBirthDate(mPrefHelper.getLong(USER_BIRTH_DATE_KEY));
+                    user.setWeight(mPrefHelper.getFloat(USER_WEIGHT_KEY));
+                    user.setHeight(mPrefHelper.getFloat(USER_HEIGHT_KEY));
+                    user.setPhoneNumber(mPrefHelper.getString(USER_PHONE_NUMBER_KEY));
+                    user.setGender(mPrefHelper.getString(USER_SEX_KEY, "UNSPECIFIED"));
+                    user.setLastModified(System.currentTimeMillis());
+                    user.setStatus(UserStatus.NEW);
+
+                    // save user data locally
+                    RuntimeExceptionDao<UserEntity, Long> userDAO = getHelper().getRuntimeExceptionDao(UserEntity.class);
+                    userDAO.update(user);
+
+                    Log.w(TAG, "User has been updated: user = " + user);
+                }
+            });
+
+            return fragment;
         }
     }
 

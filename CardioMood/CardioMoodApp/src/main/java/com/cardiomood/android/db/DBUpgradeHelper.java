@@ -6,8 +6,15 @@ import android.util.Log;
 import com.cardiomood.android.db.entity.GPSLocationEntity;
 import com.cardiomood.android.db.entity.GPSSessionEntity;
 import com.cardiomood.android.db.entity.SessionStatus;
+import com.cardiomood.android.db.entity.UserEntity;
+import com.cardiomood.android.db.entity.UserStatus;
+import com.cardiomood.android.tools.CommonTools;
+import com.cardiomood.android.tools.PreferenceHelper;
+import com.cardiomood.android.tools.config.ConfigurationConstants;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.table.TableUtils;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,10 +27,12 @@ public class DBUpgradeHelper {
 
     private SQLiteDatabase database;
     private DatabaseHelper databaseHelper;
+    private PreferenceHelper preferenceHelper;
 
     public DBUpgradeHelper(final DatabaseHelper databaseHelper) {
         this.databaseHelper = databaseHelper;
-        this.database = databaseHelper.getWritableDatabase();
+        this.database = databaseHelper.getDatabase();
+        this.preferenceHelper = new PreferenceHelper(databaseHelper.getmContext(), true);
 
         addUpgrader(19, 21, new DBUpgrader.Callback() {
 
@@ -122,11 +131,115 @@ public class DBUpgradeHelper {
             @Override
             public void onUpgrade(SQLiteDatabase db) {
                 try {
-                    // update SESSIONS s set s.end_date = s.start_date + (select sum(rrTime) from HEART_RATE_DATA where session_id = s._id);
                     TableUtils.createTable(databaseHelper.getConnectionSource(), GPSSessionEntity.class);
                     TableUtils.createTable(databaseHelper.getConnectionSource(), GPSLocationEntity.class);
                 } catch (Exception e) {
                     Log.d(TAG, "onUpgrade() exception", e);
+                }
+
+                RuntimeExceptionDao<UserEntity, Long> dao = databaseHelper.getRuntimeExceptionDao(UserEntity.class);
+                String SQL = null;
+                try {
+                    // +field users.first_name
+                    SQL = "ALTER TABLE " + HeartRateDBContract.Users.TABLE_NAME
+                            + " ADD COLUMN " + "first_name" + " TEXT";
+                    dao.executeRawNoArgs(SQL);
+
+                    // +field users.last_name
+                    SQL = "ALTER TABLE " + HeartRateDBContract.Users.TABLE_NAME
+                            + " ADD COLUMN " + "last_name" + " TEXT";
+                    dao.executeRawNoArgs(SQL);
+
+                    // +field users.weight
+                    SQL = "ALTER TABLE " + HeartRateDBContract.Users.TABLE_NAME
+                            + " ADD COLUMN " + "weight" + " REAL";
+                    dao.executeRawNoArgs(SQL);
+
+                    // +field users.height
+                    SQL = "ALTER TABLE " + HeartRateDBContract.Users.TABLE_NAME
+                            + " ADD COLUMN " + "height" + " REAL";
+                    dao.executeRawNoArgs(SQL);
+
+                    // +field users.phone_number
+                    SQL = "ALTER TABLE " + HeartRateDBContract.Users.TABLE_NAME
+                            + " ADD COLUMN " + "phone_number" + " TEXT";
+                    dao.executeRawNoArgs(SQL);
+
+                    // +field users.birth_date
+                    SQL = "ALTER TABLE " + HeartRateDBContract.Users.TABLE_NAME
+                            + " ADD COLUMN " + "birth_date" + " INTEGER";
+                    dao.executeRawNoArgs(SQL);
+
+                    // +field users.last_modified
+                    SQL = "ALTER TABLE " + HeartRateDBContract.Users.TABLE_NAME
+                            + " ADD COLUMN " + "last_modified" + " INTEGER";
+                    dao.executeRawNoArgs(SQL);
+
+                    // +field users.last_modified
+                    SQL = "ALTER TABLE " + HeartRateDBContract.Users.TABLE_NAME
+                            + " ADD COLUMN " + "gender" + " TEXT";
+                    dao.executeRawNoArgs(SQL);
+
+                    if (preferenceHelper.getBoolean(ConfigurationConstants.USER_LOGGED_IN)) {
+                        // try to setup user
+                        UserEntity user = null;
+
+                        if (preferenceHelper.getLong(ConfigurationConstants.USER_EXTERNAL_ID, -1L) >= 0
+                                && !preferenceHelper.getString(ConfigurationConstants.USER_EMAIL_KEY, "").isEmpty()
+                                && !preferenceHelper.getString(ConfigurationConstants.USER_PASSWORD_KEY, "").isEmpty()) {
+
+                            String email = preferenceHelper.getString(ConfigurationConstants.USER_EMAIL_KEY);
+                            String password = preferenceHelper.getString(ConfigurationConstants.USER_PASSWORD_KEY);
+                            long externalId = preferenceHelper.getLong(ConfigurationConstants.USER_EXTERNAL_ID);
+                            long id = preferenceHelper.getLong(ConfigurationConstants.USER_ID, 0L);
+                            try {
+                                List<UserEntity> users = dao.queryBuilder()
+                                        .where().eq("email", email).and().eq("password", CommonTools.SHA256(password)).query();
+                                if (users.size() == 1) {
+                                    user = users.get(0);
+                                }
+                            } catch (SQLException ex) {
+                                Log.w(TAG, "onUpgrade()", ex);
+                            }
+
+                            if (user == null) {
+                                // try to find by EXTERNAL_ID
+                                List<UserEntity> users = dao.queryForEq("external_id", externalId);
+                                if (users.size() == 1) {
+                                    user = users.get(0);
+                                }
+                            }
+
+                            if (id >= 0) {
+                                user = dao.queryForId(id);
+                            }
+
+                            if (user == null) {
+                                // user wasn't found => create one
+                                user = new UserEntity(externalId, email, UserStatus.NEW);
+                                user.setPassword(password);
+                            }
+
+                            user.setId(preferenceHelper.getLong(ConfigurationConstants.USER_ID));
+                            user.setExternalId(preferenceHelper.getLong(ConfigurationConstants.USER_EXTERNAL_ID));
+                            user.setEmail(preferenceHelper.getString(ConfigurationConstants.USER_EMAIL_KEY));
+                            user.setPassword(CommonTools.SHA256(preferenceHelper.getString(ConfigurationConstants.USER_PASSWORD_KEY)));
+                            user.setFirstName(preferenceHelper.getString(ConfigurationConstants.USER_FIRST_NAME_KEY));
+                            user.setLastName(preferenceHelper.getString(ConfigurationConstants.USER_LAST_NAME_KEY));
+                            user.setBirthDate(preferenceHelper.getLong(ConfigurationConstants.USER_BIRTH_DATE_KEY));
+                            user.setWeight(preferenceHelper.getFloat(ConfigurationConstants.USER_WEIGHT_KEY));
+                            user.setHeight(preferenceHelper.getFloat(ConfigurationConstants.USER_HEIGHT_KEY));
+                            user.setPhoneNumber(preferenceHelper.getString(ConfigurationConstants.USER_PHONE_NUMBER_KEY));
+                            user.setGender(preferenceHelper.getString(ConfigurationConstants.USER_SEX_KEY, "UNSPECIFIED"));
+                            user.setLastModified(System.currentTimeMillis());
+                            user.setStatus(UserStatus.NEW);
+
+                            dao.createOrUpdate(user);
+                        }
+
+                    }
+                } catch (Exception e) {
+                    Log.d(TAG, "onUpgrade() exception when executing SQL: '" + SQL + "'", e);
                 }
             }
         });

@@ -30,6 +30,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper implements HeartRate
 
     private Context mContext;
     private PreferenceHelper pHelper;
+    private SQLiteDatabase database;
 
     public DatabaseHelper(Context context) {
         super(context, HeartRateDBContract.DATABASE_NAME, null, DATABASE_VERSION);
@@ -49,6 +50,13 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper implements HeartRate
             }
         }
     }
+
+    @Override
+    public void onOpen(SQLiteDatabase db) {
+        super.onOpen(db);
+        this.database = db;
+    }
+
 
     @Override
     public void onCreate(SQLiteDatabase database, ConnectionSource connectionSource) {
@@ -78,4 +86,13 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper implements HeartRate
         }
     }
 
+    public SQLiteDatabase getDatabase() {
+        if (database != null && database.isOpen()) {
+            return database;
+        } else return null;
+    }
+
+    public Context getmContext() {
+        return mContext;
+    }
 }

@@ -1,5 +1,7 @@
 package com.cardiomood.data.json;
 
+import com.google.gson.Gson;
+
 import java.io.Serializable;
 
 /**
@@ -8,6 +10,8 @@ import java.io.Serializable;
 public class UserProfile implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    private static final Gson GSON = new Gson();
+
     private Long id;
     private String firstName;
     private String lastName;
@@ -16,6 +20,7 @@ public class UserProfile implements Serializable {
     private UserStatusEnum userStatus;
     private Long registrationDate;
     private Long lastLoginDate;
+    private Long lastModificationDate;
 
     public AccountStatusEnum getAccountStatus() {
         return accountStatus;
@@ -79,5 +84,18 @@ public class UserProfile implements Serializable {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getLastModificationDate() {
+        return lastModificationDate;
+    }
+
+    public void setLastModificationDate(Long lastModificationDate) {
+        this.lastModificationDate = lastModificationDate;
+    }
+
+    @Override
+    public String toString() {
+        return GSON.toJson(this);
     }
 }

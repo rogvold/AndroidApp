@@ -23,6 +23,22 @@ public class UserEntity implements Serializable {
     private String password;
     @DatabaseField(columnName = "status")
     private UserStatus status;
+    @DatabaseField(columnName = "first_name")
+    private String firstName;
+    @DatabaseField(columnName = "last_name")
+    private String lastName;
+    @DatabaseField(columnName = "weight")
+    private Float weight;
+    @DatabaseField(columnName = "height")
+    private Float height;
+    @DatabaseField(columnName = "birth_date")
+    private Long birthDate;
+    @DatabaseField(columnName = "phone_number")
+    private String phoneNumber;
+    @DatabaseField(columnName = "gender")
+    private String gender;
+    @DatabaseField(columnName = "last_modified")
+    private long lastModified;
 
     public UserEntity() {
         status = UserStatus.NEW;
@@ -74,12 +90,86 @@ public class UserEntity implements Serializable {
         this.status = status;
     }
 
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public Float getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Float weight) {
+        this.weight = weight;
+    }
+
+    public Float getHeight() {
+        return height;
+    }
+
+    public void setHeight(Float height) {
+        this.height = height;
+    }
+
+    public Long getBirthDate() {
+        return birthDate;
+    }
+
+    public void setBirthDate(Long birthDate) {
+        this.birthDate = birthDate;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public long getLastModified() {
+        return lastModified;
+    }
+
+    public void setLastModified(long lastModified) {
+        this.lastModified = lastModified;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
     @Override
     public String toString() {
         return "UserEntity{" +
                 "id=" + id +
                 ", externalId=" + externalId +
                 ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", status=" + status +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", weight=" + weight +
+                ", height=" + height +
+                ", birthDate=" + birthDate +
+                ", phoneNumber='" + phoneNumber + '\'' +
+                ", gender='" + gender + '\'' +
+                ", lastModified=" + lastModified +
                 '}';
     }
 }

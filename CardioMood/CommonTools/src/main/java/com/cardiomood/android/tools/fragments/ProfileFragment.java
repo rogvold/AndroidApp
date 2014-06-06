@@ -4,11 +4,11 @@ import android.app.DatePickerDialog;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -31,7 +31,7 @@ import java.util.Date;
  * Date: 15.06.13
  * Time: 18:36
  */
-public class ProfileFragment extends Fragment implements View.OnKeyListener {
+public class ProfileFragment extends Fragment implements TextWatcher {
 
     private static final String TAG = ProfileFragment.class.getSimpleName();
     private static final DateFormat DATE_FORMAT = SimpleDateFormat.getDateInstance(DateFormat.SHORT);
@@ -71,6 +71,8 @@ public class ProfileFragment extends Fragment implements View.OnKeyListener {
     private TextView heightMinorUnitsView;
 
     private Callback callback;
+    private boolean modified = false;
+    private boolean initialized = false;
 
     private final Calendar myCalendar = Calendar.getInstance();
 
@@ -82,6 +84,8 @@ public class ProfileFragment extends Fragment implements View.OnKeyListener {
             myCalendar.set(Calendar.MONTH, monthOfYear);
             myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
             birthdayView.setText(DATE_FORMAT.format(myCalendar.getTime()));
+            if (initialized)
+                modified = true;
             save();
         }
 
@@ -92,46 +96,19 @@ public class ProfileFragment extends Fragment implements View.OnKeyListener {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
-        prefHelper = new PreferenceHelper(getActivity().getApplicationContext(), true);
+        prefHelper = new PreferenceHelper(getActivity(), true);
+        initialized = false;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        v.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                save();
-                return false;
-            }
-        });
-
         emailView = (EditText) v.findViewById(R.id.editTextEmail);
-        emailView.setOnKeyListener(this);
-
         firstNameView = (EditText) v.findViewById(R.id.editTextFirstName);
-        firstNameView.setOnKeyListener(this);
-
         lastNameView = (EditText) v.findViewById(R.id.editTextLastName);
-        lastNameView.setOnKeyListener(this);
-
         phoneNumberView = (EditText) v.findViewById(R.id.editTextPhoneNumber);
-        phoneNumberView.setOnKeyListener(this);
-
         genderView = (Spinner) v.findViewById(R.id.gender);
-        genderView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                save();
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                save();
-            }
-        });
-
         birthdayView = (EditText) v.findViewById(R.id.birth_date);
         birthdayView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -158,16 +135,9 @@ public class ProfileFragment extends Fragment implements View.OnKeyListener {
         });
 
         weightMajorView = (EditText) v.findViewById(R.id.weight_major);
-        weightMajorView.setOnKeyListener(this);
-
         weightMinorView = (EditText) v.findViewById(R.id.weight_minor);
-        weightMinorView.setOnKeyListener(this);
-
         heightMajorView = (EditText) v.findViewById(R.id.height_major);
-        heightMajorView.setOnKeyListener(this);
-
         heightMinorView = (EditText) v.findViewById(R.id.height_minor);
-        heightMinorView.setOnKeyListener(this);
 
         weightMajorUnitsView = (TextView) v.findViewById(R.id.weight_major_units);
         weightMinorUnitsView = (TextView) v.findViewById(R.id.weight_minor_units);
@@ -180,6 +150,9 @@ public class ProfileFragment extends Fragment implements View.OnKeyListener {
     @Override
     public void onResume() {
         super.onResume();
+        initialized = false;
+        removeListeners();
+
         // refresh hints (due to possible settings modifications)
         final String unitSystem = prefHelper.getString(PREFERRED_MEASUREMENT_SYSTEM, "METRIC");
         if ("IMPERIAL".equalsIgnoreCase(unitSystem)) {
@@ -254,12 +227,56 @@ public class ProfileFragment extends Fragment implements View.OnKeyListener {
                 heightMinorView.setText(null);
             }
         }
+        modified = false;
+        initialized = true;
+        restoreListeners();
+    }
+
+    private void restoreListeners() {
+        emailView.addTextChangedListener(this);
+        firstNameView.addTextChangedListener(this);
+        lastNameView.addTextChangedListener(this);
+        phoneNumberView.addTextChangedListener(this);
+        weightMajorView.addTextChangedListener(this);
+        weightMinorView.addTextChangedListener(this);
+        heightMajorView.addTextChangedListener(this);
+        heightMinorView.addTextChangedListener(this);
+        birthdayView.addTextChangedListener(this);
+        genderView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (initialized)
+                    modified = true;
+                save();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                if (initialized)
+                    modified = true;
+                save();
+            }
+        });
+    }
+
+    private void removeListeners() {
+        emailView.removeTextChangedListener(this);
+        firstNameView.removeTextChangedListener(this);
+        lastNameView.removeTextChangedListener(this);
+        phoneNumberView.removeTextChangedListener(this);
+        weightMajorView.removeTextChangedListener(this);
+        weightMinorView.removeTextChangedListener(this);
+        heightMajorView.removeTextChangedListener(this);
+        heightMinorView.removeTextChangedListener(this);
+        birthdayView.removeTextChangedListener(this);
+        genderView.setOnItemSelectedListener(null);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        save();
+        if (modified)
+            save();
     }
 
     @Override
@@ -268,6 +285,8 @@ public class ProfileFragment extends Fragment implements View.OnKeyListener {
     }
 
     public void save() {
+        if (!initialized || !modified)
+            return;
         try {
             final String unitSystem = prefHelper.getString(PREFERRED_MEASUREMENT_SYSTEM, "METRIC");
 
@@ -331,6 +350,8 @@ public class ProfileFragment extends Fragment implements View.OnKeyListener {
             if (!TextUtils.isEmpty(birthdayView.getText().toString()))
                 prefHelper.putLong(USER_BIRTH_DATE_KEY, DATE_FORMAT.parse(birthdayView.getText().toString()).getTime());
             else prefHelper.remove(USER_BIRTH_DATE_KEY);
+
+            modified = false;
         } catch (Exception ex) {
             Log.w(TAG, "save() failed with exception", ex);
         }
@@ -345,18 +366,30 @@ public class ProfileFragment extends Fragment implements View.OnKeyListener {
 
     @Override
     public void onDetach() {
-        save();
+        if (modified)
+            save();
         super.onDetach();
-    }
-
-    @Override
-    public boolean onKey(View v, int keyCode, KeyEvent event) {
-        save();
-        return false;
     }
 
     public void setCallback(Callback callback) {
         this.callback = callback;
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+    }
+
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+    }
+
+    @Override
+    public void afterTextChanged(Editable s) {
+        if (initialized) {
+            modified = true;
+        }
+        save();
     }
 
     public static interface Callback {

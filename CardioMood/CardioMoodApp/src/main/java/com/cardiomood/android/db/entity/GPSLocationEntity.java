@@ -1,10 +1,12 @@
 package com.cardiomood.android.db.entity;
 
 import com.cardiomood.android.db.dao.GPSLocationDAO;
+import com.cardiomood.data.json.JsonGPS;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Created by danon on 27.05.2014.
@@ -31,7 +33,11 @@ public class GPSLocationEntity implements Serializable {
     @DatabaseField(columnName = "accuracy")
     private Double accuracy;
 
+    @DatabaseField(canBeNull = false, columnName = "time_stamp")
+    private Date timestamp;
+
     public GPSLocationEntity() {
+        timestamp = new Date();
     }
 
     public Long getId() {
@@ -96,5 +102,24 @@ public class GPSLocationEntity implements Serializable {
 
     public void setBearing(Double bearing) {
         this.bearing = bearing;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public JsonGPS toJsonGPS() {
+        JsonGPS json = new JsonGPS();
+        json.setLat(lat);
+        json.setLon(lon);
+        json.setAlt(alt);
+        json.setSpeed(speed);
+        json.setBearing(bearing);
+        json.setAccuracy(accuracy);
+        return json;
     }
 }

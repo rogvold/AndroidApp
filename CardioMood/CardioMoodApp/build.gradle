@@ -2,49 +2,46 @@ apply plugin: 'android'
 
 android {
     compileSdkVersion 19
-    buildToolsVersion '19.0.0'
-
+    buildToolsVersion '19.1.0'
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 19
         versionCode 133
-        versionName "1.3.3"
+        versionName '1.3.3'
     }
-
     lintOptions {
         abortOnError false
     }
-
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES'
         exclude 'META-INF/NOTICE'
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/ASL2.0'
     }
-
     signingConfigs {
-
         release {
             storeFile file("${project(':').projectDir}/android.key")
-            storePassword "57103261479"
-            keyAlias "myreleasekey"
-            keyPassword "5710326"
+            storePassword '57103261479'
+            keyAlias 'myreleasekey'
+            keyPassword '5710326'
         }
-
     }
-
     buildTypes {
         debug {
             runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
-
         release {
-            runProguard true
+            runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             signingConfig signingConfigs.release
+            debuggable true
+            jniDebugBuild true
         }
+    }
+    productFlavors {
     }
 }
 
@@ -55,7 +52,6 @@ dependencies {
     compile 'commons-io:commons-io:2.4@jar'
     compile 'com.android.support:support-v13:+'
     compile 'com.j256.ormlite:ormlite-android:4.48+'
-    
     compile fileTree(dir: 'libs', include: ['*.jar', '*.aar'])
     compile project(':HeartRate')
     compile project(':CommonTools')

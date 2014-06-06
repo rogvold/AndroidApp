@@ -1,9 +1,11 @@
 <component name="libraryTable">
   <library name="codegist-crest-2.0.0-RC1">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/CardioMoodApp/build/exploded-aar/CardioMood/ClientServerInteraction/unspecified/libs/codegist-crest-2.0.0-RC1.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.codegist.crest/codegist-crest/2.0.0-RC1/f76f93c3eca1a572ed0acf4750fe20159d1b4044/codegist-crest-2.0.0-RC1.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.codegist.crest/codegist-crest/2.0.0-RC1/701c245079fbe23c15784822e2a17b4f636125b1/codegist-crest-2.0.0-RC1-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>

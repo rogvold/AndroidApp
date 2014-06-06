@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="jackson-mapper-asl-1.9.0">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/CardioSportApp/libs/jackson-mapper-asl-1.9.0.jar!/" />
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.codehaus.jackson/jackson-mapper-asl/1.9.0/74828722eb1127057a9522dd6a7a8e208e82b3e7/jackson-mapper-asl-1.9.0.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

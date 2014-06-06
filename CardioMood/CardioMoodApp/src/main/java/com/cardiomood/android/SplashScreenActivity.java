@@ -60,7 +60,7 @@ public class SplashScreenActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        prefHelper = new PreferenceHelper(getApplicationContext(), true);
+        prefHelper = new PreferenceHelper(this, true);
         if (prefHelper.getBoolean(ConfigurationConstants.DISABLE_SPLASH_SCREEN)) {
             openNextActivity();
             return;
@@ -138,7 +138,7 @@ public class SplashScreenActivity extends Activity {
     }
 
     private void openNextActivity() {
-        startActivity(new Intent(this, MainActivity.class));
+        startActivity(new Intent(this, LoginActivity.class));
         finish();
     }
 
@@ -200,8 +200,7 @@ public class SplashScreenActivity extends Activity {
                 @Override
                 protected void onPostExecute(Object o) {
                     Log.e("SplashScreenActivity", "Starting MainActivity");
-                    startActivity(new Intent(SplashScreenActivity.this, LoginActivity.class));
-                    finish();
+                    openNextActivity();
                 }
             };
             startMainActivityTask.execute(null);

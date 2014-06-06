@@ -31,25 +31,33 @@ public interface CardioMoodDataService {
     @POST @Path("auth/loginByEmailAndPassword")
     JSONResponse<ApiToken> login(@FormParam("email") String email, @FormParam("password") String password);
 
-    @POST @Path("cardioSession/createCardioSession")
-    JSONResponse<CardioSession> createSession(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serverId") Long serverId);
+    @POST @Path("v2/CardioMoodSession/createCardioMoodSession")
+    JSONResponse<CardioSession> createSession(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serverId") Long serverId,  @FormParam("className") String className);
 
-    @POST @Path("cardioSession/getCardioSessionsOfUser")
+    @POST @Path("v2/CardioMoodSession/getCardioMoodSessionsOfUser")
     JSONResponse<List<CardioSession>> getSessionsOfUser(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serverId") Long serverId);
 
-    @POST @Path("cardioSession/updateCardioSessionInfo")
+    @POST @Path("v2/CardioMoodSession/updateCardioMoodSessionInfo")
     JSONResponse<CardioSession> updateSessionInfo(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("sessionId") Long sessionId, @FormParam("name") String name, @FormParam("description") String description);
 
-    @POST @Path("cardioSession/getCardioSessionData")
+    @POST @Path("v2/CardioMoodSession/getCardioMoodSessionData")
     JSONResponse<CardioSessionWithData> getSessionData(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("sessionId") Long sessionId);
 
-    @POST @Path("cardioSession/deleteCardioSession")
+    @POST @Path("v2/CardioMoodSession/deleteCardioMoodSession")
     JSONResponse<String> deleteSession(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("sessionId") Long sessionId);
 
-    @POST @Path("cardioSession/appendDataToCardioSession")
+    @POST @Path("v2/CardioMoodSession/appendDataToCardioMoodSession")
     JSONResponse<String> appendDataToSession(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serializedData") String serializedData);
 
-    @POST @Path("cardioSession/rewriteCardioSessionData")
+    @POST @Path("v2/CardioMoodSession/rewriteCardioMoodSessionData")
     JSONResponse<String> rewriteCardioSessionData(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serializedData") String serializedData);
 
+    @POST @Path("v2/CardioMoodSession/finishCardioMoodSession")
+    JSONResponse<String> finishSession(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("sessionId") Long sessionId, @FormParam("endTimestamp") Long endTimestamp);
+
+    @POST @Path("auth/updateUserInfo")
+    JSONResponse<String> updateUserInfo(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("firstName") String firstName, @FormParam("lastName") String lastName);
+
+    @POST @Path("auth/updateUserProfile")
+    JSONResponse<String> updateUserProfile(@FormParam("token") String token, @FormParam("serializedUser") String serializedUser);
 }

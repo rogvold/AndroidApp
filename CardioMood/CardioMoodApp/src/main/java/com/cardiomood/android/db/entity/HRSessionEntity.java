@@ -1,6 +1,7 @@
 package com.cardiomood.android.db.entity;
 
 import com.cardiomood.android.db.dao.HRSessionDAO;
+import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -27,9 +28,9 @@ public class HRSessionEntity implements Serializable {
     private String description;
     @DatabaseField(columnName = "status")
     private SessionStatus status;
-    @DatabaseField(columnName = "date_started")
+    @DatabaseField(columnName = "date_started", dataType = DataType.DATE_LONG)
     private Date dateStarted;
-    @DatabaseField(columnName = "date_ended")
+    @DatabaseField(columnName = "date_ended", dataType = DataType.DATE_LONG)
     private Date dateEnded;
 
     public HRSessionEntity() {

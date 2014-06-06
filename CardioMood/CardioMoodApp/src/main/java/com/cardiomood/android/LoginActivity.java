@@ -83,8 +83,7 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
         super.onCreate(savedInstanceState);
         ParseAnalytics.trackAppOpened(getIntent());
 
-        prefHelper = new PreferenceHelper(getApplicationContext());
-        prefHelper.setPersistent(true);
+        prefHelper = new PreferenceHelper(this, true);
 
         //loadConfigs();
 
@@ -334,6 +333,7 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
 
                 if (users.size() == 1) {
                     UserEntity user = users.get(0);
+                    Log.w(TAG, "attemptLogin(): user found locally: user = " + user);
                     performLogIn(new ApiToken(user.getExternalId(), "0", System.currentTimeMillis()));
                     startMainActivity();
                     return;
@@ -429,9 +429,10 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
 
             @Override
             protected Object doInBackground(Object[] params) {
+                UserEntity user = null;
                 try {
                     UserDAO userDAO = getHelper().getDao(UserEntity.class);
-                    UserEntity user = userDAO.findByExternalId(userId);
+                    user = userDAO.findByExternalId(userId);
                     if (user == null) {
                         user = new UserEntity(userId, email, UserStatus.NEW);
                         user.setPassword(CommonTools.SHA256(password));
@@ -455,11 +456,27 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
                         user.setPassword(CommonTools.SHA256(password));
                         userDAO.update(user);
                     }
-                    prefHelper.putLong(USER_ID, user.getId());
                 } catch (Exception ex) {
                     // suppress this
                 }
-                return null;
+                return user;
+            }
+
+            @Override
+            protected void onPostExecute(Object o) {
+                Log.w(TAG, "onPostExecute() o = " + o);
+                if (o == null) {
+                    return;
+                }
+                UserEntity user = (UserEntity) o;
+                prefHelper.putLong(USER_ID, user.getId());
+                prefHelper.putString(USER_FIRST_NAME_KEY, user.getFirstName());
+                prefHelper.putString(USER_LAST_NAME_KEY, user.getLastName());
+                prefHelper.putLong(USER_BIRTH_DATE_KEY, user.getBirthDate());
+                prefHelper.putString(USER_PHONE_NUMBER_KEY, user.getPhoneNumber());
+                prefHelper.putString(USER_SEX_KEY, user.getGender());
+                prefHelper.putFloat(USER_WEIGHT_KEY, user.getWeight());
+                prefHelper.putFloat(USER_HEIGHT_KEY, user.getHeight());
             }
         }.execute();
 

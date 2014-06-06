@@ -1,6 +1,7 @@
 package com.cardiomood.android.db.entity;
 
 import com.cardiomood.android.db.dao.RRIntervalDAO;
+import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -21,7 +22,7 @@ public class RRIntervalEntity implements Serializable {
     private int heartBeatsPerMinute;
     @DatabaseField(columnName = "rr_time")
     private double rrTime;
-    @DatabaseField(columnName = "time_stamp")
+    @DatabaseField(columnName = "time_stamp", dataType = DataType.DATE_LONG)
     private Date timeStamp;
 
     public RRIntervalEntity() {

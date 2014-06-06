@@ -45,7 +45,8 @@ import com.cardiomood.android.SessionDetailsActivity;
 import com.cardiomood.android.controls.progress.CircularProgressBar;
 import com.cardiomood.android.db.DatabaseHelper;
 import com.cardiomood.android.db.entity.HRSessionEntity;
-import com.cardiomood.android.gps.GPSMonitor;
+import com.cardiomood.android.gps.CardioMoodGPSService;
+import com.cardiomood.android.gps.GPSDataCollector;
 import com.cardiomood.android.heartrate.AbstractDataCollector;
 import com.cardiomood.android.heartrate.CardioMoodHeartRateLeService;
 import com.cardiomood.android.heartrate.IntervalLimitDataCollector;
@@ -110,12 +111,14 @@ public class ConnectionFragment extends Fragment {
 
     // Service registration
     private boolean receiverRegistered = false;
-    private boolean serviceBound = false;
+    private boolean hrServiceBound = false;
+    private boolean gpsServiceBound = false;
 
     private CardioMoodHeartRateLeService mBluetoothLeService;
+    private CardioMoodGPSService mGPSService;
 
     // Code to manage Service lifecycle.
-    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+    private final ServiceConnection mHRServiceConnection = new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
@@ -126,6 +129,19 @@ public class ConnectionFragment extends Fragment {
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
             mBluetoothLeService = null;
+        }
+    };
+
+    private final ServiceConnection mGPSServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mGPSService = ((CardioMoodGPSService.LocalBinder) service).getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mGPSService = null;
         }
     };
 
@@ -178,10 +194,16 @@ public class ConnectionFragment extends Fragment {
 
         mHandler = new Handler();
 
-        if (! serviceBound) {
+        if (!gpsServiceBound) {
+            Intent gpsServiceIntent = new Intent(getActivity(), CardioMoodGPSService.class);
+            getActivity().bindService(gpsServiceIntent, mGPSServiceConnection, Activity.BIND_AUTO_CREATE);
+            gpsServiceBound = true;
+        }
+
+        if (!hrServiceBound) {
             Intent gattServiceIntent = new Intent(getActivity(), CardioMoodHeartRateLeService.class);
-            getActivity().bindService(gattServiceIntent, mServiceConnection, Activity.BIND_AUTO_CREATE);
-            serviceBound = true;
+            getActivity().bindService(gattServiceIntent, mHRServiceConnection, Activity.BIND_AUTO_CREATE);
+            hrServiceBound = true;
         }
 
         setHasOptionsMenu(true);
@@ -189,8 +211,6 @@ public class ConnectionFragment extends Fragment {
         mPrefHelper = new PreferenceHelper(getActivity().getApplicationContext());
         mPrefHelper.setPersistent(true);
 
-        GPSMonitor gpsMonitor = new GPSMonitor(getActivity());
-        gpsMonitor.start();
     }
 
     @Override
@@ -346,9 +366,14 @@ public class ConnectionFragment extends Fragment {
 
         performDisconnect();
 
-        if (serviceBound) {
-            serviceBound = false;
-            getActivity().unbindService(mServiceConnection);
+        if (hrServiceBound) {
+            hrServiceBound = false;
+            getActivity().unbindService(mHRServiceConnection);
+        }
+
+        if (gpsServiceBound) {
+            gpsServiceBound = false;
+            getActivity().unbindService(mGPSServiceConnection);
         }
 
         if (disableBluetoothOnClose) {
@@ -450,6 +475,10 @@ public class ConnectionFragment extends Fragment {
                     return;
                 }
 
+                if (mGPSService != null) {
+                    mGPSService.setDataCollector(new GPSDataCollector(mGPSService, getHelper()));
+                }
+
                 AbstractDataCollector collector = createDataCollector();
                 if (collector != null && startImmediately.isChecked()) {
                     collector.startCollecting();
@@ -458,7 +487,15 @@ public class ConnectionFragment extends Fragment {
                     collector.setListener(new AbstractDataCollector.SimpleListener() {
 
                         @Override
+                        public void onStart() {
+                            if (mGPSService != null)
+                                mGPSService.start();
+                        }
+
+                        @Override
                         public void onDataSaved(HRSessionEntity session) {
+                            if (mGPSService != null)
+                                mGPSService.close();
                             Activity activity = getActivity();
                             if (activity != null) {
                                 Intent intent = new Intent(activity, SessionDetailsActivity.class);
@@ -491,6 +528,9 @@ public class ConnectionFragment extends Fragment {
             } else {
                 collector.stopCollecting();
             }
+        }
+        if (mGPSService != null) {
+            mGPSService.close();
         }
     }
 
@@ -581,7 +621,7 @@ public class ConnectionFragment extends Fragment {
             @Override
             public void run() {
                 getActivity().invalidateOptionsMenu();
-                if (serviceBound && deviceConnected()) {
+                if (hrServiceBound && deviceConnected()) {
                     AbstractDataCollector collector = (AbstractDataCollector) mBluetoothLeService.getDataCollector();
                     if (collector == null) {
                         measurementProgress.setProgress(0);

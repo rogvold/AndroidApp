@@ -33,9 +33,13 @@
 
 -keep class com.cardiomood.data.** { *; }
 
+-keep class com.cardiomood.android.db.** { *; }
+
 -keep class android.bluetooth.** { *; }
 
 -keep class com.motorola.** { *; }
+
+-keep class com.j256.ormlite.** { *; }
 
 -optimizationpasses 5
 -dontusemixedcaseclassnames

@@ -1,6 +1,5 @@
 package com.cardiomood.android.gps;
 
-import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
@@ -23,22 +22,23 @@ public class GPSMonitor implements ConfigurationConstants {
     private static final String TAG = GPSMonitor.class.getSimpleName();
 
     private final ConfigurationManager config = ConfigurationManager.getInstance();
-    private final Activity activity;
+    private final Context context;
     private final LocationManager locationManager;
     private LocationListener listener;
-    private boolean collecting = false;
+    private boolean running = false;
 
     private Location currentLocation = null;
+    private long currentLocationTimestamp = 0;
     private final LocationListener _listener = new Listener();
 
-    public GPSMonitor(Activity activity) {
-        this(activity, null);
+    public GPSMonitor(Context context) {
+        this(context, null);
     }
 
-    public GPSMonitor(Activity activity, LocationListener listener) {
+    public GPSMonitor(Context context, LocationListener listener) {
         this.listener = listener;
-        this.activity = activity;
-        locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
+        this.context = context;
+        locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
     }
 
     public boolean isGPSEnabled() {
@@ -49,8 +49,8 @@ public class GPSMonitor implements ConfigurationConstants {
         return locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
     }
 
-    public Activity getActivity() {
-        return activity;
+    public Context getContext() {
+        return context;
     }
 
     public Location getCurrentLocation() {
@@ -65,12 +65,16 @@ public class GPSMonitor implements ConfigurationConstants {
         this.listener = listener;
     }
 
-    public boolean isCollecting() {
-        return collecting;
+    public boolean isRunning() {
+        return running;
+    }
+
+    public long getCurrentLocationTimestamp() {
+        return currentLocationTimestamp;
     }
 
     public void start() {
-        if (collecting)
+        if (running)
             return;
         if (isGPSEnabled()) {
             locationManager.requestLocationUpdates(
@@ -79,15 +83,15 @@ public class GPSMonitor implements ConfigurationConstants {
                     config.getFloat(GPS_UPDATE_DISTANCE, 5.0f),
                     _listener
             );
-            collecting = true;
+            running = true;
         } else {
             stop();
-            Toast.makeText(activity, "Please, allow access to GPS location provider.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Please, allow access to GPS location provider.", Toast.LENGTH_SHORT).show();
         }
     }
 
     public void stop() {
-        collecting = false;
+        running = false;
         locationManager.removeUpdates(_listener);
     }
 
@@ -95,19 +99,11 @@ public class GPSMonitor implements ConfigurationConstants {
 
         @Override
         public void onLocationChanged(Location location) {
+            Log.d(TAG, "onLocationChanged(): lat="+location.getLatitude() + ", long=" + location.getLongitude());
             if (listener != null)
                 listener.onLocationChanged(location);
-            Log.d(TAG, "onLocationChanged(): lat="+location.getLatitude() + ", long=" + location.getLongitude());
-            if (location.hasSpeed())
-                Log.d(TAG, "onLocationChanged(): speed=" + location.getSpeed());
-            if (location.hasBearing())
-                Log.d(TAG, "onLocationChanged(): bearing=" + location.getBearing());
-            if (location.hasAccuracy())
-                Log.d(TAG, "onLocationChanged():  accuracy=" + location.getAccuracy());
-            if (location.hasAltitude())
-                Log.d(TAG, "onLocationChanged(): alt="+location.getAltitude());
-
             currentLocation = location;
+            currentLocationTimestamp = System.currentTimeMillis();
         }
 
         @Override

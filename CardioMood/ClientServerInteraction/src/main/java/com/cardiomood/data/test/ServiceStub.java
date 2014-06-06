@@ -59,7 +59,7 @@ public class ServiceStub implements CardioMoodDataService {
     }
 
     @Override
-    public JSONResponse<CardioSession> createSession(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serverId") Long serverId) {
+    public JSONResponse<CardioSession> createSession(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serverId") Long serverId, @FormParam("className") String className) {
         return null;
     }
 
@@ -90,6 +90,21 @@ public class ServiceStub implements CardioMoodDataService {
 
     @Override
     public JSONResponse<String> rewriteCardioSessionData(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serializedData") String serializedData) {
+        return null;
+    }
+
+    @Override
+    public JSONResponse<String> finishSession(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("sessionId") Long sessionId, @FormParam("endTimestamp") Long endTimestamp) {
+        return null;
+    }
+
+    @Override
+    public JSONResponse<String> updateUserInfo(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("firstName") String firstName, @FormParam("lastName") String lastName) {
+        return null;
+    }
+
+    @Override
+    public JSONResponse<String> updateUserProfile(@FormParam("token") String token, @FormParam("serializedUser") String serializedUser) {
         return null;
     }
 

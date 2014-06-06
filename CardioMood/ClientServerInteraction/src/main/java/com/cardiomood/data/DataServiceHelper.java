@@ -155,12 +155,12 @@ public class DataServiceHelper {
         }.execute(email, password);
     }
 
-    public JSONResponse<CardioSession> createSession() {
+    public JSONResponse<CardioSession> createSession(String dataClassName) {
         try {
             if (isSignedIn()) {
                 String token = getTokenString();
                 Long userId = getUserId();
-                return mService.createSession(token, userId, ServerConstants.CARDIOMOOD_CLINET_ID);
+                return mService.createSession(token, userId, ServerConstants.CARDIOMOOD_CLINET_ID, dataClassName);
             } else {
                 throw new IllegalStateException("Not signed in.");
             }
@@ -170,16 +170,43 @@ public class DataServiceHelper {
         }
     }
 
-    public void createSession(ServerResponseCallbackRetry<CardioSession> callback) {
+    public void createSession(String dataClassName, ServerResponseCallbackRetry<CardioSession> callback) {
         if (isOfflineMode())
             return;
         new ServiceTask<CardioSession>(new HandleTokenExpiredCallback<CardioSession>(callback)) {
 
             @Override
             protected JSONResponse<CardioSession> doInBackground(Object... params) {
-                return createSession();
+                return createSession((String) params[0]);
             }
-        }.execute();
+        }.execute(dataClassName);
+    }
+
+    public JSONResponse<String> finishSession(long sessionId, long endTimestamp) {
+        try {
+            if (isSignedIn()) {
+                String token = getTokenString();
+                Long userId = getUserId();
+                return mService.finishSession(token, userId, sessionId, endTimestamp);
+            } else {
+                throw new IllegalStateException("Not signed in.");
+            }
+        } catch (Exception ex) {
+            Log.w(TAG, "createSession() -> failed with an exception", ex);
+            return new JSONResponse<String>(new JSONError("Service error: " + ex.getLocalizedMessage(), JSONError.SERVICE_ERROR));
+        }
+    }
+
+    public void finishSession(long sessionId, long endTimestamp, ServerResponseCallbackRetry<String> callback) {
+        if (isOfflineMode())
+            return;
+        new ServiceTask<String>(new HandleTokenExpiredCallback<String>(callback)) {
+
+            @Override
+            protected JSONResponse<String> doInBackground(Object... params) {
+                return finishSession((Long) params[0], (Long) params[1]);
+            }
+        }.execute(sessionId, endTimestamp);
     }
 
     public JSONResponse<List<CardioSession>> getSessions() {
@@ -345,6 +372,32 @@ public class DataServiceHelper {
         }.execute(serializedData);
     }
 
+    public JSONResponse<String> updateUserProfile(UserProfile userProfile) {
+        try {
+            if (isSignedIn()) {
+                String token = getTokenString();
+                return mService.updateUserProfile(token, userProfile.toString());
+            } else {
+                throw new IllegalStateException("Not signed in.");
+            }
+        } catch (Exception ex) {
+            Log.w(TAG, "appendDataToSession() -> failed with an exception", ex);
+            return new JSONResponse<String>(new JSONError("Service error: " + ex.getLocalizedMessage(), JSONError.SERVICE_ERROR));
+        }
+    }
+
+    public void updateUserProfile(UserProfile userProfile, ServerResponseCallbackRetry<String> callback) {
+        if (isOfflineMode())
+            return;
+        new ServiceTask<String>(new HandleTokenExpiredCallback<String>(callback)) {
+
+            @Override
+            protected JSONResponse<String> doInBackground(Object... params) {
+                return updateUserProfile((UserProfile) params[0]);
+            }
+        }.execute(userProfile);
+    }
+
     public void refreshToken() {
         refreshToken(false);
     }
@@ -354,9 +407,22 @@ public class DataServiceHelper {
             return;
         String login = getEmail();
         String password = getPassword();
-        if (sync)
-            login(login, password);
+        if (sync) {
+            JSONResponse<ApiToken> response = login(login, password);
+            if (response.isOk()) {
+                setToken(response.getData());
+            } else {
+                Log.w(TAG, "refreshToken() failed: " + response);
+            }
+        }
         else login(login, password, null);
+    }
+
+    public boolean isTokenExpired() {
+        ApiToken token = getToken();
+        if (token == null || "0".equals(token.getToken()))
+            return true;
+        return System.currentTimeMillis() <= token.getExpirationDate();
     }
 
     public void checkInternetAvailable(Context context, final ServerResponseCallback<Boolean> callback) {

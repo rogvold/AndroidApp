@@ -18,12 +18,13 @@ public class CardioMoodApplication extends Application {
     private static final String PARSE_APP_ID = "D00uihFFqj0K9yAoecTzR5t4VxJeSGfYOee4LciN";
     private static final String PARSE_CLIENT_KEY = "vaqte7MiPMce9h4HFCnmTnkieIOarA9WPoCcxVnk";
 
+    private DatabaseHelper databaseHelper;
     private static SQLiteDatabase database;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        database = OpenHelperManager.getHelper(this, DatabaseHelper.class).getWritableDatabase();
+        database = getHelper().getWritableDatabase();
 
         try {
             String country = getResources().getConfiguration().locale.getCountry();
@@ -44,9 +45,23 @@ public class CardioMoodApplication extends Application {
         }
     }
 
+    public DatabaseHelper getHelper() {
+        if (databaseHelper == null) {
+            databaseHelper =
+                    OpenHelperManager.getHelper(this, DatabaseHelper.class);
+        }
+        return databaseHelper;
+    }
+
     @Override
     public void onTerminate() {
         super.onTerminate();
+
+        if (databaseHelper != null) {
+            OpenHelperManager.releaseHelper();
+            databaseHelper = null;
+        }
+
         if (database != null && database.isOpen()) {
             database.close();
             database = null;

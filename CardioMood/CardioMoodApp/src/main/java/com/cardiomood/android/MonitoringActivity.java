@@ -25,6 +25,7 @@ import com.cardiomood.android.db.entity.HRSessionEntity;
 import com.cardiomood.android.fragments.monitoring.ActivityCallback;
 import com.cardiomood.android.fragments.monitoring.FragmentCallback;
 import com.cardiomood.android.fragments.monitoring.HeartRateMonitoringFragment;
+import com.cardiomood.android.gps.CardioMoodGPSService;
 import com.cardiomood.android.heartrate.AbstractDataCollector;
 import com.cardiomood.android.heartrate.CardioMoodHeartRateLeService;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
@@ -42,8 +43,10 @@ public class MonitoringActivity extends ActionBarActivity implements ActionBar.T
 
     // Service registration parameters
     private CardioMoodHeartRateLeService mBluetoothLeService;
+    private CardioMoodGPSService mGPSService;
     private boolean receiverRegistered = false;
-    private boolean serviceBound = false;
+    private boolean hrServiceBound = false;
+    private boolean gpsServiceBound = false;
 
     private final Set<FragmentCallback> fragments = Collections.synchronizedSet(new LinkedHashSet<FragmentCallback>());
 
@@ -62,8 +65,17 @@ public class MonitoringActivity extends ActionBarActivity implements ActionBar.T
             AbstractDataCollector collector = (AbstractDataCollector) mBluetoothLeService.getDataCollector();
             if (collector != null)
                 collector.setListener(new AbstractDataCollector.SimpleListener() {
+
+                    @Override
+                    public void onStart() {
+                        if (mGPSService != null)
+                            mGPSService.start();
+                    }
+
                     @Override
                     public void onDataSaved(HRSessionEntity session) {
+                        if (mGPSService != null)
+                            mGPSService.close();
                         if (session != null && session.getId() != null) {
                             Intent intent = new Intent(MonitoringActivity.this, SessionDetailsActivity.class);
                             intent.putExtra(SessionDetailsActivity.SESSION_ID_EXTRA, session.getId());
@@ -116,6 +128,19 @@ public class MonitoringActivity extends ActionBarActivity implements ActionBar.T
         }
     };
 
+    private final ServiceConnection mGPSServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mGPSService = ((CardioMoodGPSService.LocalBinder) service).getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mGPSService = null;
+        }
+    };
+
     SectionsPagerAdapter mSectionsPagerAdapter;
     CustomViewPager mViewPager;
 
@@ -156,11 +181,17 @@ public class MonitoringActivity extends ActionBarActivity implements ActionBar.T
 
         actionBar.setSelectedNavigationItem(0);
 
+        if (!gpsServiceBound) {
+            Intent gpsServiceIntent = new Intent(this, CardioMoodGPSService.class);
+            bindService(gpsServiceIntent, mGPSServiceConnection, Activity.BIND_AUTO_CREATE);
+            gpsServiceBound = true;
+        }
+
         // Establish connection to the Heart Rate Service
-        if (!serviceBound) {
+        if (!hrServiceBound) {
             Intent gattServiceIntent = new Intent(this, CardioMoodHeartRateLeService.class);
             bindService(gattServiceIntent, mServiceConnection, Activity.BIND_AUTO_CREATE);
-            serviceBound = true;
+            hrServiceBound = true;
         }
         if (!receiverRegistered) {
             registerReceiver(dataReceiver, makeGattUpdateIntentFilter());
@@ -190,10 +221,16 @@ public class MonitoringActivity extends ActionBarActivity implements ActionBar.T
             receiverRegistered = false;
             unregisterReceiver(dataReceiver);
         }
-        if (serviceBound) {
-            serviceBound = false;
+        if (hrServiceBound) {
+            hrServiceBound = false;
             unbindService(mServiceConnection);
         }
+
+        if (gpsServiceBound) {
+            gpsServiceBound = false;
+            unbindService(mGPSServiceConnection);
+        }
+
         mBluetoothLeService = null;
     }
 

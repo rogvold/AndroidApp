@@ -57,5 +57,9 @@ public abstract class WorkerThread<T> extends Thread {
         finished = true;
     }
 
+    public boolean isFinished() {
+        return finished;
+    }
+
     public abstract void processItem(T item);
 }

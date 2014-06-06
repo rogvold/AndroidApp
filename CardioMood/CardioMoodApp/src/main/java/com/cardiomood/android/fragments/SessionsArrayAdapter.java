@@ -19,7 +19,10 @@ import com.cardiomood.android.db.entity.HRSessionEntity;
 import com.cardiomood.android.tools.CommonTools;
 
 import java.text.DateFormat;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by danshin on 03.11.13.
@@ -29,6 +32,7 @@ public class SessionsArrayAdapter extends ArrayAdapter<HRSessionEntity> {
     private static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.MEDIUM);;
     private int selectedPosition = -1;
     private DatabaseHelper databaseHelper;
+    private Map<Long, Long> cache = Collections.synchronizedMap(new HashMap<Long, Long>());
 
 
     public SessionsArrayAdapter(Context context, DatabaseHelper databaseHelper, List<HRSessionEntity> objects) {
@@ -88,23 +92,28 @@ public class SessionsArrayAdapter extends ArrayAdapter<HRSessionEntity> {
 
             @Override
             protected Object doInBackground(Object[] params) {
-                SQLiteDatabase db = databaseHelper.getWritableDatabase();
-                Cursor cursor = db.query(
-                        HeartRateDBContract.HeartRateData.TABLE_NAME,
-                        new String[]{"sum("+ HeartRateDBContract.HeartRateData.COLUMN_NAME_BPM+"*"+ HeartRateDBContract.HeartRateData.COLUMN_NAME_RR_TIME + ")/sum(" + HeartRateDBContract.HeartRateData.COLUMN_NAME_RR_TIME + ") as AVG_BPM"},
-                        HeartRateDBContract.HeartRateData.COLUMN_NAME_SESSION_ID + "=?",
-                        new String[]{String.valueOf(id)},
-                        null, null, null
-                );
-                int bpm = 0;
-                if (cursor.moveToFirst())
-                    bpm = Math.round(cursor.getFloat(cursor.getColumnIndex("AVG_BPM")));
+                Long bpm = cache.get(id);
+                if (bpm == null) {
+                    SQLiteDatabase db = databaseHelper.getWritableDatabase();
+                    Cursor cursor = db.query(
+                            HeartRateDBContract.HeartRateData.TABLE_NAME,
+                            new String[]{"sum(" + HeartRateDBContract.HeartRateData.COLUMN_NAME_BPM + "*" + HeartRateDBContract.HeartRateData.COLUMN_NAME_RR_TIME + ")/sum(" + HeartRateDBContract.HeartRateData.COLUMN_NAME_RR_TIME + ") as AVG_BPM"},
+                            HeartRateDBContract.HeartRateData.COLUMN_NAME_SESSION_ID + "=?",
+                            new String[]{String.valueOf(id)},
+                            null, null, null
+                    );
+                    if (cursor.moveToFirst())
+                        bpm = (long) Math.round(cursor.getFloat(cursor.getColumnIndex("AVG_BPM")));
+                }
+                if (bpm == null)
+                    bpm = 0L;
+                cache.put(id, bpm);
                 return bpm;
             }
 
             @Override
             protected void onPostExecute(Object o) {
-                int bpm = (Integer) o;
+                long bpm = (Long) o;
                 tv.setText(String.valueOf(bpm));
                 if (bpm < 72) {
                     tv.setCircleColor(Color.rgb(124,222,230));

@@ -16,7 +16,7 @@ public class PreferenceHelper {
     }
 
     public PreferenceHelper(Context context, boolean persistent) {
-        this.context = context.getApplicationContext();
+        this.context = context;
         this.persistent = persistent;
     }
 
@@ -33,6 +33,10 @@ public class PreferenceHelper {
     }
 
     public synchronized void putString(String key, String value, boolean persistent) {
+        if (value == null) {
+            remove(key);
+            return;
+        }
         if (persistent) {
             final SharedPreferences sharedPref =  PreferenceManager.getDefaultSharedPreferences(context);
             SharedPreferences.Editor editor = sharedPref.edit();
@@ -68,6 +72,10 @@ public class PreferenceHelper {
     }
 
     public synchronized void putFloat(String key, Float value, boolean persistent) {
+        if (value == null) {
+            remove(key);
+            return;
+        }
         if (persistent) {
             final SharedPreferences sharedPref =  PreferenceManager.getDefaultSharedPreferences(context);
             SharedPreferences.Editor editor = sharedPref.edit();
@@ -90,19 +98,23 @@ public class PreferenceHelper {
         }
     }
 
-    public synchronized Float getFloat(String key, Float defValue) {
+    public synchronized Float getFloat(String key, float defValue) {
         return getFloat(key, defValue, isPersistent());
     }
 
     public synchronized Float getFloat(String key) {
-        return getFloat(key, null, isPersistent());
+        return getFloat(key, 0.0f, isPersistent());
     }
 
     public synchronized Float getFloat(String key, boolean persistent) {
         return getFloat(key, null, persistent);
     }
 
-    public synchronized void putInt(String key, int value, boolean persistent) {
+    public synchronized void putInt(String key, Integer value, boolean persistent) {
+        if (value == null) {
+            remove(key);
+            return;
+        }
         if (persistent) {
             final SharedPreferences sharedPref =  PreferenceManager.getDefaultSharedPreferences(context);
             SharedPreferences.Editor editor = sharedPref.edit();
@@ -137,7 +149,11 @@ public class PreferenceHelper {
         return getInt(key, 0, persistent);
     }
 
-    public synchronized void putLong(String key, long value, boolean persistent) {
+    public synchronized void putLong(String key, Long value, boolean persistent) {
+        if (value == null) {
+            remove(key);
+            return;
+        }
         if (persistent) {
             final SharedPreferences sharedPref =  PreferenceManager.getDefaultSharedPreferences(context);
             SharedPreferences.Editor editor = sharedPref.edit();
@@ -147,7 +163,7 @@ public class PreferenceHelper {
         ConfigurationManager.getInstance().set(key, value);
     }
 
-    public synchronized void putLong(String key, long value) {
+    public synchronized void putLong(String key, Long value) {
         putLong(key, value, isPersistent());
     }
 
@@ -172,7 +188,11 @@ public class PreferenceHelper {
         return getLong(key, 0, persistent);
     }
 
-    public synchronized void putBoolean(String key, boolean value, boolean persistent) {
+    public synchronized void putBoolean(String key, Boolean value, boolean persistent) {
+        if (value == null) {
+            remove(key);
+            return;
+        }
         if (persistent) {
             final SharedPreferences sharedPref =  PreferenceManager.getDefaultSharedPreferences(context);
             SharedPreferences.Editor editor = sharedPref.edit();

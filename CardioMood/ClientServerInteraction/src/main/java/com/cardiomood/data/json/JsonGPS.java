@@ -1,10 +1,14 @@
 package com.cardiomood.data.json;
 
+import com.google.gson.Gson;
+
 /**
  *
  * @author sabir
  */
 public class JsonGPS {
+
+    private static final Gson GSON = new Gson();
     
     private double lat;
     private double lon;
@@ -61,9 +65,9 @@ public class JsonGPS {
     public void setBearing(Double bearing) {
         this.bearing = bearing;
     }
-    
-    
-    
-    
-    
+
+    @Override
+    public String toString() {
+        return GSON.toJson(this);
+    }
 }

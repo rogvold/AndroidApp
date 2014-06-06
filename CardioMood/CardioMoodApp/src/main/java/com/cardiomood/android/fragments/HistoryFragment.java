@@ -136,7 +136,7 @@ public class HistoryFragment extends Fragment
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        pHelper = new PreferenceHelper(getActivity().getApplicationContext(), true);
+        pHelper = new PreferenceHelper(getActivity(), true);
 
         userId = pHelper.getLong(ConfigurationConstants.USER_ID);
 
@@ -147,7 +147,6 @@ public class HistoryFragment extends Fragment
         setHasOptionsMenu(true);
 
         serviceHelper = new DataServiceHelper(CardioMoodServer.INSTANCE.getService(), pHelper);
-        serviceHelper.refreshToken();
 
         return root;
     }
@@ -521,6 +520,11 @@ public class HistoryFragment extends Fragment
             if (userId < 0)
                 return null;
 
+            if (serviceHelper.isTokenExpired()) {
+                Log.w(TAG, "SyncTask -> token is expired");
+                serviceHelper.refreshToken(true);
+            }
+
             try {
 
                 QueryBuilder<HRSessionEntity, Long> qb = sessionDAO.queryBuilder();
@@ -563,7 +567,7 @@ public class HistoryFragment extends Fragment
                 return;
             if (session.getExternalId() == null) {
                 // Create Session on the server
-                JSONResponse<CardioSession> response1 = serviceHelper.createSession();
+                JSONResponse<CardioSession> response1 = serviceHelper.createSession("JsonRRInterval");
                 if (JSONResponse.RESPONSE_OK.equals(response1.getResponseCode())) {
                     CardioSession cardioSession = response1.getData();
                     rewriteSessionData(session, cardioSession);
