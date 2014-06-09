@@ -9,6 +9,9 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -73,6 +76,7 @@ public class ProfileFragment extends Fragment implements TextWatcher {
     private Callback callback;
     private boolean modified = false;
     private boolean initialized = false;
+    private boolean firstStart = true;
 
     private final Calendar myCalendar = Calendar.getInstance();
 
@@ -90,6 +94,7 @@ public class ProfileFragment extends Fragment implements TextWatcher {
         }
 
     };
+    private int genderLastSelectedPosition = -1;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -150,6 +155,10 @@ public class ProfileFragment extends Fragment implements TextWatcher {
     @Override
     public void onResume() {
         super.onResume();
+        reloadData();
+    }
+
+    public void reloadData() {
         initialized = false;
         removeListeners();
 
@@ -173,13 +182,16 @@ public class ProfileFragment extends Fragment implements TextWatcher {
         phoneNumberView.setText(prefHelper.getString(USER_PHONE_NUMBER_KEY));
 
         String gender = prefHelper.getString(USER_SEX_KEY, "UNSPECIFIED");
-        if ("MALE".equalsIgnoreCase(gender))
+        if ("MALE".equalsIgnoreCase(gender)) {
+            genderLastSelectedPosition = 0;
             genderView.setSelection(0);
-        else if ("FEMALE".equalsIgnoreCase(gender))
+        } else if ("FEMALE".equalsIgnoreCase(gender)) {
+            genderLastSelectedPosition = 1;
             genderView.setSelection(1);
-        else
+        } else {
+            genderLastSelectedPosition = 2;
             genderView.setSelection(2);
-
+        }
         long birthDate = prefHelper.getLong(USER_BIRTH_DATE_KEY, 0L);
         if (birthDate > 0) {
             birthdayView.setText(DATE_FORMAT.format(new Date(birthDate)));
@@ -230,6 +242,11 @@ public class ProfileFragment extends Fragment implements TextWatcher {
         modified = false;
         initialized = true;
         restoreListeners();
+
+        if (firstStart) {
+            firstStart = false;
+            sync();
+        }
     }
 
     private void restoreListeners() {
@@ -245,9 +262,12 @@ public class ProfileFragment extends Fragment implements TextWatcher {
         genderView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (initialized)
-                    modified = true;
-                save();
+                if (genderLastSelectedPosition != position) {
+                    genderLastSelectedPosition = position;
+                    if (initialized)
+                        modified = true;
+                    save();
+                }
             }
 
             @Override
@@ -334,7 +354,7 @@ public class ProfileFragment extends Fragment implements TextWatcher {
                 if (!TextUtils.isEmpty(heightMinorView.getText().toString())) {
                     in = Float.parseFloat(heightMinorView.getText().toString());
                 }
-                prefHelper.putFloat(USER_HEIGHT_KEY, ft*3.28084f + in*3.28084f/12);
+                prefHelper.putFloat(USER_HEIGHT_KEY, ft*0.3048f + in*0.0254f);
             } else {
                 float m = 0;
                 float cm = 0;
@@ -371,6 +391,29 @@ public class ProfileFragment extends Fragment implements TextWatcher {
         super.onDetach();
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_profile, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int i = item.getItemId();
+        if (i == R.id.menu_sync) {
+            sync();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void sync() {
+        if (callback != null) {
+            callback.onSync();
+        }
+    }
+
     public void setCallback(Callback callback) {
         this.callback = callback;
     }
@@ -394,5 +437,6 @@ public class ProfileFragment extends Fragment implements TextWatcher {
 
     public static interface Callback {
         void onSave();
+        void onSync();
     }
 }

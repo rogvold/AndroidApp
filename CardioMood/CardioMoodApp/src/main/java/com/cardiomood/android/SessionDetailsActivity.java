@@ -25,7 +25,7 @@ import android.widget.Toast;
 
 import com.cardiomood.android.components.CustomViewPager;
 import com.cardiomood.android.db.DatabaseHelper;
-import com.cardiomood.android.db.entity.HRSessionEntity;
+import com.cardiomood.android.db.entity.ContinuousSessionEntity;
 import com.cardiomood.android.db.entity.RRIntervalEntity;
 import com.cardiomood.android.db.entity.SessionStatus;
 import com.cardiomood.android.fragments.details.AbstractSessionReportFragment;
@@ -82,7 +82,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
 
     private long sessionId = 0;
     private int postRenderAction;
-    private RuntimeExceptionDao<HRSessionEntity, Long> sessionDAO;
+    private RuntimeExceptionDao<ContinuousSessionEntity, Long> sessionDAO;
     private RuntimeExceptionDao<RRIntervalEntity, Long> hrDAO;
     private PreferenceHelper pHelper;
     private DataServiceHelper dataServiceHelper;
@@ -101,7 +101,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
             finish();
         }
 
-        sessionDAO = getHelper().getRuntimeExceptionDao(HRSessionEntity.class);
+        sessionDAO = getHelper().getRuntimeExceptionDao(ContinuousSessionEntity.class);
         if (sessionDAO.queryForId(sessionId) == null) {
             Toast.makeText(this, MessageFormat.format(getText(R.string.session_doesnt_exist).toString(), sessionId), Toast.LENGTH_SHORT).show();
             finish();
@@ -323,12 +323,13 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
                             public void onClick(DialogInterface dialog, int id) {
                                 // get user input and set it to result
                                 // edit text
-                                final HRSessionEntity session = sessionDAO.queryForId(sessionId);
+                                final ContinuousSessionEntity session = sessionDAO.queryForId(sessionId);
                                 String newName = userInput.getText() == null ? "" : userInput.getText().toString();
                                 newName = newName.trim();
                                 if (newName.isEmpty())
                                     newName = null;
                                 session.setName(newName);
+                                session.setLastModified(System.currentTimeMillis());
                                 if (session.getStatus() == SessionStatus.SYNCHRONIZED)
                                     session.setStatus(SessionStatus.COMPLETED);
                                 sessionDAO.update(session);

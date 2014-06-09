@@ -12,21 +12,42 @@ public class UserProfile implements Serializable {
     private static final long serialVersionUID = 1L;
     private static final Gson GSON = new Gson();
 
+    public static enum Gender {
+        MALE, FEMALE, UNSPECIFIED
+    }
+
+    public static enum AccountStatus {
+        FREE, GOLD
+    }
+
+    public static enum Status {
+        ACTIVE, BANNED, DELETED
+    }
+
+    public static enum Role {
+        USER, ADMIN
+    }
+
     private Long id;
     private String firstName;
     private String lastName;
-    private UserRoleEnum userRole;
-    private AccountStatusEnum accountStatus;
-    private UserStatusEnum userStatus;
+    private Role userRole;
+    private AccountStatus accountStatus;
+    private Status userStatus;
     private Long registrationDate;
     private Long lastLoginDate;
     private Long lastModificationDate;
+    private Double weight;
+    private Double height;
+    private Gender gender;
+    private String phoneNumber;
+    private Long birthTimestamp;
 
-    public AccountStatusEnum getAccountStatus() {
+    public AccountStatus getAccountStatus() {
         return accountStatus;
     }
 
-    public void setAccountStatus(AccountStatusEnum accountStatus) {
+    public void setAccountStatus(AccountStatus accountStatus) {
         this.accountStatus = accountStatus;
     }
 
@@ -62,19 +83,19 @@ public class UserProfile implements Serializable {
         this.registrationDate = registrationDate;
     }
 
-    public UserRoleEnum getUserRole() {
+    public Role getUserRole() {
         return userRole;
     }
 
-    public void setUserRole(UserRoleEnum userRole) {
+    public void setUserRole(Role userRole) {
         this.userRole = userRole;
     }
 
-    public UserStatusEnum getUserStatus() {
+    public Status getUserStatus() {
         return userStatus;
     }
 
-    public void setUserStatus(UserStatusEnum userStatus) {
+    public void setUserStatus(Status userStatus) {
         this.userStatus = userStatus;
     }
 
@@ -94,8 +115,49 @@ public class UserProfile implements Serializable {
         this.lastModificationDate = lastModificationDate;
     }
 
+    public Double getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Double weight) {
+        this.weight = weight;
+    }
+
+    public Double getHeight() {
+        return height;
+    }
+
+    public void setHeight(Double height) {
+        this.height = height;
+    }
+
+    public Gender getGender() {
+        return gender;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public Long getBirthTimestamp() {
+        return birthTimestamp;
+    }
+
+    public void setBirthTimestamp(Long birthTimestamp) {
+        this.birthTimestamp = birthTimestamp;
+    }
+
     @Override
     public String toString() {
         return GSON.toJson(this);
     }
+
 }

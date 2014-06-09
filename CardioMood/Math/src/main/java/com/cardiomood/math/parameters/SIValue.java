@@ -14,7 +14,7 @@ public class SIValue extends AbstractSingleValue {
 
     @Override
     public double evaluate(double[] x, double[] y, int begin, int length) {
-        int end = (begin + length > y.length) ? y.length : begin + y.length;
+        int end = (begin + length > y.length) ? y.length : begin + length;
         double[] rr = new double[end-begin];
         System.arraycopy(y, begin, rr, 0, rr.length);
         Histogram h = new Histogram(rr, 50);

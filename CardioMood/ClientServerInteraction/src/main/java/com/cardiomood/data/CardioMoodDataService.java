@@ -6,12 +6,14 @@ import com.cardiomood.data.json.CardioSessionWithData;
 import com.cardiomood.data.json.JSONResponse;
 import com.cardiomood.data.json.UserProfile;
 
+import org.codegist.crest.annotate.ConnectionTimeout;
 import org.codegist.crest.annotate.Consumes;
 import org.codegist.crest.annotate.EndPoint;
 import org.codegist.crest.annotate.FormParam;
 import org.codegist.crest.annotate.POST;
 import org.codegist.crest.annotate.Path;
 import org.codegist.crest.annotate.Produces;
+import org.codegist.crest.annotate.SocketTimeout;
 
 import java.util.List;
 
@@ -23,6 +25,7 @@ import java.util.List;
 @Path("{app.service_path}")
 @Consumes("application/json")
 @Produces("application/json")
+@ConnectionTimeout(5000) @SocketTimeout(5000)
 public interface CardioMoodDataService {
 
     @POST @Path("auth/registerUserByEmailAndPassword")
@@ -60,4 +63,7 @@ public interface CardioMoodDataService {
 
     @POST @Path("auth/updateUserProfile")
     JSONResponse<String> updateUserProfile(@FormParam("token") String token, @FormParam("serializedUser") String serializedUser);
+
+    @POST @Path("auth/getUserByToken")
+    JSONResponse<UserProfile> getUserProfileByToken(@FormParam("token") String token);
 }

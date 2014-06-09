@@ -34,7 +34,7 @@ public interface ConfigurationConstants {
 	String USER_DEPARTMENT_KEY		= "user.department";
 	String USER_WEIGHT_KEY			= "user.weight";
 	String USER_HEIGHT_KEY			= "user.height";
-	String USER_BIRTH_DATE_KEY = "user.age";
+	String USER_BIRTH_DATE_KEY      = "user.age";
 	String USER_SEX_KEY				= "user.sex";
     String USER_PHONE_NUMBER_KEY    = "user.phone_number";
     String USER_LOGGED_IN           = "user.logged_in";
@@ -48,14 +48,11 @@ public interface ConfigurationConstants {
 
     // GPS parameters
     String GPS_COLLECT_LOCATION		= "data.gps.collect_gps_location";
-    String GPS_COLLECT_SPEED		= "data.gps.collect_speed";
-    String GPS_COLLECT_ALTITUDE		= "data.gps.collect_altitude";
-
     String GPS_UPDATE_TIME          = "data.gps.update_time";
     String GPS_UPDATE_DISTANCE      = "data.gps.update_distance";
 
     // General app parameters
-    String APP_DATE_FORMAT          = "app.date_format";
+    String APP_DATE_FORMAT              = "app.date_format";
     String DISABLE_SPLASH_SCREEN        = "app.disable_splash_screen";
     String DISABLE_ADS                  = "app.disable_ads";
     String DO_NOT_ASK_INFO_ON_START     = "app.do_not_ask_info_on_start";

@@ -5,8 +5,8 @@ import android.location.Location;
 import android.util.Log;
 
 import com.cardiomood.android.db.DatabaseHelper;
+import com.cardiomood.android.db.entity.ContinuousSessionEntity;
 import com.cardiomood.android.db.entity.GPSLocationEntity;
-import com.cardiomood.android.db.entity.GPSSessionEntity;
 import com.cardiomood.android.db.entity.SessionStatus;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.WorkerThread;
@@ -33,16 +33,18 @@ public class GPSDataCollector implements CardioMoodGPSService.DataCollector {
 
     private static final String TAG = GPSDataCollector.class.getSimpleName();
 
+    private static final String DATA_CLASS_NAME = "JsonGPS";
+
     protected DataServiceHelper dataService;
     protected CardioSessionWithData cardioSession = null;
 
-    private RuntimeExceptionDao<GPSSessionEntity, Long> sessionDAO;
+    private RuntimeExceptionDao<ContinuousSessionEntity, Long> sessionDAO;
     private RuntimeExceptionDao<GPSLocationEntity, Long> gpsLocationDAO;
     private DatabaseHelper databaseHelper;
 
     private final PreferenceHelper preferenceHelper;
 
-    private GPSSessionEntity currentSession = null;
+    private ContinuousSessionEntity currentSession = null;
     private List<GPSLocationEntity> dataItems = null;
     private List<CardioDataItem> pendingData = null;
     private WorkerThread<CardioDataItem> serverSyncWorker;
@@ -59,13 +61,13 @@ public class GPSDataCollector implements CardioMoodGPSService.DataCollector {
         this.databaseHelper = helper;
 
         this.dataService = new DataServiceHelper(CardioMoodServer.INSTANCE.getService(), this.preferenceHelper);
-        sessionDAO = helper.getRuntimeExceptionDao(GPSSessionEntity.class);
-        gpsLocationDAO = helper.getRuntimeExceptionDao(GPSLocationEntity.class);
+        sessionDAO = this.databaseHelper.getRuntimeExceptionDao(ContinuousSessionEntity.class);
+        gpsLocationDAO = this.databaseHelper.getRuntimeExceptionDao(GPSLocationEntity.class);
     }
 
     public void onStartCollecting() {
         // do nothing
-        currentSession = new GPSSessionEntity();
+        currentSession = new ContinuousSessionEntity();
         currentSession.setDateStarted(null);
         currentSession.setStatus(SessionStatus.NEW);
         Long userId = preferenceHelper.getLong(ConfigurationConstants.USER_ID, -1);
@@ -94,10 +96,10 @@ public class GPSDataCollector implements CardioMoodGPSService.DataCollector {
     private void attemptCreateCardiomoodSession() {
         if (!creatingSession) {
             creatingSession = true;
-            dataService.createSession("JsonGPS", new ServerResponseCallbackRetry<CardioSession>() {
+            dataService.createSession(DATA_CLASS_NAME, new ServerResponseCallbackRetry<CardioSession>() {
                 @Override
                 public void retry() {
-                    dataService.createSession("JsonGPS", this);
+                    dataService.createSession(DATA_CLASS_NAME, this);
                 }
 
                 @Override
@@ -181,25 +183,14 @@ public class GPSDataCollector implements CardioMoodGPSService.DataCollector {
             if (count == 0)
                 onFirstDataReceived();
 
-            GPSLocationEntity gpsItem = new GPSLocationEntity();
+            GPSLocationEntity gpsItem = new GPSLocationEntity(location);
+            gpsItem.setSession(currentSession);
             dataItems.add(gpsItem);
-            gpsItem.setLat(location.getLatitude());
-            gpsItem.setLon(location.getLongitude());
-            if (location.hasAltitude())
-                gpsItem.setAlt(location.getAltitude());
-            if (location.hasSpeed())
-                gpsItem.setSpeed((double) location.getSpeed());
-            if (location.hasBearing())
-                gpsItem.setBearing((double) location.getBearing());
-            if (location.hasAccuracy())
-                gpsItem.setAccuracy((double) location.getAccuracy());
-            gpsItem.setSessionId(currentSession.getId());
             gpsLocationDAO.create(gpsItem);
+            currentSession.setLastModified(System.currentTimeMillis());
 
-            CardioDataItem dataItem = new CardioDataItem();
-            dataItem.setCreationTimestamp(gpsItem.getTimestamp().getTime());
+            CardioDataItem dataItem = gpsItem.toCardioDataItem();
             dataItem.setNumber((long) count++);
-            dataItem.setDataItem(gpsItem.toJsonGPS().toString());
             pendingData.add(dataItem);
             sendPendingData();
             if (listener != null)
@@ -262,11 +253,19 @@ public class GPSDataCollector implements CardioMoodGPSService.DataCollector {
         COMPLETED
     }
 
+    public Listener getListener() {
+        return listener;
+    }
+
+    public void setListener(Listener listener) {
+        this.listener = listener;
+    }
+
     public static interface Listener {
         void onComplete();
         void onStart();
         void onDataAdded(Location location);
-        void onDataSaved(GPSSessionEntity session);
+        void onDataSaved(ContinuousSessionEntity session);
     }
 
     public static class SimpleListener implements Listener {
@@ -287,7 +286,7 @@ public class GPSDataCollector implements CardioMoodGPSService.DataCollector {
         }
 
         @Override
-        public void onDataSaved(GPSSessionEntity session) {
+        public void onDataSaved(ContinuousSessionEntity session) {
 
         }
     }
@@ -309,6 +308,7 @@ public class GPSDataCollector implements CardioMoodGPSService.DataCollector {
             buffer.add(item);
             if (getQueueSize() > 0)
                 return;
+            cardioSession.setLastModificationTimestamp(currentSession.getLastModified());
             final CardioSessionWithData session = new CardioSessionWithData(cardioSession);
             session.setDataItems(buffer);
             JSONResponse<String> response = dataService.appendDataToSession(session);
@@ -330,9 +330,21 @@ public class GPSDataCollector implements CardioMoodGPSService.DataCollector {
 
         @Override
         public void onStop() {
-            if (enoughDataCollected()) {
-                currentSession.setStatus(SessionStatus.SYNCHRONIZED);
+            if (isFinished()) {
+                // update session status locally
+                currentSession.setStatus(SessionStatus.SYNCHRONIZING);
                 sessionDAO.update(currentSession);
+
+                // mark session as finished remotely
+                JSONResponse<String> response =  dataService.finishSession(currentSession.getExternalId(), currentSession.getDateEnded().getTime());
+                Log.w(TAG, "finishSession(): response = " + response);
+                if (response.isOk()) {
+                    currentSession.setStatus(SessionStatus.SYNCHRONIZED);
+                    sessionDAO.update(currentSession);
+                } else {
+                    currentSession.setStatus(SessionStatus.COMPLETED);
+                    sessionDAO.update(currentSession);
+                }
             }
         }
     }

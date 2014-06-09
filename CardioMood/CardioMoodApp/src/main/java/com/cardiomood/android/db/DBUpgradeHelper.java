@@ -4,7 +4,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
 import com.cardiomood.android.db.entity.GPSLocationEntity;
-import com.cardiomood.android.db.entity.GPSSessionEntity;
 import com.cardiomood.android.db.entity.SessionStatus;
 import com.cardiomood.android.db.entity.UserEntity;
 import com.cardiomood.android.db.entity.UserStatus;
@@ -130,56 +129,71 @@ public class DBUpgradeHelper {
 
             @Override
             public void onUpgrade(SQLiteDatabase db) {
+                db.execSQL("ALTER TABLE RENAME TO sessions");
                 try {
-                    TableUtils.createTable(databaseHelper.getConnectionSource(), GPSSessionEntity.class);
                     TableUtils.createTable(databaseHelper.getConnectionSource(), GPSLocationEntity.class);
                 } catch (Exception e) {
                     Log.d(TAG, "onUpgrade() exception", e);
                 }
 
-                RuntimeExceptionDao<UserEntity, Long> dao = databaseHelper.getRuntimeExceptionDao(UserEntity.class);
                 String SQL = null;
                 try {
                     // +field users.first_name
-                    SQL = "ALTER TABLE " + HeartRateDBContract.Users.TABLE_NAME
+                    SQL = "ALTER TABLE " + "users"
                             + " ADD COLUMN " + "first_name" + " TEXT";
-                    dao.executeRawNoArgs(SQL);
+                    db.execSQL(SQL);
 
                     // +field users.last_name
-                    SQL = "ALTER TABLE " + HeartRateDBContract.Users.TABLE_NAME
+                    SQL = "ALTER TABLE " + "users"
                             + " ADD COLUMN " + "last_name" + " TEXT";
-                    dao.executeRawNoArgs(SQL);
+                    db.execSQL(SQL);
 
                     // +field users.weight
-                    SQL = "ALTER TABLE " + HeartRateDBContract.Users.TABLE_NAME
+                    SQL = "ALTER TABLE " + "users"
                             + " ADD COLUMN " + "weight" + " REAL";
-                    dao.executeRawNoArgs(SQL);
+                    db.execSQL(SQL);
 
                     // +field users.height
-                    SQL = "ALTER TABLE " + HeartRateDBContract.Users.TABLE_NAME
+                    SQL = "ALTER TABLE " + "users"
                             + " ADD COLUMN " + "height" + " REAL";
-                    dao.executeRawNoArgs(SQL);
+                    db.execSQL(SQL);
 
                     // +field users.phone_number
-                    SQL = "ALTER TABLE " + HeartRateDBContract.Users.TABLE_NAME
+                    SQL = "ALTER TABLE " + "users"
                             + " ADD COLUMN " + "phone_number" + " TEXT";
-                    dao.executeRawNoArgs(SQL);
+                    db.execSQL(SQL);
 
                     // +field users.birth_date
-                    SQL = "ALTER TABLE " + HeartRateDBContract.Users.TABLE_NAME
+                    SQL = "ALTER TABLE " + "users"
                             + " ADD COLUMN " + "birth_date" + " INTEGER";
-                    dao.executeRawNoArgs(SQL);
+                    db.execSQL(SQL);
 
                     // +field users.last_modified
-                    SQL = "ALTER TABLE " + HeartRateDBContract.Users.TABLE_NAME
-                            + " ADD COLUMN " + "last_modified" + " INTEGER";
-                    dao.executeRawNoArgs(SQL);
+                    SQL = "ALTER TABLE " + "users"
+                            + " ADD COLUMN " + "last_modified" + " INTEGER DEFAULT 0";
+                    db.execSQL(SQL);
 
-                    // +field users.last_modified
-                    SQL = "ALTER TABLE " + HeartRateDBContract.Users.TABLE_NAME
-                            + " ADD COLUMN " + "gender" + " TEXT";
-                    dao.executeRawNoArgs(SQL);
+                    // +field users.gender
+                    SQL = "ALTER TABLE " + "users"
+                            + " ADD COLUMN " + "gender" + " TEXT DEFAULT 'UNSPECIFIED'";
+                    db.execSQL(SQL);
 
+                    // +field sessions.last_modified
+                    SQL = "ALTER TABLE " + "sessions"
+                            + " ADD COLUMN " + "last_modified" + " INTEGER DEFAULT 0";
+                    db.execSQL(SQL);
+
+                    // +field sessions.last_modified
+                    SQL = "ALTER TABLE " + "sessions"
+                            + " ADD COLUMN " + "last_modified" + " INTEGER DEFAULT 0";
+                    db.execSQL(SQL);
+
+                    // +field sessions.data_class_name
+                    SQL = "ALTER TABLE " + "sessions"
+                            + " ADD COLUMN " + "data_class_name" + " TEXT DEFAULT 'JsonRRInterval'";
+                    db.execSQL(SQL);
+
+                    RuntimeExceptionDao<UserEntity, Long> dao = databaseHelper.getRuntimeExceptionDao(UserEntity.class);
                     if (preferenceHelper.getBoolean(ConfigurationConstants.USER_LOGGED_IN)) {
                         // try to setup user
                         UserEntity user = null;

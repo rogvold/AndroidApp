@@ -1,54 +1,35 @@
 package com.cardiomood.android.db.entity;
 
 import com.cardiomood.android.db.dao.RRIntervalDAO;
-import com.j256.ormlite.field.DataType;
+import com.cardiomood.data.json.JsonRRInterval;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
-
-import java.io.Serializable;
-import java.util.Date;
 
 /**
  * Created by danon on 27.05.2014.
  */
 @DatabaseTable(tableName = "heart_rate_data", daoClass = RRIntervalDAO.class)
-public class RRIntervalEntity implements Serializable {
+public class RRIntervalEntity extends SessionDataItem<JsonRRInterval> {
 
-    @DatabaseField(generatedId = true, columnName = "_id")
-    private Long id;
-    @DatabaseField(index = true, canBeNull = false, columnName = "session_id")
-    private Long sessionId;
     @DatabaseField(columnName = "bpm")
-    private int heartBeatsPerMinute;
+    protected int heartBeatsPerMinute;
     @DatabaseField(columnName = "rr_time")
-    private double rrTime;
-    @DatabaseField(columnName = "time_stamp", dataType = DataType.DATE_LONG)
-    private Date timeStamp;
+    protected double rrTime;
 
     public RRIntervalEntity() {
-        timeStamp = new Date();
+        timestamp = System.currentTimeMillis();
     }
 
     public RRIntervalEntity(int heartBeatsPerMinute, double rrTime) {
-        timeStamp = new Date();
         this.rrTime = rrTime;
         this.heartBeatsPerMinute = heartBeatsPerMinute;
+        this.setTimestamp(System.currentTimeMillis());
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getSessionId() {
-        return sessionId;
-    }
-
-    public void setSessionId(Long sessionId) {
-        this.sessionId = sessionId;
+    public RRIntervalEntity(long timestamp, int heartBeatsPerMinute,  double rrTime) {
+        this.rrTime = rrTime;
+        this.heartBeatsPerMinute = heartBeatsPerMinute;
+        this.setTimestamp(timestamp);
     }
 
     public int getHeartBeatsPerMinute() {
@@ -67,11 +48,8 @@ public class RRIntervalEntity implements Serializable {
         this.rrTime = rrTime;
     }
 
-    public Date getTimeStamp() {
-        return timeStamp;
-    }
-
-    public void setTimeStamp(Date timeStamp) {
-        this.timeStamp = timeStamp;
+    @Override
+    public JsonRRInterval toJsonDataItem() {
+        return new JsonRRInterval((int) rrTime);
     }
 }

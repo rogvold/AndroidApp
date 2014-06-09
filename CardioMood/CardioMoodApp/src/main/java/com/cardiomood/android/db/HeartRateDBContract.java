@@ -6,6 +6,7 @@ import android.provider.BaseColumns;
  * A contract class for database schema
  * @author Anton Danshin
  */
+@Deprecated
 public interface HeartRateDBContract {
 	
 	String DATABASE_NAME = "heart_rate.db";
@@ -43,7 +44,7 @@ public interface HeartRateDBContract {
 	public static abstract class SQL {
 		private static final String TEXT_TYPE = " TEXT";
 		private static final String COMMA_SEP = ",";
-		
+
 		public static final String CREATE_TABLE_HR_DATA =
 			    "CREATE TABLE " + HeartRateData.TABLE_NAME + " (" +
 			    HeartRateData._ID + " INTEGER PRIMARY KEY" + COMMA_SEP +
@@ -54,7 +55,7 @@ public interface HeartRateDBContract {
 			    "FOREIGN KEY(" + HeartRateData.COLUMN_NAME_SESSION_ID + ") REFERENCES " +
 			    Sessions.TABLE_NAME + "(" + Sessions._ID + ")" +
 			    " )";
-		public static final String CREATE_TABLE_SESSIONS = 
+		public static final String CREATE_TABLE_SESSIONS =
 				"CREATE TABLE " + Sessions.TABLE_NAME + " (" +
 				Sessions._ID + " INTEGER PRIMARY KEY" + COMMA_SEP +
                 Sessions.COLUMN_NAME_EXTERNAL_ID + " INTEGER" + COMMA_SEP +

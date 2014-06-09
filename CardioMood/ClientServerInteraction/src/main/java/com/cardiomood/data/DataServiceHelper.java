@@ -381,7 +381,7 @@ public class DataServiceHelper {
                 throw new IllegalStateException("Not signed in.");
             }
         } catch (Exception ex) {
-            Log.w(TAG, "appendDataToSession() -> failed with an exception", ex);
+            Log.w(TAG, "updateUserProfile() -> failed with an exception", ex);
             return new JSONResponse<String>(new JSONError("Service error: " + ex.getLocalizedMessage(), JSONError.SERVICE_ERROR));
         }
     }
@@ -396,6 +396,32 @@ public class DataServiceHelper {
                 return updateUserProfile((UserProfile) params[0]);
             }
         }.execute(userProfile);
+    }
+
+    public JSONResponse<UserProfile> getUserProfile() {
+        try {
+            if (isSignedIn()) {
+                String token = getTokenString();
+                return mService.getUserProfileByToken(token);
+            } else {
+                throw new IllegalStateException("Not signed in.");
+            }
+        } catch (Exception ex) {
+            Log.w(TAG, "getUserProfile() -> failed with an exception", ex);
+            return new JSONResponse<UserProfile>(new JSONError("Service error: " + ex.getLocalizedMessage(), JSONError.SERVICE_ERROR));
+        }
+    }
+
+    public void getUserProfile(ServerResponseCallbackRetry<UserProfile> callback) {
+        if (isOfflineMode())
+            return;
+        new ServiceTask<UserProfile>(new HandleTokenExpiredCallback<UserProfile>(callback)) {
+
+            @Override
+            protected JSONResponse<UserProfile> doInBackground(Object... params) {
+                return getUserProfile();
+            }
+        }.execute();
     }
 
     public void refreshToken() {
@@ -422,7 +448,7 @@ public class DataServiceHelper {
         ApiToken token = getToken();
         if (token == null || "0".equals(token.getToken()))
             return true;
-        return System.currentTimeMillis() <= token.getExpirationDate();
+        return System.currentTimeMillis() >= token.getExpirationDate();
     }
 
     public void checkInternetAvailable(Context context, final ServerResponseCallback<Boolean> callback) {

@@ -44,7 +44,7 @@ import com.cardiomood.android.R;
 import com.cardiomood.android.SessionDetailsActivity;
 import com.cardiomood.android.controls.progress.CircularProgressBar;
 import com.cardiomood.android.db.DatabaseHelper;
-import com.cardiomood.android.db.entity.HRSessionEntity;
+import com.cardiomood.android.db.entity.ContinuousSessionEntity;
 import com.cardiomood.android.gps.CardioMoodGPSService;
 import com.cardiomood.android.gps.GPSDataCollector;
 import com.cardiomood.android.heartrate.AbstractDataCollector;
@@ -475,7 +475,7 @@ public class ConnectionFragment extends Fragment {
                     return;
                 }
 
-                if (mGPSService != null) {
+                if (mGPSService != null && isGPSCollectingEnabled()) {
                     mGPSService.setDataCollector(new GPSDataCollector(mGPSService, getHelper()));
                 }
 
@@ -488,12 +488,12 @@ public class ConnectionFragment extends Fragment {
 
                         @Override
                         public void onStart() {
-                            if (mGPSService != null)
+                            if (mGPSService != null && isGPSCollectingEnabled())
                                 mGPSService.start();
                         }
 
                         @Override
-                        public void onDataSaved(HRSessionEntity session) {
+                        public void onDataSaved(ContinuousSessionEntity session) {
                             if (mGPSService != null)
                                 mGPSService.close();
                             Activity activity = getActivity();
@@ -517,6 +517,10 @@ public class ConnectionFragment extends Fragment {
             Log.d(TAG, "performConnect(): "+ex);
             ex.printStackTrace();
         }
+    }
+
+    private boolean isGPSCollectingEnabled() {
+        return mPrefHelper.getBoolean(ConfigurationConstants.GPS_COLLECT_LOCATION);
     }
 
     public void performDisconnect() {

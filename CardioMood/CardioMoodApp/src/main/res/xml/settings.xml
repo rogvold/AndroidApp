@@ -13,6 +13,10 @@
             android:entries="@array/measurement_system_titles"
             android:entryValues="@array/measurement_system_values"
             android:defaultValue="METRIC"/>
+        <CheckBoxPreference
+            android:key="data.gps.collect_gps_location"
+            android:title="@string/title_settings_log_gps_data"
+            android:summary="@string/summary_log_gps_data" />
     </PreferenceCategory>
 
     <PreferenceCategory android:title="@string/connection_settings_title">

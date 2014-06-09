@@ -26,8 +26,10 @@ import android.widget.Toast;
 import com.cardiomood.android.R;
 import com.cardiomood.android.SessionDetailsActivity;
 import com.cardiomood.android.db.DatabaseHelper;
-import com.cardiomood.android.db.entity.HRSessionEntity;
+import com.cardiomood.android.db.entity.ContinuousSessionEntity;
+import com.cardiomood.android.db.entity.GPSLocationEntity;
 import com.cardiomood.android.db.entity.RRIntervalEntity;
+import com.cardiomood.android.db.entity.SessionDataItem;
 import com.cardiomood.android.db.entity.SessionStatus;
 import com.cardiomood.android.db.entity.UserEntity;
 import com.cardiomood.android.tools.PreferenceHelper;
@@ -41,9 +43,11 @@ import com.cardiomood.data.json.CardioSession;
 import com.cardiomood.data.json.CardioSessionWithData;
 import com.cardiomood.data.json.JSONError;
 import com.cardiomood.data.json.JSONResponse;
+import com.cardiomood.data.json.JsonGPS;
 import com.cardiomood.data.json.JsonRRInterval;
 import com.flurry.android.FlurryAgent;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
+import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.j256.ormlite.stmt.PreparedQuery;
 import com.j256.ormlite.stmt.QueryBuilder;
@@ -77,6 +81,7 @@ public class HistoryFragment extends Fragment
     private ProgressDialog pDialog = null;
     private ActionMode mActionMode = null;
     private Long userId = null;
+    private Long userExternalId = null;
 
     // work around for 'view already has a parent...'
     private boolean initial = true;
@@ -137,9 +142,6 @@ public class HistoryFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         pHelper = new PreferenceHelper(getActivity(), true);
-
-        userId = pHelper.getLong(ConfigurationConstants.USER_ID);
-
         root = inflater.inflate(R.layout.fragment_history, container, false);
         listView = (ListView) root.findViewById(R.id.sessionList);
         listView.setOnItemClickListener(this);
@@ -160,6 +162,8 @@ public class HistoryFragment extends Fragment
     public void onStart() {
         super.onStart();
         // work around for app crash due to 'view already has a parent...' - bug in EndlessAdapter
+        userExternalId = pHelper.getLong(ConfigurationConstants.USER_EXTERNAL_ID, -1L);
+        userId = pHelper.getLong(ConfigurationConstants.USER_ID, -1L);
         if (initial) {
             new android.os.Handler().postDelayed(new Runnable() {
                 @Override
@@ -200,7 +204,7 @@ public class HistoryFragment extends Fragment
     }
 
     public void deleteItem(int i) {
-        HRSessionEntity session = listAdapter.getItem(i);
+        ContinuousSessionEntity session = listAdapter.getItem(i);
         if (isPredefinedSession(session.getId())) {
             Toast.makeText(getActivity(), R.string.cannot_delete_predefined_data, Toast.LENGTH_SHORT).show();
             return;
@@ -209,9 +213,9 @@ public class HistoryFragment extends Fragment
     }
 
     public void renameItem(int i) {
-        final HRSessionEntity itemSession = listAdapter.getItem(i);
+        final ContinuousSessionEntity itemSession = listAdapter.getItem(i);
         final long sessionId = itemSession.getId();
-        RuntimeExceptionDao<HRSessionEntity, Long> sessionDAO = getHelper().getRuntimeExceptionDao(HRSessionEntity.class);
+        RuntimeExceptionDao<ContinuousSessionEntity, Long> sessionDAO = getHelper().getRuntimeExceptionDao(ContinuousSessionEntity.class);
         // get prompts.xml view
         LayoutInflater li = LayoutInflater.from(getActivity());
         View promptsView = li.inflate(R.layout.dialog_input_text, null);
@@ -232,13 +236,14 @@ public class HistoryFragment extends Fragment
                             public void onClick(DialogInterface dialog, int id) {
                                 // get user input and set it to result
                                 // edit text
-                                final RuntimeExceptionDao<HRSessionEntity, Long> dao = getHelper().getRuntimeExceptionDao(HRSessionEntity.class);
-                                final HRSessionEntity session = dao.queryForId(sessionId);
+                                final RuntimeExceptionDao<ContinuousSessionEntity, Long> dao = getHelper().getRuntimeExceptionDao(ContinuousSessionEntity.class);
+                                final ContinuousSessionEntity session = dao.queryForId(sessionId);
                                 String newName = userInput.getText() == null ? "" : userInput.getText().toString();
                                 newName = newName.trim();
                                 if (newName.isEmpty())
                                     newName = null;
                                 session.setName(newName);
+                                session.setLastModified(System.currentTimeMillis());
                                 if (session.getStatus() == SessionStatus.SYNCHRONIZED)
                                     session.setStatus(SessionStatus.COMPLETED);
                                 dao.update(session);
@@ -289,7 +294,7 @@ public class HistoryFragment extends Fragment
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         if (mActionMode == null) {
-            HRSessionEntity session = listAdapter.getItem(position);
+            ContinuousSessionEntity session = listAdapter.getItem(position);
             if (session != null) {
                 Toast.makeText(getActivity(), R.string.opening_measurement, Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(getActivity(), SessionDetailsActivity.class);
@@ -319,6 +324,13 @@ public class HistoryFragment extends Fragment
             return;
 
         pDialog = new ProgressDialog(activity);
+
+        if (userId >= 0) {
+            pDialog.setMessage("Synchronizing data...");
+            pDialog.setIndeterminate(true);
+            pDialog.setCancelable(false);
+            pDialog.show();
+        }
 
         serviceHelper.checkInternetAvailable(activity, new ServerResponseCallback<Boolean>() {
             @Override
@@ -357,7 +369,7 @@ public class HistoryFragment extends Fragment
             listAdapter.clear();
             listAdapter.notifyDataSetChanged();
         }
-        listAdapter = new SessionsArrayAdapter(activity, getHelper(), new ArrayList<HRSessionEntity>(100));
+        listAdapter = new SessionsArrayAdapter(activity, getHelper(), new ArrayList<ContinuousSessionEntity>(100));
         SessionsEndlessAdapter endlessAdapter = new SessionsEndlessAdapter(listAdapter, getActivity(), getHelper());
         listView.setAdapter(endlessAdapter);
     }
@@ -374,8 +386,8 @@ public class HistoryFragment extends Fragment
         Map<String, Object> values = new HashMap<String, Object>();
         values.put("status", SessionStatus.COMPLETED);
         values.put("user_id", userId);
-        RuntimeExceptionDao<HRSessionEntity, Long> sessionDAO = getHelper()
-                .getRuntimeExceptionDao(HRSessionEntity.class);
+        RuntimeExceptionDao<ContinuousSessionEntity, Long> sessionDAO = getHelper()
+                .getRuntimeExceptionDao(ContinuousSessionEntity.class);
         try {
             long count = sessionDAO.queryBuilder()
                     .where().eq("status", SessionStatus.COMPLETED)
@@ -403,13 +415,13 @@ public class HistoryFragment extends Fragment
     }
 
     private class DeleteItemTask extends AsyncTask<Void, Void, Boolean> {
-        private HRSessionEntity session = null;
+        private ContinuousSessionEntity session = null;
         private Handler handler = new Handler();
-        RuntimeExceptionDao<HRSessionEntity, Long> hrSessionDAO;
+        RuntimeExceptionDao<ContinuousSessionEntity, Long> hrSessionDAO;
 
-        private DeleteItemTask(HRSessionEntity session) {
+        private DeleteItemTask(ContinuousSessionEntity session) {
             this.session = session;
-            hrSessionDAO = getHelper().getRuntimeExceptionDao(HRSessionEntity.class);
+            hrSessionDAO = getHelper().getRuntimeExceptionDao(ContinuousSessionEntity.class);
         }
 
         @Override
@@ -435,7 +447,7 @@ public class HistoryFragment extends Fragment
                 }
 
                 long sessionId = session.getId();
-                HRSessionEntity session = hrSessionDAO.queryForId(sessionId);
+                ContinuousSessionEntity session = hrSessionDAO.queryForId(sessionId);
                 if (session != null) {
                     hrSessionDAO.deleteById(sessionId);
                     logSessionDeletedEvent(session);
@@ -447,7 +459,7 @@ public class HistoryFragment extends Fragment
             }
         }
 
-        private void logSessionDeletedEvent(HRSessionEntity session) {
+        private void logSessionDeletedEvent(ContinuousSessionEntity session) {
             Map<String, String> args = new HashMap<String, String>();
             args.put("sessionId", session.getId()+"");
             args.put("sessionName", session.getName());
@@ -477,26 +489,16 @@ public class HistoryFragment extends Fragment
         private Context context = null;
 
         private RuntimeExceptionDao<UserEntity, Long> userDAO;
-        private RuntimeExceptionDao<HRSessionEntity, Long> sessionDAO;
-        private RuntimeExceptionDao<RRIntervalEntity, Long> itemDAO;
-        private Long userId;
+        private RuntimeExceptionDao<ContinuousSessionEntity, Long> sessionDAO;
+        private RuntimeExceptionDao<RRIntervalEntity, Long> rrItemDAO;
+        private RuntimeExceptionDao<GPSLocationEntity, Long> gpsItemDAO;
 
         private SyncTask(Context context) {
             this.context = context;
             userDAO = getHelper().getRuntimeExceptionDao(UserEntity.class);
-            sessionDAO = getHelper().getRuntimeExceptionDao(HRSessionEntity.class);
-            itemDAO = getHelper().getRuntimeExceptionDao(RRIntervalEntity.class);
-            userId = pHelper.getLong(ConfigurationConstants.USER_ID, -1);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            if (userId >= 0) {
-                pDialog.setMessage("Synchronizing data...");
-                pDialog.setIndeterminate(true);
-                pDialog.setCancelable(false);
-                pDialog.show();
-            }
+            sessionDAO = getHelper().getRuntimeExceptionDao(ContinuousSessionEntity.class);
+            rrItemDAO = getHelper().getRuntimeExceptionDao(RRIntervalEntity.class);
+            gpsItemDAO = getHelper().getRuntimeExceptionDao(GPSLocationEntity.class);
         }
 
         @Override
@@ -504,9 +506,7 @@ public class HistoryFragment extends Fragment
             if (userId < 0)
                 return;
             pDialog.setMessage("100% - completed.");
-
-           refresh();
-
+            refresh();
             pDialog.dismiss();
         }
 
@@ -526,23 +526,24 @@ public class HistoryFragment extends Fragment
             }
 
             try {
-
-                QueryBuilder<HRSessionEntity, Long> qb = sessionDAO.queryBuilder();
+                QueryBuilder<ContinuousSessionEntity, Long> qb = sessionDAO.queryBuilder().orderBy("_id", true);
                 Where w = qb.where();
                 w.isNull("external_id");
                 w.ne("status", SessionStatus.IN_PROGRESS);
                 w.and(w, w);
                 w.or().eq("status", SessionStatus.COMPLETED);
                 w.eq("user_id", userId);
-                PreparedQuery<HRSessionEntity> pq = w.and(w, w).prepare();
-                List<HRSessionEntity> sessions = sessionDAO.query(pq);
+                PreparedQuery<ContinuousSessionEntity> pq = w.and(w, w).prepare();
+                List<ContinuousSessionEntity> sessions = sessionDAO.query(pq);
 
                 int progress = 0;
-                for (HRSessionEntity session : sessions) {
-                    synchronizeSession(session);
+                for (ContinuousSessionEntity session : sessions) {
+                    uploadSession(session);
                     progress++;
                     publishProgress(context.getString(R.string.progress_sending_data) +" " + Math.round(100.0f * progress / sessions.size()) + "%");
                 }
+
+                // TODO: upload GPS Session
 
                 progress = 0;
                 JSONResponse<List<CardioSession>> response = serviceHelper.getSessions();
@@ -551,7 +552,7 @@ public class HistoryFragment extends Fragment
                     if (cardioSessions == null)
                         return null;
                     for (CardioSession cardioSession : cardioSessions) {
-                        synchronizeCardioSession(cardioSession);
+                        downloadSession(cardioSession);
                         progress++;
                         publishProgress(context.getText(R.string.progress_receiving_data) + " " + Math.round(100.0f * progress / cardioSessions.size()) + "%");
                     }
@@ -562,116 +563,221 @@ public class HistoryFragment extends Fragment
          return null;
         }
 
-        private void synchronizeSession(HRSessionEntity session) {
+        private void uploadSession(ContinuousSessionEntity session) {
+            // check for predefined session -- do we really need this????
             if (isPredefinedSession(session.getId()))
                 return;
             if (session.getExternalId() == null) {
                 // Create Session on the server
-                JSONResponse<CardioSession> response1 = serviceHelper.createSession("JsonRRInterval");
-                if (JSONResponse.RESPONSE_OK.equals(response1.getResponseCode())) {
+                JSONResponse<CardioSession> response1 = serviceHelper.createSession(session.getDataClassName());
+                if (response1.isOk()) {
                     CardioSession cardioSession = response1.getData();
                     rewriteSessionData(session, cardioSession);
                 }
             } else if (session.getStatus() == SessionStatus.COMPLETED) {
+                // this session was modified locally after last synchronization
                 CardioSession cardioSession = new CardioSession();
                 cardioSession.setId(session.getExternalId());
                 rewriteSessionData(session, cardioSession);
             }
         }
 
-        private void rewriteSessionData(HRSessionEntity session, CardioSession cardioSession) {
+        private void rewriteSessionData(ContinuousSessionEntity session, CardioSession cardioSession) {
             SessionStatus oldStatus = session.getStatus();
-            cardioSession.setDataClassName("JsonRRInterval");
+            cardioSession.setDataClassName(session.getDataClassName());
             cardioSession.setName(session.getName());
             cardioSession.setDescription(session.getDescription());
             cardioSession.setCreationTimestamp(session.getDateStarted() == null ? 0 : session.getDateStarted().getTime());
+            cardioSession.setEndTimestamp(session.getDateEnded() == null ? 0 : session.getDateEnded().getTime());
+            if (session.getOriginalSession() != null) {
+                cardioSession.setOriginalSessionId(session.getOriginalSession().getExternalId());
+            }
+            cardioSession.setLastModificationTimestamp(session.getLastModified());
             session.setExternalId(cardioSession.getId());
             session.setStatus(SessionStatus.SYNCHRONIZING);
             sessionDAO.update(session);
 
             // Upload sessionData
             try {
-                List<RRIntervalEntity> items = itemDAO.queryBuilder().orderBy("_id", true)
-                        .where().eq("session_id", session.getId()).query();
+                List<? extends SessionDataItem> items = null;
+                if (cardioSession.getDataClassName() == null ||
+                        cardioSession.getDataClassName().isEmpty() ||
+                        "JsonRRInterval".equals(cardioSession.getDataClassName())) {
+                    // this is a Cardio Session
+                    items = rrItemDAO.queryBuilder().orderBy("_id", true)
+                            .where().eq("session_id", session.getId()).query();
+                } else if ("JsonGPS".equals(session.getDataClassName())) {
+                    items = gpsItemDAO.queryBuilder().orderBy("_id", true)
+                            .where().eq("session_id", session.getId()).query();
+                }
+
                 CardioSessionWithData sessionWithData = new CardioSessionWithData(cardioSession);
                 List<CardioDataItem> dataItems = new ArrayList<CardioDataItem>(items.size());
                 long i = 0;
-                for (RRIntervalEntity hrItem : items) {
-                    CardioDataItem cardioDataItem = new CardioDataItem();
+                for (SessionDataItem gpsItem : items) {
+                    CardioDataItem cardioDataItem = gpsItem.toCardioDataItem();
                     cardioDataItem.setNumber(i++);
-                    cardioDataItem.setCreationTimestamp(hrItem.getTimeStamp().getTime());
-                    cardioDataItem.setSessionId(cardioSession.getId());
-                    cardioDataItem.setDataItem(new JsonRRInterval((int) hrItem.getRrTime()).toString());
                     dataItems.add(cardioDataItem);
                 }
                 sessionWithData.setDataItems(dataItems);
                 JSONResponse<String> response2 = serviceHelper.rewriteCardioSessionData(sessionWithData);
-                if (JSONResponse.RESPONSE_OK.equals(response2.getResponseCode())) {
+                if (response2.isOk()) {
                     session.setStatus(SessionStatus.SYNCHRONIZED);
                     sessionDAO.update(session);
                 } else {
-                    session.setStatus(oldStatus);
-                    sessionDAO.update(session);
+                    JSONResponse<CardioSession> response3 = serviceHelper.createSession(session.getDataClassName());
+                    if (response3.isOk()) {
+                        JSONResponse<String> response4 = serviceHelper.rewriteCardioSessionData(sessionWithData);
+                        if (response4.isOk()) {
+                            session.setStatus(SessionStatus.SYNCHRONIZED);
+                            sessionDAO.update(session);
+                        } else {
+                            session.setStatus(oldStatus);
+                            sessionDAO.update(session);
+                        }
+                    } else {
+                        session.setStatus(oldStatus);
+                        sessionDAO.update(session);
+                    }
                 }
-            } catch (SQLException ex) {
+            } catch(SQLException ex){
                 session.setStatus(oldStatus);
                 sessionDAO.update(session);
             }
         }
 
-        private void synchronizeCardioSession(CardioSession cardioSession) {
+        private void downloadSession(CardioSession cardioSession) {
             try {
-                long count = sessionDAO.queryBuilder()
+                if (cardioSession.getLastModificationTimestamp() == null)
+                    cardioSession.setLastModificationTimestamp(0L);
+                List<ContinuousSessionEntity> localSessions = sessionDAO.queryBuilder()
                         .where().eq("user_id", userId)
                         .and().eq("external_id", cardioSession.getId())
-                        .countOf();
+                        .query();
 
-                if (count == 0) {
-                    // create session locally
-                    HRSessionEntity session = new HRSessionEntity();
-                    session.setUserId(userId);
-                    session.setStatus(SessionStatus.SYNCHRONIZING);
-                    session.setDateStarted(new Date(cardioSession.getCreationTimestamp()));
-                    session.setExternalId(cardioSession.getId());
-                    session.setDescription(cardioSession.getDescription());
-                    session.setName(cardioSession.getName());
-                    session = sessionDAO.createIfNotExists(session);
+                ContinuousSessionEntity session = null;
+                if (localSessions == null || localSessions.isEmpty()) {
+                    // session is new => create session locally
+                    session = new ContinuousSessionEntity();
+                } else {
+                    // session exists locally
+                    session = localSessions.get(0);
+                    if (session.getLastModified() > cardioSession.getLastModificationTimestamp()) {
+                        // local session is newer than remote
+                        session.setStatus(SessionStatus.COMPLETED);
+                        uploadSession(session);
+                        return;
+                    } else if (session.getLastModified() == cardioSession.getLastModificationTimestamp()) {
+                        // local session is up-to-date
+                    }
+                    // local session is outdated
+                }
 
+                // update session params
+                session.setUserId(userId);
+                session.setStatus(SessionStatus.SYNCHRONIZING);
+                session.setDateStarted(new Date(cardioSession.getCreationTimestamp()));
+                session.setExternalId(cardioSession.getId());
+                session.setDescription(cardioSession.getDescription());
+                session.setName(cardioSession.getName());
+                session.setDataClassName(cardioSession.getDataClassName());
+                if (cardioSession.getEndTimestamp() != null)
+                    session.setDateEnded(new Date(cardioSession.getEndTimestamp()));
+                if (cardioSession.getLastModificationTimestamp() != null)
+                    session.setLastModified(cardioSession.getLastModificationTimestamp());
+                Dao.CreateOrUpdateStatus status = sessionDAO.createOrUpdate(session);
+                if (status.isCreated()) {
+                    // this session was created => load session data from server
                     JSONResponse<CardioSessionWithData> response = serviceHelper.getSessionData(cardioSession.getId());
-                    if (JSONResponse.RESPONSE_OK.equals(response.getResponseCode())) {
+                    if (response.isOk()) {
                         List<CardioDataItem> dataItems = response.getData().getDataItems();
                         if (dataItems == null)
                             dataItems = Collections.emptyList();
-                        final List<RRIntervalEntity> items = new ArrayList<RRIntervalEntity>(dataItems.size());
-                        long duration = 0;
-                        for (CardioDataItem dataItem : dataItems) {
-                            RRIntervalEntity item = new RRIntervalEntity();
-                            item.setSessionId(session.getId());
-                            item.setTimeStamp(new Date(dataItem.getCreationTimestamp()));
-                            JsonRRInterval rr = JsonRRInterval.fromJson(dataItem.getDataItem());
-                            item.setRrTime(rr.getR());
-                            duration += rr.getR();
-                            if (rr.getR() > 0)
-                                item.setHeartBeatsPerMinute(Math.round(60 * 1000.0f / rr.getR()));
-                            items.add(item);
+                        if (dataItems.isEmpty()) {
+                            // delete session locally and remotely
+                            sessionDAO.deleteById(session.getId());
+                            serviceHelper.deleteSession(cardioSession.getId());
+                            return;
                         }
-                        itemDAO.callBatchTasks(new Callable<Object>() {
-                            @Override
-                            public Object call() throws Exception {
-                                for (RRIntervalEntity item: items) {
-                                    itemDAO.create(item);
-                                }
-                                return null;
+                        final List<SessionDataItem> items = new ArrayList<SessionDataItem>(dataItems.size());
+                        // here we need to use different logic for different data types
+                        if (cardioSession.getDataClassName() == null ||
+                                cardioSession.getDataClassName().isEmpty() ||
+                                "JsonRRInterval".equals(cardioSession.getDataClassName())) {
+                            // this is Cardio Session (with RR-intervals)
+                            long duration = 0;
+                            for (CardioDataItem dataItem : dataItems) {
+                                RRIntervalEntity item = new RRIntervalEntity();
+                                item.setSession(session);
+                                item.setTimestamp(dataItem.getCreationTimestamp());
+                                JsonRRInterval rr = JsonRRInterval.fromJson(dataItem.getDataItem());
+                                item.setRrTime(rr.getR());
+                                duration += rr.getR();
+                                if (rr.getR() > 0)
+                                    item.setHeartBeatsPerMinute(Math.round(60 * 1000.0f / rr.getR()));
+                                items.add(item);
                             }
-                        });
-                        session.setDateEnded(new Date(session.getDateStarted().getTime() + duration));
-                        session.setStatus(SessionStatus.SYNCHRONIZED);
-                        sessionDAO.update(session);
-                    }
+                            rrItemDAO.callBatchTasks(new Callable<Object>() {
+                                @Override
+                                public Object call() throws Exception {
+                                    for (SessionDataItem item : items) {
+                                        rrItemDAO.create((RRIntervalEntity) item);
+                                    }
+                                    return null;
+                                }
+                            });
+                            session.setStatus(SessionStatus.SYNCHRONIZED);
+                            if (session.getDateEnded() == null) {
+                                session.setDateEnded(new Date(session.getDateStarted().getTime() + duration));
+                                session.setLastModified(System.currentTimeMillis());
+                                JSONResponse<String> response1 = serviceHelper.finishSession(cardioSession.getId(), session.getDateEnded().getTime());
+                                if (!response1.isOk()) {
+                                    session.setStatus(SessionStatus.COMPLETED);
+                                }
+                            }
+                        } else if ("JsonGPS".equals(cardioSession.getDataClassName())) {
+                            // this is a GPS session (with GPS locations)
+                            long maxTimestamp = 0;
+                            for (CardioDataItem dataItem : dataItems) {
+                                GPSLocationEntity item = new GPSLocationEntity();
+                                item.setSession(session);
+                                item.setTimestamp(dataItem.getCreationTimestamp());
+                                JsonGPS gps = JsonGPS.fromJson(dataItem.getDataItem());
+                                item.setLat(gps.getLat());
+                                item.setLon(gps.getLon());
+                                item.setAlt(gps.getAlt());
+                                item.setSpeed(gps.getSpeed());
+                                item.setBearing(gps.getBearing());
+                                item.setAccuracy(gps.getAccuracy());
+                                if (maxTimestamp < dataItem.getCreationTimestamp())
+                                    maxTimestamp = dataItem.getCreationTimestamp();
+                                items.add(item);
+                            }
+                            rrItemDAO.callBatchTasks(new Callable<Object>() {
+                                @Override
+                                public Object call() throws Exception {
+                                    for (SessionDataItem item : items) {
+                                        gpsItemDAO.create((GPSLocationEntity) item);
+                                    }
+                                    return null;
+                                }
+                            });
+                            session.setStatus(SessionStatus.SYNCHRONIZED);
+                            if (session.getDateEnded() == null) {
+                                session.setDateEnded(new Date(maxTimestamp));
+                                session.setLastModified(System.currentTimeMillis());
+                                JSONResponse<String> response1 = serviceHelper.finishSession(cardioSession.getId(), session.getDateEnded().getTime());
+                                if (!response1.isOk()) {
+                                    session.setStatus(SessionStatus.COMPLETED);
+                                }
+                            }
+                        }
 
+                    }
+                    sessionDAO.update(session);
                 }
             } catch (SQLException ex) {
-                Log.w(TAG, "synchronizeCardioSession() failed", ex);
+                Log.w(TAG, "downloadCardioSession() failed", ex);
             }
         }
     }

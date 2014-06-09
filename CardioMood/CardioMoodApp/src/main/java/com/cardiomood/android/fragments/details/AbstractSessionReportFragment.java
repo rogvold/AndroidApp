@@ -29,7 +29,7 @@ import com.cardiomood.android.R;
 import com.cardiomood.android.ReportPreviewActivity;
 import com.cardiomood.android.SessionDetailsActivity;
 import com.cardiomood.android.db.DatabaseHelper;
-import com.cardiomood.android.db.entity.HRSessionEntity;
+import com.cardiomood.android.db.entity.ContinuousSessionEntity;
 import com.cardiomood.android.db.entity.RRIntervalEntity;
 import com.cardiomood.android.db.entity.SessionStatus;
 import com.cardiomood.android.dialogs.SaveAsDialog;
@@ -393,8 +393,8 @@ public abstract class AbstractSessionReportFragment extends Fragment {
         dlg.saveAsTxt();
     }
 
-    protected RuntimeExceptionDao<HRSessionEntity, Long> getSessionDao() {
-        return getHelper().getRuntimeExceptionDao(HRSessionEntity.class);
+    protected RuntimeExceptionDao<ContinuousSessionEntity, Long> getSessionDao() {
+        return getHelper().getRuntimeExceptionDao(ContinuousSessionEntity.class);
     }
 
     protected RuntimeExceptionDao<RRIntervalEntity, Long> getRRIntervalDao() {
@@ -403,12 +403,12 @@ public abstract class AbstractSessionReportFragment extends Fragment {
 
     protected abstract Axis getXAxis();
     protected abstract Axis getYAxis();
-    protected abstract double[] collectDataInBackground(HRSessionEntity session);
+    protected abstract double[] collectDataInBackground(ContinuousSessionEntity session);
     protected abstract void displayData(double rr[]);
 
     private class DataLoadingTask extends AsyncTask<Long, Void, double[]> {
 
-        private RuntimeExceptionDao<HRSessionEntity, Long> sessionDAO;
+        private RuntimeExceptionDao<ContinuousSessionEntity, Long> sessionDAO;
         private String name;
         private String date;
         private int artifactsRemoved = 0;
@@ -425,7 +425,7 @@ public abstract class AbstractSessionReportFragment extends Fragment {
         @Override
         protected double[] doInBackground(Long... params) {
             long sessionId = params[0];
-            HRSessionEntity session = sessionDAO.queryForId(sessionId);
+            ContinuousSessionEntity session = sessionDAO.queryForId(sessionId);
             name = session.getName();
             if (name == null)
                 name = "";
@@ -486,12 +486,14 @@ public abstract class AbstractSessionReportFragment extends Fragment {
 
         @Override
         protected Object doInBackground(Object[] params) {
-            final RuntimeExceptionDao<HRSessionEntity, Long> sessionDAO = getSessionDao();
-            final HRSessionEntity session = sessionDAO.queryForId(sessionId);
-            session.setOriginalSessionId(sessionId);
+            final RuntimeExceptionDao<ContinuousSessionEntity, Long> sessionDAO = getSessionDao();
+            final ContinuousSessionEntity originalSession = sessionDAO.queryForId(sessionId);
+            final ContinuousSessionEntity session = sessionDAO.queryForId(sessionId);
+            session.setOriginalSession(originalSession);
             session.setStatus(SessionStatus.COMPLETED);
             session.setExternalId(null);
             session.setId(null);
+            session.setLastModified(System.currentTimeMillis());
 
             String name = session.getName();
             if (name == null || name.trim().isEmpty()) {
@@ -528,7 +530,7 @@ public abstract class AbstractSessionReportFragment extends Fragment {
                     public Object call() throws Exception {
                         sessionDAO.createIfNotExists(session);
                         for (RRIntervalEntity item : items) {
-                            item.setSessionId(session.getId());
+                            item.setSession(session);
                             hrDAO.create(item);
                         }
                         return null;
@@ -544,7 +546,7 @@ public abstract class AbstractSessionReportFragment extends Fragment {
         @Override
         protected void onPostExecute(Object result) {
             Activity activity = getActivity();
-            HRSessionEntity session = (HRSessionEntity) result;
+            ContinuousSessionEntity session = (ContinuousSessionEntity) result;
             if (result != null && activity != null) {
                 Intent intent = new Intent(activity, SessionDetailsActivity.class);
                 intent.putExtra(SessionDetailsActivity.SESSION_ID_EXTRA, session.getId());

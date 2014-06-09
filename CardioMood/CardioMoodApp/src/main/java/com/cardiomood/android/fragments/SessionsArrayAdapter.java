@@ -15,7 +15,7 @@ import com.cardiomood.android.R;
 import com.cardiomood.android.controls.CircledTextView;
 import com.cardiomood.android.db.DatabaseHelper;
 import com.cardiomood.android.db.HeartRateDBContract;
-import com.cardiomood.android.db.entity.HRSessionEntity;
+import com.cardiomood.android.db.entity.ContinuousSessionEntity;
 import com.cardiomood.android.tools.CommonTools;
 
 import java.text.DateFormat;
@@ -27,7 +27,7 @@ import java.util.Map;
 /**
  * Created by danshin on 03.11.13.
  */
-public class SessionsArrayAdapter extends ArrayAdapter<HRSessionEntity> {
+public class SessionsArrayAdapter extends ArrayAdapter<ContinuousSessionEntity> {
 
     private static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.MEDIUM);;
     private int selectedPosition = -1;
@@ -35,7 +35,7 @@ public class SessionsArrayAdapter extends ArrayAdapter<HRSessionEntity> {
     private Map<Long, Long> cache = Collections.synchronizedMap(new HashMap<Long, Long>());
 
 
-    public SessionsArrayAdapter(Context context, DatabaseHelper databaseHelper, List<HRSessionEntity> objects) {
+    public SessionsArrayAdapter(Context context, DatabaseHelper databaseHelper, List<ContinuousSessionEntity> objects) {
         super(context, R.layout.history_item, objects);
         this.databaseHelper = databaseHelper;
     }
@@ -63,7 +63,7 @@ public class SessionsArrayAdapter extends ArrayAdapter<HRSessionEntity> {
         TextView date = (TextView) itemView.findViewById(R.id.item_date);
         TextView duration = (TextView) itemView.findViewById(R.id.item_extra);
         CircledTextView avgHeartRate = (CircledTextView) itemView.findViewById(R.id.average_heart_rate);
-        HRSessionEntity session = getItem(position);
+        ContinuousSessionEntity session = getItem(position);
 
         if (session.getName() != null)
             name.setText(session.getName());

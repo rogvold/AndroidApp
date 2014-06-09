@@ -23,7 +23,11 @@ public class JsonRRInterval implements Serializable {
     }
 
     public String toString() {
-        return GSON.toJson(this);
+        return toJson(this);
+    }
+
+    public static String toJson(JsonRRInterval rr) {
+        return GSON.toJson(rr);
     }
 
     public static JsonRRInterval fromJson(String json) {

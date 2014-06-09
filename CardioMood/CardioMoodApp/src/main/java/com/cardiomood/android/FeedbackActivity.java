@@ -20,7 +20,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.cardiomood.android.db.DatabaseHelper;
-import com.cardiomood.android.db.entity.HRSessionEntity;
+import com.cardiomood.android.db.entity.ContinuousSessionEntity;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.j256.ormlite.android.apptools.OrmLiteBaseActivity;
@@ -156,7 +156,7 @@ public class FeedbackActivity extends OrmLiteBaseActivity<DatabaseHelper> {
             feedback.put("user_rating", userRating.getRating());
             feedback.put("user_feedback_type", feedbackType.getSelectedItem().toString());
             feedback.put("user_message", userMessage.getText().toString());
-            feedback.put("sessions_number", getHelper().getRuntimeExceptionDao(HRSessionEntity.class).countOf());
+            feedback.put("sessions_number", getHelper().getRuntimeExceptionDao(ContinuousSessionEntity.class).countOf());
             feedback.put("user_email", prefHelper.getString(ConfigurationConstants.USER_EMAIL_KEY));
 
             feedback.saveInBackground(new SaveCallback() {

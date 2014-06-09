@@ -21,13 +21,14 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.cardiomood.android.components.CustomViewPager;
-import com.cardiomood.android.db.entity.HRSessionEntity;
+import com.cardiomood.android.db.entity.ContinuousSessionEntity;
 import com.cardiomood.android.fragments.monitoring.ActivityCallback;
 import com.cardiomood.android.fragments.monitoring.FragmentCallback;
 import com.cardiomood.android.fragments.monitoring.HeartRateMonitoringFragment;
 import com.cardiomood.android.gps.CardioMoodGPSService;
 import com.cardiomood.android.heartrate.AbstractDataCollector;
 import com.cardiomood.android.heartrate.CardioMoodHeartRateLeService;
+import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.heartrate.bluetooth.LeHRMonitor;
 import com.flurry.android.FlurryAgent;
@@ -47,6 +48,8 @@ public class MonitoringActivity extends ActionBarActivity implements ActionBar.T
     private boolean receiverRegistered = false;
     private boolean hrServiceBound = false;
     private boolean gpsServiceBound = false;
+
+    private PreferenceHelper preferenceHelper;
 
     private final Set<FragmentCallback> fragments = Collections.synchronizedSet(new LinkedHashSet<FragmentCallback>());
 
@@ -68,12 +71,12 @@ public class MonitoringActivity extends ActionBarActivity implements ActionBar.T
 
                     @Override
                     public void onStart() {
-                        if (mGPSService != null)
+                        if (mGPSService != null && isGPSCollectingEnabled())
                             mGPSService.start();
                     }
 
                     @Override
-                    public void onDataSaved(HRSessionEntity session) {
+                    public void onDataSaved(ContinuousSessionEntity session) {
                         if (mGPSService != null)
                             mGPSService.close();
                         if (session != null && session.getId() != null) {
@@ -148,6 +151,8 @@ public class MonitoringActivity extends ActionBarActivity implements ActionBar.T
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_monitoring);
+
+        preferenceHelper = new PreferenceHelper(this, true);
 
         // Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
@@ -383,6 +388,10 @@ public class MonitoringActivity extends ActionBarActivity implements ActionBar.T
             }
             return null;
         }
+    }
+
+    private boolean isGPSCollectingEnabled() {
+        return preferenceHelper.getBoolean(ConfigurationConstants.GPS_COLLECT_LOCATION);
     }
 
     private static IntentFilter makeGattUpdateIntentFilter() {

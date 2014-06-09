@@ -17,4 +17,5 @@
     <string name="weight">Вес:</string>
     <string name="height">Рост:</string>
     <string name="you_can_select_unit_system_in_settings">*** Систему единиц можно изменить в настройках программы.</string>
+    <string name="menu_sync">Sync</string>
 </resources>

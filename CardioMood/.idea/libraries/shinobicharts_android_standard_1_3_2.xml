@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="shinobicharts-android-standard-1.3.2">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/CardioMoodApp/build/exploded-aar/CardioMood/ShinobiCharts/unspecified/libs/shinobicharts-android-standard-1.3.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/build/intermediates/exploded-aar/CardioMood/ShinobiCharts/unspecified/libs/shinobicharts-android-standard-1.3.2.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

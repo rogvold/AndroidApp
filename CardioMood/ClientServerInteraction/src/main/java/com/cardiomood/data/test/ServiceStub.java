@@ -1,15 +1,12 @@
 package com.cardiomood.data.test;
 
 import com.cardiomood.data.CardioMoodDataService;
-import com.cardiomood.data.json.AccountStatusEnum;
 import com.cardiomood.data.json.ApiToken;
 import com.cardiomood.data.json.CardioSession;
 import com.cardiomood.data.json.CardioSessionWithData;
 import com.cardiomood.data.json.JSONError;
 import com.cardiomood.data.json.JSONResponse;
 import com.cardiomood.data.json.UserProfile;
-import com.cardiomood.data.json.UserRoleEnum;
-import com.cardiomood.data.json.UserStatusEnum;
 
 import org.codegist.crest.annotate.FormParam;
 
@@ -108,6 +105,11 @@ public class ServiceStub implements CardioMoodDataService {
         return null;
     }
 
+    @Override
+    public JSONResponse<UserProfile> getUserProfileByToken(@FormParam("token") String token) {
+        return null;
+    }
+
     private ApiToken generateApiToken() {
         final ApiToken token = new ApiToken(USER_ID, "this_is_a_test_token_"+random.nextInt(), System.currentTimeMillis()+TOKEN_LIFE_TIME);
         token.setId(random.nextLong());
@@ -117,9 +119,9 @@ public class ServiceStub implements CardioMoodDataService {
     private UserProfile getUser() {
         UserProfile user = new UserProfile();
         user.setId(USER_ID);
-        user.setAccountStatus(AccountStatusEnum.FREE);
-        user.setUserStatus(UserStatusEnum.ACTIVE);
-        user.setUserRole(UserRoleEnum.USER);
+        user.setAccountStatus(UserProfile.AccountStatus.FREE);
+        user.setUserStatus(UserProfile.Status.ACTIVE);
+        user.setUserRole(UserProfile.Role.USER);
         return user;
     }
 

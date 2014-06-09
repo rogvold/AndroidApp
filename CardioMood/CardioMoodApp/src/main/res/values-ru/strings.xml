@@ -153,5 +153,7 @@
     <string name="menu_save_this_revision">Сохранить текущий вариант</string>
     <string name="menu_undo_remove_artifacts">Отменить удаление артефактов</string>
     <string name="duration">Длительность:</string>
+    <string name="title_settings_log_gps_data">Enable GPS tracking</string>
+    <string name="summary_log_gps_data">Log your current location and speed while training.</string>
 
 </resources>

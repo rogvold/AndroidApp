@@ -4,6 +4,8 @@
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.codehaus.jackson/jackson-core-asl/1.9.0/194599ab3dd29b63b763e7635c8d7a63c830f058/jackson-core-asl-1.9.0.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.codehaus.jackson/jackson-core-asl/1.9.0/422a990713a2cef45d68a51dc87a3a3f9025fafa/jackson-core-asl-1.9.0-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>

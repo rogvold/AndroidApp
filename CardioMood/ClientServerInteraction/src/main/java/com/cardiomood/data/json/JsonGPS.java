@@ -66,8 +66,15 @@ public class JsonGPS {
         this.bearing = bearing;
     }
 
-    @Override
     public String toString() {
-        return GSON.toJson(this);
+        return toJson(this);
+    }
+
+    public static String toJson(JsonGPS gps) {
+        return GSON.toJson(gps);
+    }
+
+    public static JsonGPS fromJson(String json) {
+        return GSON.fromJson(json, JsonGPS.class);
     }
 }

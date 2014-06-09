@@ -2,8 +2,7 @@
     package="com.cardiomood.heartrate">
 
     <application android:allowBackup="true"
-        android:label="CardioMood HeartRate"
->
+        android:label="CardioMood HeartRate">
 
     </application>
 

@@ -23,6 +23,7 @@ public class SettingsFragment extends PreferenceActivityBase.AbstractMainFragmen
     private CheckBoxPreference mDisableBluetoothOnClosePref;
     private ListPreference mPreferredUnitSystemPref;
     private CheckBoxPreference mDisableSplashScreenPref;
+    private CheckBoxPreference mLogGPSDataPref;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -39,6 +40,7 @@ public class SettingsFragment extends PreferenceActivityBase.AbstractMainFragmen
         helper.putBoolean(CONNECTION_DISABLE_BT_ON_CLOSE, helper.getBoolean(CONNECTION_DISABLE_BT_ON_CLOSE));
         helper.putBoolean(DISABLE_SPLASH_SCREEN, helper.getBoolean(DISABLE_SPLASH_SCREEN));
         helper.putString(PREFERRED_MEASUREMENT_SYSTEM, helper.getString(PREFERRED_MEASUREMENT_SYSTEM));
+        helper.putBoolean(GPS_COLLECT_LOCATION, helper.getBoolean(GPS_COLLECT_LOCATION));
 
         mProtocolPref = (EditTextPreference) findPreference(SERVICE_PROTOCOL);
         mHostPref = (EditTextPreference) findPreference(SERVICE_HOST);
@@ -47,13 +49,15 @@ public class SettingsFragment extends PreferenceActivityBase.AbstractMainFragmen
         mDisableBluetoothOnClosePref = (CheckBoxPreference) findPreference(CONNECTION_DISABLE_BT_ON_CLOSE);
         mDisableSplashScreenPref = (CheckBoxPreference) findPreference(DISABLE_SPLASH_SCREEN);
         mPreferredUnitSystemPref = (ListPreference) findPreference(PREFERRED_MEASUREMENT_SYSTEM);
+        mLogGPSDataPref = (CheckBoxPreference) findPreference(GPS_COLLECT_LOCATION);
 
         refreshSummaries();
     }
 
     private void refreshSummaries() {
         updatePrefSummary(mProtocolPref, mHostPref, mPortPref, mPathPref,
-                mDisableBluetoothOnClosePref, mDisableSplashScreenPref, mPreferredUnitSystemPref);
+                mDisableBluetoothOnClosePref, mDisableSplashScreenPref, mPreferredUnitSystemPref,
+                mLogGPSDataPref);
     }
 
     @Override

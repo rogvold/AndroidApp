@@ -20,10 +20,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cardiomood.android.db.DatabaseHelper;
-import com.cardiomood.android.db.HeartRateDBContract;
-import com.cardiomood.android.db.dao.HRSessionDAO;
+import com.cardiomood.android.db.dao.ContinuousSessionDAO;
 import com.cardiomood.android.db.dao.UserDAO;
-import com.cardiomood.android.db.entity.HRSessionEntity;
+import com.cardiomood.android.db.entity.ContinuousSessionEntity;
 import com.cardiomood.android.db.entity.SessionStatus;
 import com.cardiomood.android.db.entity.UserEntity;
 import com.cardiomood.android.db.entity.UserStatus;
@@ -162,21 +161,21 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
                 try {
                     db.beginTransaction();
                     db.execSQL(
-                            "UPDATE " + HeartRateDBContract.Sessions.TABLE_NAME +
-                                    " SET " + HeartRateDBContract.Sessions.COLUMN_NAME_STATUS + "=? " +
-                                    " WHERE " + HeartRateDBContract.Sessions.COLUMN_NAME_STATUS + "=?",
+                            "UPDATE " + "sessions" +
+                                    " SET " + "status" + "=? " +
+                                    " WHERE " + "status" + "=?",
                             new String[]{
                                     String.valueOf(SessionStatus.COMPLETED),
                                     String.valueOf(SessionStatus.IN_PROGRESS)
                             }
                     );
-                    db.execSQL(
-                            "DELETE FROM " + HeartRateDBContract.Sessions.TABLE_NAME +
-                                    " WHERE " + HeartRateDBContract.Sessions._ID + " NOT IN (" +
-                                        "SELECT " + HeartRateDBContract.HeartRateData.COLUMN_NAME_SESSION_ID + " FROM " + HeartRateDBContract.HeartRateData.TABLE_NAME + "\n" +
-                                        "GROUP BY " +  HeartRateDBContract.HeartRateData.COLUMN_NAME_SESSION_ID + " HAVING count(1) > 1" +
-                                    ")"
-                    );
+//                    db.execSQL(
+//                            "DELETE FROM " + "sessions" +
+//                                    " WHERE " + HeartRateDBContract.Sessions._ID + " NOT IN (" +
+//                                        "SELECT " + HeartRateDBContract.HeartRateData.COLUMN_NAME_SESSION_ID + " FROM " + HeartRateDBContract.HeartRateData.TABLE_NAME + "\n" +
+//                                        "GROUP BY " +  HeartRateDBContract.HeartRateData.COLUMN_NAME_SESSION_ID + " HAVING count(1) > 0" +
+//                                    ")"
+//                    );
                     db.setTransactionSuccessful();
                 } finally {
                     db.endTransaction();
@@ -325,6 +324,8 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
             showProgress(true);
 
             try {
+                DataServiceHelper service = new DataServiceHelper(CardioMoodServer.INSTANCE.getService());
+
                 // query user locally
                 RuntimeExceptionDao<UserEntity, Long> userDAO = getHelper().getRuntimeExceptionDao(UserEntity.class);
 
@@ -335,24 +336,19 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
                     UserEntity user = users.get(0);
                     Log.w(TAG, "attemptLogin(): user found locally: user = " + user);
                     performLogIn(new ApiToken(user.getExternalId(), "0", System.currentTimeMillis()));
-                    startMainActivity();
                     return;
                 }
 
                 // TODO: it is strongly recommended to send SHA2 hash of the password
-                DataServiceHelper service = new DataServiceHelper(CardioMoodServer.INSTANCE.getService());
                 service.login(mEmail, mPassword, new ServerResponseCallback<ApiToken>() {
                     @Override
                     public void onResult(ApiToken result) {
                         if (result != null) {
                             performLogIn(result);
-                            startMainActivity();
                         } else {
                             mPasswordView.setError("Incorrect email and/or password.");
                             mPasswordView.requestFocus();
                         }
-                        showProgress(false);
-                        loginInProgress = false;
                     }
 
                     @Override
@@ -438,12 +434,12 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
                         user.setPassword(CommonTools.SHA256(password));
                         user = userDAO.createIfNotExists(user);
                         final Long userLocalId = user.getId();
-                        final HRSessionDAO sessionDAO = getHelper().getDao(HRSessionEntity.class);
+                        final ContinuousSessionDAO sessionDAO = getHelper().getDao(ContinuousSessionEntity.class);
                         sessionDAO.callBatchTasks(new Callable<Object>() {
                             @Override
                             public Object call() throws Exception {
-                                List<HRSessionEntity> sessions = sessionDAO.queryForAll();
-                                for (HRSessionEntity session : sessions) {
+                                List<ContinuousSessionEntity> sessions = sessionDAO.queryForAll();
+                                for (ContinuousSessionEntity session : sessions) {
                                     if (session.getUserId() == null) {
                                         session.setUserId(userLocalId);
                                         sessionDAO.update(session);
@@ -465,9 +461,6 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
             @Override
             protected void onPostExecute(Object o) {
                 Log.w(TAG, "onPostExecute() o = " + o);
-                if (o == null) {
-                    return;
-                }
                 UserEntity user = (UserEntity) o;
                 prefHelper.putLong(USER_ID, user.getId());
                 prefHelper.putString(USER_FIRST_NAME_KEY, user.getFirstName());
@@ -477,6 +470,9 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
                 prefHelper.putString(USER_SEX_KEY, user.getGender());
                 prefHelper.putFloat(USER_WEIGHT_KEY, user.getWeight());
                 prefHelper.putFloat(USER_HEIGHT_KEY, user.getHeight());
+                startMainActivity();
+                showProgress(false);
+                loginInProgress = false;
             }
         }.execute();
 

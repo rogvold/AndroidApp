@@ -18,6 +18,8 @@ public class CardioSessionWithData extends CardioSession {
 
     public CardioSessionWithData(CardioSession session) {
         super(session.id, session.name, session.description, session.serverId, session.userId, session.creationTimestamp, session.dataClassName);
+        setLastModificationTimestamp(session.getLastModificationTimestamp());
+        setEndTimestamp(session.getEndTimestamp());
         dataItems = new ArrayList<CardioDataItem>();
     }
 

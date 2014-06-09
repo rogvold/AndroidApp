@@ -1,23 +1,17 @@
 package com.cardiomood.android.db.entity;
 
+import android.location.Location;
+
 import com.cardiomood.android.db.dao.GPSLocationDAO;
 import com.cardiomood.data.json.JsonGPS;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
-import java.io.Serializable;
-import java.util.Date;
-
 /**
  * Created by danon on 27.05.2014.
  */
 @DatabaseTable(tableName = "gps_data", daoClass = GPSLocationDAO.class)
-public class GPSLocationEntity implements Serializable {
-
-    @DatabaseField(generatedId = true, columnName = "_id")
-    private Long id;
-    @DatabaseField(index = true, columnName = "session_id")
-    private Long sessionId;
+public class GPSLocationEntity extends SessionDataItem<JsonGPS> {
 
     @DatabaseField(columnName = "lat")
     private double lat;
@@ -33,27 +27,22 @@ public class GPSLocationEntity implements Serializable {
     @DatabaseField(columnName = "accuracy")
     private Double accuracy;
 
-    @DatabaseField(canBeNull = false, columnName = "time_stamp")
-    private Date timestamp;
-
     public GPSLocationEntity() {
-        timestamp = new Date();
+        timestamp = System.currentTimeMillis();
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getSessionId() {
-        return sessionId;
-    }
-
-    public void setSessionId(Long sessionId) {
-        this.sessionId = sessionId;
+    public GPSLocationEntity(Location location) {
+        timestamp = System.currentTimeMillis();
+        lat = location.getLatitude();
+        lon = location.getLongitude();
+        if (location.hasAltitude())
+            alt = location.getAltitude();
+        if (location.hasSpeed())
+            speed = (double) location.getSpeed();
+        if (location.hasBearing())
+            bearing = (double) location.getBearing();
+        if (location.hasAccuracy())
+            accuracy = (double) location.getAccuracy();
     }
 
     public double getLat() {
@@ -104,15 +93,8 @@ public class GPSLocationEntity implements Serializable {
         this.bearing = bearing;
     }
 
-    public Date getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Date timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public JsonGPS toJsonGPS() {
+    @Override
+    public JsonGPS toJsonDataItem() {
         JsonGPS json = new JsonGPS();
         json.setLat(lat);
         json.setLon(lon);
@@ -122,4 +104,7 @@ public class GPSLocationEntity implements Serializable {
         json.setAccuracy(accuracy);
         return json;
     }
+
+
+
 }

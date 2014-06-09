@@ -35,7 +35,7 @@ public class UserEntity implements Serializable {
     private Long birthDate;
     @DatabaseField(columnName = "phone_number")
     private String phoneNumber;
-    @DatabaseField(columnName = "gender")
+    @DatabaseField(columnName = "gender", defaultValue = "UNSPECIFIED")
     private String gender;
     @DatabaseField(columnName = "last_modified")
     private long lastModified;

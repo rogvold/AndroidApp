@@ -15,7 +15,7 @@ import android.widget.Toast;
 
 import com.cardiomood.android.R;
 import com.cardiomood.android.db.DatabaseHelper;
-import com.cardiomood.android.db.entity.HRSessionEntity;
+import com.cardiomood.android.db.entity.ContinuousSessionEntity;
 import com.cardiomood.android.db.entity.RRIntervalEntity;
 import com.cardiomood.android.fragments.details.TextReport;
 import com.flurry.android.FlurryAgent;
@@ -161,8 +161,8 @@ public class SaveAsDialog extends Dialog {
                 File outputFile = new File(getTextStorageDirectory(), generateFileName());
                 pw = new PrintWriter(new FileWriter(outputFile));
 
-                RuntimeExceptionDao<HRSessionEntity, Long> sessionDAO = databaseHelper.getRuntimeExceptionDao(HRSessionEntity.class);
-                HRSessionEntity session = sessionDAO.queryForId(sessionId);
+                RuntimeExceptionDao<ContinuousSessionEntity, Long> sessionDAO = databaseHelper.getRuntimeExceptionDao(ContinuousSessionEntity.class);
+                ContinuousSessionEntity session = sessionDAO.queryForId(sessionId);
                 if (session == null) {
                     throw new IllegalArgumentException("Session doesn't exist: sessionId = " + sessionId);
                 }
@@ -192,7 +192,7 @@ public class SaveAsDialog extends Dialog {
                 pw.printf("%4s  %-14s  %-4s %-3s%n", "n", "timestamp", "rr", "bpm");
                 int i = 1;
                 for (RRIntervalEntity item: items) {
-                    pw.printf("%4d  %14d  %4d %3d%n", i++, item.getTimeStamp().getTime(), (int)item.getRrTime(), item.getHeartBeatsPerMinute());
+                    pw.printf("%4d  %14d  %4d %3d%n", i++, item.getTimestamp(), (int)item.getRrTime(), item.getHeartBeatsPerMinute());
                 }
                 pw.println();
                 pw.flush();

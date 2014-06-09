@@ -8,9 +8,14 @@ import com.cardiomood.math.parameters.RMSSDValue;
 import com.cardiomood.math.parameters.SDNNValue;
 import com.cardiomood.math.parameters.SIValue;
 import com.cardiomood.math.window.DataWindow;
+import com.google.gson.Gson;
 
 import org.apache.commons.math3.util.DoubleArray;
 import org.apache.commons.math3.util.ResizableDoubleArray;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
 
 import static com.cardiomood.math.window.DataWindow.CallbackAdapter;
 
@@ -183,10 +188,13 @@ public final class HeartRateUtils {
             if (t - t0 >= windowSize) {
                 values.addElement(getSI(rrIntervals, i0, i-i0));
                 timeValues.addElement(t);
-                t0 = values.getNumElements() * step;
+                t0 = time[0] + values.getNumElements() * step;
             }
-            if (t >= windowSize) {
-                i0++;
+            if (t - time[0] >= windowSize) {
+                while (i0 < i && time[i0] < t0) {
+                    i0++;
+                }
+                t0 = time[i0];
             }
         }
         double[][] result = new double[2][];
@@ -206,5 +214,14 @@ public final class HeartRateUtils {
             sum += rrIntervals[i];
         }
         return sum;
+    }
+
+    public static void main(String[] args) throws Exception {
+            URL url = new URL("https://gist.githubusercontent.com/rogvold/fec741d35d967864ae17/raw/6b11a42284f92813e6c9c582aa17bea512aa0165/gistfile1.txt");
+            BufferedReader br = new BufferedReader(new InputStreamReader(url.openStream()));
+            String json = br.readLine();
+            br.close();
+            double[][] data = new Gson().fromJson(json, double[][].class);
+            double[][] tt = getSI(data[1], data[0], 2*60*1000, 5*1000);
     }
 }

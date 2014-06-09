@@ -30,6 +30,11 @@ import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.android.tools.fragments.ProfileFragment;
+import com.cardiomood.data.CardioMoodServer;
+import com.cardiomood.data.DataServiceHelper;
+import com.cardiomood.data.async.ServerResponseCallbackRetry;
+import com.cardiomood.data.json.JSONError;
+import com.cardiomood.data.json.UserProfile;
 import com.flurry.android.FlurryAgent;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
@@ -62,6 +67,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     CustomViewPager mViewPager;
 
     private DatabaseHelper databaseHelper;
+    private DataServiceHelper dataServiceHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +75,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         setContentView(R.layout.activity_main);
 
         mPrefHelper = new PreferenceHelper(this, true);
+        dataServiceHelper = new DataServiceHelper(CardioMoodServer.INSTANCE.getService(), mPrefHelper);
 
         // Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
@@ -305,32 +312,110 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             return null;
         }
 
-        private ProfileFragment createProfileFragment() {
-            ProfileFragment fragment = new ProfileFragment();
+        private UserEntity saveProfileLocally() {
+            UserEntity user = new UserEntity();
+            user.setId(mPrefHelper.getLong(USER_ID));
+            user.setExternalId(mPrefHelper.getLong(USER_EXTERNAL_ID));
+            user.setEmail(mPrefHelper.getString(USER_EMAIL_KEY));
+            user.setPassword(CommonTools.SHA256(mPrefHelper.getString(USER_PASSWORD_KEY)));
+            user.setFirstName(mPrefHelper.getString(USER_FIRST_NAME_KEY));
+            user.setLastName(mPrefHelper.getString(USER_LAST_NAME_KEY));
+            user.setBirthDate(mPrefHelper.getLong(USER_BIRTH_DATE_KEY));
+            user.setWeight(mPrefHelper.getFloat(USER_WEIGHT_KEY));
+            user.setHeight(mPrefHelper.getFloat(USER_HEIGHT_KEY));
+            user.setPhoneNumber(mPrefHelper.getString(USER_PHONE_NUMBER_KEY));
+            user.setGender(mPrefHelper.getString(USER_SEX_KEY, "UNSPECIFIED"));
+            user.setLastModified(System.currentTimeMillis());
+            user.setStatus(UserStatus.NEW);
 
+            // save user data locally
+            RuntimeExceptionDao<UserEntity, Long> userDAO = getHelper().getRuntimeExceptionDao(UserEntity.class);
+            userDAO.update(user);
+
+            Log.w(TAG, "saveProfileLocally(): User has been updated: user = " + user);
+
+            return user;
+        }
+
+        private void saveProfileRemotely(UserEntity user) {
+            final UserProfile profile = new UserProfile();
+            profile.setId(user.getExternalId());
+            profile.setFirstName(user.getFirstName());
+            profile.setLastName(user.getLastName());
+            profile.setLastModificationDate(user.getLastModified());
+            profile.setBirthTimestamp(user.getBirthDate());
+            profile.setGender(UserProfile.Gender.valueOf(user.getGender() == null ? "UNSPECIFIED" : user.getGender()));
+            profile.setWeight(user.getWeight() == null ? null : user.getWeight().doubleValue());
+            profile.setHeight(user.getHeight() == null ? null : user.getHeight().doubleValue());
+            profile.setPhoneNumber(user.getPhoneNumber());
+
+            dataServiceHelper.updateUserProfile(profile, new ServerResponseCallbackRetry<String>() {
+                @Override
+                public void retry() {
+                    dataServiceHelper.updateUserProfile(profile, this);
+                }
+
+                @Override
+                public void onResult(String result) {
+                    Log.w(TAG, "saveProfileRemotely(): result="+result);
+                    Toast.makeText(MainActivity.this, "Profile successfully updated", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onError(JSONError error) {
+                    Log.w(TAG, "saveProfileRemotely() failed: error = " + error);
+                    Toast.makeText(MainActivity.this, "Failed to sync profile", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
+        private ProfileFragment createProfileFragment() {
+            final ProfileFragment fragment = new ProfileFragment();
             fragment.setCallback(new ProfileFragment.Callback() {
                 @Override
                 public void onSave() {
-                    UserEntity user = new UserEntity();
-                    user.setId(mPrefHelper.getLong(USER_ID));
-                    user.setExternalId(mPrefHelper.getLong(USER_EXTERNAL_ID));
-                    user.setEmail(mPrefHelper.getString(USER_EMAIL_KEY));
-                    user.setPassword(CommonTools.SHA256(mPrefHelper.getString(USER_PASSWORD_KEY)));
-                    user.setFirstName(mPrefHelper.getString(USER_FIRST_NAME_KEY));
-                    user.setLastName(mPrefHelper.getString(USER_LAST_NAME_KEY));
-                    user.setBirthDate(mPrefHelper.getLong(USER_BIRTH_DATE_KEY));
-                    user.setWeight(mPrefHelper.getFloat(USER_WEIGHT_KEY));
-                    user.setHeight(mPrefHelper.getFloat(USER_HEIGHT_KEY));
-                    user.setPhoneNumber(mPrefHelper.getString(USER_PHONE_NUMBER_KEY));
-                    user.setGender(mPrefHelper.getString(USER_SEX_KEY, "UNSPECIFIED"));
-                    user.setLastModified(System.currentTimeMillis());
-                    user.setStatus(UserStatus.NEW);
+                    UserEntity user = saveProfileLocally();
+                    //saveProfileRemotely(user);
+                }
 
-                    // save user data locally
-                    RuntimeExceptionDao<UserEntity, Long> userDAO = getHelper().getRuntimeExceptionDao(UserEntity.class);
-                    userDAO.update(user);
+                @Override
+                public void onSync() {
+                    dataServiceHelper.getUserProfile(new ServerResponseCallbackRetry<UserProfile>() {
+                        @Override
+                        public void retry() {
+                            dataServiceHelper.getUserProfile(this);
+                        }
 
-                    Log.w(TAG, "User has been updated: user = " + user);
+                        @Override
+                        public void onResult(UserProfile result) {
+                            RuntimeExceptionDao<UserEntity, Long> userDAO = getHelper().getRuntimeExceptionDao(UserEntity.class);
+                            UserEntity user = userDAO.queryForId(mPrefHelper.getLong(USER_ID));
+                            if (user != null) {
+                                long lastModified = user.getLastModified();
+                                if (result.getLastModificationDate() != null && lastModified < result.getLastModificationDate()) {
+                                    // updated remotely
+                                    mPrefHelper.putString(USER_FIRST_NAME_KEY, result.getFirstName());
+                                    mPrefHelper.putString(USER_LAST_NAME_KEY, result.getLastName());
+                                    mPrefHelper.putFloat(USER_WEIGHT_KEY, result.getWeight() == null ? null : result.getWeight().floatValue());
+                                    mPrefHelper.putFloat(USER_HEIGHT_KEY, result.getHeight() == null ? null : result.getHeight().floatValue());
+                                    mPrefHelper.putLong(USER_BIRTH_DATE_KEY, result.getBirthTimestamp());
+                                    mPrefHelper.putString(USER_SEX_KEY, result.getGender() == null ? null : result.getGender().toString());
+                                    mPrefHelper.putString(USER_PHONE_NUMBER_KEY, result.getPhoneNumber());
+                                    fragment.reloadData();
+                                    saveProfileLocally();
+                                    Toast.makeText(MainActivity.this, "Profile successfully updated", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    // updated locally
+                                    saveProfileRemotely(user);
+                                }
+                            }
+                        }
+
+                        @Override
+                        public void onError(JSONError error) {
+                            Toast.makeText(MainActivity.this, "Failed to sync profile. " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 }
             });
 

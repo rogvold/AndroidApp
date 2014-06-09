@@ -5,9 +5,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
 import android.util.Log;
 
+import com.cardiomood.android.db.entity.ContinuousSessionEntity;
 import com.cardiomood.android.db.entity.GPSLocationEntity;
-import com.cardiomood.android.db.entity.GPSSessionEntity;
-import com.cardiomood.android.db.entity.HRSessionEntity;
 import com.cardiomood.android.db.entity.RRIntervalEntity;
 import com.cardiomood.android.db.entity.UserEntity;
 import com.cardiomood.android.tools.PreferenceHelper;
@@ -63,9 +62,8 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper implements HeartRate
         Log.d(TAG, "onCreate()");
         try {
             TableUtils.createTable(connectionSource, UserEntity.class);
-            TableUtils.createTable(connectionSource, HRSessionEntity.class);
+            TableUtils.createTable(connectionSource, ContinuousSessionEntity.class);
             TableUtils.createTable(connectionSource, RRIntervalEntity.class);
-            TableUtils.createTable(connectionSource, GPSSessionEntity.class);
             TableUtils.createTable(connectionSource, GPSLocationEntity.class);
         } catch (SQLException ex) {
             Log.e(TAG, "onCreate(): failed to create tables", ex);

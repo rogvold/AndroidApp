@@ -4,7 +4,7 @@ import android.graphics.Color;
 import android.util.Log;
 
 import com.cardiomood.android.R;
-import com.cardiomood.android.db.entity.HRSessionEntity;
+import com.cardiomood.android.db.entity.ContinuousSessionEntity;
 import com.cardiomood.android.db.entity.RRIntervalEntity;
 import com.cardiomood.math.histogram.Histogram;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
@@ -49,7 +49,7 @@ public class HistogramReportFragment extends AbstractSessionReportFragment {
     }
 
     @Override
-    protected double[] collectDataInBackground(HRSessionEntity session) {
+    protected double[] collectDataInBackground(ContinuousSessionEntity session) {
         try {
             List<RRIntervalEntity> items = hrDAO.queryBuilder()
                     .orderBy("_id", true).where().eq("session_id", session.getId())

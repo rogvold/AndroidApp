@@ -3,7 +3,7 @@ package com.cardiomood.android.heartrate;
 import android.util.Log;
 
 import com.cardiomood.android.db.DatabaseHelper;
-import com.cardiomood.android.db.entity.HRSessionEntity;
+import com.cardiomood.android.db.entity.ContinuousSessionEntity;
 import com.cardiomood.android.db.entity.RRIntervalEntity;
 import com.cardiomood.android.db.entity.SessionStatus;
 import com.cardiomood.android.tools.CommonTools;
@@ -18,7 +18,6 @@ import com.cardiomood.data.json.CardioSession;
 import com.cardiomood.data.json.CardioSessionWithData;
 import com.cardiomood.data.json.JSONError;
 import com.cardiomood.data.json.JSONResponse;
-import com.cardiomood.data.json.JsonRRInterval;
 import com.cardiomood.heartrate.bluetooth.HeartRateLeService;
 import com.cardiomood.math.DataWindowSet;
 import com.cardiomood.math.window.DataWindow;
@@ -35,19 +34,20 @@ import java.util.List;
 public abstract class AbstractDataCollector implements HeartRateLeService.DataCollector {
 
     private static final String TAG = AbstractDataCollector.class.getSimpleName();
+    private static final String DATA_CLASS_NAME = "JsonRRInterval";
 
     protected CardioMoodHeartRateLeService service = null;
     protected DataWindowSet math = new DataWindowSet(); // cache for data
     protected DataServiceHelper dataService;
     protected CardioSessionWithData cardioSession = null;
 
-    private RuntimeExceptionDao<HRSessionEntity, Long> sessionDAO;
+    private RuntimeExceptionDao<ContinuousSessionEntity, Long> sessionDAO;
     private RuntimeExceptionDao<RRIntervalEntity, Long> hrItemDAO;
     private DatabaseHelper databaseHelper;
 
     private final PreferenceHelper preferenceHelper;
 
-    private HRSessionEntity currentSession = null;
+    private ContinuousSessionEntity currentSession = null;
     private List<RRIntervalEntity> heartRateDataItems = null;
     private List<CardioDataItem> pendingData = null;
     private int count = 0;
@@ -68,7 +68,7 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
         this.preferenceHelper = new PreferenceHelper(service, true);
         this.dataService = new DataServiceHelper(CardioMoodServer.INSTANCE.getService(), this.preferenceHelper);
 
-        sessionDAO = helper.getRuntimeExceptionDao(HRSessionEntity.class);
+        sessionDAO = helper.getRuntimeExceptionDao(ContinuousSessionEntity.class);
         hrItemDAO = helper.getRuntimeExceptionDao(RRIntervalEntity.class);
     }
 
@@ -79,7 +79,7 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
 
     public void onStartCollecting() {
         // do nothing
-        currentSession = new HRSessionEntity();
+        currentSession = new ContinuousSessionEntity();
         currentSession.setDateStarted(null);
         currentSession.setStatus(SessionStatus.NEW);
         Long userId = preferenceHelper.getLong(ConfigurationConstants.USER_ID, -1);
@@ -96,22 +96,18 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
     }
 
     public void onFirstDataRecieved() {
-        if (currentSession.getDateStarted() == null) {
-            currentSession.setDateStarted(new Date());
-            currentSession.setStatus(SessionStatus.IN_PROGRESS);
-            currentSession = sessionDAO.createIfNotExists(currentSession);
-            // send to server
-            attemptCreateCardioSession();
-        }
+        currentSession.setDateStarted(new Date());
+        currentSession.setStatus(SessionStatus.IN_PROGRESS);
+        currentSession = sessionDAO.createIfNotExists(currentSession);
     }
 
     private void attemptCreateCardioSession() {
         if (!creatingSession) {
             creatingSession = true;
-            dataService.createSession("JsonRRInterval", new ServerResponseCallbackRetry<CardioSession>() {
+            dataService.createSession(DATA_CLASS_NAME, new ServerResponseCallbackRetry<CardioSession>() {
                 @Override
                 public void retry() {
-                    dataService.createSession("JsonRRInterval", this);
+                    dataService.createSession(DATA_CLASS_NAME, this);
                 }
 
                 @Override
@@ -210,17 +206,22 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
         if (getStatus() == Status.COLLECTING) {
             if (getIntervalsCount() == 0 && rrIntervals.length > 0)
                 onFirstDataRecieved();
+            long timestamp = System.currentTimeMillis();
+            for (short rr: rrIntervals)
+                timestamp -= rr;
             for (short rr: rrIntervals) {
                 math.addIntervals(rr);
-                RRIntervalEntity hrItem = new RRIntervalEntity(bpm, rr);
+                RRIntervalEntity hrItem = new RRIntervalEntity(timestamp, bpm, rr);
+                hrItem.setSession(currentSession);
                 heartRateDataItems.add(hrItem);
-                hrItem.setSessionId(currentSession.getId());
                 hrItemDAO.create(hrItem);
-                CardioDataItem dataItem = new CardioDataItem();
-                dataItem.setCreationTimestamp(System.currentTimeMillis());
+                currentSession.setLastModified(timestamp);
+
+                CardioDataItem dataItem = hrItem.toCardioDataItem();
                 dataItem.setNumber((long) count++);
-                dataItem.setDataItem(new JsonRRInterval((int) rr).toString());
                 pendingData.add(dataItem);
+
+                timestamp += rr;
                 if (needToStopCollecting()) {
                     sendPendingData();
                     stopCollecting();
@@ -322,7 +323,7 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
         void onComplete();
         void onStart();
         void onDataAdded(int bpm, short rr[]);
-        void onDataSaved(HRSessionEntity session);
+        void onDataSaved(ContinuousSessionEntity session);
     }
 
     public static class SimpleListener implements Listener {
@@ -343,7 +344,7 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
         }
 
         @Override
-        public void onDataSaved(HRSessionEntity session) {
+        public void onDataSaved(ContinuousSessionEntity session) {
 
         }
     }
@@ -351,8 +352,6 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
     private class ServerSyncWorkerThread extends WorkerThread<CardioDataItem> {
 
         private CardioSession cardioSession;
-       // private List<CardioDataItem> internetQueue = Collections.synchronizedList(new ArrayList<CardioDataItem>());
-
         private List<CardioDataItem> buffer = Collections.synchronizedList(new ArrayList<CardioDataItem>());
 
         private ServerSyncWorkerThread(CardioSession cardioSession) {
@@ -365,6 +364,7 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
             buffer.add(item);
             if (getQueueSize() > 0)
                 return;
+            cardioSession.setLastModificationTimestamp(currentSession.getLastModified());
             final CardioSessionWithData session = new CardioSessionWithData(cardioSession);
             session.setDataItems(buffer);
             JSONResponse<String> response = dataService.appendDataToSession(session);
@@ -388,11 +388,19 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
         public void onStop() {
             if (isFinished()) {
                 // update session status locally
-                currentSession.setStatus(SessionStatus.SYNCHRONIZED);
+                currentSession.setStatus(SessionStatus.SYNCHRONIZING);
                 sessionDAO.update(currentSession);
 
                 // mark session as finished remotely
-                dataService.finishSession(currentSession.getExternalId(), currentSession.getDateEnded().getTime());
+                JSONResponse<String> response =  dataService.finishSession(currentSession.getExternalId(), currentSession.getDateEnded().getTime());
+                Log.w(TAG, "finishSession(): response = " + response);
+                if (response.isOk()) {
+                    currentSession.setStatus(SessionStatus.SYNCHRONIZED);
+                    sessionDAO.update(currentSession);
+                } else {
+                    currentSession.setStatus(SessionStatus.COMPLETED);
+                    sessionDAO.update(currentSession);
+                }
             }
         }
     }

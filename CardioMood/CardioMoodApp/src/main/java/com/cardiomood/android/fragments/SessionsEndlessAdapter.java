@@ -9,7 +9,7 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import com.cardiomood.android.db.DatabaseHelper;
-import com.cardiomood.android.db.entity.HRSessionEntity;
+import com.cardiomood.android.db.entity.ContinuousSessionEntity;
 import com.cardiomood.android.db.entity.UserEntity;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
@@ -26,11 +26,11 @@ public class SessionsEndlessAdapter extends EndlessAdapter {
 
     private static final int STEP = 25;
 
-    private RuntimeExceptionDao<HRSessionEntity, Long> sessionDAO;
+    private RuntimeExceptionDao<ContinuousSessionEntity, Long> sessionDAO;
     private RuntimeExceptionDao<UserEntity, Long> userDAO;
     private PreferenceHelper pHelper;
     private Long userId = null;
-    private final List<HRSessionEntity> cachedSessions = new ArrayList<HRSessionEntity>(STEP*2);
+    private final List<ContinuousSessionEntity> cachedSessions = new ArrayList<ContinuousSessionEntity>(STEP*2);
 
 
     public SessionsEndlessAdapter(ListAdapter wrapped, Context context, DatabaseHelper databaseHelper) {
@@ -41,7 +41,7 @@ public class SessionsEndlessAdapter extends EndlessAdapter {
         userId = pHelper.getLong(ConfigurationConstants.USER_ID);
 
 
-        sessionDAO = databaseHelper.getRuntimeExceptionDao(HRSessionEntity.class);
+        sessionDAO = databaseHelper.getRuntimeExceptionDao(ContinuousSessionEntity.class);
     }
 
     @Override
@@ -54,10 +54,11 @@ public class SessionsEndlessAdapter extends EndlessAdapter {
 
     @Override
     protected boolean cacheInBackground() throws Exception {
-        List<HRSessionEntity> sessions =  sessionDAO.queryBuilder()
+        List<ContinuousSessionEntity> sessions =  sessionDAO.queryBuilder()
                 .limit((long) STEP).offset((long) getWrappedAdapter().getCount())
                 .orderBy("date_started", false)
                 .where().eq("user_id", userId)
+                .and().eq("data_class_name", "JsonRRInterval")
                 .query();
         if (sessions == null || sessions.isEmpty())
             return false;
@@ -73,7 +74,7 @@ public class SessionsEndlessAdapter extends EndlessAdapter {
         ArrayAdapter a=(ArrayAdapter)getWrappedAdapter();
 
         synchronized (cachedSessions) {
-            for (HRSessionEntity session: cachedSessions) {
+            for (ContinuousSessionEntity session: cachedSessions) {
                 a.add(session);
             }
             cachedSessions.clear();
