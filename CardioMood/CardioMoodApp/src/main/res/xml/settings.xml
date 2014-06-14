@@ -19,11 +19,31 @@
             android:summary="@string/summary_log_gps_data" />
     </PreferenceCategory>
 
+    <PreferenceCategory android:title="@string/data_service_settings_title">
+        <ListPreference
+            android:key="sync.strategy"
+            android:title="@string/title_settings_sync_strategy"
+            android:entries="@array/sync_strategy_titles"
+            android:entryValues="@array/sync_strategy_values"
+            android:defaultValue="SYNC_WHEN_MODIFIED" />
+        <CheckBoxPreference
+            android:key="sync.disable_real_time"
+            android:title="@string/title_settings_sync_disable_real_time"
+            android:summary="@string/summary_sync_disable_real_time"
+            android:defaultValue="false"
+            />
+    </PreferenceCategory>
+
     <PreferenceCategory android:title="@string/connection_settings_title">
         <CheckBoxPreference
             android:key="connection.disable_bluetooth_on_close"
             android:title="@string/title_settings_disable_bluetooth_on_close"
             android:summary="@string/summary_disable_bluetooth_on_close" />
+        <Preference
+            android:key="device.last_device_battery_level"
+            android:title="@string/title_settings_last_device_battery_level"
+            android:summary="N/A"
+        />
     </PreferenceCategory>
 
 </PreferenceScreen>

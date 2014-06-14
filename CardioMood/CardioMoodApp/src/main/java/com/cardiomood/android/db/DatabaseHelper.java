@@ -73,7 +73,7 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper implements HeartRate
     @Override
     public void onUpgrade(SQLiteDatabase database, ConnectionSource connectionSource, int oldVersion, int newVersion) {
         // Upgrade or downgrade the database schema
-        new DBUpgradeHelper(this).performUpgrade(oldVersion, newVersion);
+        new DBUpgradeHelper(database, this).performUpgrade(oldVersion, newVersion);
 
         if (oldVersion < 26) {
             // due to update in ProfileFragment

@@ -56,7 +56,7 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
     private Listener listener;
 
     private Status status = Status.NOT_STARTED;
-    private boolean creatingSession = false;
+    private volatile boolean creatingSession = false;
 
 
     public AbstractDataCollector(CardioMoodHeartRateLeService service, DatabaseHelper helper) {
@@ -86,6 +86,7 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
         if (userId < 0)
             userId = null;
         currentSession.setUserId(userId);
+        currentSession.setDataClassName(DATA_CLASS_NAME);
 
         heartRateDataItems = new ArrayList<RRIntervalEntity>();
         pendingData = Collections.synchronizedList(new ArrayList<CardioDataItem>());
@@ -102,12 +103,15 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
     }
 
     private void attemptCreateCardioSession() {
+        if (preferenceHelper.getBoolean(ConfigurationConstants.SYNC_DISABLE_REAL_TIME, false, true))
+            return;
+
         if (!creatingSession) {
             creatingSession = true;
-            dataService.createSession(DATA_CLASS_NAME, new ServerResponseCallbackRetry<CardioSession>() {
+            dataService.createSession(DATA_CLASS_NAME, currentSession.getDateStarted().getTime(), new ServerResponseCallbackRetry<CardioSession>() {
                 @Override
                 public void retry() {
-                    dataService.createSession(DATA_CLASS_NAME, this);
+                    dataService.createSession(DATA_CLASS_NAME, currentSession.getDateStarted().getTime(), this);
                 }
 
                 @Override
@@ -203,39 +207,44 @@ public abstract class AbstractDataCollector implements HeartRateLeService.DataCo
 
     @Override
     public void addData(int bpm, short[] rrIntervals) {
-        if (getStatus() == Status.COLLECTING) {
-            if (getIntervalsCount() == 0 && rrIntervals.length > 0)
-                onFirstDataRecieved();
-            long timestamp = System.currentTimeMillis();
-            for (short rr: rrIntervals)
-                timestamp -= rr;
-            for (short rr: rrIntervals) {
-                math.addIntervals(rr);
-                RRIntervalEntity hrItem = new RRIntervalEntity(timestamp, bpm, rr);
-                hrItem.setSession(currentSession);
-                heartRateDataItems.add(hrItem);
-                hrItemDAO.create(hrItem);
-                currentSession.setLastModified(timestamp);
+        if (rrIntervals.length == 0)
+            return;
+        synchronized (this) {
+            if (getStatus() == Status.COLLECTING) {
+                if (getIntervalsCount() == 0)
+                    onFirstDataRecieved();
+                long timestamp = System.currentTimeMillis();
+                for (short rr : rrIntervals)
+                    timestamp -= rr;
+                for (short rr : rrIntervals) {
+                    math.addIntervals(rr);
+                    RRIntervalEntity hrItem = new RRIntervalEntity(timestamp, bpm, rr);
+                    hrItem.setSession(currentSession);
+                    heartRateDataItems.add(hrItem);
+                    hrItemDAO.create(hrItem);
+                    currentSession.setLastModified(timestamp);
+                    sessionDAO.update(currentSession);
 
-                CardioDataItem dataItem = hrItem.toCardioDataItem();
-                dataItem.setNumber((long) count++);
-                pendingData.add(dataItem);
+                    CardioDataItem dataItem = hrItem.toCardioDataItem();
+                    dataItem.setNumber((long) count++);
+                    pendingData.add(dataItem);
 
-                timestamp += rr;
-                if (needToStopCollecting()) {
-                    sendPendingData();
-                    stopCollecting();
-                    break;
+                    timestamp += rr;
+                    if (needToStopCollecting()) {
+                        sendPendingData();
+                        stopCollecting();
+                        break;
+                    }
                 }
+                if (listener != null)
+                    listener.onDataAdded(bpm, rrIntervals);
+                sendPendingData();
+            } else {
+                for (short rr : rrIntervals) {
+                    math.addIntervals(rr);
+                }
+                Log.d(TAG, "addData() - ignored, status = " + getStatus());
             }
-            sendPendingData();
-            if (listener != null)
-                listener.onDataAdded(bpm, rrIntervals);
-        } else {
-            for (short rr: rrIntervals) {
-                math.addIntervals(rr);
-            }
-            Log.d(TAG, "addData() - ignored, status = " + getStatus());
         }
     }
 

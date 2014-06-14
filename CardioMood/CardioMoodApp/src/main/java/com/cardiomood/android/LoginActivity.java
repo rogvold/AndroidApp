@@ -162,20 +162,13 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
                     db.beginTransaction();
                     db.execSQL(
                             "UPDATE " + "sessions" +
-                                    " SET " + "status" + "=? " +
+                                    " SET " + "status" + "=?, date_ended = last_modified, last_modified = " + System.currentTimeMillis() +
                                     " WHERE " + "status" + "=?",
                             new String[]{
                                     String.valueOf(SessionStatus.COMPLETED),
                                     String.valueOf(SessionStatus.IN_PROGRESS)
                             }
                     );
-//                    db.execSQL(
-//                            "DELETE FROM " + "sessions" +
-//                                    " WHERE " + HeartRateDBContract.Sessions._ID + " NOT IN (" +
-//                                        "SELECT " + HeartRateDBContract.HeartRateData.COLUMN_NAME_SESSION_ID + " FROM " + HeartRateDBContract.HeartRateData.TABLE_NAME + "\n" +
-//                                        "GROUP BY " +  HeartRateDBContract.HeartRateData.COLUMN_NAME_SESSION_ID + " HAVING count(1) > 0" +
-//                                    ")"
-//                    );
                     db.setTransactionSuccessful();
                 } finally {
                     db.endTransaction();

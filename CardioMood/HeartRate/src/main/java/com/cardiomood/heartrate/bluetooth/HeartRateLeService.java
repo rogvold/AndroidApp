@@ -28,27 +28,34 @@ public abstract class HeartRateLeService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             //HeartRateLeService.this.sendBroadcast(intent);
-            DataCollector collector = dataCollector;
-            if (collector != null) {
-                String action = intent.getAction();
-                // Connection status changed
-                if (LeHRMonitor.ACTION_CONNECTION_STATUS_CHANGED.equals(action)) {
-                    int newStatus = intent.getIntExtra(LeHRMonitor.EXTRA_NEW_STATUS, 0);
-                    if (newStatus == LeHRMonitor.CONNECTED_STATUS)
-                        collector.onConnected();
-                    int oldStatus = intent.getIntExtra(LeHRMonitor.EXTRA_OLD_STATUS, 0);
-                    if (oldStatus == LeHRMonitor.CONNECTED_STATUS)
-                        collector.onDisconnected();
-                }
-                // Heart rate data received
-                if (LeHRMonitor.ACTION_HEART_RATE_DATA_RECEIVED.equals(action)) {
-                    int bpm = intent.getIntExtra(LeHRMonitor.EXTRA_BPM, 0);
-                    short[] rr = intent.getShortArrayExtra(LeHRMonitor.EXTRA_INTERVALS);
-                    collector.addData(bpm, rr);
-                }
-            }
+            HeartRateLeService.this.onReceiveBroadcast(context, intent);
         }
     };
+
+    protected void onReceiveBroadcast(Context context, Intent intent) {
+        final DataCollector collector = dataCollector;
+        final String action = intent.getAction();
+        // Connection status changed
+        if (LeHRMonitor.ACTION_CONNECTION_STATUS_CHANGED.equals(action)) {
+            int newStatus = intent.getIntExtra(LeHRMonitor.EXTRA_NEW_STATUS, 0);
+            if (newStatus == LeHRMonitor.CONNECTED_STATUS) {
+                if (collector != null)
+                    collector.onConnected();
+                monitor.requestBatteryLevel();
+            }
+            int oldStatus = intent.getIntExtra(LeHRMonitor.EXTRA_OLD_STATUS, 0);
+            if (oldStatus == LeHRMonitor.CONNECTED_STATUS)
+                if (collector != null)
+                    collector.onDisconnected();
+        }
+        // Heart rate data received
+        if (LeHRMonitor.ACTION_HEART_RATE_DATA_RECEIVED.equals(action)) {
+            int bpm = intent.getIntExtra(LeHRMonitor.EXTRA_BPM, 0);
+            short[] rr = intent.getShortArrayExtra(LeHRMonitor.EXTRA_INTERVALS);
+            if (collector != null)
+                collector.addData(bpm, rr);
+        }
+    }
 
     private boolean receiverRegistered = false;
 
@@ -175,6 +182,7 @@ public abstract class HeartRateLeService extends Service {
         intentFilter.addAction(LeHRMonitor.ACTION_HEART_RATE_DATA_RECEIVED);
         intentFilter.addAction(LeHRMonitor.ACTION_BPM_CHANGED);
         intentFilter.addAction(LeHRMonitor.ACTION_CONNECTION_STATUS_CHANGED);
+        intentFilter.addAction(LeHRMonitor.ACTION_BATTERY_LEVEL);
         return intentFilter;
     }
 }

@@ -480,9 +480,6 @@ public class ConnectionFragment extends Fragment {
                 }
 
                 AbstractDataCollector collector = createDataCollector();
-                if (collector != null && startImmediately.isChecked()) {
-                    collector.startCollecting();
-                }
                 if (collector != null) {
                     collector.setListener(new AbstractDataCollector.SimpleListener() {
 
@@ -505,6 +502,9 @@ public class ConnectionFragment extends Fragment {
                             }
                         }
                     });
+                    if (startImmediately.isChecked()) {
+                        collector.startCollecting();
+                    }
                 }
                 mBluetoothLeService.setDataCollector(collector);
             } catch (Exception ex) {

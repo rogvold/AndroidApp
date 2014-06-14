@@ -70,6 +70,7 @@ public class GPSDataCollector implements CardioMoodGPSService.DataCollector {
         currentSession = new ContinuousSessionEntity();
         currentSession.setDateStarted(null);
         currentSession.setStatus(SessionStatus.NEW);
+        currentSession.setDataClassName(DATA_CLASS_NAME);
         Long userId = preferenceHelper.getLong(ConfigurationConstants.USER_ID, -1);
         if (userId < 0)
             userId = null;
@@ -94,12 +95,15 @@ public class GPSDataCollector implements CardioMoodGPSService.DataCollector {
     }
 
     private void attemptCreateCardiomoodSession() {
+        if (preferenceHelper.getBoolean(ConfigurationConstants.SYNC_DISABLE_REAL_TIME, false, true))
+            return;
+
         if (!creatingSession) {
             creatingSession = true;
-            dataService.createSession(DATA_CLASS_NAME, new ServerResponseCallbackRetry<CardioSession>() {
+            dataService.createSession(DATA_CLASS_NAME, currentSession.getDateStarted().getTime(), new ServerResponseCallbackRetry<CardioSession>() {
                 @Override
                 public void retry() {
-                    dataService.createSession(DATA_CLASS_NAME, this);
+                    dataService.createSession(DATA_CLASS_NAME, currentSession.getDateStarted().getTime(), this);
                 }
 
                 @Override
@@ -179,24 +183,27 @@ public class GPSDataCollector implements CardioMoodGPSService.DataCollector {
     }
 
     public void addData(Location location) {
-        if (getStatus() == Status.COLLECTING) {
-            if (count == 0)
-                onFirstDataReceived();
+        synchronized (this) {
+            if (getStatus() == Status.COLLECTING) {
+                if (count == 0)
+                    onFirstDataReceived();
 
-            GPSLocationEntity gpsItem = new GPSLocationEntity(location);
-            gpsItem.setSession(currentSession);
-            dataItems.add(gpsItem);
-            gpsLocationDAO.create(gpsItem);
-            currentSession.setLastModified(System.currentTimeMillis());
+                GPSLocationEntity gpsItem = new GPSLocationEntity(location);
+                gpsItem.setSession(currentSession);
+                dataItems.add(gpsItem);
+                gpsLocationDAO.create(gpsItem);
+                currentSession.setLastModified(System.currentTimeMillis());
+                sessionDAO.update(currentSession);
 
-            CardioDataItem dataItem = gpsItem.toCardioDataItem();
-            dataItem.setNumber((long) count++);
-            pendingData.add(dataItem);
-            sendPendingData();
-            if (listener != null)
-                listener.onDataAdded(location);
-        } else {
-            Log.d(TAG, "addData() - ignored, status = " + getStatus());
+                CardioDataItem dataItem = gpsItem.toCardioDataItem();
+                dataItem.setNumber((long) count++);
+                pendingData.add(dataItem);
+                sendPendingData();
+                if (listener != null)
+                    listener.onDataAdded(location);
+            } else {
+                Log.d(TAG, "addData() - ignored, status = " + getStatus());
+            }
         }
     }
 

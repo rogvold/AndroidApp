@@ -14,6 +14,7 @@ public class JSONResponse<T> implements Serializable {
     private Integer responseCode;
     private JSONError error;
     private T data;
+    private long serverTime;
 
     public JSONResponse(Integer responseCode, JSONError error, T object) {
         this.responseCode = responseCode;
@@ -65,6 +66,14 @@ public class JSONResponse<T> implements Serializable {
 
     public boolean isOk() {
         return RESPONSE_OK.equals(responseCode);
+    }
+
+    public long getServerTime() {
+        return serverTime;
+    }
+
+    public void setServerTime(long serverTime) {
+        this.serverTime = serverTime;
     }
 
     @Override

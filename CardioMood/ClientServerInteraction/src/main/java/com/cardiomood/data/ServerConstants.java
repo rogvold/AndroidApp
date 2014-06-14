@@ -5,7 +5,7 @@ package com.cardiomood.data;
  */
 public interface ServerConstants {
 
-    Long CARDIOMOOD_CLINET_ID       = 51L;
+    Long CARDIOMOOD_CLIENT_ID       = 51L;
 
     // service
     String SERVICE_PROTOCOL			= "app.service_protocol";

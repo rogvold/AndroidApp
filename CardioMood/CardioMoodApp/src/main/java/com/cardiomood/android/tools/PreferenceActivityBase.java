@@ -69,7 +69,9 @@ public abstract class PreferenceActivityBase<F extends PreferenceActivityBase.Ab
 			for (Preference pref : prefs) {
 				if (pref instanceof EditTextPreference) {
 					EditTextPreference etp = (EditTextPreference) pref;
-				    etp.setSummary(etp.getText());
+				    if (etp.getText() != null) {
+                        etp.setSummary(etp.getText());
+                    } else etp.setSummary("(not set)");
 				} else if (pref instanceof ListPreference) {
 					ListPreference lp = (ListPreference) pref;
 				    lp.setSummary(lp.getEntry());

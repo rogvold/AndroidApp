@@ -32,7 +32,9 @@ import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.android.tools.fragments.ProfileFragment;
 import com.cardiomood.data.CardioMoodServer;
 import com.cardiomood.data.DataServiceHelper;
+import com.cardiomood.data.async.ServerResponseCallback;
 import com.cardiomood.data.async.ServerResponseCallbackRetry;
+import com.cardiomood.data.json.ApiToken;
 import com.cardiomood.data.json.JSONError;
 import com.cardiomood.data.json.UserProfile;
 import com.flurry.android.FlurryAgent;
@@ -375,11 +377,28 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                 @Override
                 public void onSave() {
                     UserEntity user = saveProfileLocally();
-                    //saveProfileRemotely(user);
                 }
 
                 @Override
                 public void onSync() {
+                    if (dataServiceHelper.isTokenExpired()) {
+                        dataServiceHelper.refreshToken(new ServerResponseCallback<ApiToken>() {
+                            @Override
+                            public void onResult(ApiToken result) {
+                                if (System.currentTimeMillis() <= result.getExpirationDate())
+                                    onSync();
+                                else {
+                                    Log.wtf(TAG, "onSync() -> onResult(): an expired token was returned!");
+                                }
+                            }
+
+                            @Override
+                            public void onError(JSONError error) {
+                                Log.w(TAG, "onSync() -> onError() failed to refresh token, error=" + error);
+                            }
+                        });
+                        return;
+                    }
                     dataServiceHelper.getUserProfile(new ServerResponseCallbackRetry<UserProfile>() {
                         @Override
                         public void retry() {
@@ -404,9 +423,12 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                                     fragment.reloadData();
                                     saveProfileLocally();
                                     Toast.makeText(MainActivity.this, "Profile successfully updated", Toast.LENGTH_SHORT).show();
-                                } else {
+                                } else if (result.getLastModificationDate() != null
+                                        && lastModified > result.getLastModificationDate()) {
                                     // updated locally
                                     saveProfileRemotely(user);
+                                } else {
+                                    Toast.makeText(MainActivity.this, "Profile is up-to-date.", Toast.LENGTH_SHORT).show();
                                 }
                             }
                         }

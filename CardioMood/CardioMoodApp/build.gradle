@@ -7,7 +7,7 @@ android {
         minSdkVersion 14
         targetSdkVersion 19
         versionCode 133
-        versionName '1.3.3'
+        versionName '1.3.4a'
     }
     lintOptions {
         abortOnError false
@@ -30,15 +30,15 @@ android {
     }
     buildTypes {
         debug {
-            runProguard false
+            runProguard true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
         release {
-            runProguard false
+            runProguard true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             signingConfig signingConfigs.release
-            debuggable true
-            jniDebugBuild true
+            debuggable false
+            jniDebugBuild false
         }
     }
     productFlavors {

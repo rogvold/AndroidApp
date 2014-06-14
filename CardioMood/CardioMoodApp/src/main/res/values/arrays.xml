@@ -50,4 +50,14 @@
         <item>12 hours</item>
         <item>24 hours</item>
     </string-array>
+    <string-array name="sync_strategy_titles">
+        <item>Sync on application start</item>
+        <item>Sync when modified</item>
+        <item>Sync on demand</item>
+    </string-array>
+    <string-array name="sync_strategy_values">
+        <item>SYNC_ON_START</item>
+        <item>SYNC_ON_MODIFIED</item>
+        <item>SYNC_ON_DEMAND</item>
+    </string-array>
 </resources>

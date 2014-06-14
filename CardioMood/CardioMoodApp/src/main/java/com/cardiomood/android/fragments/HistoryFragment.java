@@ -36,6 +36,7 @@ import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.data.CardioMoodServer;
 import com.cardiomood.data.DataServiceHelper;
+import com.cardiomood.data.ServerConstants;
 import com.cardiomood.data.async.ServerResponseCallback;
 import com.cardiomood.data.async.ServerResponseCallbackRetry;
 import com.cardiomood.data.json.CardioDataItem;
@@ -205,10 +206,6 @@ public class HistoryFragment extends Fragment
 
     public void deleteItem(int i) {
         ContinuousSessionEntity session = listAdapter.getItem(i);
-        if (isPredefinedSession(session.getId())) {
-            Toast.makeText(getActivity(), R.string.cannot_delete_predefined_data, Toast.LENGTH_SHORT).show();
-            return;
-        }
         new DeleteItemTask(session).execute();
     }
 
@@ -248,29 +245,33 @@ public class HistoryFragment extends Fragment
                                     session.setStatus(SessionStatus.COMPLETED);
                                 dao.update(session);
                                 Toast.makeText(HistoryFragment.this.getActivity(), R.string.session_renamed, Toast.LENGTH_SHORT).show();
-                                if (session.getExternalId() != null) {
-                                    serviceHelper.updateSessionInfo(session.getExternalId(), session.getName(), session.getDescription(), new ServerResponseCallbackRetry<CardioSession>() {
-                                        @Override
-                                        public void retry() {
-                                            serviceHelper.updateSessionInfo(sessionId, session.getName(), session.getDescription(), this);
-                                        }
-
-                                        @Override
-                                        public void onResult(CardioSession result) {
-                                            session.setStatus(SessionStatus.SYNCHRONIZED);
-                                            session.setName(result.getName());
-                                            session.setDescription(result.getDescription());
-                                            dao.update(session);
-                                        }
-
-                                        @Override
-                                        public void onError(JSONError error) {
-                                            Log.d(TAG, "updateSessionInfo failed, error="+error);
-                                        }
-                                    });
-                                }
                                 itemSession.setName(session.getName());
                                 listAdapter.notifyDataSetChanged();
+
+                                if (!"SYNC_ON_DEMAND".equals(pHelper.getString(ConfigurationConstants.SYNC_STRATEGY, "SYNC_WHEN_MODIFIED"))) {
+                                    if (session.getExternalId() != null) {
+                                        serviceHelper.updateSessionInfo(session.getExternalId(), session.getName(), session.getDescription(), new ServerResponseCallbackRetry<CardioSession>() {
+                                            @Override
+                                            public void retry() {
+                                                serviceHelper.updateSessionInfo(sessionId, session.getName(), session.getDescription(), this);
+                                            }
+
+                                            @Override
+                                            public void onResult(CardioSession result) {
+                                                session.setStatus(SessionStatus.SYNCHRONIZED);
+                                                session.setName(result.getName());
+                                                session.setDescription(result.getDescription());
+                                                dao.update(session);
+                                            }
+
+                                            @Override
+                                            public void onError(JSONError error) {
+                                                Log.d(TAG, "updateSessionInfo failed, error=" + error);
+                                            }
+                                        });
+                                    }
+                                }
+
                                 FlurryAgent.logEvent("session_renamed");
                             }
                         }
@@ -323,19 +324,19 @@ public class HistoryFragment extends Fragment
         if (activity == null)
             return;
 
-        pDialog = new ProgressDialog(activity);
-
-        if (userId >= 0) {
-            pDialog.setMessage("Synchronizing data...");
-            pDialog.setIndeterminate(true);
-            pDialog.setCancelable(false);
-            pDialog.show();
-        }
-
         serviceHelper.checkInternetAvailable(activity, new ServerResponseCallback<Boolean>() {
             @Override
             public void onResult(Boolean result) {
                 if (result) {
+                    pDialog = new ProgressDialog(activity);
+
+                    if (userId >= 0) {
+                        pDialog.setMessage("Synchronizing data...");
+                        pDialog.setIndeterminate(true);
+                        pDialog.setCancelable(false);
+                        pDialog.show();
+                    }
+
                     new SyncTask(activity).execute();
                 } else {
                     refresh();
@@ -345,7 +346,7 @@ public class HistoryFragment extends Fragment
 
             @Override
             public void onError(JSONError error) {
-
+                // shit happens
             }
         });
     }
@@ -355,9 +356,18 @@ public class HistoryFragment extends Fragment
             return;
         }
 
-        if (initial && hasUpdatedSessions()) {
+        // started?
+        if (initial && "SYNC_ON_START".equals(pHelper.getString(ConfigurationConstants.SYNC_STRATEGY, "SYNC_WHEN_MODIFIED"))) {
             sync();
             return;
+        }
+
+        // has modified sessions?
+        if (hasUpdatedSessions()) {
+            if ("SYNC_ON_MODIFIED".equals(pHelper.getString(ConfigurationConstants.SYNC_STRATEGY, "SYNC_WHEN_MODIFIED"))) {
+                sync();
+                return;
+            }
         }
 
         Activity activity = getActivity();
@@ -383,9 +393,6 @@ public class HistoryFragment extends Fragment
     }
 
     private boolean hasUpdatedSessions() {
-        Map<String, Object> values = new HashMap<String, Object>();
-        values.put("status", SessionStatus.COMPLETED);
-        values.put("user_id", userId);
         RuntimeExceptionDao<ContinuousSessionEntity, Long> sessionDAO = getHelper()
                 .getRuntimeExceptionDao(ContinuousSessionEntity.class);
         try {
@@ -526,14 +533,14 @@ public class HistoryFragment extends Fragment
             }
 
             try {
-                QueryBuilder<ContinuousSessionEntity, Long> qb = sessionDAO.queryBuilder().orderBy("_id", true);
+                QueryBuilder<ContinuousSessionEntity, Long> qb = sessionDAO.queryBuilder().orderBy("last_modified", true);
                 Where w = qb.where();
-                w.isNull("external_id");
-                w.ne("status", SessionStatus.IN_PROGRESS);
-                w.and(w, w);
-                w.or().eq("status", SessionStatus.COMPLETED);
+                //w.isNull("external_id");
+                //w.ne("status", SessionStatus.IN_PROGRESS);
+                //w.and(w, w);
                 w.eq("user_id", userId);
-                PreparedQuery<ContinuousSessionEntity> pq = w.and(w, w).prepare();
+                w.and().eq("status", SessionStatus.COMPLETED);
+                PreparedQuery<ContinuousSessionEntity> pq = w.prepare();
                 List<ContinuousSessionEntity> sessions = sessionDAO.query(pq);
 
                 int progress = 0;
@@ -542,8 +549,6 @@ public class HistoryFragment extends Fragment
                     progress++;
                     publishProgress(context.getString(R.string.progress_sending_data) +" " + Math.round(100.0f * progress / sessions.size()) + "%");
                 }
-
-                // TODO: upload GPS Session
 
                 progress = 0;
                 JSONResponse<List<CardioSession>> response = serviceHelper.getSessions();
@@ -564,31 +569,17 @@ public class HistoryFragment extends Fragment
         }
 
         private void uploadSession(ContinuousSessionEntity session) {
-            // check for predefined session -- do we really need this????
-            if (isPredefinedSession(session.getId()))
-                return;
-            if (session.getExternalId() == null) {
-                // Create Session on the server
-                JSONResponse<CardioSession> response1 = serviceHelper.createSession(session.getDataClassName());
-                if (response1.isOk()) {
-                    CardioSession cardioSession = response1.getData();
-                    rewriteSessionData(session, cardioSession);
-                }
-            } else if (session.getStatus() == SessionStatus.COMPLETED) {
-                // this session was modified locally after last synchronization
-                CardioSession cardioSession = new CardioSession();
-                cardioSession.setId(session.getExternalId());
-                rewriteSessionData(session, cardioSession);
+            if (session.getExternalId() == null || session.getStatus() == SessionStatus.COMPLETED) {
+                rewriteSessionData(session);
             }
         }
 
-        private void rewriteSessionData(ContinuousSessionEntity session, CardioSession cardioSession) {
+        private void rewriteSessionData(ContinuousSessionEntity session) {
+            CardioSession cardioSession = new CardioSession(session.getExternalId(), session.getName(), session.getDescription(),
+                    ServerConstants.CARDIOMOOD_CLIENT_ID, serviceHelper.getUserId(), null, session.getDataClassName());
             SessionStatus oldStatus = session.getStatus();
-            cardioSession.setDataClassName(session.getDataClassName());
-            cardioSession.setName(session.getName());
-            cardioSession.setDescription(session.getDescription());
             cardioSession.setCreationTimestamp(session.getDateStarted() == null ? 0 : session.getDateStarted().getTime());
-            cardioSession.setEndTimestamp(session.getDateEnded() == null ? 0 : session.getDateEnded().getTime());
+            cardioSession.setEndTimestamp(session.getDateEnded() == null ? null : session.getDateEnded().getTime());
             if (session.getOriginalSession() != null) {
                 cardioSession.setOriginalSessionId(session.getOriginalSession().getExternalId());
             }
@@ -614,31 +605,30 @@ public class HistoryFragment extends Fragment
                 CardioSessionWithData sessionWithData = new CardioSessionWithData(cardioSession);
                 List<CardioDataItem> dataItems = new ArrayList<CardioDataItem>(items.size());
                 long i = 0;
-                for (SessionDataItem gpsItem : items) {
-                    CardioDataItem cardioDataItem = gpsItem.toCardioDataItem();
+                long maxTimestamp = 0;
+                for (SessionDataItem item : items) {
+                    CardioDataItem cardioDataItem = item.toCardioDataItem();
                     cardioDataItem.setNumber(i++);
+                    if (maxTimestamp < cardioDataItem.getCreationTimestamp())
+                        maxTimestamp = cardioDataItem.getCreationTimestamp();
                     dataItems.add(cardioDataItem);
                 }
                 sessionWithData.setDataItems(dataItems);
-                JSONResponse<String> response2 = serviceHelper.rewriteCardioSessionData(sessionWithData);
-                if (response2.isOk()) {
+                if (sessionWithData.getEndTimestamp() == null) {
+                    session.setDateEnded(new Date(maxTimestamp));
+                    session.setLastModified(System.currentTimeMillis());
+                    sessionWithData.setEndTimestamp(maxTimestamp);
+                }
+                JSONResponse<CardioSession> response = serviceHelper.rewriteCardioSessionData(sessionWithData);
+                if (response.isOk()) {
+                    session.setExternalId(response.getData().getId());
                     session.setStatus(SessionStatus.SYNCHRONIZED);
                     sessionDAO.update(session);
-                } else {
-                    JSONResponse<CardioSession> response3 = serviceHelper.createSession(session.getDataClassName());
-                    if (response3.isOk()) {
-                        JSONResponse<String> response4 = serviceHelper.rewriteCardioSessionData(sessionWithData);
-                        if (response4.isOk()) {
-                            session.setStatus(SessionStatus.SYNCHRONIZED);
-                            sessionDAO.update(session);
-                        } else {
-                            session.setStatus(oldStatus);
-                            sessionDAO.update(session);
-                        }
-                    } else {
-                        session.setStatus(oldStatus);
-                        sessionDAO.update(session);
-                    }
+                } else if (JSONError.SESSION_IS_MODIFIED_ON_SERVER_ERROR.equals(response.getError().getCode())) {
+                    session.setStatus(oldStatus);
+                    sessionDAO.update(session);
+                    if (cardioSession.getId() != null)
+                        downloadSession(cardioSession);
                 }
             } catch(SQLException ex){
                 session.setStatus(oldStatus);

@@ -171,5 +171,10 @@
     <string name="duration">Duration:</string>
     <string name="title_settings_log_gps_data">Enable GPS tracking</string>
     <string name="summary_log_gps_data">Log your current location and speed while training.</string>
+    <string name="title_settings_last_device_battery_level">Last device battery level</string>
+    <string name="data_service_settings_title">Data Service Settings</string>
+    <string name="title_settings_sync_strategy">Data synchronization strategy</string>
+    <string name="title_settings_sync_disable_real_time">Disable real time upload</string>
+    <string name="summary_sync_disable_real_time">Do not send data in real time</string>
 
 </resources>

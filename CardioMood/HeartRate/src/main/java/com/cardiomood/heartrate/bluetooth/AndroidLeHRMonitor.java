@@ -31,7 +31,7 @@ public class AndroidLeHRMonitor extends LeHRMonitor {
     public final static UUID UUID_HEART_RATE_MEASUREMENT_CHARACTERISTIC =
             UUID.fromString("00002a37-0000-1000-8000-00805f9b34fb");
     public final static UUID UUID_BATTERY_SERVICE =
-            UUID.fromString("0000180f-0000-1000-8000-00805f9b34fb");
+            UUID.fromString("0000180F-0000-1000-8000-00805f9b34fb");
     public final static UUID UUID_BATTERY_LEVEL_CHARACTERISTIC =
             UUID.fromString("00002a19-0000-1000-8000-00805f9b34fb");
 
@@ -80,17 +80,6 @@ public class AndroidLeHRMonitor extends LeHRMonitor {
                     return;
                 }
                 setConnectionStatus(CONNECTED_STATUS);
-
-                // Request battery level if supported
-                BluetoothGattService batteryService = mBluetoothGatt.getService(UUID_BATTERY_SERVICE);
-                if (batteryService != null) {
-                    Log.i(TAG, "onServicesDiscovered(): Battery service has been dicovered.");
-                    BluetoothGattCharacteristic characteristic = batteryService.getCharacteristic(UUID_BATTERY_LEVEL_CHARACTERISTIC);
-                    if (characteristic != null)
-                        gatt.readCharacteristic(characteristic);
-                } else {
-                    Log.i(TAG, "onServicesDiscovered(): Battery Service is not supported. :(");
-                }
             } else {
                 setConnectionStatus(READY_STATUS);
             }
@@ -273,5 +262,26 @@ public class AndroidLeHRMonitor extends LeHRMonitor {
     @Override
     public BluetoothAdapter getCurrentBluetoothAdapter() {
         return mBluetoothAdapter;
+    }
+
+    @Override
+    public boolean requestBatteryLevel() {
+        if (mBluetoothGatt == null)
+            return  false;
+        // Request battery level if supported
+        BluetoothGattService batteryService = mBluetoothGatt.getService(UUID_BATTERY_SERVICE);
+        if (batteryService != null) {
+            Log.i(TAG, "onServicesDiscovered(): Battery service has been dicovered.");
+            BluetoothGattCharacteristic characteristic = batteryService.getCharacteristic(UUID_BATTERY_LEVEL_CHARACTERISTIC);
+            if (characteristic != null) {
+                // This is specific to Battery Level.
+                boolean s = mBluetoothGatt.readCharacteristic(characteristic);
+                Log.v(TAG, "gatt.readCharacteristic(characteristic) => " + s);
+                return s;
+            }
+        } else {
+            Log.i(TAG, "onServicesDiscovered(): Battery Service is not supported. :(");
+        }
+        return false;
     }
 }

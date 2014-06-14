@@ -28,9 +28,9 @@ public class DBUpgradeHelper {
     private DatabaseHelper databaseHelper;
     private PreferenceHelper preferenceHelper;
 
-    public DBUpgradeHelper(final DatabaseHelper databaseHelper) {
+    public DBUpgradeHelper(SQLiteDatabase db, final DatabaseHelper databaseHelper) {
         this.databaseHelper = databaseHelper;
-        this.database = databaseHelper.getDatabase();
+        this.database = db;
         this.preferenceHelper = new PreferenceHelper(databaseHelper.getmContext(), true);
 
         addUpgrader(19, 21, new DBUpgrader.Callback() {
@@ -129,71 +129,61 @@ public class DBUpgradeHelper {
 
             @Override
             public void onUpgrade(SQLiteDatabase db) {
-                db.execSQL("ALTER TABLE RENAME TO sessions");
                 try {
+                    RuntimeExceptionDao dao = databaseHelper.getRuntimeExceptionDao(UserEntity.class);
+                    dao.executeRawNoArgs("ALTER TABLE heart_rate_sessions RENAME TO sessions");
                     TableUtils.createTable(databaseHelper.getConnectionSource(), GPSLocationEntity.class);
-                } catch (Exception e) {
-                    Log.d(TAG, "onUpgrade() exception", e);
-                }
-
-                String SQL = null;
-                try {
+                    String SQL = null;
                     // +field users.first_name
                     SQL = "ALTER TABLE " + "users"
                             + " ADD COLUMN " + "first_name" + " TEXT";
-                    db.execSQL(SQL);
+                    dao.executeRawNoArgs(SQL);
 
                     // +field users.last_name
                     SQL = "ALTER TABLE " + "users"
                             + " ADD COLUMN " + "last_name" + " TEXT";
-                    db.execSQL(SQL);
+                    dao.executeRawNoArgs(SQL);
 
                     // +field users.weight
                     SQL = "ALTER TABLE " + "users"
                             + " ADD COLUMN " + "weight" + " REAL";
-                    db.execSQL(SQL);
+                    dao.executeRawNoArgs(SQL);
 
                     // +field users.height
                     SQL = "ALTER TABLE " + "users"
                             + " ADD COLUMN " + "height" + " REAL";
-                    db.execSQL(SQL);
+                    dao.executeRawNoArgs(SQL);
 
                     // +field users.phone_number
                     SQL = "ALTER TABLE " + "users"
                             + " ADD COLUMN " + "phone_number" + " TEXT";
-                    db.execSQL(SQL);
+                    dao.executeRawNoArgs(SQL);
 
                     // +field users.birth_date
                     SQL = "ALTER TABLE " + "users"
                             + " ADD COLUMN " + "birth_date" + " INTEGER";
-                    db.execSQL(SQL);
+                    dao.executeRawNoArgs(SQL);
 
                     // +field users.last_modified
                     SQL = "ALTER TABLE " + "users"
                             + " ADD COLUMN " + "last_modified" + " INTEGER DEFAULT 0";
-                    db.execSQL(SQL);
+                    dao.executeRawNoArgs(SQL);
 
                     // +field users.gender
                     SQL = "ALTER TABLE " + "users"
                             + " ADD COLUMN " + "gender" + " TEXT DEFAULT 'UNSPECIFIED'";
-                    db.execSQL(SQL);
+                    dao.executeRawNoArgs(SQL);
 
                     // +field sessions.last_modified
                     SQL = "ALTER TABLE " + "sessions"
                             + " ADD COLUMN " + "last_modified" + " INTEGER DEFAULT 0";
-                    db.execSQL(SQL);
-
-                    // +field sessions.last_modified
-                    SQL = "ALTER TABLE " + "sessions"
-                            + " ADD COLUMN " + "last_modified" + " INTEGER DEFAULT 0";
-                    db.execSQL(SQL);
+                    dao.executeRawNoArgs(SQL);
 
                     // +field sessions.data_class_name
                     SQL = "ALTER TABLE " + "sessions"
                             + " ADD COLUMN " + "data_class_name" + " TEXT DEFAULT 'JsonRRInterval'";
-                    db.execSQL(SQL);
+                    dao.executeRawNoArgs(SQL);
 
-                    RuntimeExceptionDao<UserEntity, Long> dao = databaseHelper.getRuntimeExceptionDao(UserEntity.class);
                     if (preferenceHelper.getBoolean(ConfigurationConstants.USER_LOGGED_IN)) {
                         // try to setup user
                         UserEntity user = null;
@@ -225,7 +215,7 @@ public class DBUpgradeHelper {
                             }
 
                             if (id >= 0) {
-                                user = dao.queryForId(id);
+                                user = (UserEntity) dao.queryForId(id);
                             }
 
                             if (user == null) {
@@ -245,15 +235,29 @@ public class DBUpgradeHelper {
                             user.setHeight(preferenceHelper.getFloat(ConfigurationConstants.USER_HEIGHT_KEY));
                             user.setPhoneNumber(preferenceHelper.getString(ConfigurationConstants.USER_PHONE_NUMBER_KEY));
                             user.setGender(preferenceHelper.getString(ConfigurationConstants.USER_SEX_KEY, "UNSPECIFIED"));
-                            user.setLastModified(System.currentTimeMillis());
+                            user.setLastModified(0);
                             user.setStatus(UserStatus.NEW);
 
                             dao.createOrUpdate(user);
                         }
-
                     }
-                } catch (Exception e) {
-                    Log.d(TAG, "onUpgrade() exception when executing SQL: '" + SQL + "'", e);
+                }  catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+
+            }
+        });
+
+        addUpgrader(27, 28, new DBUpgrader.Callback() {
+
+            @Override
+            public void onUpgrade(SQLiteDatabase db) {
+                try {
+                    // enforce a complete client-server synchronization
+                    RuntimeExceptionDao dao = databaseHelper.getRuntimeExceptionDao(UserEntity.class);
+                    dao.executeRawNoArgs("UPDATE sessions SET status = 'COMPLETED', last_modified = " + System.currentTimeMillis());
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
                 }
             }
         });

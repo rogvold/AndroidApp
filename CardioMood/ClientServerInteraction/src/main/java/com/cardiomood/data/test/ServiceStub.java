@@ -56,7 +56,7 @@ public class ServiceStub implements CardioMoodDataService {
     }
 
     @Override
-    public JSONResponse<CardioSession> createSession(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serverId") Long serverId, @FormParam("className") String className) {
+    public JSONResponse<CardioSession> createSession(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serverId") Long serverId, @FormParam("className") String className, @FormParam("creationTimestamp") Long creationTimestamp) {
         return null;
     }
 
@@ -86,7 +86,7 @@ public class ServiceStub implements CardioMoodDataService {
     }
 
     @Override
-    public JSONResponse<String> rewriteCardioSessionData(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serializedData") String serializedData) {
+    public JSONResponse<CardioSession> rewriteCardioSessionData(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("serializedData") String serializedData) {
         return null;
     }
 

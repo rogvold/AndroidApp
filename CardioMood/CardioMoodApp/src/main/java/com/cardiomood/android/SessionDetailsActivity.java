@@ -334,26 +334,28 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
                                     session.setStatus(SessionStatus.COMPLETED);
                                 sessionDAO.update(session);
                                 Toast.makeText(SessionDetailsActivity.this, R.string.session_renamed, Toast.LENGTH_SHORT).show();
-                                if (session.getExternalId() != null) {
-                                    dataServiceHelper.updateSessionInfo(session.getExternalId(), session.getName(), session.getDescription(), new ServerResponseCallbackRetry<CardioSession>() {
-                                        @Override
-                                        public void retry() {
-                                          dataServiceHelper.updateSessionInfo(sessionId, session.getName(), session.getDescription(), this);
-                                        }
+                                if (!"SYNC_ON_DEMAND".equals(pHelper.getString(ConfigurationConstants.SYNC_STRATEGY, "SYNC_WHEN_MODIFIED"))) {
+                                    if (session.getExternalId() != null) {
+                                        dataServiceHelper.updateSessionInfo(session.getExternalId(), session.getName(), session.getDescription(), new ServerResponseCallbackRetry<CardioSession>() {
+                                            @Override
+                                            public void retry() {
+                                                dataServiceHelper.updateSessionInfo(sessionId, session.getName(), session.getDescription(), this);
+                                            }
 
-                                        @Override
-                                        public void onResult(CardioSession result) {
-                                            session.setStatus(SessionStatus.SYNCHRONIZED);
-                                            session.setName(result.getName());
-                                            session.setDescription(result.getDescription());
-                                            sessionDAO.update(session);
-                                        }
+                                            @Override
+                                            public void onResult(CardioSession result) {
+                                                session.setStatus(SessionStatus.SYNCHRONIZED);
+                                                session.setName(result.getName());
+                                                session.setDescription(result.getDescription());
+                                                sessionDAO.update(session);
+                                            }
 
-                                        @Override
-                                        public void onError(JSONError error) {
-                                            Log.d(TAG, "updateSessionInfo failed, error="+error);
-                                        }
-                                    });
+                                            @Override
+                                            public void onError(JSONError error) {
+                                                Log.d(TAG, "updateSessionInfo failed, error=" + error);
+                                            }
+                                        });
+                                    }
                                 }
                                 String name = session.getName();
                                 if (name == null || name.isEmpty()) {

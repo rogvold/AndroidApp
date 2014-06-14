@@ -58,9 +58,16 @@ public interface ConfigurationConstants {
     String DO_NOT_ASK_INFO_ON_START     = "app.do_not_ask_info_on_start";
     String PREFERRED_MEASUREMENT_SYSTEM = "app.preferred_measurement_system";
 
+    // Synchronization parameters
+    String SYNC_STRATEGY                = "sync.strategy"; // SYNC_ON_START, SYNC_ON_DEMAND
+    String SYNC_DISABLE_REAL_TIME       = "sync.disable_real_time";
+
     // Special DB constants
     String DB_GOOD_SESSION_ID       = "db.good_session_id";
     String DB_STRESSED_SESSION_ID   = "db.stressed_session_id";
     String DB_ATHLETE_SESSION_ID    = "db.athlete_session_id";
     String DB_BAD_SESSION_ID        = "db.bad_session_id";
+
+    String LAST_DEVICE_BATTERY_LEVEL = "device.last_device_battery_level";
+
 }

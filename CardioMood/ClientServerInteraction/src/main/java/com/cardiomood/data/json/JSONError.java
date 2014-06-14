@@ -14,6 +14,7 @@ public class JSONError implements Serializable {
     public static final Integer NOT_AUTHORIZED_ERROR = 23;
     public static final Integer ACCESS_DENIED_ERROR = 24;
     public static final Integer REGISTRATION_FAILED_ERROR = 25;
+    public static final Integer SESSION_IS_MODIFIED_ON_SERVER_ERROR = 26;
     public static final Integer EMPTY_RESPONSE_ERROR = -1;
     public static final Integer INVALID_RESPONSE_CODE_ERROR = -2;
     public static final Integer SERVICE_ERROR = -3;

@@ -155,12 +155,12 @@ public class DataServiceHelper {
         }.execute(email, password);
     }
 
-    public JSONResponse<CardioSession> createSession(String dataClassName) {
+    public JSONResponse<CardioSession> createSession(String dataClassName, long created) {
         try {
             if (isSignedIn()) {
                 String token = getTokenString();
                 Long userId = getUserId();
-                return mService.createSession(token, userId, ServerConstants.CARDIOMOOD_CLINET_ID, dataClassName);
+                return mService.createSession(token, userId, ServerConstants.CARDIOMOOD_CLIENT_ID, dataClassName, created);
             } else {
                 throw new IllegalStateException("Not signed in.");
             }
@@ -170,16 +170,17 @@ public class DataServiceHelper {
         }
     }
 
-    public void createSession(String dataClassName, ServerResponseCallbackRetry<CardioSession> callback) {
+    public AsyncTask<Object, Object, JSONResponse<CardioSession>> createSession(
+            final String dataClassName, long created, final ServerResponseCallbackRetry<CardioSession> callback) {
         if (isOfflineMode())
-            return;
-        new ServiceTask<CardioSession>(new HandleTokenExpiredCallback<CardioSession>(callback)) {
+            return null;
+        return new ServiceTask<CardioSession>(new HandleTokenExpiredCallback<CardioSession>(callback)) {
 
             @Override
             protected JSONResponse<CardioSession> doInBackground(Object... params) {
-                return createSession((String) params[0]);
+                return createSession((String) params[0], (Long) params[1]);
             }
-        }.execute(dataClassName);
+        }.execute(dataClassName, created);
     }
 
     public JSONResponse<String> finishSession(long sessionId, long endTimestamp) {
@@ -214,7 +215,7 @@ public class DataServiceHelper {
             if (isSignedIn()) {
                 String token = getTokenString();
                 Long userId = getUserId();
-                return mService.getSessionsOfUser(token, userId, ServerConstants.CARDIOMOOD_CLINET_ID);
+                return mService.getSessionsOfUser(token, userId, ServerConstants.CARDIOMOOD_CLIENT_ID);
             } else {
                 throw new IllegalStateException("Not signed in.");
             }
@@ -306,10 +307,10 @@ public class DataServiceHelper {
         }
     }
 
-    public void deleteSession(Long sessionId, ServerResponseCallbackRetry<String> callback) {
+    public AsyncTask deleteSession(Long sessionId, ServerResponseCallbackRetry<String> callback) {
         if (isOfflineMode())
-            return;
-        new ServiceTask<String>(new HandleTokenExpiredCallback<String>(callback)) {
+            return null;
+        return new ServiceTask<String>(new HandleTokenExpiredCallback<String>(callback)) {
 
             @Override
             protected JSONResponse<String> doInBackground(Object... params) {
@@ -318,7 +319,7 @@ public class DataServiceHelper {
         }.execute(sessionId);
     }
 
-    public JSONResponse<String> rewriteCardioSessionData(CardioSessionWithData serializedData) {
+    public JSONResponse<CardioSession> rewriteCardioSessionData(CardioSessionWithData serializedData) {
         try {
             if (isSignedIn()) {
                 String token = getTokenString();
@@ -329,17 +330,17 @@ public class DataServiceHelper {
             }
         } catch (Exception ex) {
             Log.w(TAG, "rewriteCardioSessionData() -> failed with an exception", ex);
-            return new JSONResponse<String>(new JSONError("Service error: " + ex.getLocalizedMessage(), JSONError.SERVICE_ERROR));
+            return new JSONResponse<CardioSession>(new JSONError("Service error: " + ex.getLocalizedMessage(), JSONError.SERVICE_ERROR));
         }
     }
 
-    public void rewriteCardioSessionData(CardioSessionWithData serializedData, ServerResponseCallbackRetry<String> callback) {
+    public void rewriteCardioSessionData(CardioSessionWithData serializedData, ServerResponseCallbackRetry<CardioSession> callback) {
         if (isOfflineMode())
             return;
-        new ServiceTask<String>(new HandleTokenExpiredCallback<String>(callback)) {
+        new ServiceTask<CardioSession>(new HandleTokenExpiredCallback<CardioSession>(callback)) {
 
             @Override
-            protected JSONResponse<String> doInBackground(Object... params) {
+            protected JSONResponse<CardioSession> doInBackground(Object... params) {
                 return rewriteCardioSessionData((CardioSessionWithData) params[0]);
             }
         }.execute(serializedData);
@@ -444,6 +445,27 @@ public class DataServiceHelper {
         else login(login, password, null);
     }
 
+    public void refreshToken(final ServerResponseCallback<ApiToken> callback) {
+        if (!isSignedIn())
+            return;
+        String login = getEmail();
+        String password = getPassword();
+        login(login, password, new ServerResponseCallback<ApiToken>() {
+            @Override
+            public void onResult(ApiToken result) {
+                setToken(result);
+                if (callback != null)
+                    callback.onResult(result);
+            }
+
+            @Override
+            public void onError(JSONError error) {
+                if (callback != null)
+                    callback.onError(error);
+            }
+        });
+    }
+
     public boolean isTokenExpired() {
         ApiToken token = getToken();
         if (token == null || "0".equals(token.getToken()))
@@ -474,7 +496,7 @@ public class DataServiceHelper {
     }
 
 
-    private class HandleTokenExpiredCallback<T> implements ServerResponseCallback {
+    private class HandleTokenExpiredCallback<T> implements ServerResponseCallback<T> {
 
         private ServerResponseCallbackRetry<T> externalCallback;
 
@@ -483,9 +505,9 @@ public class DataServiceHelper {
         }
 
         @Override
-        public void onResult(Object result) {
+        public void onResult(T result) {
             if (externalCallback != null)
-                externalCallback.onResult((T) result);
+                externalCallback.onResult(result);
         }
 
         @Override
@@ -514,6 +536,7 @@ public class DataServiceHelper {
                     externalCallback.onError(error);
             }
         }
+
     }
 
     private class LoginCallback implements ServerResponseCallback<ApiToken> {

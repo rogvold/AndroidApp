@@ -15,6 +15,7 @@ public abstract class LeHRMonitor {
     public static final String ACTION_CONNECTION_STATUS_CHANGED = "com.cardiomood.android.bluetooth.ACTION_CONNECTION_STATUS_CHANGED";
     public static final String ACTION_BPM_CHANGED = "com.cardiomood.android.bluetooth.ACTION_BPM_CHANGED";
     public static final String ACTION_HEART_RATE_DATA_RECEIVED = "com.cardiomood.android.bluetooth.ACTION_HEART_RATE_DATA_RECEIVED";
+    public static final String ACTION_BATTERY_LEVEL = "com.cardiomood.android.bluetooth.ACTION_BATTERY_LEVEL";
 
     public static final String EXTRA_OLD_STATUS = "com.cardiomood.android.bluetooth.EXTRA_OLD_STATUS";
     public static final String EXTRA_NEW_STATUS = "com.cardiomood.android.bluetooth.EXTRA_NEW_STATUS";
@@ -23,6 +24,7 @@ public abstract class LeHRMonitor {
     public static final String EXTRA_BPM = "com.cardiomood.android.bluetooth.EXTRA_BPM";
     public static final String EXTRA_INTERVALS = "com.cardiomood.android.bluetooth.EXTRA_INTERVALS";
     public static final String EXTRA_ENERGY_EXPENDED = "com.cardiomood.android.bluetooth.EXTRA_ENERGY_EXPENDED";
+    public static final String EXTRA_BATTERY_LEVEL = "com.cardiomood.android.bluetooth.EXTRA_BATTERY_LEVEL";
 
     public static final int INITIAL_STATUS = 0;
     public static final int READY_STATUS = 1;
@@ -73,6 +75,10 @@ public abstract class LeHRMonitor {
     public abstract void close();
     public abstract BluetoothAdapter getCurrentBluetoothAdapter();
 
+    public boolean requestBatteryLevel() {
+        return false;
+    }
+
     public BluetoothAdapter getBluetoothAdapter() {
         return BluetoothAdapter.getDefaultAdapter();
     }
@@ -90,6 +96,7 @@ public abstract class LeHRMonitor {
     }
 
     public void setBatteryLevel(int batteryLevel) {
+        notifyBatteryLevel(batteryLevel);
         this.batteryLevel = batteryLevel;
     }
 
@@ -113,6 +120,12 @@ public abstract class LeHRMonitor {
             notifyConnectionStatusChanged(this.connectionStatus, connectionStatus);
             this.connectionStatus = connectionStatus;
         }
+    }
+
+    protected void notifyBatteryLevel(int batteryLevel) {
+        Intent intent = new Intent(ACTION_BATTERY_LEVEL);
+        intent.putExtra(EXTRA_BATTERY_LEVEL, batteryLevel);
+        context.sendBroadcast(intent);
     }
 
     protected void notifyConnectionStatusChanged(int oldStatus, int newStatus) {
