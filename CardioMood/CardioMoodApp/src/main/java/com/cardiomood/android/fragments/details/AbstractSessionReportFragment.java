@@ -58,6 +58,9 @@ public abstract class AbstractSessionReportFragment extends Fragment {
     public static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.MEDIUM);
     public static final String ARG_SESSION_ID = "com.cardiomood.android.fragments.extra.SESSION_ID";
 
+
+    private static volatile List<RRIntervalEntity> items = null;
+
     private Axis xAxis;
     private Axis yAxis;
     private long sessionId;
@@ -110,6 +113,7 @@ public abstract class AbstractSessionReportFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        items = null;
         if (getArguments() != null) {
             // obtain arguments
             this.sessionId = getArguments().getLong(ARG_SESSION_ID, -1L);
@@ -403,7 +407,7 @@ public abstract class AbstractSessionReportFragment extends Fragment {
 
     protected abstract Axis getXAxis();
     protected abstract Axis getYAxis();
-    protected abstract double[] collectDataInBackground(ContinuousSessionEntity session);
+    protected abstract void collectDataInBackground(ContinuousSessionEntity session, List<RRIntervalEntity> items, double[] rrFiltered);
     protected abstract void displayData(double rr[]);
 
     private class DataLoadingTask extends AsyncTask<Long, Void, double[]> {
@@ -412,9 +416,11 @@ public abstract class AbstractSessionReportFragment extends Fragment {
         private String name;
         private String date;
         private int artifactsRemoved = 0;
+        private RuntimeExceptionDao<RRIntervalEntity, Long> hrDAO;
 
         private DataLoadingTask() {
             sessionDAO = getSessionDao();
+            hrDAO = getRRIntervalDao();
         }
 
         @Override
@@ -435,21 +441,36 @@ public abstract class AbstractSessionReportFragment extends Fragment {
             }
             if (session.getDateStarted() != null)
                 date = DATE_FORMAT.format(session.getDateStarted());
-            rr = collectDataInBackground(session);
-            int oldArtifactsFiltered = artifactsFiltered;
-            artifactsFiltered = 0;
-            for (int i=0; i<filterCount; i++) {
-                artifactsFiltered += FILTER.getArtifactsCount(rr);
-                rr = FILTER.doFilter(rr);
+            try {
+                synchronized (AbstractSessionReportFragment.class) {
+                    if (items == null)
+                        items = hrDAO.queryBuilder()
+                                .orderBy("_id", true).where().eq("session_id", session.getId())
+                                .query();
+                }
+                rr = new double[items.size()];
+                for (int i = 0; i < items.size(); i++) {
+                    rr[i] = items.get(i).getRrTime();
+                }
+                int oldArtifactsFiltered = artifactsFiltered;
+                artifactsFiltered = 0;
+                for (int i = 0; i < filterCount; i++) {
+                    artifactsFiltered += FILTER.getArtifactsCount(rr);
+                    rr = FILTER.doFilter(rr);
+                }
+                artifactsRemoved = artifactsFiltered - oldArtifactsFiltered;
+                artifactsLeft = FILTER.getArtifactsCount(rr);
+                collectDataInBackground(session, items, rr);
+                return rr;
+            } catch (SQLException ex) {
+                Log.w(TAG, "doInBackground() failed", ex);
+                return new double[0];
             }
-            artifactsRemoved = artifactsFiltered - oldArtifactsFiltered;
-            artifactsLeft = FILTER.getArtifactsCount(rr);
-            return rr;
         }
 
         @Override
         protected void onPostExecute(double[] rr) {
-            AbstractSessionReportFragment.this.sessionName.setText(name);
+            sessionName.setText(name);
             if (date != null)
                 sessionDate.setText(date);
             else sessionDate.setVisibility(View.GONE);

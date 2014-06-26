@@ -2,7 +2,6 @@ package com.cardiomood.android.fragments.details;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +13,6 @@ import com.cardiomood.android.db.entity.ContinuousSessionEntity;
 import com.cardiomood.android.db.entity.RRIntervalEntity;
 import com.cardiomood.math.HeartRateUtils;
 import com.cardiomood.math.window.DataWindow;
-import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.shinobicontrols.charts.Axis;
 import com.shinobicontrols.charts.DataAdapter;
 import com.shinobicontrols.charts.DataPoint;
@@ -25,11 +23,8 @@ import com.shinobicontrols.charts.Series;
 import com.shinobicontrols.charts.ShinobiChart;
 import com.shinobicontrols.charts.SimpleDataAdapter;
 
-import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
-import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.stat.StatUtils;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,19 +33,20 @@ public class OveralSessionReportFragment extends AbstractSessionReportFragment {
 
     private static final String TAG = OveralSessionReportFragment.class.getSimpleName();
 
-    private RuntimeExceptionDao<RRIntervalEntity, Long> hrDAO;
-
     // Components in this fragment view:
     private TextView meanHeartRate;
     private TextView meanStressIndex;
     private SpeedometerGauge speedometer;
 
+    private double meanBPM = 0;
+    private double stressIndex = 0;
+    private double[] bpm = new double[0];
+    private double[] time = new double[0];
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        hrDAO = getRRIntervalDao();
     }
 
     @Override
@@ -92,21 +88,15 @@ public class OveralSessionReportFragment extends AbstractSessionReportFragment {
     }
 
     @Override
-    protected double[] collectDataInBackground(ContinuousSessionEntity session) {
-        try {
-            final List<RRIntervalEntity> items = hrDAO.queryBuilder()
-                    .orderBy("_id", true).where().eq("session_id", session.getId())
-                    .query();
-
-            double[] rr = new double[items.size()];
-            for (int i=0; i<items.size(); i++) {
-                rr[i] = items.get(i).getRrTime();
-            }
-            return rr;
-        } catch (SQLException ex) {
-            Log.e(TAG, "collectDataInBackground() failed", ex);
-        }
-        return new double[0];
+    protected void collectDataInBackground(ContinuousSessionEntity session, List<RRIntervalEntity> items, double[] rrFiltered) {
+        time = new double[rrFiltered.length];
+        for (int i=1; i<rrFiltered.length; i++)
+            time[i] = time[i-1] + rrFiltered[i];
+        bpm = new double[rrFiltered.length];
+        for (int i=0; i<rrFiltered.length; i++)
+            bpm[i] = 1000*60/rrFiltered[i];
+        meanBPM = StatUtils.mean(bpm);
+        stressIndex = StatUtils.mean(HeartRateUtils.getSI(rrFiltered, new DataWindow.Timed(2 * 1000 * 60, 5000))[1]);
     }
 
     @Override
@@ -116,21 +106,10 @@ public class OveralSessionReportFragment extends AbstractSessionReportFragment {
         Axis xAxis = chart.getXAxis();
         Axis yAxis = chart.getYAxis();
 
-        double time[] = new double[rr.length];
-        for (int i=1; i<rr.length; i++)
-            time[i] = time[i-1] + rr[i];
-        double bpm[] = new double[rr.length];
-        for (int i=0; i<rr.length; i++)
-            bpm[i] = 1000*60/rr[i];
 
-        double meanBPM = StatUtils.mean(bpm);
         meanHeartRate.setText(String.valueOf(Math.round(meanBPM)));
-        double stressIndex = StatUtils.mean(HeartRateUtils.getSI(rr, new DataWindow.Timed(2 * 1000 * 60, 5000))[1]);
         meanStressIndex.setText(String.valueOf(Math.round(stressIndex)));
         speedometer.setSpeed(stressIndex, 1200, 200);
-
-        SplineInterpolator interpol = new SplineInterpolator();
-        PolynomialSplineFunction f = interpol.interpolate(time, bpm);
 
         // Heart Rate Chart
         xAxis.enableGesturePanning(true);
@@ -145,11 +124,6 @@ public class OveralSessionReportFragment extends AbstractSessionReportFragment {
             chart.removeSeries(s);
 
         SimpleDataAdapter<Double, Double> dataAdapter1 = new SimpleDataAdapter<Double, Double>();
-//        double t = 0;
-//        while(t < time[time.length-1]) {
-//            dataAdapter1.add(new DataPoint<Double, Double>(t/1000, f.value(t)));
-//            t += 50;
-//        }
         for (int i=0; i<time.length; i++)
             dataAdapter1.add(new DataPoint<Double, Double>(time[i]/1000, bpm[i]));
 

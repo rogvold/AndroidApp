@@ -110,8 +110,8 @@ public class SpeedometerGauge extends View {
 
     @TargetApi(11)
     public ValueAnimator setSpeed(double progress, long duration, long startDelay) {
-        if (progress <= 0)
-            throw new IllegalArgumentException("Non-positive value specified as a speed.");
+        if (progress < 0)
+            throw new IllegalArgumentException("Negative value specified as a speed.");
 
         if (progress > maxSpeed)
             progress = maxSpeed;
