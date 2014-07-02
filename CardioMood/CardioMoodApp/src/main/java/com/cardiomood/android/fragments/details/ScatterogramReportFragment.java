@@ -50,7 +50,7 @@ public class ScatterogramReportFragment extends AbstractSessionReportFragment {
     }
 
     @Override
-    protected void collectDataInBackground(ContinuousSessionEntity session, List<RRIntervalEntity> items, double[] rrFiltered) {
+    protected void collectDataInBackground(ContinuousSessionEntity session, double[] time, double[] rrFiltered) {
         // do nothing
     }
 

@@ -45,6 +45,7 @@ import com.shinobicontrols.charts.ShinobiChart;
 import java.io.File;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -58,8 +59,10 @@ public abstract class AbstractSessionReportFragment extends Fragment {
     public static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.MEDIUM);
     public static final String ARG_SESSION_ID = "com.cardiomood.android.fragments.extra.SESSION_ID";
 
+    private static final Object lock = new Object();
 
-    private static volatile List<RRIntervalEntity> items = null;
+    private static double time[];
+    private static double rrOriginal[];
 
     private Axis xAxis;
     private Axis yAxis;
@@ -113,7 +116,6 @@ public abstract class AbstractSessionReportFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        items = null;
         if (getArguments() != null) {
             // obtain arguments
             this.sessionId = getArguments().getLong(ARG_SESSION_ID, -1L);
@@ -236,6 +238,8 @@ public abstract class AbstractSessionReportFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         chartView.onDestroy();
+        rrOriginal = null;
+        time = null;
 
         if (databaseHelper != null) {
             OpenHelperManager.releaseHelper();
@@ -264,7 +268,8 @@ public abstract class AbstractSessionReportFragment extends Fragment {
     public void refresh() {
         if (!refreshing) {
             refreshing = true;
-            new DataLoadingTask().execute(sessionId);
+            new DataLoadingTask().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, sessionId);
+            //new DataLoadingTask().execute(sessionId);
         }
     }
 
@@ -407,7 +412,7 @@ public abstract class AbstractSessionReportFragment extends Fragment {
 
     protected abstract Axis getXAxis();
     protected abstract Axis getYAxis();
-    protected abstract void collectDataInBackground(ContinuousSessionEntity session, List<RRIntervalEntity> items, double[] rrFiltered);
+    protected abstract void collectDataInBackground(ContinuousSessionEntity session, double[] time, double[] rrFiltered);
     protected abstract void displayData(double rr[]);
 
     private class DataLoadingTask extends AsyncTask<Long, Void, double[]> {
@@ -430,6 +435,7 @@ public abstract class AbstractSessionReportFragment extends Fragment {
 
         @Override
         protected double[] doInBackground(Long... params) {
+            Log.i(TAG, "doInBackground(): START loading session");
             long sessionId = params[0];
             ContinuousSessionEntity session = sessionDAO.queryForId(sessionId);
             name = session.getName();
@@ -442,16 +448,26 @@ public abstract class AbstractSessionReportFragment extends Fragment {
             if (session.getDateStarted() != null)
                 date = DATE_FORMAT.format(session.getDateStarted());
             try {
-                synchronized (AbstractSessionReportFragment.class) {
-                    if (items == null)
-                        items = hrDAO.queryBuilder()
-                                .orderBy("_id", true).where().eq("session_id", session.getId())
-                                .query();
+                synchronized (lock) {
+                    if (rrOriginal == null) {
+                        List<String[]> res = hrDAO.queryRaw(
+                                "select rr_time from heart_rate_data where session_id = ? order by _id asc",
+                                String.valueOf(sessionId)
+                        ).getResults();
+                        time = new double[res.size()];
+                        rrOriginal = new double[res.size()];
+                        int i = 0;
+                        long duration = 0;
+                        for (String[] row: res) {
+                            rrOriginal[i] = Long.parseLong(row[0]);
+                            time[i] = duration;
+                            duration += rrOriginal[i];
+                            i++;
+                        }
+                    }
                 }
-                rr = new double[items.size()];
-                for (int i = 0; i < items.size(); i++) {
-                    rr[i] = items.get(i).getRrTime();
-                }
+
+                rr = Arrays.copyOf(rrOriginal, rrOriginal.length);
                 int oldArtifactsFiltered = artifactsFiltered;
                 artifactsFiltered = 0;
                 for (int i = 0; i < filterCount; i++) {
@@ -460,7 +476,7 @@ public abstract class AbstractSessionReportFragment extends Fragment {
                 }
                 artifactsRemoved = artifactsFiltered - oldArtifactsFiltered;
                 artifactsLeft = FILTER.getArtifactsCount(rr);
-                collectDataInBackground(session, items, rr);
+                collectDataInBackground(session, time, rr);
                 return rr;
             } catch (SQLException ex) {
                 Log.w(TAG, "doInBackground() failed", ex);

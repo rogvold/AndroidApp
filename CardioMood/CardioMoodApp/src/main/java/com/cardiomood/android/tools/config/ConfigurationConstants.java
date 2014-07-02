@@ -70,4 +70,11 @@ public interface ConfigurationConstants {
 
     String LAST_DEVICE_BATTERY_LEVEL = "device.last_device_battery_level";
 
+    // Measurement parameters
+    String MEASUREMENT_LIMIT_TYPE           = "measurement.limit_type";
+    String MEASUREMENT_TIME_LIMIT           = "measurement.time_limit";
+    String MEASUREMENT_COUNT_LIMIT          = "measurement.count_limit";
+    String MEASUREMENT_CUSTOM_TIME_LIMIT    = "measurement.custom_time_limit";
+    String MEASUREMENT_CUSTOM_COUNT_LIMIT   = "measurement.custom_count_limit";
+    String MEASUREMENT_AUTO_START           = "measurement.auto_start";
 }

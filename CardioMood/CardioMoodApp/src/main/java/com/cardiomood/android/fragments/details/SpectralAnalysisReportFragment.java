@@ -4,9 +4,7 @@ import android.os.Bundle;
 
 import com.cardiomood.android.R;
 import com.cardiomood.android.db.entity.ContinuousSessionEntity;
-import com.cardiomood.android.db.entity.RRIntervalEntity;
 import com.cardiomood.math.spectrum.SpectralAnalysis;
-import com.cardiomood.math.window.DataWindow;
 import com.shinobicontrols.charts.Axis;
 import com.shinobicontrols.charts.DataPoint;
 import com.shinobicontrols.charts.LineSeries;
@@ -48,10 +46,8 @@ public class SpectralAnalysisReportFragment extends AbstractSessionReportFragmen
     }
 
     @Override
-    protected void collectDataInBackground(ContinuousSessionEntity session, List<RRIntervalEntity> items, double[] rrFiltered) {
-        DataWindow window = new DataWindow.UnlimitedWithCountStep(rrFiltered.length);
-        window.add(rrFiltered);
-        sa = new SpectralAnalysis(window.getTime().getElements(), rrFiltered);
+    protected void collectDataInBackground(ContinuousSessionEntity session, double[] time, double[] rrFiltered) {
+        sa = new SpectralAnalysis(time, rrFiltered);
     }
 
     @Override

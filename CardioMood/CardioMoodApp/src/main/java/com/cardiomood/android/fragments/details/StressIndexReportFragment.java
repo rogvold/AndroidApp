@@ -51,7 +51,7 @@ public class StressIndexReportFragment extends AbstractSessionReportFragment {
     }
 
     @Override
-    protected void collectDataInBackground(ContinuousSessionEntity session, List<RRIntervalEntity> items, double[] rrFiltered) {
+    protected void collectDataInBackground(ContinuousSessionEntity session, double[] time, double[] rrFiltered) {
         SI = HeartRateUtils.getSI(rrFiltered, new DataWindow.Timed(2 * 60 * 1000, 5000));
     }
 

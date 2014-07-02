@@ -10,7 +10,6 @@ import android.widget.TextView;
 import com.cardiomood.android.R;
 import com.cardiomood.android.controls.gauge.SpeedometerGauge;
 import com.cardiomood.android.db.entity.ContinuousSessionEntity;
-import com.cardiomood.android.db.entity.RRIntervalEntity;
 import com.cardiomood.math.HeartRateUtils;
 import com.cardiomood.math.window.DataWindow;
 import com.shinobicontrols.charts.Axis;
@@ -88,13 +87,13 @@ public class OveralSessionReportFragment extends AbstractSessionReportFragment {
     }
 
     @Override
-    protected void collectDataInBackground(ContinuousSessionEntity session, List<RRIntervalEntity> items, double[] rrFiltered) {
-        time = new double[rrFiltered.length];
-        for (int i=1; i<rrFiltered.length; i++)
-            time[i] = time[i-1] + rrFiltered[i];
+    protected void collectDataInBackground(ContinuousSessionEntity session, double[] time, double[] rrFiltered) {
         bpm = new double[rrFiltered.length];
-        for (int i=0; i<rrFiltered.length; i++)
-            bpm[i] = 1000*60/rrFiltered[i];
+        this.time = time;
+        long duration = 0;
+        for (int i=0; i<rrFiltered.length; i++) {
+            bpm[i] = 1000 * 60 / rrFiltered[i];
+        }
         meanBPM = StatUtils.mean(bpm);
         stressIndex = StatUtils.mean(HeartRateUtils.getSI(rrFiltered, new DataWindow.Timed(2 * 1000 * 60, 5000))[1]);
     }

@@ -319,12 +319,19 @@ public class ConnectionFragment extends Fragment {
 
         setDisconnectedView();
 
-        this.container.post(new Runnable() {
+        limitTypeSpinner.setSelection(mPrefHelper.getInt(ConfigurationConstants.MEASUREMENT_LIMIT_TYPE, 0));
+        timeLimitSpinner.setSelection(mPrefHelper.getInt(ConfigurationConstants.MEASUREMENT_TIME_LIMIT, 0));
+        countLimitSpinner.setSelection(mPrefHelper.getInt(ConfigurationConstants.MEASUREMENT_COUNT_LIMIT, 0));
+        customCountLimitTxt.setText(mPrefHelper.getString(ConfigurationConstants.MEASUREMENT_CUSTOM_COUNT_LIMIT, ""));
+        customTimeLimitTxt.setText(mPrefHelper.getString(ConfigurationConstants.MEASUREMENT_CUSTOM_TIME_LIMIT, ""));
+        startImmediately.setChecked(mPrefHelper.getBoolean(ConfigurationConstants.MEASUREMENT_AUTO_START));
+
+        this.container.postDelayed(new Runnable() {
             @Override
             public void run() {
                 CommonTools.hideSoftInputKeyboard(getActivity());
             }
-        });
+        }, 100);
         return this.container;
     }
 
@@ -389,6 +396,13 @@ public class ConnectionFragment extends Fragment {
             OpenHelperManager.releaseHelper();
             databaseHelper = null;
         }
+
+        mPrefHelper.putInt(ConfigurationConstants.MEASUREMENT_LIMIT_TYPE, limitTypeSpinner.getSelectedItemPosition());
+        mPrefHelper.putInt(ConfigurationConstants.MEASUREMENT_TIME_LIMIT, timeLimitSpinner.getSelectedItemPosition());
+        mPrefHelper.putInt(ConfigurationConstants.MEASUREMENT_COUNT_LIMIT, countLimitSpinner.getSelectedItemPosition());
+        mPrefHelper.putString(ConfigurationConstants.MEASUREMENT_CUSTOM_COUNT_LIMIT, customCountLimitTxt.getText().toString());
+        mPrefHelper.putString(ConfigurationConstants.MEASUREMENT_CUSTOM_TIME_LIMIT, customTimeLimitTxt.getText().toString());
+        mPrefHelper.putBoolean(ConfigurationConstants.MEASUREMENT_AUTO_START, startImmediately.isChecked());
     }
 
     @Override
