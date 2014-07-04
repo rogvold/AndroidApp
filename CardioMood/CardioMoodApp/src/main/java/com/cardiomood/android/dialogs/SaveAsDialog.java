@@ -177,22 +177,31 @@ public class SaveAsDialog extends Dialog {
                 reportBuilder.setEndDate(session.getDateEnded());
                 reportBuilder.setTag(name);
                 RuntimeExceptionDao<RRIntervalEntity, Long> hrDAO = databaseHelper.getRuntimeExceptionDao(RRIntervalEntity.class);
-                final List<RRIntervalEntity> items = hrDAO.queryBuilder()
-                        .orderBy("_id", true).where().eq("session_id", session.getId())
-                        .query();
-                double rr[] = new double[items.size()];
-                for (int i=0; i<items.size(); i++)
-                    rr[i] = items.get(i).getRrTime();
+                final List<String[]> res = hrDAO.queryRaw(
+                        "select rr_time, time_stamp, bpm from heart_rate_data where session_id = ? order by _id asc",
+                        String.valueOf(sessionId)
+                ).getResults();
+                double rr[] = new double[res.size()];
+                long time[] = new long[res.size()];
+                int bpm[] = new int[res.size()];
+                int i = 0;
+                for (String[] item: res) {
+                    rr[i] = Long.parseLong(item[0]);
+                    time[i] = Long.parseLong(item[1]);
+                    bpm[i] = Integer.parseInt(item[2]);
+                    i++;
+                }
                 reportBuilder.setRRIntervals(rr);
                 reportBuilder.setFilterCount(filterCount);
-                pw.println(reportBuilder.build().toString());
+                TextReport report = reportBuilder.build();
+                pw.println(report.toString());
                 pw.println();
                 pw.flush();
                 pw.println("The numbers above were calculated using following data:");
                 pw.printf("%4s  %-14s  %-4s %-3s%n", "n", "timestamp", "rr", "bpm");
-                int i = 1;
-                for (RRIntervalEntity item: items) {
-                    pw.printf("%4d  %14d  %4d %3d%n", i++, item.getTimestamp(), (int)item.getRrTime(), item.getHeartBeatsPerMinute());
+                rr = report.getRrIntervals();
+                for (i=0; i<rr.length; i++) {
+                    pw.printf("%4d  %14d  %4d %3d%n", i+1, time[i], (int) rr[i], bpm[i]);
                 }
                 pw.println();
                 pw.flush();
