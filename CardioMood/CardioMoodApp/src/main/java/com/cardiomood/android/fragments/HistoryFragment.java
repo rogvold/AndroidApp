@@ -535,9 +535,6 @@ public class HistoryFragment extends Fragment
             try {
                 QueryBuilder<ContinuousSessionEntity, Long> qb = sessionDAO.queryBuilder().orderBy("last_modified", true);
                 Where w = qb.where();
-                //w.isNull("external_id");
-                //w.ne("status", SessionStatus.IN_PROGRESS);
-                //w.and(w, w);
                 w.eq("user_id", userId);
                 w.and().eq("status", SessionStatus.COMPLETED);
                 PreparedQuery<ContinuousSessionEntity> pq = w.prepare();

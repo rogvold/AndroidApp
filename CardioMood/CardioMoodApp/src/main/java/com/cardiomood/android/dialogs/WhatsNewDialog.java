@@ -23,7 +23,7 @@ public class WhatsNewDialog extends Dialog {
 
     private static final String TAG = WhatsNewDialog.class.getSimpleName();
 
-    public static final String CONFIG_SHOW_DIALOG_ON_STARTUP = "app.whats_new.show_on_startup_v133";
+    public static final String CONFIG_SHOW_DIALOG_ON_STARTUP = "app.whats_new.show_on_startup_v134";
 
     private Context mContext;
 

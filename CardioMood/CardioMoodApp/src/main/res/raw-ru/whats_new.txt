@@ -1,3 +1,20 @@
+<p><b>New in CardioMood 1.3.4:</b><p>
+<p>
++++ Улучшение производительности
+<br/>
++++ Устранение багов.
+<br/>
++++ GPS-трекинг (experimental).
+<br/>
++++ Заряд батареи (experimental).
+<br/>
++++ Стратегии синхронизации.
+<br/>
++++ Сохранение последних настроек измерения.
+<br/>
+<b>Rate our app</b>: https://play.google.com/store/apps/details?id=com.cardiomood.android
+</p>
+<br/>
 <p><b>New in CardioMood 1.3.3:</b><p>
 <p>
 +++ Мы запустили тестовый Web-site! Подробнее <a href="http://goo.gl/w9gwrv">beta.cardiomood.com</a>

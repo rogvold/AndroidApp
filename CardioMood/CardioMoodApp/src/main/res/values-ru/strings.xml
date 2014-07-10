@@ -153,12 +153,12 @@
     <string name="menu_save_this_revision">Сохранить текущий вариант</string>
     <string name="menu_undo_remove_artifacts">Отменить удаление артефактов</string>
     <string name="duration">Длительность:</string>
-    <string name="title_settings_log_gps_data">Enable GPS tracking</string>
-    <string name="summary_log_gps_data">Log your current location and speed while training.</string>
-    <string name="title_settings_last_device_battery_level">Last device battery level</string>
-    <string name="data_service_settings_title">Data Service Settings</string>
-    <string name="title_settings_sync_strategy">Data synchronization strategy</string>
-    <string name="title_settings_sync_disable_real_time">Disable real time upload</string>
-    <string name="summary_sync_disable_real_time">Do not send data in real time</string>
+    <string name="title_settings_log_gps_data">Включить GPS-трекинг</string>
+    <string name="summary_log_gps_data">Записывать данные GPS во время измерения.</string>
+    <string name="title_settings_last_device_battery_level">Уровень заряда батареии датчика</string>
+    <string name="data_service_settings_title">Настройки веб-сервиса</string>
+    <string name="title_settings_sync_strategy">Стратегия синхронизации</string>
+    <string name="title_settings_sync_disable_real_time">Отключить онлайн отправку данных</string>
+    <string name="summary_sync_disable_real_time">Не отправлять данные на сервер во время измерения</string>
 
 </resources>

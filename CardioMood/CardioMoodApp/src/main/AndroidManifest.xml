@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.cardiomood.android"
-    android:versionCode="133"
-    android:versionName="1.3.4a" >
+    android:versionCode="134"
+    android:versionName="1.3.4" >
 
     <uses-sdk
         android:minSdkVersion="14"
