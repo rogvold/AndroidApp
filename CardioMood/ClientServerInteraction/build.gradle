@@ -1,8 +1,8 @@
 apply plugin: 'android-library'
 
 android {
-    compileSdkVersion 19
-    buildToolsVersion "19.1.0"
+    compileSdkVersion 20
+    buildToolsVersion "20"
 
     defaultConfig {
         minSdkVersion 9
@@ -20,7 +20,7 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:+'
+    compile 'com.android.support:appcompat-v7:20.+'
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.0'
     compile 'org.codegist.crest:codegist-crest:2.0.0-RC1'
