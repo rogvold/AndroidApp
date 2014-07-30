@@ -16,6 +16,7 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -24,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 public abstract class CommonTools {
 
     private static final String TAG = CommonTools.class.getSimpleName();
+    public static final String RANDOM_STRING = "G12HIJdefgPQRSTUVWXYZabc56hijklmnopqAB78CDEF0KLMNO3rstu4vwxyz9";
 
     public static String timeToHumanString(long millis) {
         if (millis > 1000*60*60) {
@@ -203,4 +205,13 @@ public abstract class CommonTools {
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
     }
 
+    public static String generateRandomString(int length) {
+        final StringBuilder ar = new StringBuilder();
+        final int l = RANDOM_STRING.length();
+        Random r = new Random(System.currentTimeMillis());
+        for (int i = 1; i <= length; i++) {
+            ar.append(RANDOM_STRING.charAt(r.nextInt(l)));
+        }
+        return ar.toString();
+    }
 }

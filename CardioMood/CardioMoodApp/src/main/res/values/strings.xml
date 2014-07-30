@@ -176,5 +176,12 @@
     <string name="title_settings_sync_strategy">Data synchronization strategy</string>
     <string name="title_settings_sync_disable_real_time">Disable real time upload</string>
     <string name="summary_sync_disable_real_time">Do not send data in real time</string>
+    <string name="menu_share_session">Share Session...</string>
+    <string name="facebook_login">Login with Facebook</string>
+    <string name="facebook_app_id">788471417852291</string>
+    <string name="sign_up_with_facebook">Try Facebook log in! (experimental)</string>
+    <string name="menu_change_password">Change Password...</string>
+    <string name="facebook_authentification_failed">Unable to perform Facebook authorization.</string>
+    <string name="email_is_not_accessible">Unable to access your email. Use standard login.</string>
 
 </resources>

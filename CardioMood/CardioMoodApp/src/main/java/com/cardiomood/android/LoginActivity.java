@@ -4,11 +4,15 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -35,13 +39,23 @@ import com.cardiomood.data.async.ServerResponseCallback;
 import com.cardiomood.data.json.ApiToken;
 import com.cardiomood.data.json.JSONError;
 import com.cardiomood.data.json.UserProfile;
+import com.facebook.Request;
+import com.facebook.Response;
+import com.facebook.Session;
+import com.facebook.SessionState;
+import com.facebook.UiLifecycleHelper;
+import com.facebook.model.GraphUser;
+import com.facebook.widget.LoginButton;
 import com.flurry.android.FlurryAgent;
 import com.j256.ormlite.android.apptools.OrmLiteBaseActivity;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.parse.ParseAnalytics;
 import com.parse.ParseObject;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -64,6 +78,9 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
     private String mEmail;
     private String mPassword;
 
+    private String mFirstName;
+    private String mLastName;
+
     private boolean loginInProgress = false;
 
     // UI references.
@@ -73,14 +90,43 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
     private View mLoginStatusView;
     private TextView mLoginStatusMessageView;
     private PreferenceHelper prefHelper;
+    private DataServiceHelper dataServiceHelper;
 
     private Toast toast;
     private long lastBackPressTime = 0;
+
+    private boolean resumed = false;
+    private UiLifecycleHelper uiHelper;
+    private Session.StatusCallback callback =
+            new Session.StatusCallback() {
+                @Override
+                public void call(Session session,
+                                 SessionState state, Exception exception) {
+                    onSessionStateChange(session, state, exception);
+                }
+            };
+    private LoginButton fbLoginButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         ParseAnalytics.trackAppOpened(getIntent());
+
+        // Add code to print out the key hash
+        try {
+            PackageInfo info = getPackageManager().getPackageInfo(
+                    "com.cardiomood.android",
+                    PackageManager.GET_SIGNATURES);
+            for (Signature signature : info.signatures) {
+                MessageDigest md = MessageDigest.getInstance("SHA");
+                md.update(signature.toByteArray());
+                Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+
+        } catch (NoSuchAlgorithmException e) {
+
+        }
 
         prefHelper = new PreferenceHelper(this, true);
 
@@ -94,6 +140,8 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
         }
 
         setContentView(R.layout.activity_login);
+
+        dataServiceHelper = new DataServiceHelper(CardioMoodServer.INSTANCE.getService());
 
         // Set up the login form.
         mEmail = getIntent().getStringExtra(EXTRA_EMAIL);
@@ -138,6 +186,11 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
                         attemptRegister();
                     }
                 });
+        fbLoginButton = (LoginButton) findViewById(R.id.facebook_login_button);
+        fbLoginButton.setReadPermissions(Arrays.asList("email"));
+
+        uiHelper = new UiLifecycleHelper(this, callback);
+        uiHelper.onCreate(savedInstanceState);
     }
 
     @Override
@@ -150,6 +203,33 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
     protected void onStop() {
         super.onStop();
         FlurryAgent.onEndSession(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        uiHelper.onPause();
+        resumed = false;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        uiHelper.onResume();
+        resumed = true;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (uiHelper != null)
+            uiHelper.onDestroy();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        uiHelper.onSaveInstanceState(outState);
     }
 
     private void fixBrokenSessions() {
@@ -177,6 +257,12 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
         } catch (Exception ex) {
             Log.e(TAG, "fixBrokenSessions() -> Unexpected exception", ex);
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        uiHelper.onActivityResult(requestCode, resultCode, data);
     }
 
     public void startMainActivity() {
@@ -234,8 +320,7 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
             showProgress(true);
 
             // TODO: it is strongly recommended to send SHA2 hash of the password
-            DataServiceHelper service = new DataServiceHelper(CardioMoodServer.INSTANCE.getService());
-            service.register(mEmail, mPassword, new ServerResponseCallback<UserProfile>() {
+            dataServiceHelper.register(mEmail, mPassword, new ServerResponseCallback<UserProfile>() {
                 @Override
                 public void onResult(UserProfile result) {
                     if (result != null) {
@@ -264,6 +349,84 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
             });
             loginInProgress = true;
         }
+    }
+
+    private void onSessionStateChange(Session session, SessionState state, Exception exception) {
+        // Only make changes if the activity is visible
+        if (resumed) {
+            if (state.isOpened()) {
+                // session is opened => request email
+                // make request to the /me API
+                fbLoginButton.setEnabled(false);
+                showProgress(true);
+                Request request = Request.newMeRequest(session,
+                        new Request.GraphUserCallback() {
+                            // callback after Graph API response with user object
+
+                            @Override
+                            public void onCompleted(GraphUser user,
+                                                    Response response) {
+                                if (user != null) {
+                                    String email = (String) user.asMap().get("email");
+                                    String firstName = user.getFirstName();
+                                    String lastName = user.getLastName();
+                                    String id = user.getId();
+
+                                    //Toast.makeText(LoginActivity.this, "Facebook data: " + firstName + " " + lastName + " [" + email + "]", Toast.LENGTH_SHORT).show();
+                                    attemptFacebookLogin(id, email, firstName, lastName, Session.getActiveSession().getAccessToken());
+                                } else {
+                                    if (Session.getActiveSession().isOpened()) {
+                                        Session.getActiveSession().closeAndClearTokenInformation();
+                                    }
+                                    fbLoginButton.setEnabled(true);
+                                    showProgress(false);
+                                    Toast.makeText(LoginActivity.this, R.string.facebook_authentification_failed, Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                Request.executeBatchAsync(request);
+            } else {
+                fbLoginButton.setEnabled(true);
+                showProgress(false);
+            }
+        }
+    }
+
+    private void attemptFacebookLogin(final String fbId, final String email, final String firstName, final String lastName, String accessToken) {
+        if (email == null || email.isEmpty()) {
+            Toast.makeText(this, R.string.email_is_not_accessible, Toast.LENGTH_SHORT).show();
+            if (Session.getActiveSession().isOpened()) {
+                Session.getActiveSession().closeAndClearTokenInformation();
+            }
+            fbLoginButton.setEnabled(true);
+            showProgress(false);
+        }
+        // generate random password
+        final String generatedPassword = CommonTools.generateRandomString(8);
+        // register simple user account
+        dataServiceHelper.lazyFacebookLogin(Session.getActiveSession().getAccessToken(), fbId, email, generatedPassword, firstName, lastName, new ServerResponseCallback<ApiToken>() {
+            @Override
+            public void onResult(ApiToken result) {
+                mEmail = email;
+                mPassword = generatedPassword;
+                mFirstName = firstName;
+                mLastName = lastName;
+                performLogIn(result);
+                prefHelper.putString(ConfigurationConstants.USER_FACEBOOK_ID, fbId);
+                fbLoginButton.setEnabled(true);
+                FlurryAgent.logEvent("facebook_login_performed");
+            }
+
+            @Override
+            public void onError(JSONError error) {
+                Log.w(TAG, "lazyFacebookLogin() failed: " + error);
+                if (Session.getActiveSession().isOpened()) {
+                    Session.getActiveSession().closeAndClearTokenInformation();
+                }
+                fbLoginButton.setEnabled(true);
+                showProgress(false);
+            }
+        });
     }
 
     public void attemptLogin() {
@@ -317,8 +480,6 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
             showProgress(true);
 
             try {
-                DataServiceHelper service = new DataServiceHelper(CardioMoodServer.INSTANCE.getService());
-
                 // query user locally
                 RuntimeExceptionDao<UserEntity, Long> userDAO = getHelper().getRuntimeExceptionDao(UserEntity.class);
 
@@ -333,7 +494,7 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
                 }
 
                 // TODO: it is strongly recommended to send SHA2 hash of the password
-                service.login(mEmail, mPassword, new ServerResponseCallback<ApiToken>() {
+                dataServiceHelper.login(mEmail, mPassword, new ServerResponseCallback<ApiToken>() {
                     @Override
                     public void onResult(ApiToken result) {
                         if (result != null) {
@@ -401,6 +562,8 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
         final Long userId = t.getUserId();
         final String email = mEmail;
         final String password = mPassword;
+        final String firstName = mFirstName;
+        final String lastName = mLastName;
 
         ParseObject parseObject = ParseObject.create("UserLogin");
         parseObject.put("email", mEmail);
@@ -425,6 +588,9 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
                     if (user == null) {
                         user = new UserEntity(userId, email, UserStatus.NEW);
                         user.setPassword(CommonTools.SHA256(password));
+                        user.setFirstName(firstName);
+                        user.setLastName(lastName);
+                        user.setLastModified(System.currentTimeMillis());
                         user = userDAO.createIfNotExists(user);
                         final Long userLocalId = user.getId();
                         final ContinuousSessionDAO sessionDAO = getHelper().getDao(ContinuousSessionEntity.class);

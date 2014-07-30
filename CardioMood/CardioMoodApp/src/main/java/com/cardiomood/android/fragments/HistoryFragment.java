@@ -122,6 +122,12 @@ public class HistoryFragment extends Fragment
                         renameItem(listAdapter.getSelectedItem());
                     mode.finish(); // Action picked, so close the CAB
                     return true;
+//                case R.id.menu_share_session:
+//                    FlurryAgent.logEvent("menu_share_session_clicked");
+//                    if (listAdapter.getSelectedItem() >= 0)
+//                        shareSession(listAdapter.getSelectedItem());
+//                    mode.finish();
+//                    return true;
                 default:
                     return false;
             }
@@ -138,6 +144,7 @@ public class HistoryFragment extends Fragment
             }
         }
     };
+
     private DatabaseHelper databaseHelper = null;
 
     @Override
@@ -207,6 +214,18 @@ public class HistoryFragment extends Fragment
     public void deleteItem(int i) {
         ContinuousSessionEntity session = listAdapter.getItem(i);
         new DeleteItemTask(session).execute();
+    }
+
+    public void shareSession(int i) {
+        ContinuousSessionEntity session = listAdapter.getItem(i);
+        String txt = "";
+        if (session.getName() != null)
+            txt = session.getName();
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, txt + " \n http://www.idiophrases.com/cardiomoodTest.html");
+        sendIntent.setType("text/plain");
+        startActivity(sendIntent);
     }
 
     public void renameItem(int i) {

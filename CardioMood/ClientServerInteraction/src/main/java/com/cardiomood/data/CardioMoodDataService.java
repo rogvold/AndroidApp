@@ -4,6 +4,7 @@ import com.cardiomood.data.json.ApiToken;
 import com.cardiomood.data.json.CardioSession;
 import com.cardiomood.data.json.CardioSessionWithData;
 import com.cardiomood.data.json.JSONResponse;
+import com.cardiomood.data.json.UserAccount;
 import com.cardiomood.data.json.UserProfile;
 
 import org.codegist.crest.annotate.ConnectionTimeout;
@@ -69,4 +70,13 @@ public interface CardioMoodDataService {
 
     @POST @Path("auth/getUserByToken")
     JSONResponse<UserProfile> getUserProfileByToken(@FormParam("token") String token);
+
+//    @POST @Path("auth/lazyFacebookAuth")
+//    JSONResponse<UserProfile> lazyFacebookAuth(@FormParam("token") String token, @FormParam("fbToken") String fbToken, @FormParam("userId") Long userId,  @FormParam("fbId") String fbId);
+
+    @POST @Path("auth/lazyFacebookLogin")
+    JSONResponse<ApiToken> lazyFacebookLogin(@FormParam("fbToken") String fbToken, @FormParam("fbId") String fbId, @FormParam("email") String email, @FormParam("password") String password, @FormParam("firstName") String firstName, @FormParam("lastName") String lastName);
+
+    @POST @Path("auth/changePassword")
+    JSONResponse<UserAccount> changePassword(@FormParam("token") String token, @FormParam("userId") Long userId,  @FormParam("type") UserAccount.Type type, @FormParam("newPassword") String newPassword);
 }

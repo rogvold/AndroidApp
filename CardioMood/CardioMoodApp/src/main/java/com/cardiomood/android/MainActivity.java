@@ -1,5 +1,6 @@
 package com.cardiomood.android;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,7 +16,9 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.cardiomood.android.components.CustomViewPager;
@@ -36,7 +39,9 @@ import com.cardiomood.data.async.ServerResponseCallback;
 import com.cardiomood.data.async.ServerResponseCallbackRetry;
 import com.cardiomood.data.json.ApiToken;
 import com.cardiomood.data.json.JSONError;
+import com.cardiomood.data.json.UserAccount;
 import com.cardiomood.data.json.UserProfile;
+import com.facebook.Session;
 import com.flurry.android.FlurryAgent;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
@@ -127,6 +132,13 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                 actionBar.setSelectedNavigationItem(1);
             }
         });
+
+        if (mPrefHelper.getString(USER_FACEBOOK_ID, null) != null) {
+            Session session = Session.getActiveSession();
+            if (session == null || session.isClosed()) {
+                logout();
+            }
+        }
     }
 
     @Override
@@ -235,6 +247,10 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                 FlurryAgent.logEvent("menu_logout_clicked");
                 logout();
                 return true;
+            case R.id.menu_change_password:
+                FlurryAgent.logEvent("menu_change_password_clicked");
+                showChangePasswordDialog();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -269,8 +285,67 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         mPrefHelper.remove(USER_FIRST_NAME_KEY);
         mPrefHelper.remove(USER_LAST_NAME_KEY);
         mPrefHelper.remove(USER_BIRTH_DATE_KEY);
+
+        // remove facebook authentication data if needed
+        if (mPrefHelper.getString(USER_FACEBOOK_ID, null) != null) {
+            mPrefHelper.remove(USER_FACEBOOK_ID);
+            Session fbSession = Session.getActiveSession();
+            if (fbSession != null && fbSession.isOpened()) {
+                Session.getActiveSession().closeAndClearTokenInformation();
+            }
+        }
         startActivity(new Intent(this, LoginActivity.class));
         finish();
+    }
+
+    private void showChangePasswordDialog() {
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_change_password, null);
+        final EditText newPassword = (EditText) dialogView.findViewById(R.id.new_password);
+        final EditText confirmNewPassword = (EditText) dialogView.findViewById(R.id.confirm_new_password);
+
+        newPassword.setText(null);
+        confirmNewPassword.setText(null);
+
+        new AlertDialog.Builder(this)
+                .setCancelable(true)
+                .setView(dialogView)
+                .setPositiveButton("Change Password", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        final String p1 = newPassword.getText().toString();
+                        String p2 = confirmNewPassword.getText().toString();
+                        if (p2.equals(p1)) {
+                            dataServiceHelper.changePassword(p1, new ServerResponseCallbackRetry<UserAccount>() {
+                                @Override
+                                public void retry() {
+                                    dataServiceHelper.changePassword(p1, this);
+                                }
+
+                                @Override
+                                public void onResult(UserAccount result) {
+                                    Toast.makeText(MainActivity.this, "Password has been changed.", Toast.LENGTH_SHORT).show();
+                                    logout();
+                                }
+
+                                @Override
+                                public void onError(JSONError error) {
+                                    Toast.makeText(MainActivity.this, "Operation failed. " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        } else {
+                            Toast.makeText(MainActivity.this, "Passwords must match!", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setTitle("Change Password...")
+                .create()
+                .show();
     }
 
     /**

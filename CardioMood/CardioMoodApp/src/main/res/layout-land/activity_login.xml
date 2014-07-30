@@ -105,6 +105,17 @@
                     android:layout_height="wrap_content"
                     android:text="@string/register" />
 
+            <TextView
+                android:layout_marginTop="16dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sign_up_with_facebook" />
+
+            <com.facebook.widget.LoginButton
+                android:id="@+id/facebook_login_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
             <View
                 android:layout_width="fill_parent"
                 android:layout_height="1dp"

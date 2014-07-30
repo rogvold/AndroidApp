@@ -160,5 +160,11 @@
     <string name="title_settings_sync_strategy">Стратегия синхронизации</string>
     <string name="title_settings_sync_disable_real_time">Отключить онлайн отправку данных</string>
     <string name="summary_sync_disable_real_time">Не отправлять данные на сервер во время измерения</string>
+    <string name="menu_share_session">Поделиться ссылкой...</string>
+    <string name="facebook_login">Войти через Facebook</string>
+    <string name="sign_up_with_facebook">Попробуйте войти через Facebook!</string>
+    <string name="menu_change_password">Изменить пароль...</string>
+    <string name="facebook_authentification_failed">Не удалось выполнить авторизацию через Facebook.</string>
+    <string name="email_is_not_accessible">Не удалось получить доступ к email. Воспользуйтесь стандартным входом.</string>
 
 </resources>

@@ -14,6 +14,10 @@
         android:title="@string/menu_feedback"
         android:icon="@drawable/ic_action_important"
         android:titleCondensed="@string/menu_feedback_condensed"/>
+    <item cardiomood:showAsAction="never"
+        android:id="@+id/menu_change_password"
+        android:icon="@drawable/ic_action_settings"
+        android:title="@string/menu_change_password" />
     <item cardiomood:showAsAction="ifRoom"
         android:id="@+id/menu_settings"
         android:icon="@drawable/ic_action_settings"

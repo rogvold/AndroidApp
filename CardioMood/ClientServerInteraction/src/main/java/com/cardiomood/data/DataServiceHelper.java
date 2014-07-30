@@ -14,6 +14,7 @@ import com.cardiomood.data.json.CardioSession;
 import com.cardiomood.data.json.CardioSessionWithData;
 import com.cardiomood.data.json.JSONError;
 import com.cardiomood.data.json.JSONResponse;
+import com.cardiomood.data.json.UserAccount;
 import com.cardiomood.data.json.UserProfile;
 import com.google.gson.Gson;
 
@@ -413,16 +414,61 @@ public class DataServiceHelper {
         }
     }
 
-    public void getUserProfile(ServerResponseCallbackRetry<UserProfile> callback) {
+    public ServiceTask<UserProfile> getUserProfile(ServerResponseCallbackRetry<UserProfile> callback) {
         if (isOfflineMode())
-            return;
-        new ServiceTask<UserProfile>(new HandleTokenExpiredCallback<UserProfile>(callback)) {
+            return null;
+        return (ServiceTask<UserProfile>) new ServiceTask<UserProfile>(new HandleTokenExpiredCallback<UserProfile>(callback)) {
 
             @Override
             protected JSONResponse<UserProfile> doInBackground(Object... params) {
                 return getUserProfile();
             }
         }.execute();
+    }
+
+    public JSONResponse<UserAccount> changePassword(String newPassword) {
+        try {
+            if (isSignedIn()) {
+                String token = getTokenString();
+                return mService.changePassword(token, getUserId(), UserAccount.Type.EMAIL, newPassword);
+            } else {
+                throw new IllegalStateException("Not signed in.");
+            }
+        } catch (Exception ex) {
+            Log.w(TAG, "changePassword() -> failed with an exception", ex);
+            return new JSONResponse<UserAccount>(new JSONError("Service error: " + ex.getLocalizedMessage(), JSONError.SERVICE_ERROR));
+        }
+    }
+
+    public ServiceTask<UserAccount> changePassword(String newPassword, ServerResponseCallbackRetry<UserAccount> callback) {
+        if (isOfflineMode())
+            return null;
+        return (ServiceTask<UserAccount>) new ServiceTask<UserAccount>(new HandleTokenExpiredCallback<UserAccount>(callback)) {
+
+            @Override
+            protected JSONResponse<UserAccount> doInBackground(Object... params) {
+                return changePassword((String) params[0]);
+            }
+        }.execute(newPassword);
+    }
+
+    public JSONResponse<ApiToken> lazyFacebookLogin(String fbToken, String fbId, String email, String password, String firstName, String lastName) {
+        try {
+            return mService.lazyFacebookLogin(fbToken, fbId, email, password, firstName, lastName);
+        } catch (Exception ex) {
+            Log.w(TAG, "lazyFacebookLogin() -> failed with an exception", ex);
+            return new JSONResponse<ApiToken>(new JSONError("Service error: " + ex.getLocalizedMessage(), JSONError.SERVICE_ERROR));
+        }
+    }
+
+    public ServiceTask<ApiToken> lazyFacebookLogin(String fbToken, String fbId, String email, String password, String firstName, String lastName, ServerResponseCallback<ApiToken> callback) {
+        return (ServiceTask<ApiToken>) new ServiceTask<ApiToken>(callback) {
+
+            @Override
+            protected JSONResponse<ApiToken> doInBackground(Object... params) {
+                return lazyFacebookLogin((String) params[0], (String) params[1], (String) params[2], (String) params[3], (String) params[4], (String) params[5]);
+            }
+        }.execute(fbToken, fbId, email, password, firstName, lastName);
     }
 
     public void refreshToken() {

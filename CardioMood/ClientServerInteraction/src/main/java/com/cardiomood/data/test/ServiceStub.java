@@ -6,6 +6,7 @@ import com.cardiomood.data.json.CardioSession;
 import com.cardiomood.data.json.CardioSessionWithData;
 import com.cardiomood.data.json.JSONError;
 import com.cardiomood.data.json.JSONResponse;
+import com.cardiomood.data.json.UserAccount;
 import com.cardiomood.data.json.UserProfile;
 
 import org.codegist.crest.annotate.FormParam;
@@ -107,6 +108,16 @@ public class ServiceStub implements CardioMoodDataService {
 
     @Override
     public JSONResponse<UserProfile> getUserProfileByToken(@FormParam("token") String token) {
+        return null;
+    }
+
+    @Override
+    public JSONResponse<ApiToken> lazyFacebookLogin(@FormParam("fbToken") String fbToken, @FormParam("fbId") String fbId, @FormParam("email") String email, @FormParam("password") String password, @FormParam("firstName") String firstName, @FormParam("lastName") String lastName) {
+        return null;
+    }
+
+    @Override
+    public JSONResponse<UserAccount> changePassword(@FormParam("token") String token, @FormParam("userId") Long userId, @FormParam("type") UserAccount.Type type, @FormParam("newPassword") String newPassword) {
         return null;
     }
 

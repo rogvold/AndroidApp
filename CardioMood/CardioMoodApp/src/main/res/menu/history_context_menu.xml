@@ -16,4 +16,9 @@
         app:showAsAction="always|withText"
         />
 
+    <!--<item android:id="@+id/menu_share_session"-->
+        <!--app:showAsAction="always"-->
+        <!--android:icon="@drawable/ic_action_share"-->
+        <!--android:title="@string/menu_share_session"/>-->
+
 </menu>
