@@ -13,7 +13,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.cardiomood.android.tools.PreferenceHelper;
-import com.cardiomood.heartrate.android.fragments.ProfileFragment;
+import com.cardiomood.android.tools.fragments.ProfileFragment;
 import com.cardiomood.heartrate.android.tools.ConfigurationConstants;
 import com.flurry.android.FlurryAgent;
 
@@ -120,5 +120,10 @@ public class FirstInputPersonalDataActivity extends FragmentActivity implements 
     @Override
     public void onSave() {
         buttonContinue.setEnabled(allDataSpecified());
+    }
+
+    @Override
+    public void onSync() {
+        // do nothing for now
     }
 }

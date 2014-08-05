@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.cardiomood.android"
-    android:versionCode="135"
-    android:versionName="1.3.5" >
+    android:versionCode="137"
+    android:versionName="1.3.5_fix" >
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -125,6 +125,15 @@
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
                 <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
                 <category android:name="com.cardiomood.android" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Used for Google Play Store Campaign Measurement-->;
+        <service android:name="com.google.android.gms.analytics.CampaignTrackingService" />
+        <receiver android:name="com.google.android.gms.analytics.CampaignTrackingReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.vending.INSTALL_REFERRER" />
             </intent-filter>
         </receiver>
 

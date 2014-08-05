@@ -70,6 +70,7 @@
     <orderEntry type="library" exported="" name="Parse-1.4.1" level="project" />
     <orderEntry type="library" exported="" name="codegist-common-2.0.0-RC1" level="project" />
     <orderEntry type="library" exported="" name="codegist-crest-2.0.0-RC1" level="project" />
+    <orderEntry type="library" exported="" name="play-services-5.0.89" level="project" />
     <orderEntry type="library" exported="" name="support-v4-20.0.0" level="project" />
     <orderEntry type="library" exported="" name="commons-io-2.4" level="project" />
     <orderEntry type="library" exported="" name="ormlite-core-4.48" level="project" />

@@ -6,6 +6,8 @@ import android.os.Build;
 import android.util.Log;
 
 import com.cardiomood.android.db.DatabaseHelper;
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.Tracker;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.parse.Parse;
 import com.parse.PushService;
@@ -67,4 +69,14 @@ public class CardioMoodApplication extends Application {
             database = null;
         }
     }
+
+    public synchronized Tracker getTracker() {
+        if (mTracker == null) {
+            GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
+            mTracker = analytics.newTracker(R.xml.global_tracker);
+        }
+        return mTracker;
+    }
+
+    private Tracker mTracker = null;
 }
