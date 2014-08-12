@@ -1,38 +1,54 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.cardiomood.heartrate.android.MainActivity" >
+    tools:context="com.cardiomood.heartrate.android.MainActivity">
 
-    <item android:id="@+id/action_feedback"
-        android:title="@string/action_feedback"
+    <item
+        android:id="@+id/menu_disconnect"
+        android:showAsAction="always"
+        android:title="@string/menu_disconnect"
+        android:visible="false" />
+    <item
+        android:id="@+id/menu_bpm"
+        android:showAsAction="always"
+        android:title="-"
+        android:visible="false" />
+
+    <item
+        android:id="@+id/action_feedback"
         android:icon="@drawable/ic_action_important"
+        android:menuCategory="secondary"
         android:orderInCategory="1"
-        android:menuCategory="secondary"
-        android:showAsAction="always" />
+        android:showAsAction="always"
+        android:title="@string/action_feedback" />
 
-    <item android:id="@+id/action_about"
-        android:title="@string/action_about"
+    <item
+        android:id="@+id/action_about"
         android:icon="@drawable/ic_action_about"
-        android:orderInCategory="2"
         android:menuCategory="secondary"
-        android:showAsAction="ifRoom" />
+        android:orderInCategory="2"
+        android:showAsAction="ifRoom"
+        android:title="@string/action_about" />
 
-    <item android:id="@+id/action_settings"
-    android:title="@string/action_settings"
-    android:icon="@drawable/ic_action_settings"
-    android:menuCategory="system"
-    android:orderInCategory="2"
-    android:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_settings"
+        android:icon="@drawable/ic_action_settings"
+        android:menuCategory="system"
+        android:orderInCategory="2"
+        android:showAsAction="ifRoom"
+        android:title="@string/action_settings" />
 
-    <item android:id="@+id/action_bt_settings"
-        android:title="@string/action_bt_settings"
+    <item
+        android:id="@+id/action_bt_settings"
         android:icon="@drawable/ic_action_bluetooth"
         android:menuCategory="system"
         android:orderInCategory="3"
-        android:showAsAction="ifRoom" />
+        android:showAsAction="ifRoom"
+        android:title="@string/action_bt_settings" />
 
-    <item android:id="@+id/action_personal_data"
-        android:title="@string/action_personal_data"
+    <item
+        android:id="@+id/action_personal_data"
         android:menuCategory="system"
         android:orderInCategory="4"
-        android:showAsAction="never" />
+        android:showAsAction="never"
+        android:title="@string/action_personal_data" />
 </menu>

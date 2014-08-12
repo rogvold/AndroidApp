@@ -47,6 +47,7 @@ import com.facebook.UiLifecycleHelper;
 import com.facebook.model.GraphUser;
 import com.facebook.widget.LoginButton;
 import com.flurry.android.FlurryAgent;
+import com.google.android.gms.analytics.GoogleAnalytics;
 import com.j256.ormlite.android.apptools.OrmLiteBaseActivity;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.parse.ParseAnalytics;
@@ -197,12 +198,14 @@ public class LoginActivity extends OrmLiteBaseActivity<DatabaseHelper> implement
     protected void onStart() {
         super.onStart();
         FlurryAgent.onStartSession(this, FLURRY_API_KEY);
+        GoogleAnalytics.getInstance(this).reportActivityStart(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         FlurryAgent.onEndSession(this);
+        GoogleAnalytics.getInstance(this).reportActivityStop(this);
     }
 
     @Override

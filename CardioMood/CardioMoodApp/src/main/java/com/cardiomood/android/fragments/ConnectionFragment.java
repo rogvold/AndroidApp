@@ -76,9 +76,9 @@ public class ConnectionFragment extends Fragment {
 
    private static final String TAG = ConnectionFragment.class.getSimpleName();
     // Bluetooth Intent request codes
-    private static final  int REQUEST_ENABLE_BT = 2;
+   private static final  int REQUEST_ENABLE_BT = 2;
 
-    // Stops scanning after 10 seconds.
+    // Stops scanning after 100 seconds.
     private static final long SCAN_PERIOD = 100000;
 
     private View container;

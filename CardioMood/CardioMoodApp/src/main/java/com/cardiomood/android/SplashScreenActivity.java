@@ -15,6 +15,7 @@ import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.android.util.SystemUiHider;
 import com.flurry.android.FlurryAgent;
+import com.google.android.gms.analytics.GoogleAnalytics;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -157,12 +158,14 @@ public class SplashScreenActivity extends Activity {
     protected void onStart() {
         super.onStart();
         FlurryAgent.onStartSession(this, ConfigurationConstants.FLURRY_API_KEY);
+        GoogleAnalytics.getInstance(this).reportActivityStart(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         FlurryAgent.onEndSession(this);
+        GoogleAnalytics.getInstance(this).reportActivityStop(this);
     }
 
     /**

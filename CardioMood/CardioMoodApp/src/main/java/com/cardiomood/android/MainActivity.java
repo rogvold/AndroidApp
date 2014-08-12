@@ -43,6 +43,7 @@ import com.cardiomood.data.json.UserAccount;
 import com.cardiomood.data.json.UserProfile;
 import com.facebook.Session;
 import com.flurry.android.FlurryAgent;
+import com.google.android.gms.analytics.GoogleAnalytics;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 
@@ -145,6 +146,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     protected void onStart() {
         super.onStart();
         FlurryAgent.onStartSession(this, ConfigurationConstants.FLURRY_API_KEY);
+        GoogleAnalytics.getInstance(this).reportActivityStart(this);
     }
 
     @Override
@@ -174,6 +176,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     protected void onStop() {
         super.onStop();
         FlurryAgent.onEndSession(this);
+        GoogleAnalytics.getInstance(this).reportActivityStop(this);
     }
 
     @Override

@@ -7,9 +7,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.RelativeLayout;
 
+import com.cardiomood.android.tools.fragments.ProfileFragment;
 import com.cardiomood.heartrate.android.ads.AdMobController;
 import com.cardiomood.heartrate.android.ads.AdsControllerBase;
-import com.cardiomood.heartrate.android.fragments.ProfileFragment;
 import com.cardiomood.heartrate.android.tools.ConfigurationConstants;
 import com.flurry.android.FlurryAgent;
 
@@ -28,9 +28,13 @@ public class PersonalDataActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_personal_data);
+
+        // add profile fragment
+        ProfileFragment pFragment = new ProfileFragment();
+        pFragment.setEmailEditable(true);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new ProfileFragment())
+                    .add(R.id.container, pFragment)
                     .commit();
         }
         getActionBar().setDisplayHomeAsUpEnabled(true);

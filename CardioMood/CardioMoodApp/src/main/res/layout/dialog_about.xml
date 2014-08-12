@@ -8,8 +8,8 @@
 
     <TableRow>
         <ImageView
-            android:layout_width="144dp"
-            android:layout_height="144dp"
+            android:layout_width="128dp"
+            android:layout_height="128dp"
             android:padding="8dp"
             android:layout_gravity="left|center"
             android:src="@drawable/img_cardiomood_notext" />
@@ -17,7 +17,7 @@
         <TextView
             android:id="@+id/info_text"
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center" />
     </TableRow>

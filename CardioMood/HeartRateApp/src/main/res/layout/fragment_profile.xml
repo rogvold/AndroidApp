@@ -7,54 +7,55 @@
     android:padding="8dp"
     android:paddingBottom="16dp">
     <LinearLayout
+        android:layout_width="fill_parent"
+        android:orientation="vertical"
+        android:layout_height="fill_parent">
+        <EditText
+            android:id="@+id/editTextEmail"
+            android:layout_height="wrap_content"
+            android:hint="@string/email"
+            android:inputType="none"
             android:layout_width="fill_parent"
-            android:orientation="vertical"
-            android:layout_height="fill_parent">
-        <EditText
-                android:id="@+id/editTextEmail"
-                android:layout_height="wrap_content"
-                android:hint="@string/email"
-                android:inputType="textEmailAddress"
-                android:layout_width="fill_parent"
-                android:editable="false">
+            android:editable="false">
         </EditText>
         <EditText
-                android:id="@+id/editTextFirstName"
-                android:layout_height="wrap_content"
-                android:hint="@string/first_name"
-                android:inputType="textPersonName"
-                android:layout_width="fill_parent"
-                android:editable="false">
+            android:id="@+id/editTextFirstName"
+            android:layout_height="wrap_content"
+            android:hint="@string/first_name"
+            android:inputType="textPersonName"
+            android:layout_width="fill_parent"
+            android:editable="false">
         </EditText>
         <EditText
-                android:id="@+id/editTextLastName"
-                android:layout_height="wrap_content"
-                android:hint="@string/last_name"
-                android:inputType="textPersonName"
-                android:layout_width="fill_parent"
-                android:editable="false" >
+            android:id="@+id/editTextLastName"
+            android:layout_height="wrap_content"
+            android:hint="@string/last_name"
+            android:inputType="textPersonName"
+            android:layout_width="fill_parent"
+            android:editable="false" >
         </EditText>
         <EditText
-                android:id="@+id/editTextPhoneNumber"
-                android:layout_height="wrap_content"
-                android:hint="@string/phone_number_hint"
-                android:inputType="phone"
-                android:layout_width="fill_parent"
-                android:editable="false" >
+            android:id="@+id/editTextPhoneNumber"
+            android:layout_height="wrap_content"
+            android:hint="@string/phone_number_hint"
+            android:inputType="phone"
+            android:layout_width="fill_parent"
+            android:editable="false" >
         </EditText>
         <Spinner
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/gender"
-                android:entries="@array/gender_names"
-                />
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/gender"
+            android:entries="@array/gender_names"
+            />
         <EditText
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text=""
-                android:hint="@string/birth_date"
-                android:inputType="date"
-                android:id="@+id/birth_date"/>
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:hint="@string/birth_date"
+            android:inputType="date"
+            android:id="@+id/birth_date"
+            />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -63,7 +64,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/weight"/>
+                android:text="@string/weight"
+                android:paddingRight="16dp"/>
             <EditText
                 android:layout_width="0px"
                 android:layout_height="wrap_content"
@@ -95,10 +97,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/height"/>
+                android:text="@string/height"
+                android:paddingRight="16dp"/>
             <EditText
                 android:layout_width="0px"
                 android:layout_height="wrap_content"
@@ -126,5 +130,11 @@
                 android:text="@string/height_units_cm"
                 android:layout_weight="1"/>
         </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/you_can_select_unit_system_in_settings" />
     </LinearLayout>
 </ScrollView> 

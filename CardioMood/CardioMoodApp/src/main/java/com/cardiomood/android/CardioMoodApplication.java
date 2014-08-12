@@ -26,6 +26,7 @@ public class CardioMoodApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        getTracker();
         database = getHelper().getWritableDatabase();
 
         try {

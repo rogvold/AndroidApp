@@ -62,6 +62,9 @@ public class FirstInputPersonalDataActivity extends FragmentActivity implements 
 
         profileFragment = (ProfileFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_profile);
         profileFragment.setCallback(this);
+
+        ProfileFragment pFragment = (ProfileFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_profile);
+        pFragment.setEmailEditable(true);
     }
 
     private boolean allDataSpecified() {
@@ -71,9 +74,9 @@ public class FirstInputPersonalDataActivity extends FragmentActivity implements 
             return false;
         if (TextUtils.isEmpty(prefHelper.getString(ConfigurationConstants.USER_LAST_NAME_KEY)))
             return false;
-        if (prefHelper.getInt(ConfigurationConstants.USER_SEX_KEY, 2) == 2)
+        if (TextUtils.isEmpty(prefHelper.getString(ConfigurationConstants.USER_SEX_KEY)))
             return false;
-        if (TextUtils.isEmpty(prefHelper.getString(ConfigurationConstants.USER_BIRTH_DATE_KEY)))
+        if (prefHelper.getLong(ConfigurationConstants.USER_BIRTH_DATE_KEY, -1L) < 0)
             return false;
         return true;
     }

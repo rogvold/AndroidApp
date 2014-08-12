@@ -65,7 +65,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/weight"
-                android:paddingRight="16dp"/>
+                android:paddingRight="16dp"
+                android:paddingLeft="0dp"/>
             <EditText
                 android:layout_width="0px"
                 android:layout_height="wrap_content"
@@ -102,7 +103,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/height"
-                android:paddingRight="16dp"/>
+                android:paddingRight="16dp"
+                android:paddingLeft="0dp"/>
             <EditText
                 android:layout_width="0px"
                 android:layout_height="wrap_content"

@@ -33,8 +33,8 @@
     <string name="title_activity_first_input_personal_data">Welcome!</string>
     <string name="welcome_to_cardio_mood">Welcome to CardioMood HeartRate!</string>
     <string name="specify_your_personal_information">Please, specify your personal information.</string>
-    <string name="you_may_skip_this">You may skip this.\nHowever this information may be required in the future.</string>
-    <string name="button_continue">Continue with CardioMood</string>
+    <string name="you_may_skip_this">You can skip this.\nHowever this information might be required in the future.</string>
+    <string name="button_continue">Continue</string>
     <string name="menu_action_send_feedback">Send Feedback</string>
     <string name="title_activity_feedback">Feedback</string>
     <string name="submitting_feedback_message">Submitting your feedback...</string>
@@ -57,5 +57,14 @@
     <string name="height_units_m">m</string>
     <string name="weight_units_g">g</string>
     <string name="weight_units_oz">oz.</string>
+    <string name="pair_and_tap_connect">Pair your phone with Polar H7 heart rate monitor or similar and tap Connect Device to start.</string>
+    <string name="connect_device">Connect Device</string>
+    <string name="time_elapsed">Time Elapsed</string>
+    <string name="heart_beats_collected">Intervals Collected</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="device_connected">Device connected</string>
+    <string name="select_device_to_connect">Choose Heart Rate Sensor</string>
+    <string name="title_other_devices">Other devices</string>
+    <string name="menu_disconnect">STOP</string>
 
 </resources>

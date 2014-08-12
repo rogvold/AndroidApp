@@ -5,6 +5,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -74,6 +75,7 @@ public class ProfileFragment extends Fragment implements TextWatcher {
     private TextView heightMinorUnitsView;
 
     private Callback callback;
+    private boolean emailEditable = false;
     private boolean modified = false;
     private boolean initialized = false;
     private boolean firstStart = true;
@@ -148,6 +150,9 @@ public class ProfileFragment extends Fragment implements TextWatcher {
         weightMinorUnitsView = (TextView) v.findViewById(R.id.weight_minor_units);
         heightMajorUnitsView = (TextView) v.findViewById(R.id.height_major_units);
         heightMinorUnitsView = (TextView) v.findViewById(R.id.height_minor_units);
+
+        if (emailEditable)
+            emailView.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
 
         return v;
     }
@@ -416,6 +421,17 @@ public class ProfileFragment extends Fragment implements TextWatcher {
 
     public void setCallback(Callback callback) {
         this.callback = callback;
+    }
+
+    public boolean isEmailEditable() {
+        return emailEditable;
+    }
+
+    public void setEmailEditable(boolean emailEditable) {
+        this.emailEditable = emailEditable;
+        if (emailView != null) {
+            emailView.setInputType(emailEditable ? InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS : InputType.TYPE_NULL);
+        }
     }
 
     @Override
