@@ -1,1 +1,1 @@
-include ':HeartRate', ':Math', ':ShinobiCharts', ':ClientServerInteraction', ':HeartRateApp', ':WorkoutAssistantApp', 'CommonTools', 'CardioMoodApp', 'CardioSportApp', 'AndroidControls', ':facebook'
+include ':HeartRate', ':Math', ':ShinobiCharts', ':ClientServerInteraction', ':HeartRateApp', ':WorkoutAssistantApp', 'CommonTools', 'CardioMoodApp', 'CardioSportApp', 'AndroidControls', ':facebook', ':Air'

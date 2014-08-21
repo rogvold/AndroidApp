@@ -1,12 +1,10 @@
-package com.cardiomood.heartrate.android.ads;
+package com.cardiomood.android.tools;
 
 import android.app.Activity;
 import android.os.Handler;
 import android.view.View;
 import android.widget.RelativeLayout;
 
-import com.cardiomood.android.tools.PreferenceHelper;
-import com.cardiomood.heartrate.android.tools.ConfigurationConstants;
 import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdSize;
@@ -19,6 +17,8 @@ import java.util.Random;
  * Created by danon on 23.04.2014.
  */
 public class AdMobController extends AdListener implements AdsControllerBase {
+
+    public static final String CONFIG_DISABLE_ADS = "app.disable_ads";
 
     private static final int REQUEST_TIMEOUT = 30000;
 
@@ -187,7 +187,7 @@ public class AdMobController extends AdListener implements AdsControllerBase {
     }
 
     public boolean isAddsDisabled() {
-        return prefHelper.getBoolean(ConfigurationConstants.DISABLE_ADS);
+        return prefHelper.getBoolean(CONFIG_DISABLE_ADS);
     }
 
     private void reloadInterstitial() {

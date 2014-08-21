@@ -35,10 +35,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cardiomood.android.controls.progress.CircularProgressBar;
+import com.cardiomood.android.tools.AdMobController;
+import com.cardiomood.android.tools.AdsControllerBase;
 import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.android.tools.PreferenceHelper;
-import com.cardiomood.heartrate.android.ads.AdMobController;
-import com.cardiomood.heartrate.android.ads.AdsControllerBase;
 import com.cardiomood.heartrate.android.dialogs.AboutDialog;
 import com.cardiomood.heartrate.android.service.BluetoothHRMService;
 import com.cardiomood.heartrate.android.tools.ConfigurationConstants;

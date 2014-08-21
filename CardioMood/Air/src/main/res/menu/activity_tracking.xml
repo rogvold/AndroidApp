@@ -1,0 +1,10 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.cardiomood.android.air.TrackingActivity" >
+
+    <item android:id="@+id/menu_logout"
+        android:title="@string/menu_logout"
+        android:showAsAction="never" />
+
+
+</menu>

@@ -1,4 +1,4 @@
-package com.cardiomood.heartrate.android.ads;
+package com.cardiomood.android.tools;
 
 import android.widget.RelativeLayout;
 

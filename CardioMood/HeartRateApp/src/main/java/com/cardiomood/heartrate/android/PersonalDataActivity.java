@@ -7,9 +7,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.RelativeLayout;
 
+import com.cardiomood.android.tools.AdMobController;
+import com.cardiomood.android.tools.AdsControllerBase;
 import com.cardiomood.android.tools.fragments.ProfileFragment;
-import com.cardiomood.heartrate.android.ads.AdMobController;
-import com.cardiomood.heartrate.android.ads.AdsControllerBase;
 import com.cardiomood.heartrate.android.tools.ConfigurationConstants;
 import com.flurry.android.FlurryAgent;
 

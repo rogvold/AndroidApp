@@ -68,10 +68,14 @@ public abstract class CommonTools {
     }
 
     public static boolean isNetworkAvailable(Context context) {
+        return isNetworkAvailable(context, "http://data.cardiomood.com/");
+    }
+
+    public static boolean isNetworkAvailable(Context context, String urlStr) {
         try {
             ConnectivityManager cm = (ConnectivityManager) context .getSystemService(Context.CONNECTIVITY_SERVICE);
             if (cm.getActiveNetworkInfo().isConnectedOrConnecting()) {
-                URL url = new URL("http://data.cardiomood.com/");
+                URL url = new URL(urlStr);
                 HttpURLConnection urlc = (HttpURLConnection) url .openConnection();
                 urlc.setRequestProperty("User-Agent", "test");
                 urlc.setRequestProperty("Connection", "close");

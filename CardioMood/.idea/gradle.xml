@@ -8,6 +8,7 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/Air" />
             <option value="$PROJECT_DIR$/AndroidControls" />
             <option value="$PROJECT_DIR$/CardioMoodApp" />
             <option value="$PROJECT_DIR$/CardioSportApp" />
