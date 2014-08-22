@@ -12,8 +12,8 @@ import com.parse.ParseObject;
  */
 public class AirApplication extends Application {
 
-    private static final String PARSE_APPLICATION_ID = "ZhlYHr1uAjC7CJB7l1QVfuzsJIwpp51J5KpQYOco";
-    private static final String PARSE_CLIENT_KEY = "YecCXICy1VY4Z4S7cVOS5jtdB0dW2dRsKSINfK9B";
+    public static final String PARSE_APPLICATION_ID = "ZhlYHr1uAjC7CJB7l1QVfuzsJIwpp51J5KpQYOco";
+    public static final String PARSE_CLIENT_KEY = "YecCXICy1VY4Z4S7cVOS5jtdB0dW2dRsKSINfK9B";
 
     @Override
     public void onCreate() {

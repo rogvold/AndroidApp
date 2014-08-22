@@ -41,7 +41,7 @@
             android:screenOrientation="portrait">
         </activity>
 
-        <service android:name=".gps.GPSService" android:enabled="true" />
+        <service android:name=".gps.GPSService" android:enabled="true" android:process=":gps_service" />
     </application>
 
     <!-- To auto-complete the email text field in the login form with the user's emails -->

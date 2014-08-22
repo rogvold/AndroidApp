@@ -8,13 +8,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import com.cardiomood.android.air.AirApplication;
 import com.cardiomood.android.air.R;
 import com.cardiomood.android.air.TrackingActivity;
 import com.cardiomood.android.air.data.AirSession;
@@ -22,8 +24,10 @@ import com.cardiomood.android.air.data.Aircraft;
 import com.cardiomood.android.air.data.DataPoint;
 import com.cardiomood.android.tools.thread.WorkerThread;
 import com.google.gson.Gson;
+import com.parse.Parse;
 import com.parse.ParseCloud;
 import com.parse.ParseException;
+import com.parse.ParseObject;
 
 import org.json.JSONArray;
 
@@ -31,6 +35,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+
+import bolts.Continuation;
+import bolts.Task;
 
 /**
  * Created by danon on 06.06.2014.
@@ -40,32 +48,182 @@ public class GPSService extends Service {
     private static final String TAG = GPSService.class.getSimpleName();
     private static final int SERVICE_NOTIFICATION_ID = 4242;
 
-    public static boolean isServiceStarted = false;
+    public static volatile boolean isServiceStarted = false;
 
-    private final IBinder mBinder = new LocalBinder();
     private GPSMonitor monitor;
     private AirSession airSession;
-    private Aircraft aircraft;
 
     private DataCollectorThread workerThread;
     private NotificationCompat.Builder mBuilder;
+    private NotificationManager mNotificationManager;
+    private Handler mHandler;
+    private Task<Void> mFinishingTask;
 
-    public class LocalBinder extends Binder {
-        public GPSService getService() {
-            return GPSService.this;
+    private final Object lock = new Object();
+    private final List<GPSServiceListener> listeners = new ArrayList<GPSServiceListener>();
+
+    private GPSServiceApi.Stub apiEndpoint = new GPSServiceApi.Stub() {
+
+        @Override
+        public void addListener(GPSServiceListener listener) throws RemoteException {
+            if (listener == null)
+                return;
+            synchronized (listeners) {
+                listeners.add(listener);
+            }
         }
+
+        @Override
+        public void removeListener(GPSServiceListener listener) throws RemoteException {
+            if (listener == null)
+                return;
+            synchronized (listeners) {
+                listeners.remove(listener);
+            }
+        }
+
+        @Override
+        public void startTrackingSession(String userId, String aircraftId) throws RemoteException {
+            synchronized (lock) {
+                createTrackingSession(userId, aircraftId);
+            }
+        }
+
+        @Override
+        public void stopTrackingSession() throws RemoteException {
+            synchronized (lock) {
+                GPSService.this.stop();
+            }
+        }
+
+        @Override
+        public boolean isRunning() throws RemoteException {
+            synchronized (lock) {
+                return isServiceStarted;
+            }
+        }
+
+        @Override
+        public void showNotification() throws RemoteException {
+            synchronized (lock) {
+                GPSService.this.showNotification();
+            }
+        }
+
+        @Override
+        public void hideNotification() throws RemoteException {
+            synchronized (lock) {
+                GPSService.this.hideNotification();
+            }
+        }
+
+        @Override
+        public String getAirSessionId() throws RemoteException {
+            synchronized (lock) {
+                return airSession == null ? null : airSession.getObjectId();
+            }
+        }
+
+        @Override
+        public String getAircraftId() throws RemoteException {
+            synchronized (lock) {
+                return airSession == null ? null : airSession.getAircraftId();
+            }
+        }
+
+        @Override
+        public String getUserId() throws RemoteException {
+            synchronized (lock) {
+                return airSession == null ? null : airSession.getUserId();
+            }
+        }
+
+        private void createTrackingSession(final String userId, final String aircraftId) {
+            Task.callInBackground(new Callable<AirSession>() {
+
+                @Override
+                public AirSession call() throws Exception {
+                    AirSession airSession = ParseObject.create(AirSession.class);
+                    airSession.setAircraftId(aircraftId);
+                    airSession.setUserId(userId);
+                    airSession.save();
+                    return airSession;
+                }
+            }).continueWith(new Continuation<AirSession, AirSession>() {
+
+                @Override
+                public AirSession then(Task<AirSession> task) throws Exception {
+                    AirSession session = null;
+                    if (task.isFaulted()) {
+                        // error: something went wrong
+                        Exception ex = task.getError();
+                        Log.e(TAG, "createSession failed", ex);
+                    } else if (task.isCompleted()) {
+                        // tracking session created
+                        session = task.getResult();
+                    }
+                    synchronized (lock) {
+                        onSessionCreated(session);
+                    }
+                    return session;
+                }
+            });
+        }
+
+        private void onSessionCreated(AirSession session) {
+            airSession = session;
+
+            // start monitoring
+            mHandler.post(new Runnable() {
+                public void run() {
+                    GPSService.this.start();
+                }
+            });
+
+            // notify listeners
+            synchronized (listeners) {
+                for (GPSServiceListener l: listeners) {
+                    try {
+                        l.onTrackingSessionStarted(session.getUserId(), session.getAircraftId(), session.getObjectId());
+                    } catch (RemoteException ex) {
+                        Log.w(TAG, "onSessionCreated() -> failed to notify listener", ex);
+                    }
+                }
+            }
+        }
+    };
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return Service.START_NOT_STICKY;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        // init Parse SDK
+        ParseObject.registerSubclass(Aircraft.class);
+        ParseObject.registerSubclass(AirSession.class);
+        Parse.initialize(this, AirApplication.PARSE_APPLICATION_ID, AirApplication.PARSE_CLIENT_KEY);
+
+        // create NotificationManager
+        mBuilder = setupNotificationBuilder();
+        // create notification
+        mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // create GPS monitor
+        monitor = createGPSMonitor();
+
+        mHandler = new Handler();
     }
 
     @Override
     public IBinder onBind(Intent intent) {
         Log.d(TAG, "onBind()");
 
-        return mBinder;
+        return apiEndpoint;
     }
 
     @Override
@@ -74,124 +232,80 @@ public class GPSService extends Service {
         return super.onUnbind(intent);
     }
 
-
-
-
     @Override
     public void onDestroy() {
         Log.d(TAG, "onDestroy()");
-        close();
-        super.onDestroy();
-    }
-
-    public void close() {
         stop();
-        stopSelf();
-        mBuilder = null;
-        monitor = null;
-        workerThread = null;
-        airSession = null;
-        aircraft = null;
+        isServiceStarted = false;
+        super.onDestroy();
     }
 
 
     public void stop() {
         Log.d(TAG, "stop()");
 
-        isServiceStarted = false;
-
-        // cancel notification
-        hideNotification();
-
         if (monitor == null)
             return;
 
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (monitor.isRunning()) {
+                    monitor.stop();
+                    monitor = null;
+                }
+            }
+        });
+
         if (workerThread != null && workerThread.isAlive()) {
             workerThread.finishWork();
-        }
-
-        if (monitor.isRunning()) {
-            monitor.stop();
+            mFinishingTask = Task.callInBackground(new Callable<Void>() {
+                @Override
+                public Void call() throws Exception {
+                    workerThread.join();
+                    workerThread = null;
+                    mFinishingTask = null;
+                    isServiceStarted = false;
+                    stopForeground(true);
+                    stopSelf();
+                    return null;
+                }
+            });
         }
     }
 
     public void start() {
         Log.d(TAG, "start()");
 
-        if (monitor == null)
-            monitor = createGPSMonitor();
         try {
-            if (!monitor.isRunning()) {
+            if (airSession != null) {
                 monitor.start();
-                workerThread = new DataCollectorThread();
-                workerThread.setSession(airSession);
-                workerThread.start();
             }
-
-            // set up notification builder
-            if (mBuilder == null)
-                mBuilder = setupNotificationBuilder();
-
-            isServiceStarted = true;
         } catch (Exception ex) {
             Log.e(TAG, "failed to start GPS tracking!", ex);
+            return;
         }
 
+        workerThread = new DataCollectorThread();
+        workerThread.setSession(airSession);
+        workerThread.start();
+
+        isServiceStarted = true;
     }
 
     public void showNotification() {
-        if (isServiceStarted && mBinder != null) {
-            // create notification
-            NotificationManager mNotificationManager =
-                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-            // mId allows you to update the notification later on.
-            mNotificationManager.notify(SERVICE_NOTIFICATION_ID, mBuilder.build());
+        if (mNotificationManager == null || mBuilder == null) {
+            // onCreate() wasn't invoked????
+            return;
+        }
+
+        if (isServiceStarted && mBuilder != null) {
+            startForeground(SERVICE_NOTIFICATION_ID, mBuilder.build());
         }
     }
 
     public void hideNotification() {
-        // create notification
-        NotificationManager mNotificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        // mId allows you to update the notification later on.
-        mNotificationManager.cancel(SERVICE_NOTIFICATION_ID);
-    }
-
-    private NotificationCompat.Builder setupNotificationBuilder() {
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.ic_launcher)
-                        .setContentTitle(aircraft.getName() + " :: " + getAircraft().getAircraftId())
-                        .setContentText("Click to open flight tracker")
-                        .setOngoing(true);
-
-        Intent resultIntent = new Intent(this, TrackingActivity.class);
-        resultIntent.putExtra(TrackingActivity.GET_PLANE_FROM_SERVICE, true);
-        //resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-
-        PendingIntent resultPendingIntent = null;
-
-        if (Build.VERSION.SDK_INT >= 16) {
-            // The stack builder object will contain an artificial back stack for the
-            // started Activity.
-            // This ensures that navigating backward from the Activity leads out of
-            // your application to the Home screen.
-            TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-            // Adds the back stack for the Intent (but not the Intent itself)
-            stackBuilder.addParentStack(TrackingActivity.class);
-            // Adds the Intent that starts the Activity to the top of the stack
-            stackBuilder.addNextIntent(resultIntent);
-            resultPendingIntent =
-                    stackBuilder.getPendingIntent(
-                            0,
-                            PendingIntent.FLAG_UPDATE_CURRENT
-                    );
-        } else {
-            resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
-        }
-        mBuilder.setContentIntent(resultPendingIntent);
-
-        return mBuilder;
+        stopForeground(true);
     }
 
     public boolean isRunning() {
@@ -218,22 +332,6 @@ public class GPSService extends Service {
         return monitor.getCurrentLocationTimestamp();
     }
 
-    public AirSession getAirSession() {
-        return airSession;
-    }
-
-    public void setAirSession(AirSession airSession) {
-        this.airSession = airSession;
-    }
-
-    public Aircraft getAircraft() {
-        return aircraft;
-    }
-
-    public void setAircraft(Aircraft aircraft) {
-        this.aircraft = aircraft;
-    }
-
     private GPSMonitor createGPSMonitor() {
         final GPSMonitor gpsMonitor = new GPSMonitor(this);
         gpsMonitor.setListener(new LocationListener() {
@@ -241,6 +339,15 @@ public class GPSService extends Service {
             public void onLocationChanged(Location location) {
                if (workerThread != null)
                    workerThread.put(getDataPoint(location));
+               synchronized (listeners) {
+                   for (GPSServiceListener l: listeners) {
+                       try {
+                           l.onLocationChanged(location);
+                       } catch (Exception ex) {
+                           Log.w(TAG, "monitor.onLocationChanged() -> failed to notify listener", ex);
+                       }
+                   }
+               }
             }
 
             @Override
@@ -275,6 +382,44 @@ public class GPSService extends Service {
         return dp;
     }
 
+    private NotificationCompat.Builder setupNotificationBuilder() {
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.ic_launcher)
+                        .setContentTitle("CardioMood Air is running")
+                        .setContentText("Click this to open the flight tracker")
+                        .setOngoing(true);
+
+        Intent resultIntent = new Intent(this, TrackingActivity.class);
+        resultIntent.putExtra(TrackingActivity.GET_PLANE_FROM_SERVICE, true);
+        //resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+
+        PendingIntent resultPendingIntent = null;
+
+        if (Build.VERSION.SDK_INT >= 16) {
+            // The stack builder object will contain an artificial back stack for the
+            // started Activity.
+            // This ensures that navigating backward from the Activity leads out of
+            // your application to the Home screen.
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+            // Adds the back stack for the Intent (but not the Intent itself)
+            stackBuilder.addParentStack(TrackingActivity.class);
+            // Adds the Intent that starts the Activity to the top of the stack
+            stackBuilder.addNextIntent(resultIntent);
+            resultPendingIntent =
+                    stackBuilder.getPendingIntent(
+                            0,
+                            PendingIntent.FLAG_UPDATE_CURRENT
+                    );
+        } else {
+            resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
+        }
+        mBuilder.setContentIntent(resultPendingIntent);
+
+        return mBuilder;
+    }
+
+
     private class DataCollectorThread extends WorkerThread<DataPoint> {
 
         private final Gson GSON = new Gson();
@@ -293,7 +438,24 @@ public class GPSService extends Service {
         public void onStop() {
             if (session != null) {
                 session.setEndDate(getLastItemTime());
-                session.saveEventually();
+
+                try {
+                    session.save();
+                } catch (ParseException ex) {
+                    Log.w(TAG, "workerThread.onStop() -> failed to save session", ex);
+                    session.saveEventually();
+                }
+
+                // notify listeners
+                synchronized (listeners) {
+                    for (GPSServiceListener l: listeners) {
+                        try {
+                            l.onTrackingSessionFinished();
+                        } catch (RemoteException ex) {
+                            Log.w(TAG, "stopTrackingSession() -> failed to notify listener", ex);
+                        }
+                    }
+                }
             }
         }
 

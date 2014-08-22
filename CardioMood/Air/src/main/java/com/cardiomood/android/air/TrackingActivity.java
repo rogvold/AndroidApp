@@ -2,15 +2,16 @@ package com.cardiomood.android.air;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.location.Location;
-import android.location.LocationListener;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,6 +24,8 @@ import com.cardiomood.android.air.data.AirSession;
 import com.cardiomood.android.air.data.Aircraft;
 import com.cardiomood.android.air.gps.GPSMonitor;
 import com.cardiomood.android.air.gps.GPSService;
+import com.cardiomood.android.air.gps.GPSServiceApi;
+import com.cardiomood.android.air.gps.GPSServiceListener;
 import com.cardiomood.android.air.tools.ParseTools;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -31,7 +34,6 @@ import com.google.android.gms.maps.model.LatLng;
 import com.parse.DeleteCallback;
 import com.parse.GetCallback;
 import com.parse.ParseException;
-import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
@@ -42,7 +44,7 @@ import bolts.Continuation;
 import bolts.Task;
 
 
-public class TrackingActivity extends Activity implements LocationListener {
+public class TrackingActivity extends Activity {
 
     public static final String SELECTED_PLANE_PARSE_ID = "com.cardiomood.android.air.extra.SELECTED_PLANE_PARSE_ID";
     public static final String GET_PLANE_FROM_SERVICE = "com.cardiomood.android.air.extra.GET_PLANE_FROM_SERVICE";
@@ -55,19 +57,27 @@ public class TrackingActivity extends Activity implements LocationListener {
     private Aircraft mPlane = null;
     private volatile AirSession mAirSession = null;
 
-    private GPSService gpsService;
+    private GPSServiceApi gpsService;
     private boolean gpsBound;
     private ServiceConnection gpsConnection = new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            GPSService.LocalBinder binder = (GPSService.LocalBinder) service;
-            gpsService = binder.getService();
+            gpsService = GPSServiceApi.Stub.asInterface(service);
             gpsBound = true;
 
-            gpsService.hideNotification();
+            try {
+                gpsService.hideNotification();
+            } catch (RemoteException ex) {
+                Log.d(TAG, "onServiceConnected(): api.hideNotification() failed", ex);
+            }
+
+            try {
+                gpsService.addListener(gpsServiceListener);
+            } catch (Exception ex) {
+                Log.d(TAG, "onServiceConnected(): api.addListener() failed", ex);
+            }
 
             loadPlaneData();
         }
@@ -75,6 +85,7 @@ public class TrackingActivity extends Activity implements LocationListener {
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             gpsBound = false;
+            mStopButton.setEnabled(false);
         }
     };
 
@@ -96,7 +107,7 @@ public class TrackingActivity extends Activity implements LocationListener {
         // check if signed in
         ParseUser currentUser = ParseUser.getCurrentUser();
         if (currentUser == null || !currentUser.isAuthenticated()) {
-            performExit();
+            performLogout(false);
             return;
         }
 
@@ -118,7 +129,7 @@ public class TrackingActivity extends Activity implements LocationListener {
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         mMap.setMyLocationEnabled(true);
 
-        gpsMonitor = new GPSMonitor(this, this);
+        gpsMonitor = new GPSMonitor(this);
         Location lastLocation = gpsMonitor.getLastKnownLocation();
         if (lastLocation != null) {
             // setup initial map coordinated
@@ -126,6 +137,7 @@ public class TrackingActivity extends Activity implements LocationListener {
         }
 
         mStopButton = (Button) findViewById(R.id.stop_button);
+        mStopButton.setEnabled(false);
         mStopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -143,7 +155,7 @@ public class TrackingActivity extends Activity implements LocationListener {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 dialogInterface.dismiss();
-                                performExit();
+                                stopGPSService();
                             }
                         }).show();
             }
@@ -154,21 +166,6 @@ public class TrackingActivity extends Activity implements LocationListener {
     protected void onDestroy() {
         Log.d(TAG, "onDestroy()");
 
-        if (gpsMonitor != null && gpsMonitor.isRunning()) {
-            gpsMonitor.stop();
-        }
-
-        if (mPlane != null) {
-            mPlane.unpinInBackground(new DeleteCallback() {
-                @Override
-                public void done(ParseException e) {
-                    if (e != null) {
-                        Log.w(TAG, "failed to unpin plane", e);
-                    }
-                }
-            });
-        }
-
         super.onDestroy();
     }
 
@@ -176,28 +173,40 @@ public class TrackingActivity extends Activity implements LocationListener {
     protected void onStart() {
         super.onStart();
 
-        if (gpsMonitor.isGPSEnabled() && !gpsMonitor.isRunning())
-            gpsMonitor.start();
+        // start service
+        Intent intent = new Intent(this, GPSService.class);
+        startService(intent);
 
         // Bind GPSService
-        Intent intent = new Intent(this, GPSService.class);
         bindService(intent, gpsConnection, Context.BIND_AUTO_CREATE);
-        startService(intent);
     }
+
+
 
     @Override
     protected void onStop() {
         super.onStop();
 
-        // Unbind GPSService if bound
         if (gpsBound) {
-            if (GPSService.isServiceStarted && gpsService.getAirSession() != null)
-                gpsService.showNotification();
-            unbindService(gpsConnection);
+            // show notification if the service is running
+            try {
+                if (gpsService.isRunning())
+                    gpsService.showNotification();
+            } catch (RemoteException ex) {
+                Log.d(TAG, "onStop() -> show notification failed", ex);
+            }
+            // remove listener
+            try {
+                gpsService.removeListener(gpsServiceListener);
+            } catch (RemoteException ex) {
+                Log.d(TAG, "onStop() -> remove listener failed", ex);
+            }
+
         }
 
-        if (gpsMonitor.isRunning())
-            gpsMonitor.stop();
+        if (gpsBound) {
+            unbindService(gpsConnection);
+        }
     }
 
     @Override
@@ -267,6 +276,22 @@ public class TrackingActivity extends Activity implements LocationListener {
     protected void onResume() {
         super.onResume();
         checkGPSEnabled();
+
+        if (gpsBound) {
+            // add listener
+            try {
+                gpsService.addListener(gpsServiceListener);
+            } catch (RemoteException ex) {
+                Log.d(TAG, "onStart() -> add listener failed", ex);
+            }
+
+            // hide notification
+            try {
+                gpsService.hideNotification();
+            } catch (RemoteException ex) {
+                Log.d(TAG, "onStart() -> hide notification failed", ex);
+            }
+        }
     }
 
     @Override
@@ -293,38 +318,43 @@ public class TrackingActivity extends Activity implements LocationListener {
         final TextView text2 = (TextView) mCurrentUserView.findViewById(android.R.id.text2);
         text2.setText("Loading...");
 
-        boolean getPlaneFromService = getIntent().getBooleanExtra(GET_PLANE_FROM_SERVICE, false);
-        if (getPlaneFromService) {
-            Aircraft plane = gpsService.getAircraft();
-            if (plane != null) {
-                onPlaneLoaded(plane);
-                return;
+        boolean serviceIsRunning = false;
+        try {
+            serviceIsRunning = gpsService.isRunning();
+        } catch (RemoteException ex) {
+            // suppress this
+        }
+
+        String planeId = getIntent().getStringExtra(SELECTED_PLANE_PARSE_ID);
+        if (serviceIsRunning) {
+            try {
+                planeId = gpsService.getAircraftId();
+            } catch (RemoteException ex) {
+                Log.w(TAG, "failed to get planeId from service", ex);
+                serviceIsRunning = false;
             }
         }
 
         // load plane from Parse
-        String planeId = getIntent().getStringExtra(SELECTED_PLANE_PARSE_ID);
-        ParseQuery.getQuery(Aircraft.class)
-                .fromPin()
-                .getInBackground(planeId, new GetCallback<Aircraft>() {
-                    @Override
-                    public void done(Aircraft parseObject, ParseException e) {
-                        if (e == null) {
-                            onPlaneLoaded(parseObject);
-                        } else {
-                            Toast.makeText(TrackingActivity.this, "Plane not found.", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(TrackingActivity.this, PlanesActivity.class));
-                            finish();
-                        }
-                    }
-                });
-
+        ParseQuery query = ParseQuery.getQuery(Aircraft.class);
+//        if (!serviceIsRunning)
+//            query.fromPin();
+        query.getInBackground(planeId, new GetCallback<Aircraft>() {
+            @Override
+            public void done(Aircraft parseObject, ParseException e) {
+                if (e == null) {
+                    onPlaneLoaded(parseObject);
+                } else {
+                    Toast.makeText(TrackingActivity.this, "Plane not found.", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(TrackingActivity.this, PlanesActivity.class));
+                    finish();
+                }
+            }
+        });
     }
 
     private void onPlaneLoaded(Aircraft plane) {
         mPlane = plane;
-        if (gpsService.getAircraft() == null)
-            gpsService.setAircraft(plane);
 
         // update view
         TextView text1 = (TextView) mCurrentUserView.findViewById(android.R.id.text1);
@@ -336,63 +366,15 @@ public class TrackingActivity extends Activity implements LocationListener {
         Toast.makeText(TrackingActivity.this, "Plane: " + plane.getString("name"), Toast.LENGTH_SHORT).show();
 
         // create tracking session if not created
-        if (gpsService.getAirSession() == null) {
-            createTrackingSession();
-        } else {
-            onTrackingSessionCreated(gpsService.getAirSession());
+        try {
+            if (gpsService.isRunning()) {
+                gpsServiceListener.onTrackingSessionStarted(gpsService.getUserId(), gpsService.getAircraftId(), gpsService.getAirSessionId());
+            } else {
+                gpsService.startTrackingSession(ParseUser.getCurrentUser().getObjectId(), plane.getObjectId());
+            }
+        } catch (RemoteException ex) {
+            Log.w(TAG, "failed to setup tracking session", ex);
         }
-    }
-
-    private void createTrackingSession() {
-        Task.callInBackground(new Callable<AirSession>() {
-
-            @Override
-            public AirSession call() throws Exception {
-                AirSession airSession = ParseObject.create(AirSession.class);
-                airSession.setAircraftId(mPlane.getObjectId());
-                airSession.setUserId(ParseUser.getCurrentUser().getObjectId());
-                airSession.save();
-                return airSession;
-            }
-        }).continueWith(new Continuation<AirSession, AirSession>() {
-
-            @Override
-            public AirSession then(Task<AirSession> task) throws Exception {
-                if (task.isCancelled()) {
-                    // the task was cancelled
-                } else if (task.isFaulted()) {
-                    // error: something went wrong
-                    Exception ex = task.getError();
-                    Log.e(TAG, "createSession failed", ex);
-                    Toast.makeText(TrackingActivity.this,
-                            "Real time monitoring is not possible.", Toast.LENGTH_SHORT).show();
-                } else if (task.isCompleted()) {
-                    // tracking session created
-                    onTrackingSessionCreated(task.getResult());
-                }
-                return mAirSession;
-            }
-        });
-    }
-
-    private void onTrackingSessionCreated(AirSession session) {
-        mAirSession = session;
-        if (gpsService.getAirSession() == null)
-            gpsService.setAirSession(session);
-        if (!gpsService.isRunning()) {
-            startTracking();
-        }
-    }
-
-    private void startTracking() {
-        // start tracking
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (!gpsService.isRunning())
-                    gpsService.start();
-            }
-        });
     }
 
     private void showLogoutDialog() {
@@ -415,67 +397,40 @@ public class TrackingActivity extends Activity implements LocationListener {
                 }).show();
     }
 
+    private void stopGPSService() {
+        boolean showProgress = false;
+        if (gpsBound) {
+            try {
+                if (gpsService.isRunning()) {
+                    gpsService.stopTrackingSession();
+                    showProgress = true;
+                }
+            } catch (RemoteException ex) {
+                Log.w(TAG, "stopGPSService() failed to close the service", ex);
+            }
+        }
+        if (showProgress) {
+            new ProgressDialog.Builder(this)
+                    .setCancelable(false)
+                    .setMessage("Waiting for the service to finish...")
+                    .show();
+        }
+    }
+
     private void performLogout() {
         performLogout(true);
     }
 
-    private void performExit() {
-        if (gpsBound) {
-            if (gpsService.isRunning()) {
-                gpsService.close();
-            }
-        }
-        // ... and also stop the service
-        Intent intent = new Intent(this, GPSService.class);
-        stopService(intent);
-
-        startActivity(new Intent(this, PlanesActivity.class));
-        finish();
-    }
-
     private void performLogout(boolean openLoginActivity) {
-        // close GPSService
-        if (gpsBound) {
-            if (gpsService.isRunning()) {
-                gpsService.close();
-            }
-        }
-        // ... and also stop the service
-        Intent intent = new Intent(this, GPSService.class);
-        stopService(intent);
-
+        // Parse log out
         ParseUser.logOut();
-        if (openLoginActivity)
-            startActivity(new Intent(this, LoginActivity.class));
-        finish();
+
+        if (!openLoginActivity)
+            finish();
+
+        stopGPSService();
     }
 
-
-
-    @Override
-    public void onLocationChanged(Location location) {
-        if (location.hasSpeed())
-            mSpeedView.setText(String.format("%.2f km/h", location.getSpeed()*3.6f));
-        if (location.hasAltitude())
-            mAltitudeView.setText(String.format("%d m", (int) location.getAltitude()));
-
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
-    }
-
-    @Override
-    public void onStatusChanged(String s, int i, Bundle bundle) {
-        Log.i(TAG, "onStatusChanged(): s=" + s);
-    }
-
-    @Override
-    public void onProviderEnabled(String s) {
-        Log.i(TAG, "onProviderEnabled(): s="+s);
-    }
-
-    @Override
-    public void onProviderDisabled(String s) {
-        Log.i(TAG, "onProviderDisabled(): s="+s);
-    }
 
     private void checkGPSEnabled() {
         if (gpsMonitor.isGPSEnabled()) {
@@ -494,7 +449,7 @@ public class TrackingActivity extends Activity implements LocationListener {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.dismiss();
-                        performExit();
+                        performLogout(true);
                     }
                 })
                 .setPositiveButton("Go to Settings", new DialogInterface.OnClickListener() {
@@ -505,4 +460,69 @@ public class TrackingActivity extends Activity implements LocationListener {
                     }
                 }).show();
     }
+
+    private final GPSServiceListener.Stub gpsServiceListener =  new GPSServiceListener.Stub() {
+
+        @Override
+        public void onLocationChanged(final Location location) throws RemoteException {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (location.hasSpeed())
+                        mSpeedView.setText(String.format("%.2f km/h", location.getSpeed()*3.6f));
+                    if (location.hasAltitude())
+                        mAltitudeView.setText(String.format("%d m", (int) location.getAltitude()));
+
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+                }
+            });
+
+        }
+
+        @Override
+        public void onHeartRateChanged(int heartRate) throws RemoteException {
+
+        }
+
+        @Override
+        public void onStressChanged(double stress) throws RemoteException {
+
+        }
+
+        @Override
+        public void onTrackingSessionStarted(String userId, String aircraftId, final String airSessionId) throws RemoteException {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        mStopButton.setEnabled(true);
+                        if (!TrackingActivity.this.isFinishing())
+                            Toast.makeText(TrackingActivity.this, "Tracking session is running. SessionId="
+                                    + airSessionId, Toast.LENGTH_SHORT).show();
+                    } catch(Exception ex) {
+                        // suppress this
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void onTrackingSessionFinished() throws RemoteException {
+            //Toast.makeText(TrackingActivity.this, "Tracking session finished.", Toast.LENGTH_SHORT).show();
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (!TrackingActivity.this.isFinishing()) {
+                            startActivity(new Intent(TrackingActivity.this, LoginActivity.class));
+                            TrackingActivity.this.finish();
+                        }
+                    } catch(Exception ex) {
+                        // suppress this
+                    }
+                }
+            });
+
+        }
+    };
 }
