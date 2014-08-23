@@ -1,8 +1,10 @@
 package com.cardiomood.heartrate.bluetooth;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.util.Log;
 
 /**
@@ -80,6 +82,12 @@ public abstract class LeHRMonitor {
     }
 
     public BluetoothAdapter getBluetoothAdapter() {
+        // Use BluetoothManager for API level >= 18
+        if (Build.VERSION.SDK_INT >= 18) {
+            BluetoothManager btMan = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+            return btMan == null ? null : btMan.getAdapter();
+        }
+        // Use default BluetoothAdapter on API level < 18
         return BluetoothAdapter.getDefaultAdapter();
     }
 

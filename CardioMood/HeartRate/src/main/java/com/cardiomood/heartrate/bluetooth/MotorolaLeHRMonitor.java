@@ -32,6 +32,8 @@ public class MotorolaLeHRMonitor extends LeHRMonitor {
 
     private Context mContext = null;
 
+    //private final CountDownLatch latch = new CountDownLatch(1);
+
     private BluetoothDevice device;
     private BluetoothAdapter bluetoothAdapter;
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -39,6 +41,7 @@ public class MotorolaLeHRMonitor extends LeHRMonitor {
         public void onServiceConnected(ComponentName className, IBinder service) {
             hrmService = IBluetoothHrm.Stub.asInterface(service);
             bleBound = true;
+            //latch.countDown();
         }
 
         public void onServiceDisconnected(ComponentName arg0) {
@@ -187,6 +190,13 @@ public class MotorolaLeHRMonitor extends LeHRMonitor {
         callback1 = new BLECallback(hrmUUID);
 
         previousData = new byte[0];
+
+        // todo: this method is asynchronous!!!
+//        try {
+//            latch.await();
+//        } catch (InterruptedException ex) {
+//            Thread.currentThread().interrupt();
+//        }
         setConnectionStatus(READY_STATUS);
         // initialized!
         return true;

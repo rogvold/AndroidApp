@@ -40,6 +40,14 @@ interface GPSServiceApi {
      */
     void hideNotification();
 
+    boolean initBLE();
+
+    void connectHRMonitor(String address);
+
+    void disconnectHRMonitor();
+
+    boolean isHRMonitorConnected();
+
     String getAirSessionId();
 
     String getAircraftId();

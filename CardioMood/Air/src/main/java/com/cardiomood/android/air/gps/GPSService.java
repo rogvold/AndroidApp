@@ -23,6 +23,7 @@ import com.cardiomood.android.air.data.AirSession;
 import com.cardiomood.android.air.data.Aircraft;
 import com.cardiomood.android.air.data.DataPoint;
 import com.cardiomood.android.tools.thread.WorkerThread;
+import com.cardiomood.heartrate.bluetooth.LeHRMonitor;
 import com.google.gson.Gson;
 import com.parse.Parse;
 import com.parse.ParseCloud;
@@ -50,7 +51,8 @@ public class GPSService extends Service {
 
     public static volatile boolean isServiceStarted = false;
 
-    private GPSMonitor monitor;
+    private GPSMonitor gpsMonitor;
+    private LeHRMonitor hrMonitor;
     private AirSession airSession;
 
     private DataCollectorThread workerThread;
@@ -92,6 +94,8 @@ public class GPSService extends Service {
         @Override
         public void stopTrackingSession() throws RemoteException {
             synchronized (lock) {
+                if (isHRMonitorConnected())
+                    disconnectHRMonitor();
                 GPSService.this.stop();
             }
         }
@@ -114,6 +118,45 @@ public class GPSService extends Service {
         public void hideNotification() throws RemoteException {
             synchronized (lock) {
                 GPSService.this.hideNotification();
+            }
+        }
+
+        @Override
+        public boolean initBLE() throws RemoteException {
+            synchronized (lock) {
+                if (hrMonitor == null)
+                    hrMonitor = LeHRMonitor.getMonitor(GPSService.this);
+                if (hrMonitor.getConnectionStatus() == LeHRMonitor.INITIAL_STATUS)
+                    return hrMonitor.initialize();
+                if (hrMonitor.getConnectionStatus() == LeHRMonitor.READY_STATUS)
+                    return true;
+
+                // reset the monitor
+                hrMonitor.close();
+                hrMonitor = null;
+
+                return initBLE();
+            }
+        }
+
+        @Override
+        public void connectHRMonitor(String address) throws RemoteException {
+            synchronized (lock) {
+                hrMonitor.connect(address);
+            }
+        }
+
+        @Override
+        public void disconnectHRMonitor() throws RemoteException {
+            synchronized (lock) {
+                hrMonitor.disconnect();
+            }
+        }
+
+        @Override
+        public boolean isHRMonitorConnected() throws RemoteException {
+            synchronized (lock) {
+                return hrMonitor == null ? false : (hrMonitor.getConnectionStatus() == LeHRMonitor.CONNECTED_STATUS);
             }
         }
 
@@ -214,9 +257,11 @@ public class GPSService extends Service {
                 (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         // create GPS monitor
-        monitor = createGPSMonitor();
+        gpsMonitor = createGPSMonitor();
 
         mHandler = new Handler();
+
+        hrMonitor = LeHRMonitor.getMonitor(this);
     }
 
     @Override
@@ -244,18 +289,22 @@ public class GPSService extends Service {
     public void stop() {
         Log.d(TAG, "stop()");
 
-        if (monitor == null)
+        if (gpsMonitor == null)
             return;
 
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                if (monitor.isRunning()) {
-                    monitor.stop();
-                    monitor = null;
+                if (gpsMonitor.isRunning()) {
+                    gpsMonitor.stop();
+                    gpsMonitor = null;
                 }
             }
         });
+
+        if (hrMonitor.getConnectionStatus() == LeHRMonitor.CONNECTED_STATUS) {
+            hrMonitor.disconnect();
+        }
 
         if (workerThread != null && workerThread.isAlive()) {
             workerThread.finishWork();
@@ -279,7 +328,7 @@ public class GPSService extends Service {
 
         try {
             if (airSession != null) {
-                monitor.start();
+                gpsMonitor.start();
             }
         } catch (Exception ex) {
             Log.e(TAG, "failed to start GPS tracking!", ex);
@@ -289,6 +338,10 @@ public class GPSService extends Service {
         workerThread = new DataCollectorThread();
         workerThread.setSession(airSession);
         workerThread.start();
+
+        if (hrMonitor.initialize()) {
+            hrMonitor.connect("00:22:D0:00:00:CC");
+        }
 
         isServiceStarted = true;
     }
@@ -309,27 +362,27 @@ public class GPSService extends Service {
     }
 
     public boolean isRunning() {
-        return monitor == null ? false : monitor.isRunning();
+        return gpsMonitor == null ? false : gpsMonitor.isRunning();
     }
 
     public boolean isGPSEnabled() {
-        return monitor.isGPSEnabled();
+        return gpsMonitor.isGPSEnabled();
     }
 
     public Location getLastKnownLocation() {
-        return monitor.getLastKnownLocation();
+        return gpsMonitor.getLastKnownLocation();
     }
 
     public Context getContext() {
-        return monitor.getContext();
+        return gpsMonitor.getContext();
     }
 
     public Location getCurrentLocation() {
-        return monitor.getCurrentLocation();
+        return gpsMonitor.getCurrentLocation();
     }
 
     public long getCurrentLocationTimestamp() {
-        return monitor.getCurrentLocationTimestamp();
+        return gpsMonitor.getCurrentLocationTimestamp();
     }
 
     private GPSMonitor createGPSMonitor() {
@@ -344,7 +397,7 @@ public class GPSService extends Service {
                        try {
                            l.onLocationChanged(location);
                        } catch (Exception ex) {
-                           Log.w(TAG, "monitor.onLocationChanged() -> failed to notify listener", ex);
+                           Log.w(TAG, "gpsMonitor.onLocationChanged() -> failed to notify listener", ex);
                        }
                    }
                }
@@ -368,7 +421,7 @@ public class GPSService extends Service {
         return gpsMonitor;
     }
 
-    private static DataPoint getDataPoint(Location loc) {
+    private DataPoint getDataPoint(Location loc) {
         DataPoint dp = new DataPoint();
         dp.setLat(loc.getLatitude());
         dp.setLon(loc.getLongitude());
@@ -377,7 +430,7 @@ public class GPSService extends Service {
         dp.setBea(loc.hasBearing() ? loc.getBearing() : null);
         dp.setVel(loc.hasSpeed() ? loc.getSpeed() : null);
         dp.setT(loc.getTime());
-        dp.setHR(72);
+        dp.setHR(hrMonitor.getConnectionStatus() == LeHRMonitor.CONNECTED_STATUS ? hrMonitor.getLastBPM() : null);
         dp.setStress(94);
         return dp;
     }

@@ -2,6 +2,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.cardiomood.android.air.TrackingActivity" >
 
+    <item android:id="@+id/menu_connect_hr"
+        android:title="Connect HR Monitor"/>
+
     <item android:id="@+id/menu_logout"
         android:title="@string/menu_logout"
         android:showAsAction="never" />
