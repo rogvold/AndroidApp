@@ -15,4 +15,6 @@ interface GPSServiceListener {
 
     void onTrackingSessionFinished();
 
+    void onHRMStatusChanged(String address, String name, int oldStatus, int newStatus);
+
 }

@@ -5,14 +5,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Vibrator;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.security.MessageDigest;
 import java.util.Calendar;
 import java.util.Date;
@@ -68,29 +67,13 @@ public abstract class CommonTools {
     }
 
     public static boolean isNetworkAvailable(Context context) {
-        return isNetworkAvailable(context, "http://data.cardiomood.com/");
-    }
+        ConnectivityManager cm =
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
-    public static boolean isNetworkAvailable(Context context, String urlStr) {
-        try {
-            ConnectivityManager cm = (ConnectivityManager) context .getSystemService(Context.CONNECTIVITY_SERVICE);
-            if (cm.getActiveNetworkInfo().isConnectedOrConnecting()) {
-                URL url = new URL(urlStr);
-                HttpURLConnection urlc = (HttpURLConnection) url .openConnection();
-                urlc.setRequestProperty("User-Agent", "test");
-                urlc.setRequestProperty("Connection", "close");
-                urlc.setConnectTimeout(2000); // mTimeout is in seconds
-                urlc.connect();
-                if (urlc.getResponseCode() == 200) {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        } catch (Exception e) {
-            Log.d(TAG, "isNetworkAvailable() exception", e);
-        }
-        return false;
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+        return isConnected;
     }
 
     public static String encryptString(String s, String algo) {
@@ -100,7 +83,6 @@ public abstract class CommonTools {
         try {
             MessageDigest md = MessageDigest.getInstance(algo);
             md.update(s.getBytes());
-            s = null;
             return toHexString(md.digest());
         } catch (Exception ex) {
             Log.e(TAG, "encryptString(): Couldn't calculate MD5 of string", ex);
@@ -161,7 +143,7 @@ public abstract class CommonTools {
             age--;
 
             // If birth date and todays date are of same month and birth day of month is greater than todays day of month then decrement age
-        }else if ((birthDate.get(Calendar.MONTH) == today.get(Calendar.MONTH )) &&
+        } else if ((birthDate.get(Calendar.MONTH) == today.get(Calendar.MONTH )) &&
                 (birthDate.get(Calendar.DAY_OF_MONTH) > today.get(Calendar.DAY_OF_MONTH ))){
             age--;
         }

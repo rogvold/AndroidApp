@@ -54,6 +54,7 @@ public class GPSService extends Service {
     private GPSMonitor gpsMonitor;
     private LeHRMonitor hrMonitor;
     private AirSession airSession;
+    private String hrmAddress;
 
     private DataCollectorThread workerThread;
     private NotificationCompat.Builder mBuilder;
@@ -63,6 +64,44 @@ public class GPSService extends Service {
 
     private final Object lock = new Object();
     private final List<GPSServiceListener> listeners = new ArrayList<GPSServiceListener>();
+
+    private LeHRMonitor.Callback hrCallback = new LeHRMonitor.Callback() {
+        @Override
+        public void onBPMChanged(int bpm) {
+            synchronized (listeners) {
+                for (GPSServiceListener l: listeners) {
+                    try {
+                        l.onHeartRateChanged(bpm);
+                    } catch (RemoteException ex) {
+                        Log.w(TAG, "onBPMChanged() failed to notify listener", ex);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onConnectionStatusChanged(int oldStatus, int newStatus) {
+            synchronized (listeners) {
+                for (GPSServiceListener l: listeners) {
+                    try {
+                        l.onHRMStatusChanged(hrmAddress, null, oldStatus, newStatus);
+                    } catch (RemoteException ex) {
+                        Log.w(TAG, "onBPMChanged() failed to notify listener", ex);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onDataReceived(int bpm, short[] rr) {
+
+        }
+
+        @Override
+        public void onBatteryLevelReceived(int level) {
+
+        }
+    };
 
     private GPSServiceApi.Stub apiEndpoint = new GPSServiceApi.Stub() {
 
@@ -126,8 +165,10 @@ public class GPSService extends Service {
             synchronized (lock) {
                 if (hrMonitor == null)
                     hrMonitor = LeHRMonitor.getMonitor(GPSService.this);
-                if (hrMonitor.getConnectionStatus() == LeHRMonitor.INITIAL_STATUS)
+                if (hrMonitor.getConnectionStatus() == LeHRMonitor.INITIAL_STATUS) {
+                    hrMonitor.setCallback(hrCallback);
                     return hrMonitor.initialize();
+                }
                 if (hrMonitor.getConnectionStatus() == LeHRMonitor.READY_STATUS)
                     return true;
 
@@ -143,6 +184,7 @@ public class GPSService extends Service {
         public void connectHRMonitor(String address) throws RemoteException {
             synchronized (lock) {
                 hrMonitor.connect(address);
+                hrmAddress = address;
             }
         }
 
@@ -150,6 +192,7 @@ public class GPSService extends Service {
         public void disconnectHRMonitor() throws RemoteException {
             synchronized (lock) {
                 hrMonitor.disconnect();
+                hrmAddress = null;
             }
         }
 

@@ -4,7 +4,6 @@
     android:layout_height="match_parent"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
     tools:context="com.cardiomood.android.air.TrackingActivity">
 
@@ -14,7 +13,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <include layout="@android:layout/simple_list_item_2"
+        <include layout="@layout/two_lines_layout"
             android:id="@+id/current_user_box"
             android:layout_height="wrap_content"
             android:layout_width="0dp"
@@ -26,7 +25,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Stop"/>
+            android:text="Stop"
+            android:background="@android:color/holo_red_dark" />
 
     </LinearLayout>
 
@@ -47,6 +47,30 @@
         android:paddingTop="8dp"
         android:paddingBottom="8dp">
 
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textStyle="bold"
+                android:text="Internet"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:text="N/A"
+                android:id="@+id/internet"/>
+
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="0dp"
@@ -59,7 +83,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textStyle="bold"
                 android:text="Altitude"
                 />
 
@@ -82,7 +107,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textStyle="bold"
                 android:text="Speed"
                 />
 
@@ -94,6 +120,42 @@
 
         </LinearLayout>
 
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/hr_monitor_block"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingBottom="8dp"
+        android:layout_below="@id/gps_info_block">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textStyle="bold"
+            android:text="HR Monitor:"/>
+
+        <TextView
+            android:id="@+id/hr_monitor_status"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="10"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Not connected"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+
+        <Button android:text="Connect..."
+            android:id="@+id/connect_hr_monitor_button"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textStyle="bold"/>
 
     </LinearLayout>
 
@@ -102,8 +164,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:layout_below="@id/gps_info_block"
+        android:layout_below="@id/hr_monitor_block"
         android:layout_alignParentBottom="true">
+
         <fragment
             android:name="com.google.android.gms.maps.MapFragment"
             android:layout_width="match_parent"

@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.cardiomood.android.air.data.AirSession;
 import com.cardiomood.android.air.data.Aircraft;
 import com.cardiomood.android.air.tools.ParseTools;
+import com.cardiomood.android.tools.CommonTools;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
@@ -215,10 +216,10 @@ public class PlanesActivity extends Activity {
     }
 
     private void refreshPlanes() {
-//        if (!CommonTools.isNetworkAvailable(this, "https://parse.com/")) {
-//            Toast.makeText(this, "Back-end servers are not accessible at the moment. \n" +
-//                    "Check Internet connection and try again.", Toast.LENGTH_SHORT).show();
-//        }
+        if (!CommonTools.isNetworkAvailable(this)) {
+            Toast.makeText(this, "Back-end servers are not accessible at the moment. \n" +
+                    "Check Internet connection and try again.", Toast.LENGTH_SHORT).show();
+        }
 
         mStartButton.setEnabled(false);
 

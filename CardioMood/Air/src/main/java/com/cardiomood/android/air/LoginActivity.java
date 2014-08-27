@@ -167,13 +167,13 @@ public class LoginActivity extends Activity{
     }
 
     private void refreshUsersList() {
-        if (!CommonTools.isNetworkAvailable(this, "https://parse.com/")) {
+        if (!CommonTools.isNetworkAvailable(this)) {
             Toast.makeText(this, "Back-end servers are not accessible at the moment. \n" +
                     "Check Internet connection and try again.", Toast.LENGTH_SHORT).show();
         }
 
         // initialize progress dialog
-        mProgressDialog = new ProgressDialog(this, android.R.style.Theme_Holo_Light_Dialog);
+        mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setIndeterminate(true);
         mProgressDialog.setCancelable(true);
         mProgressDialog.setMessage("Contacting servers...");
@@ -347,7 +347,7 @@ public class LoginActivity extends Activity{
                 // Successful sign in
                 startMainActivity();
             } else {
-                if (CommonTools.isNetworkAvailable(LoginActivity.this, "https://parse.com/")) {
+                if (CommonTools.isNetworkAvailable(LoginActivity.this)) {
                     mPasswordView.setError(getString(R.string.error_incorrect_password));
                     mPasswordView.requestFocus();
                 } else {

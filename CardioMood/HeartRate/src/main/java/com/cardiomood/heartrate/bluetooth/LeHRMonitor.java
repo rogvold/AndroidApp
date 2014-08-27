@@ -38,6 +38,7 @@ public abstract class LeHRMonitor {
     private int batteryLevel = -1;
     private int connectionStatus = INITIAL_STATUS;
     private Context context;
+    private Callback callback;
 
     public LeHRMonitor(Context context) {
         this.context = context;
@@ -76,6 +77,10 @@ public abstract class LeHRMonitor {
     public abstract void disconnect();
     public abstract void close();
     public abstract BluetoothAdapter getCurrentBluetoothAdapter();
+
+    public void setCallback(Callback callback) {
+        this.callback = callback;
+    }
 
     public boolean requestBatteryLevel() {
         return false;
@@ -134,6 +139,10 @@ public abstract class LeHRMonitor {
         Intent intent = new Intent(ACTION_BATTERY_LEVEL);
         intent.putExtra(EXTRA_BATTERY_LEVEL, batteryLevel);
         context.sendBroadcast(intent);
+
+        if (callback != null) {
+            callback.onBatteryLevelReceived(batteryLevel);
+        }
     }
 
     protected void notifyConnectionStatusChanged(int oldStatus, int newStatus) {
@@ -141,6 +150,10 @@ public abstract class LeHRMonitor {
         intent.putExtra(EXTRA_OLD_STATUS, oldStatus);
         intent.putExtra(EXTRA_NEW_STATUS, newStatus);
         context.sendBroadcast(intent);
+
+        if (callback != null) {
+            callback.onConnectionStatusChanged(oldStatus, newStatus);
+        }
     }
 
     protected void notifyBPMChanged(int oldBPM, int newBPM) {
@@ -148,6 +161,10 @@ public abstract class LeHRMonitor {
         intent.putExtra(EXTRA_OLD_BPM, oldBPM);
         intent.putExtra(EXTRA_NEW_BPM, newBPM);
         context.sendBroadcast(intent);
+
+        if (callback != null) {
+            callback.onBPMChanged(newBPM);
+        }
     }
 
     protected void notifyHeartRateDataReceived(int bpm, short energyExpended, short[] rrIntervals) {
@@ -157,5 +174,16 @@ public abstract class LeHRMonitor {
         intent.putExtra(EXTRA_ENERGY_EXPENDED, energyExpended);
         intent.putExtra(EXTRA_INTERVALS, rrIntervals);
         context.sendBroadcast(intent);
+
+        if (callback != null) {
+            callback.onDataReceived(bpm, rrIntervals);
+        }
+    }
+
+    public static interface Callback {
+        void onBPMChanged(int bpm);
+        void onConnectionStatusChanged(int oldStatus, int newStatus);
+        void onDataReceived(int bpm, short[] rr);
+        void onBatteryLevelReceived(int level);
     }
 }

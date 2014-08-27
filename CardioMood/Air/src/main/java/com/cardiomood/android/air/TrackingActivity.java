@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -37,7 +38,10 @@ import com.cardiomood.android.air.gps.GPSService;
 import com.cardiomood.android.air.gps.GPSServiceApi;
 import com.cardiomood.android.air.gps.GPSServiceListener;
 import com.cardiomood.android.air.tools.ParseTools;
+import com.cardiomood.android.tools.ReachabilityTest;
 import com.cardiomood.heartrate.bluetooth.LeHRMonitor;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
@@ -52,6 +56,8 @@ import com.parse.SaveCallback;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.Callable;
 
 import bolts.Continuation;
@@ -116,9 +122,16 @@ public class TrackingActivity extends Activity {
     private MapFragment mMapFragment;
     private GoogleMap mMap;
     private View mCurrentUserView;
+    private TextView mInternetView;
     private TextView mAltitudeView;
     private TextView mSpeedView;
     private Button mStopButton;
+    private TextView mHRMonitorStatusView;
+    private Button mConnectHRMonitorButton;
+
+    // check current state
+    private Timer checkStatusTimer = new Timer("check_status");
+    private TimerTask checkInternetTask = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -142,21 +155,9 @@ public class TrackingActivity extends Activity {
         final TextView text2 = (TextView) mCurrentUserView.findViewById(android.R.id.text2);
         text2.setText(currentUser.getEmail());
 
+        mInternetView = (TextView) findViewById(R.id.internet);
         mAltitudeView = (TextView) findViewById(R.id.altitude);
         mSpeedView = (TextView) findViewById(R.id.speed);
-
-        // initialize map
-        mMapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-        mMap = mMapFragment.getMap();
-        mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        mMap.setMyLocationEnabled(true);
-
-        gpsMonitor = new GPSMonitor(this);
-        Location lastLocation = gpsMonitor.getLastKnownLocation();
-        if (lastLocation != null) {
-            // setup initial map coordinated
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 14));
-        }
 
         mStopButton = (Button) findViewById(R.id.stop_button);
         mStopButton.setEnabled(false);
@@ -183,7 +184,17 @@ public class TrackingActivity extends Activity {
             }
         });
 
+        mHRMonitorStatusView = (TextView) findViewById(R.id.hr_monitor_status);
+        mConnectHRMonitorButton = (Button) findViewById(R.id.connect_hr_monitor_button);
+        mConnectHRMonitorButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                performConnect();
+            }
+        });
+
         hrMonitor = LeHRMonitor.getMonitor(this);
+        gpsMonitor = new GPSMonitor(this);
         mHandler = new Handler();
     }
 
@@ -204,6 +215,26 @@ public class TrackingActivity extends Activity {
 
         // Bind GPSService
         bindService(intent, gpsConnection, Context.BIND_AUTO_CREATE);
+
+        // initialize mapFragment
+        if (mMapFragment == null)
+            mMapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+
+        // init google map
+        if (mMap == null) {
+            mMap = mMapFragment.getMap();
+            if (mMap != null) {
+                mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                mMap.setMyLocationEnabled(true);
+
+                gpsMonitor = new GPSMonitor(this);
+                Location lastLocation = gpsMonitor.getLastKnownLocation();
+                if (lastLocation != null) {
+                    // setup initial map coordinated
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 14));
+                }
+            }
+        }
     }
 
 
@@ -298,9 +329,39 @@ public class TrackingActivity extends Activity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+
+        checkInternetTask.cancel();
+        checkInternetTask = null;
+        checkStatusTimer.purge();
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
-        checkGPSEnabled();
+
+        checkInternetTask = new TimerTask() {
+            @Override
+            public void run() {
+                new ReachabilityTest(TrackingActivity.this, "api.parse.com", 80, new ReachabilityTest.Callback() {
+                    @Override
+                    public void onReachabilityTestPassed() {
+                        mInternetView.setText("Connected");
+                        mInternetView.setTextColor(Color.rgb(0, 128, 0));
+                        Toast.makeText(TrackingActivity.this, "Reachable!", Toast.LENGTH_SHORT);
+                    }
+
+                    @Override
+                    public void onReachabilityTestFailed() {
+                        mInternetView.setText("Not connected!");
+                        mInternetView.setTextColor(Color.RED);
+                        Toast.makeText(TrackingActivity.this, "Not reachable!", Toast.LENGTH_SHORT);
+                    }
+                }).execute();
+            }
+        };
+        checkStatusTimer.schedule(checkInternetTask, 500, 10000);
 
         if (gpsBound) {
             // add listener
@@ -316,6 +377,15 @@ public class TrackingActivity extends Activity {
             } catch (RemoteException ex) {
                 Log.d(TAG, "onStart() -> hide notification failed", ex);
             }
+        }
+
+
+        if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(this) == ConnectionResult.SUCCESS) {
+            // Google Play Services available
+            checkGPSEnabled();
+        } else {
+            Toast.makeText(this, "Google Play Services are not available. " +
+                    "Some features will be disabled.", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -455,10 +525,11 @@ public class TrackingActivity extends Activity {
             }
         }
         if (showProgress) {
-            new ProgressDialog.Builder(this)
-                    .setCancelable(false)
-                    .setMessage("Waiting for the service to finish...")
-                    .show();
+            ProgressDialog pDialog = new ProgressDialog(this);
+            pDialog.setIndeterminate(true);
+            pDialog.setCancelable(false);
+            pDialog.setMessage("Waiting for the service to finish...");
+            pDialog.show();
         }
     }
 
@@ -662,8 +733,6 @@ public class TrackingActivity extends Activity {
     private void checkGPSEnabled() {
         if (gpsMonitor.isGPSEnabled()) {
             // GPS is available!
-            if (!gpsMonitor.isRunning())
-                gpsMonitor.start();
             return;
         }
 
@@ -700,7 +769,8 @@ public class TrackingActivity extends Activity {
                     if (location.hasAltitude())
                         mAltitudeView.setText(String.format("%d m", (int) location.getAltitude()));
 
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+                    if (mMap != null)
+                        mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
                 }
             });
 
@@ -750,6 +820,29 @@ public class TrackingActivity extends Activity {
                 }
             });
 
+        }
+
+        @Override
+        public void onHRMStatusChanged(final String address, String name, int oldStatus, int newStatus) throws RemoteException {
+            if (newStatus == LeHRMonitor.CONNECTED_STATUS) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mHRMonitorStatusView.setText(address);
+                        mConnectHRMonitorButton.setVisibility(View.GONE);
+                    }
+                });
+            }
+            if (oldStatus == LeHRMonitor.CONNECTED_STATUS) {
+                // monitor is disconnected
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mHRMonitorStatusView.setText("Not connected");
+                        mConnectHRMonitorButton.setVisibility(View.VISIBLE);
+                    }
+                });
+            }
         }
     };
 }
