@@ -24,6 +24,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -107,7 +108,17 @@ public class TrackingActivity extends Activity {
                 Log.d(TAG, "onServiceConnected(): api.addListener() failed", ex);
             }
 
-            loadPlaneData();
+            try {
+                if (gpsService.isRunning()) {
+                    gpsServiceListener.onTrackingSessionStarted(gpsService.getUserId(), gpsService.getAircraftId(), gpsService.getAirSessionId());
+                } else {
+                    String planeId = getIntent().getStringExtra(SELECTED_PLANE_PARSE_ID);
+                    gpsService.startTrackingSession(ParseUser.getCurrentUser().getObjectId(), planeId);
+                }
+            } catch (RemoteException ex) {
+                Log.d(TAG, "onServiceConnected(): api.isRunning() failed", ex);
+            }
+
         }
 
         @Override
@@ -132,6 +143,8 @@ public class TrackingActivity extends Activity {
     // check current state
     private Timer checkStatusTimer = new Timer("check_status");
     private TimerTask checkInternetTask = null;
+    private TimerTask checkGPSTask = null;
+    private long lastLocationUpdate = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -196,11 +209,15 @@ public class TrackingActivity extends Activity {
         hrMonitor = LeHRMonitor.getMonitor(this);
         gpsMonitor = new GPSMonitor(this);
         mHandler = new Handler();
+
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
     @Override
     protected void onDestroy() {
         Log.d(TAG, "onDestroy()");
+
+        checkStatusTimer.cancel();
 
         super.onDestroy();
     }
@@ -333,7 +350,9 @@ public class TrackingActivity extends Activity {
         super.onPause();
 
         checkInternetTask.cancel();
+        checkGPSTask.cancel();
         checkInternetTask = null;
+        checkGPSTask = null;
         checkStatusTimer.purge();
     }
 
@@ -361,7 +380,24 @@ public class TrackingActivity extends Activity {
                 }).execute();
             }
         };
+        checkGPSTask = new TimerTask() {
+
+            @Override
+            public void run() {
+                if (System.currentTimeMillis() - lastLocationUpdate >= 10000) {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mAltitudeView.setText("No GPS");
+                            mSpeedView.setText("No GPS");
+                        }
+                    });
+                }
+            }
+        };
+
         checkStatusTimer.schedule(checkInternetTask, 500, 10000);
+        checkStatusTimer.schedule(checkGPSTask, 1000, 10000);
 
         if (gpsBound) {
             // add listener
@@ -446,14 +482,11 @@ public class TrackingActivity extends Activity {
                 planeId = gpsService.getAircraftId();
             } catch (RemoteException ex) {
                 Log.w(TAG, "failed to get planeId from service", ex);
-                serviceIsRunning = false;
             }
         }
 
         // load plane from Parse
         ParseQuery query = ParseQuery.getQuery(Aircraft.class);
-//        if (!serviceIsRunning)
-//            query.fromPin();
         query.getInBackground(planeId, new GetCallback<Aircraft>() {
             @Override
             public void done(Aircraft parseObject, ParseException e) {
@@ -479,17 +512,6 @@ public class TrackingActivity extends Activity {
 
         // notify user
         Toast.makeText(TrackingActivity.this, "Plane: " + plane.getString("name"), Toast.LENGTH_SHORT).show();
-
-        // create tracking session if not created
-        try {
-            if (gpsService.isRunning()) {
-                gpsServiceListener.onTrackingSessionStarted(gpsService.getUserId(), gpsService.getAircraftId(), gpsService.getAirSessionId());
-            } else {
-                gpsService.startTrackingSession(ParseUser.getCurrentUser().getObjectId(), plane.getObjectId());
-            }
-        } catch (RemoteException ex) {
-            Log.w(TAG, "failed to setup tracking session", ex);
-        }
     }
 
     private void showLogoutDialog() {
@@ -764,10 +786,13 @@ public class TrackingActivity extends Activity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    lastLocationUpdate = System.currentTimeMillis();
                     if (location.hasSpeed())
                         mSpeedView.setText(String.format("%.2f km/h", location.getSpeed()*3.6f));
                     if (location.hasAltitude())
                         mAltitudeView.setText(String.format("%d m", (int) location.getAltitude()));
+                    else
+                        mAltitudeView.setText("N/A");
 
                     if (mMap != null)
                         mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
@@ -793,6 +818,7 @@ public class TrackingActivity extends Activity {
                 public void run() {
                     try {
                         mStopButton.setEnabled(true);
+                        loadPlaneData();
                         if (!TrackingActivity.this.isFinishing())
                             Toast.makeText(TrackingActivity.this, "Tracking session is running. SessionId="
                                     + airSessionId, Toast.LENGTH_SHORT).show();
