@@ -7,6 +7,9 @@ import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  * Created by danon on 18.11.13.
  */
@@ -39,6 +42,10 @@ public abstract class LeHRMonitor {
     private int connectionStatus = INITIAL_STATUS;
     private Context context;
     private Callback callback;
+
+    private final Object lock = new Object();
+    private Timer timer = new Timer("freeze_timer");
+    private TimerTask connectingTimeoutTask;
 
     public LeHRMonitor(Context context) {
         this.context = context;
@@ -153,6 +160,25 @@ public abstract class LeHRMonitor {
 
         if (callback != null) {
             callback.onConnectionStatusChanged(oldStatus, newStatus);
+        }
+
+        if (connectingTimeoutTask != null) {
+            connectingTimeoutTask.cancel();
+            connectingTimeoutTask = null;
+        }
+
+        if (newStatus == CONNECTING_STATUS) {
+            // make sure connecting lasts not more than 10 seconds
+            connectingTimeoutTask = new TimerTask() {
+                @Override
+                public void run() {
+                    if (getConnectionStatus() == CONNECTING_STATUS) {
+                        disconnect();
+                        setConnectionStatus(READY_STATUS);
+                    }
+                }
+            };
+            timer.schedule(connectingTimeoutTask, 10000);
         }
     }
 

@@ -31,7 +31,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Choose your aircraft:"
+            android:text="@string/choose_your_aircraft"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:id="@+id/textView1"/>
@@ -54,7 +54,7 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Start monitoring"
+        android:text="@string/button_continue"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"

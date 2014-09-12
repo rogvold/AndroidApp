@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="menu_logout">Выход...</string>
+    <string name="menu_settings">Настройки программы</string>
+    <string name="choose_your_aircraft">Выберите авиасудно:</string>
+    <string name="button_continue">Продолжить</string>
+    <string name="dialog_title_aircraft_in_air">Выбранное судно уже в полете!</string>
+    <string name="dialog_message_active_session_found">Мы обнаружили незавершенные сессии для выбранного авиасудна. Завершить все активные сессии и начать новый полет?</string>
+    <string name="backend_servers_are_not_vailable">Наши сервера в данный момент недоступны. \nПроверьте интернет и повторите снова.</string>
+    <string name="logout_dialog_title">Подтверждение выхода</string>
+    <string name="logout_dialog_message">Вы действительно хотите выйти из программы? \nДля входа потребуется снова ввести пароль.</string>
+</resources>

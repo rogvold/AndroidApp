@@ -56,6 +56,15 @@ public abstract class CommonTools {
         }
     }
 
+    @SuppressLint("NewApi")
+    public static void vibrate(Context context, long[] pattern, int repeat) {
+        Vibrator v = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+        // Vibrate
+        if (v != null && (Build.VERSION.SDK_INT < 11 || v.hasVibrator())) {
+            v.vibrate(pattern, repeat);
+        }
+    }
+
     public static void hideSoftInputKeyboard(Activity activity) {
         InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
         if (imm != null)

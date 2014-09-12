@@ -4,12 +4,15 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.app.TaskStackBuilder;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationListener;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -24,6 +27,8 @@ import com.cardiomood.android.air.data.Aircraft;
 import com.cardiomood.android.air.data.DataPoint;
 import com.cardiomood.android.tools.thread.WorkerThread;
 import com.cardiomood.heartrate.bluetooth.LeHRMonitor;
+import com.cardiomood.math.HeartRateUtils;
+import com.cardiomood.math.window.DataWindow;
 import com.google.gson.Gson;
 import com.parse.Parse;
 import com.parse.ParseCloud;
@@ -55,12 +60,40 @@ public class GPSService extends Service {
     private LeHRMonitor hrMonitor;
     private AirSession airSession;
     private String hrmAddress;
+    private volatile Location lastLocation;
+    private volatile double lastStress = -1;
 
     private DataCollectorThread workerThread;
     private NotificationCompat.Builder mBuilder;
     private NotificationManager mNotificationManager;
     private Handler mHandler;
     private Task<Void> mFinishingTask;
+    private boolean finishing = false;
+
+    private DataWindow hrData = new DataWindow.Timed(2*60*1000, 5000);
+    private DataWindow.Callback dataWindowCallback = new DataWindow.Callback() {
+        @Override
+        public void onMove(DataWindow window, double t, double value) {
+
+        }
+
+        @Override
+        public double onAdd(DataWindow window, double t, double value) {
+            return value;
+        }
+
+        @Override
+        public void onStep(DataWindow window, int index, double t, double value) {
+            double rr[] = window.getIntervals().getElements();
+            double stressIndex = HeartRateUtils.getSI(rr);
+            lastStress = stressIndex;
+            if (isRunning()&& workerThread != null && lastLocation != null) {
+                DataPoint dp = getDataPoint(lastLocation);
+                dp.setT(System.currentTimeMillis());
+                workerThread.put(dp);
+            }
+        }
+    };
 
     private final Object lock = new Object();
     private final List<GPSServiceListener> listeners = new ArrayList<GPSServiceListener>();
@@ -77,24 +110,63 @@ public class GPSService extends Service {
                     }
                 }
             }
-        }
-
-        @Override
-        public void onConnectionStatusChanged(int oldStatus, int newStatus) {
-            synchronized (listeners) {
-                for (GPSServiceListener l: listeners) {
-                    try {
-                        l.onHRMStatusChanged(hrmAddress, null, oldStatus, newStatus);
-                    } catch (RemoteException ex) {
-                        Log.w(TAG, "onBPMChanged() failed to notify listener", ex);
-                    }
+            if (isRunning()&& workerThread != null) {
+                if (lastLocation != null) {
+                    DataPoint dp = getDataPoint(lastLocation);
+                    dp.setT(System.currentTimeMillis());
+                    workerThread.put(dp);
                 }
             }
         }
 
         @Override
-        public void onDataReceived(int bpm, short[] rr) {
+        public void onConnectionStatusChanged(final int oldStatus, final int newStatus) {
+            synchronized (listeners) {
+                try {
+                    String name = apiEndpoint.getHrmName();
+                    for (GPSServiceListener l : listeners) {
+                        try {
+                            l.onHRMStatusChanged(hrmAddress, name, oldStatus, newStatus);
+                        } catch (RemoteException ex) {
+                            Log.w(TAG, "onConnectionStatusChanged() failed to notify listener", ex);
+                        }
+                    }
+                } catch (RemoteException ex) {
 
+                }
+            }
+
+
+            if (hrmAddress == null)
+                return;
+            final String deviceAddress = hrmAddress;
+            if (oldStatus == LeHRMonitor.CONNECTED_STATUS) {
+                lastStress = -1;
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        synchronized (lock) {
+                            // we are disconnected...
+                            // => try to reconnect!
+                            try {
+                                if (!finishing) {
+                                    if (apiEndpoint.initBLE())
+                                        apiEndpoint.connectHRMonitor(deviceAddress);
+                                }
+                            } catch (RemoteException ex) {
+                                Log.w(TAG, "reconnect to HRM failed", ex);
+                            }
+                        }
+                    }
+                }, 500);
+        }
+
+        }
+
+        @Override
+        public void onDataReceived(int bpm, short[] rr) {
+            for (short r: rr)
+            hrData.add(r);
         }
 
         @Override
@@ -126,6 +198,7 @@ public class GPSService extends Service {
         @Override
         public void startTrackingSession(String userId, String aircraftId) throws RemoteException {
             synchronized (lock) {
+                finishing = false;
                 createTrackingSession(userId, aircraftId);
             }
         }
@@ -133,6 +206,7 @@ public class GPSService extends Service {
         @Override
         public void stopTrackingSession() throws RemoteException {
             synchronized (lock) {
+                finishing = true;
                 if (isHRMonitorConnected())
                     disconnectHRMonitor();
                 GPSService.this.stop();
@@ -183,8 +257,9 @@ public class GPSService extends Service {
         @Override
         public void connectHRMonitor(String address) throws RemoteException {
             synchronized (lock) {
-                hrMonitor.connect(address);
+                hrData.clear();
                 hrmAddress = address;
+                hrMonitor.connect(address);
             }
         }
 
@@ -200,6 +275,35 @@ public class GPSService extends Service {
         public boolean isHRMonitorConnected() throws RemoteException {
             synchronized (lock) {
                 return hrMonitor == null ? false : (hrMonitor.getConnectionStatus() == LeHRMonitor.CONNECTED_STATUS);
+            }
+        }
+
+        @Override
+        public int getHrmStatus() throws RemoteException {
+            synchronized (lock) {
+                if (hrMonitor == null)
+                    return LeHRMonitor.INITIAL_STATUS;
+                return hrMonitor.getConnectionStatus();
+            }
+        }
+
+        @Override
+        public String getHrmAddress() throws RemoteException {
+            return hrmAddress;
+        }
+
+        @Override
+        public String getHrmName() throws RemoteException {
+            synchronized (lock) {
+                if (hrmAddress == null)
+                    return null;
+                if (hrMonitor == null)
+                    return null;
+                BluetoothAdapter adapter = hrMonitor.getCurrentBluetoothAdapter();
+                if (adapter == null)
+                    return null;
+                BluetoothDevice device = adapter.getRemoteDevice(hrmAddress);
+                return device == null ? null : device.getName();
             }
         }
 
@@ -221,6 +325,15 @@ public class GPSService extends Service {
         public String getUserId() throws RemoteException {
             synchronized (lock) {
                 return airSession == null ? null : airSession.getUserId();
+            }
+        }
+
+        @Override
+        public int getCurrentHeartRate() throws RemoteException {
+            synchronized (lock) {
+                if (hrMonitor != null && hrMonitor.getConnectionStatus() == LeHRMonitor.CONNECTED_STATUS)
+                    return hrMonitor.getLastBPM();
+                else return -1;
             }
         }
 
@@ -305,6 +418,8 @@ public class GPSService extends Service {
         mHandler = new Handler();
 
         hrMonitor = LeHRMonitor.getMonitor(this);
+
+        hrData.setCallback(dataWindowCallback);
     }
 
     @Override
@@ -382,10 +497,6 @@ public class GPSService extends Service {
         workerThread.setSession(airSession);
         workerThread.start();
 
-        if (hrMonitor.initialize()) {
-            hrMonitor.connect("00:22:D0:00:00:CC");
-        }
-
         isServiceStarted = true;
     }
 
@@ -433,8 +544,9 @@ public class GPSService extends Service {
         gpsMonitor.setListener(new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-               if (workerThread != null)
+               if (isRunning() && workerThread != null)
                    workerThread.put(getDataPoint(location));
+               lastLocation = location;
                synchronized (listeners) {
                    for (GPSServiceListener l: listeners) {
                        try {
@@ -466,15 +578,17 @@ public class GPSService extends Service {
 
     private DataPoint getDataPoint(Location loc) {
         DataPoint dp = new DataPoint();
-        dp.setLat(loc.getLatitude());
-        dp.setLon(loc.getLongitude());
-        dp.setAlt(loc.hasAltitude() ? loc.getAltitude() : null);
-        dp.setAcc(loc.hasAccuracy() ? loc.getAccuracy() : null);
-        dp.setBea(loc.hasBearing() ? loc.getBearing() : null);
-        dp.setVel(loc.hasSpeed() ? loc.getSpeed() : null);
-        dp.setT(loc.getTime());
+        if (loc != null) {
+            dp.setLat(loc.getLatitude());
+            dp.setLon(loc.getLongitude());
+            dp.setAlt(loc.hasAltitude() ? loc.getAltitude() : null);
+            dp.setAcc(loc.hasAccuracy() ? loc.getAccuracy() : null);
+            dp.setBea(loc.hasBearing() ? loc.getBearing() : null);
+            dp.setVel(loc.hasSpeed() ? loc.getSpeed() : null);
+            dp.setT(loc.getTime());
+        }
         dp.setHR(hrMonitor.getConnectionStatus() == LeHRMonitor.CONNECTED_STATUS ? hrMonitor.getLastBPM() : null);
-        dp.setStress(94);
+        dp.setStress(lastStress < 0 ? null : (int) lastStress);
         return dp;
     }
 
@@ -487,8 +601,6 @@ public class GPSService extends Service {
                         .setOngoing(true);
 
         Intent resultIntent = new Intent(this, TrackingActivity.class);
-        resultIntent.putExtra(TrackingActivity.GET_PLANE_FROM_SERVICE, true);
-        //resultIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 
         PendingIntent resultPendingIntent = null;
 
@@ -544,19 +656,25 @@ public class GPSService extends Service {
 
                 // notify listeners
                 synchronized (listeners) {
+                    List<GPSServiceListener> toRemove = new ArrayList<GPSServiceListener>();
                     for (GPSServiceListener l: listeners) {
                         try {
                             l.onTrackingSessionFinished();
                         } catch (RemoteException ex) {
                             Log.w(TAG, "stopTrackingSession() -> failed to notify listener", ex);
+                            if (ex instanceof DeadObjectException)
+                                toRemove.add(l);
                         }
                     }
+                    listeners.removeAll(toRemove);
                 }
             }
         }
 
         @Override
         protected void onCycle() {
+            if (hasMoreElements() || session == null)
+                return;
             if (!portion.isEmpty()) {
                 if (System.currentTimeMillis() - lastSuccessTime >= INTERVAL) {
                     long time = System.currentTimeMillis();
@@ -571,8 +689,6 @@ public class GPSService extends Service {
         @Override
         public void processItem(DataPoint item) {
             portion.add(item);
-            if (hasMoreElements() || session == null)
-                return;
         }
 
         private boolean processItems(List<DataPoint> items) {

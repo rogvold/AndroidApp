@@ -13,6 +13,7 @@
         android:layout_marginTop="8dip"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textStyle="bold"
+        android:text="[Plane] :: [ID]"
         />
 
     <TextView android:id="@android:id/text2"
@@ -23,6 +24,7 @@
         android:layout_alignLeft="@android:id/text1"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textStyle="italic"
+        android:text="[Current user name]"
         />
 
 </LinearLayout>

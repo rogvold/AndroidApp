@@ -1,5 +1,5 @@
-<h3>CardioMood <br/>
-    HeartRate</h3>
+<h3>CardioMood Air</h3>
+
 Version 1.0<br>
 Copyright 2014<br/>
 <br/>

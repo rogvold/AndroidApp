@@ -12,4 +12,6 @@
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
     <string name="error_no_internet">No internet access</string>
+    <string name="menu_refresh">Refresh</string>
+    <string name="select_user_from_list_below">Select user from the list below:</string>
 </resources>

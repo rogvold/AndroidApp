@@ -9,5 +9,22 @@
     <string name="google_maps_v2_api_key">AIzaSyDBA1At5FNMeruMuqq3ftr6D9LIV9BL94c</string>
     <string name="google_maps_v2_api_key_release">AIzaSyAR8Nx2HhbeHuSPxNWhZzZtPSe3qNQDUPU</string>
     <string name="title_other_devices">Other devices</string>
+    <string name="select_device">Select device</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
+    <string name="failed_to_refresh_planes_list">Failed to refresh planes list. \nCheck Internet connection.</string>
+    <string name="message_gps_disabled">Geo Location Services and GPS are not available. Please, enable GPS Satellites in Settings to continue.</string>
+    <string name="hrm_not_connected">Not connected</string>
+    <string name="hrm_ready">Ready to connect...</string>
+    <string name="hrm_no_name">No name</string>
+    <string name="hrm_disconnected">Connection lost.</string>
+    <string name="hrm_connecting">Connecting...</string>
+    <string name="hrm_no_device">No device</string>
+    <string name="hrm_connected">Connected</string>
+    <string name="pref_title_radar_radius">Radar radius</string>
+    <string name="waiting_for_service_to_finish">Waiting for the service to finish...</string>
+    <string name="title_general_settings">General Settings</string>
+    <string name="pref_title_selected_aircraft">Selected aircraft</string>
+    <string name="bluetooth_is_not_available">Bluetooth is not available.</string>
 
 </resources>

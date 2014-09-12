@@ -26,6 +26,7 @@ import com.cardiomood.android.air.tools.ParseTools;
 import com.cardiomood.android.tools.CommonTools;
 import com.parse.FindCallback;
 import com.parse.ParseException;
+import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
@@ -129,9 +130,9 @@ public class PlanesActivity extends Activity {
     private void showExistingSessionDialog(final Aircraft plane, final List<AirSession> airSessions) {
         new AlertDialog.Builder(this)
                 .setCancelable(true)
-                .setTitle("This aircraft is currently in air!")
-                .setMessage("We found an active session for the selected aircraft. Do you want to discard existing session and start new one?")
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                .setTitle(R.string.dialog_title_aircraft_in_air)
+                .setMessage(R.string.dialog_message_active_session_found)
+                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         selectedPlane = null;
@@ -140,7 +141,7 @@ public class PlanesActivity extends Activity {
                         dialogInterface.dismiss();
                     }
                 })
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         long time = System.currentTimeMillis();
@@ -182,6 +183,9 @@ public class PlanesActivity extends Activity {
             case R.id.menu_refresh:
                 refreshPlanes();
                 return true;
+            case R.id.menu_settings:
+                openSettingsActivity();
+                return true;
             case R.id.menu_logout:
                 showLogoutDialog();
                 return true;
@@ -190,18 +194,22 @@ public class PlanesActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
+    private void openSettingsActivity() {
+        startActivity(new Intent(this, SettingsActivity.class));
+    }
+
     private void showLogoutDialog() {
         new AlertDialog.Builder(this)
                 .setCancelable(true)
-                .setTitle("Confirm logout")
-                .setMessage("Are you sure you want to log out?")
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                .setTitle(R.string.logout_dialog_title)
+                .setMessage(R.string.logout_dialog_message)
+                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.dismiss();
                     }
                 })
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         performLogout();
@@ -217,8 +225,7 @@ public class PlanesActivity extends Activity {
 
     private void refreshPlanes() {
         if (!CommonTools.isNetworkAvailable(this)) {
-            Toast.makeText(this, "Back-end servers are not accessible at the moment. \n" +
-                    "Check Internet connection and try again.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.backend_servers_are_not_vailable, Toast.LENGTH_SHORT).show();
         }
 
         mStartButton.setEnabled(false);
@@ -243,9 +250,10 @@ public class PlanesActivity extends Activity {
                     selectedPlane = null;
                     mPlanesListView.clearChoices();
                     mStartButton.setEnabled(false);
+                    ParseObject.pinAllInBackground("planes", parseObjects);
                 } else {
                     Log.w(TAG, "Failed to refresh planes list.", e);
-                    Toast.makeText(PlanesActivity.this, "Failed to refresh planes list.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(PlanesActivity.this, R.string.failed_to_refresh_planes_list, Toast.LENGTH_SHORT).show();
                     mStartButton.setEnabled(selectedPlane != null && mPlanesListView.getSelectedItemPosition() >= 0);
                 }
                 planesQuery = null;

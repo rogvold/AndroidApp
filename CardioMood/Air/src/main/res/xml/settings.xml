@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/title_general_settings">
+
+        <IntListPreference
+            android:key="config.radar_radius"
+            android:title="@string/pref_title_radar_radius"/>
+
+        <!--<Preference-->
+            <!--android:key="config.config.selected_aircraft_id"-->
+            <!--android:title="@string/pref_title_selected_aircraft" />-->
+
+        <!--<com.cardiomood.android.air.prefs.HrmPreference-->
+            <!--android:key="config.config.hrm_address"-->
+            <!--android:title="@string/pref_title_hrm_address"/>-->
+
+    </PreferenceCategory>
+
+
+</PreferenceScreen>

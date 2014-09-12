@@ -48,6 +48,14 @@ interface GPSServiceApi {
 
     boolean isHRMonitorConnected();
 
+    int getHrmStatus();
+
+    String getHrmAddress();
+
+    String getHrmName();
+
+    int getCurrentHeartRate();
+
     String getAirSessionId();
 
     String getAircraftId();

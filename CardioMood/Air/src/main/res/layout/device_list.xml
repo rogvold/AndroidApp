@@ -6,7 +6,7 @@
 		android:layout_height="wrap_content" android:background="#666" android:visibility="gone">
 		<TextView android:id="@+id/title_paired_devices"
 			android:layout_width="wrap_content" android:layout_height="wrap_content"
-			android:layout_centerInParent="true" android:text="Select device"
+			android:layout_centerInParent="true" android:text="@string/select_device"
 			android:visibility="gone" android:textColor="#fff" android:textSize="15sp"
 			android:paddingLeft="12sp"
 			android:paddingRight="50sp" />

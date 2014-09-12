@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="menu_connect_hr_monitor">Подключить датчик пульса...</string>
+    <string name="start_button">Старт</string>
+    <string name="stop_button">Стоп</string>
+    <string name="internet">Интернет</string>
+    <string name="altitude">Высота</string>
+    <string name="speed">Скорость</string>
+    <string name="hr">Пульс:</string>
+    <string name="select_hrm_device">Выберите датчик...</string>
+    <string name="not_connected">Не подключен</string>
+    <string name="connect_button">Подключить</string>
+    <string name="title_select_hrm">Выберите датчик пульса</string>
+    <string name="title_gps_disabled">Сервисы GPS</string>
+    <string name="log_out_button">Выход</string>
+    <string name="go_to_gps_settings_button">Настройки GPS</string>
+    <string name="titile_confirm_finish">Заврешение полета</string>
+    <string name="message_confirm_finish">Вы действительно хотите завершить полет?</string>
+</resources>

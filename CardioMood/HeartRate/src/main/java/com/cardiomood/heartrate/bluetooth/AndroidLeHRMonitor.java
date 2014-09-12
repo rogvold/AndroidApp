@@ -202,7 +202,7 @@ public class AndroidLeHRMonitor extends LeHRMonitor {
 
         // Previously connected device.  Try to reconnect.
         if (mBluetoothDeviceAddress != null && deviceAddress.equals(mBluetoothDeviceAddress) && mBluetoothGatt != null) {
-            Log.d(TAG, "Trying to use an existing mBluetoothGatt for connection.");
+            Log.d(TAG, "Trying to use an existing mBluetoothGaаtt for connection.");
             setConnectionStatus(CONNECTING_STATUS);
             if (mBluetoothGatt.connect()) {
                 mBluetoothGatt.discoverServices();

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="title_activity_settings">Settings Activity</string>
+    <string name="pref_title_hrm_address">Selected Heart Rate Monitor</string>
+
+</resources>

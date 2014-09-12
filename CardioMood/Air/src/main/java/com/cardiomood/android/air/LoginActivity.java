@@ -138,7 +138,6 @@ public class LoginActivity extends Activity{
 
     private void startTrackingActivity() {
         Intent intent = new Intent(this, TrackingActivity.class);
-        intent.putExtra(TrackingActivity.GET_PLANE_FROM_SERVICE, true);
         startActivity(intent);
         finish();
     }
@@ -168,8 +167,7 @@ public class LoginActivity extends Activity{
 
     private void refreshUsersList() {
         if (!CommonTools.isNetworkAvailable(this)) {
-            Toast.makeText(this, "Back-end servers are not accessible at the moment. \n" +
-                    "Check Internet connection and try again.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.backend_servers_are_not_vailable, Toast.LENGTH_SHORT).show();
         }
 
         // initialize progress dialog

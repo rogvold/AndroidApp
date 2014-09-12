@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="entries_radar_radius">
+        <item>500 m</item>
+        <item>1000 m</item>
+        <item>1500 m</item>
+        <item>2 km</item>
+        <item>3 km</item>
+        <item>5 km</item>
+    </string-array>
+    <integer-array name="values_radar_radius">
+        <item>500</item>
+        <item>1000</item>
+        <item>1500</item>
+        <item>2000</item>
+        <item>3000</item>
+        <item>5000</item>
+    </integer-array>
+</resources>

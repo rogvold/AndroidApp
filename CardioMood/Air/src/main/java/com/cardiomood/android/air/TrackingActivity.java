@@ -19,15 +19,18 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,24 +41,44 @@ import com.cardiomood.android.air.gps.GPSMonitor;
 import com.cardiomood.android.air.gps.GPSService;
 import com.cardiomood.android.air.gps.GPSServiceApi;
 import com.cardiomood.android.air.gps.GPSServiceListener;
+import com.cardiomood.android.air.tools.Constants;
 import com.cardiomood.android.air.tools.ParseTools;
+import com.cardiomood.android.tools.CommonTools;
+import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.ReachabilityTest;
+import com.cardiomood.android.tools.ui.TouchEffect;
 import com.cardiomood.heartrate.bluetooth.LeHRMonitor;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.SphericalUtil;
 import com.parse.DeleteCallback;
+import com.parse.FunctionCallback;
 import com.parse.GetCallback;
+import com.parse.ParseCloud;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -68,7 +91,6 @@ import bolts.Task;
 public class TrackingActivity extends Activity {
 
     public static final String SELECTED_PLANE_PARSE_ID = "com.cardiomood.android.air.extra.SELECTED_PLANE_PARSE_ID";
-    public static final String GET_PLANE_FROM_SERVICE = "com.cardiomood.android.air.extra.GET_PLANE_FROM_SERVICE";
 
     private static final int REQUEST_ENABLE_BT = 2;
 
@@ -77,6 +99,7 @@ public class TrackingActivity extends Activity {
     private GPSMonitor gpsMonitor;
     private LeHRMonitor hrMonitor;
     private Handler mHandler;
+    private PreferenceHelper prefHelper;
 
     private boolean mScanning = false;
     private AlertDialog alertSelectDevice;
@@ -96,25 +119,41 @@ public class TrackingActivity extends Activity {
             gpsService = GPSServiceApi.Stub.asInterface(service);
             gpsBound = true;
 
-            try {
-                gpsService.hideNotification();
-            } catch (RemoteException ex) {
-                Log.d(TAG, "onServiceConnected(): api.hideNotification() failed", ex);
-            }
-
+            // register listener
             try {
                 gpsService.addListener(gpsServiceListener);
             } catch (Exception ex) {
                 Log.d(TAG, "onServiceConnected(): api.addListener() failed", ex);
             }
 
+            // hide notification (it is not needed when the UI is active)
             try {
+                if (!gpsService.isRunning()) {
+                    gpsService.hideNotification();
+                } else {
+                    gpsService.showNotification();
+                }
+            } catch (RemoteException ex) {
+                Log.d(TAG, "onServiceConnected(): api.hideNotification() failed", ex);
+            }
+
+            // check Service status and update UI
+            try {
+                // check whether the tracking session is started
                 if (gpsService.isRunning()) {
                     gpsServiceListener.onTrackingSessionStarted(gpsService.getUserId(), gpsService.getAircraftId(), gpsService.getAirSessionId());
                 } else {
-                    String planeId = getIntent().getStringExtra(SELECTED_PLANE_PARSE_ID);
-                    gpsService.startTrackingSession(ParseUser.getCurrentUser().getObjectId(), planeId);
+                    mStartButton.setVisibility(View.VISIBLE);
+                    mStopButton.setVisibility(View.GONE);
+                    mStartButton.setEnabled(true);
+                    mStopButton.setEnabled(false);
+//                    String planeId = getIntent().getStringExtra(SELECTED_PLANE_PARSE_ID);
+//                    gpsService.startTrackingSession(ParseUser.getCurrentUser().getObjectId(), planeId);
                 }
+
+                // update HR monitor info
+                gpsServiceListener.onHRMStatusChanged(gpsService.getHrmAddress(), gpsService.getHrmName(), LeHRMonitor.INITIAL_STATUS, gpsService.getHrmStatus());
+
             } catch (RemoteException ex) {
                 Log.d(TAG, "onServiceConnected(): api.isRunning() failed", ex);
             }
@@ -125,6 +164,7 @@ public class TrackingActivity extends Activity {
         public void onServiceDisconnected(ComponentName arg0) {
             gpsBound = false;
             mStopButton.setEnabled(false);
+            gpsService = null;
         }
     };
 
@@ -137,18 +177,40 @@ public class TrackingActivity extends Activity {
     private TextView mAltitudeView;
     private TextView mSpeedView;
     private Button mStopButton;
+    private Button mStartButton;
     private TextView mHRMonitorStatusView;
     private Button mConnectHRMonitorButton;
+    private TextView mHeartRateView;
+    private TextView mDeviceNameView;
+    private LinearLayout mMapOverlay;
+    private TextView mOverlayAircraftName;
+    private TextView mOverlayCallName;
+    private TextView mOverlayDistance;
+    private TextView mOverlaySpeed;
+    private TextView mOverlayHeight;
+    private ProgressDialog finishingProgressDialog;
 
     // check current state
     private Timer checkStatusTimer = new Timer("check_status");
     private TimerTask checkInternetTask = null;
     private TimerTask checkGPSTask = null;
+    private TimerTask checkNearbyPlanes = null;
     private long lastLocationUpdate = 0;
+    private Location lastLocation;
+
+    // objects on map
+    private Circle mapCircle;
+    private Map<String, Marker> markers = new HashMap<String, Marker>();
+    private Map<String, Map<String, Object>> nearbyPlanes = new HashMap<String, Map<String, Object>>();
+    private String selectedAircraftId = null;
+    private GestureDetector overlayGestureDetector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // set max priority for UI thread for better rendering
+        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 
         Log.d(TAG, "onCreate() savedInstanceState=" + savedInstanceState);
 
@@ -158,6 +220,9 @@ public class TrackingActivity extends Activity {
             performLogout(false);
             return;
         }
+
+        prefHelper = new PreferenceHelper(this, true);
+
 
         // initialize view
         setContentView(R.layout.activity_tracking);
@@ -173,21 +238,22 @@ public class TrackingActivity extends Activity {
         mSpeedView = (TextView) findViewById(R.id.speed);
 
         mStopButton = (Button) findViewById(R.id.stop_button);
+        mStopButton.setOnTouchListener(TouchEffect.FADE_ON_TOUCH);
         mStopButton.setEnabled(false);
         mStopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 new AlertDialog.Builder(TrackingActivity.this)
                         .setCancelable(true)
-                        .setTitle("Confirm finish")
-                        .setMessage("Are you sure you want finish your flight?")
-                        .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        .setTitle(R.string.titile_confirm_finish)
+                        .setMessage(R.string.message_confirm_finish)
+                        .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 dialogInterface.dismiss();
                             }
                         })
-                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 dialogInterface.dismiss();
@@ -197,12 +263,87 @@ public class TrackingActivity extends Activity {
             }
         });
 
+        mStartButton = (Button) findViewById(R.id.start_button);
+        mStartButton.setOnTouchListener(TouchEffect.FADE_ON_TOUCH);
+        mStartButton.setEnabled(false);
+        mStartButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startTracking();
+            }
+        });
+
         mHRMonitorStatusView = (TextView) findViewById(R.id.hr_monitor_status);
+        mHeartRateView = (TextView) findViewById(R.id.heart_rate);
+        mDeviceNameView = (TextView) findViewById(R.id.hrm_device_name);
         mConnectHRMonitorButton = (Button) findViewById(R.id.connect_hr_monitor_button);
         mConnectHRMonitorButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 performConnect();
+            }
+        });
+
+        mMapOverlay = (LinearLayout) findViewById(R.id.map_overlay);
+        mOverlayAircraftName = (TextView) findViewById(R.id.overlay_aircraft_name);
+        mOverlayCallName = (TextView) findViewById(R.id.overlay_call_name);
+        mOverlayDistance = (TextView) findViewById(R.id.overlay_distance);
+        mOverlayHeight = (TextView) findViewById(R.id.overlay_height);
+        mOverlaySpeed = (TextView) findViewById(R.id.overlay_speed);
+
+        overlayGestureDetector = new GestureDetector(this, new GestureDetector.OnGestureListener() {
+            @Override
+            public boolean onDown(MotionEvent e) {
+                return true;
+            }
+
+            @Override
+            public void onShowPress(MotionEvent e) {
+
+            }
+
+            @Override
+            public boolean onSingleTapUp(MotionEvent e) {
+                return true;
+            }
+
+            @Override
+            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                return true;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+
+            }
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                return true;
+            }
+        });
+        overlayGestureDetector.setOnDoubleTapListener(new GestureDetector.OnDoubleTapListener() {
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                return true;
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                mMapOverlay.setVisibility(View.GONE);
+                selectedAircraftId = null;
+                return true;
+            }
+
+            @Override
+            public boolean onDoubleTapEvent(MotionEvent e) {
+                return true;
+            }
+        });
+        mMapOverlay.setOnTouchListener(new TouchEffect() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return overlayGestureDetector.onTouchEvent(event);
             }
         });
 
@@ -243,13 +384,43 @@ public class TrackingActivity extends Activity {
             if (mMap != null) {
                 mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
                 mMap.setMyLocationEnabled(true);
-
                 gpsMonitor = new GPSMonitor(this);
                 Location lastLocation = gpsMonitor.getLastKnownLocation();
+                this.lastLocation = lastLocation;
                 if (lastLocation != null) {
+                    LatLng myLatLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
                     // setup initial map coordinated
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()), 14));
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLatLng, 14));
                 }
+                mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                    @Override
+                    public boolean onMarkerClick(Marker marker) {
+                        Map<String, Object> planeInfo = nearbyPlanes.get(marker.getId());
+                        if (planeInfo != null) {
+                            selectedAircraftId = (String) planeInfo.get("aircraftId");
+                            mOverlayDistance.setText("? m");
+                            mOverlayHeight.setText("? m");
+                            mOverlayHeight.setTextColor(Color.BLACK);
+                            mOverlaySpeed.setText("? m");
+
+                            try {
+                                Aircraft aircraft = ParseQuery.getQuery(Aircraft.class)
+                                        .fromPin("planes")
+                                        .get(selectedAircraftId);
+                                if (aircraft != null) {
+                                    mOverlayAircraftName.setText(aircraft.getName());
+                                    mOverlayCallName.setText("Loading...");
+                                }
+                            } catch (Exception ex) {
+                                mOverlayAircraftName.setText("Unknown");
+                                mOverlayCallName.setText("N/A");
+                            }
+
+                            mMapOverlay.setVisibility(View.VISIBLE);
+                        }
+                        return true;
+                    }
+                });
             }
         }
     }
@@ -261,13 +432,6 @@ public class TrackingActivity extends Activity {
         super.onStop();
 
         if (gpsBound) {
-            // show notification if the service is running
-            try {
-                if (gpsService.isRunning())
-                    gpsService.showNotification();
-            } catch (RemoteException ex) {
-                Log.d(TAG, "onStop() -> show notification failed", ex);
-            }
             // remove listener
             try {
                 gpsService.removeListener(gpsServiceListener);
@@ -275,9 +439,6 @@ public class TrackingActivity extends Activity {
                 Log.d(TAG, "onStop() -> remove listener failed", ex);
             }
 
-        }
-
-        if (gpsBound) {
             unbindService(gpsConnection);
         }
     }
@@ -351,8 +512,10 @@ public class TrackingActivity extends Activity {
 
         checkInternetTask.cancel();
         checkGPSTask.cancel();
+        checkNearbyPlanes.cancel();
         checkInternetTask = null;
         checkGPSTask = null;
+        checkNearbyPlanes = null;
         checkStatusTimer.purge();
     }
 
@@ -363,23 +526,30 @@ public class TrackingActivity extends Activity {
         checkInternetTask = new TimerTask() {
             @Override
             public void run() {
-                new ReachabilityTest(TrackingActivity.this, "api.parse.com", 80, new ReachabilityTest.Callback() {
+                mHandler.post(new Runnable() {
                     @Override
-                    public void onReachabilityTestPassed() {
-                        mInternetView.setText("Connected");
-                        mInternetView.setTextColor(Color.rgb(0, 128, 0));
-                        Toast.makeText(TrackingActivity.this, "Reachable!", Toast.LENGTH_SHORT);
-                    }
+                    public void run() {
+                        mInternetView.setText("Checking...");
+                        new ReachabilityTest(TrackingActivity.this, "api.parse.com", 80, new ReachabilityTest.Callback() {
+                            @Override
+                            public void onReachabilityTestPassed() {
+                                mInternetView.setText("Connected");
+                                mInternetView.setTextColor(Color.rgb(0, 128, 0));
+                                Toast.makeText(TrackingActivity.this, "Reachable!", Toast.LENGTH_SHORT);
+                            }
 
-                    @Override
-                    public void onReachabilityTestFailed() {
-                        mInternetView.setText("Not connected!");
-                        mInternetView.setTextColor(Color.RED);
-                        Toast.makeText(TrackingActivity.this, "Not reachable!", Toast.LENGTH_SHORT);
+                            @Override
+                            public void onReachabilityTestFailed() {
+                                mInternetView.setText("Not connected!");
+                                mInternetView.setTextColor(Color.RED);
+                                Toast.makeText(TrackingActivity.this, "Not reachable!", Toast.LENGTH_SHORT);
+                            }
+                        }).execute();
                     }
-                }).execute();
+                });
             }
         };
+
         checkGPSTask = new TimerTask() {
 
             @Override
@@ -388,16 +558,40 @@ public class TrackingActivity extends Activity {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            mAltitudeView.setText("No GPS");
-                            mSpeedView.setText("No GPS");
+                            try {
+                                if (gpsBound && gpsService != null) {
+                                    if (gpsService.isRunning()) {
+                                        mAltitudeView.setText("No GPS");
+                                        mSpeedView.setText("No GPS");
+                                    }
+                                }
+                            } catch (RemoteException ex) {
+                                // suppress this!
+                            }
                         }
                     });
                 }
             }
         };
 
+        checkNearbyPlanes = new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    if (gpsBound && gpsService != null) {
+                        if (gpsService.isRunning()) {
+                            updateNearbyPlanes(lastLocation);
+                        }
+                    }
+                } catch (RemoteException ex) {
+                    // suppress this!
+                }
+            }
+        };
+
         checkStatusTimer.schedule(checkInternetTask, 500, 10000);
         checkStatusTimer.schedule(checkGPSTask, 1000, 10000);
+        checkStatusTimer.schedule(checkNearbyPlanes, 500, 3000);
 
         if (gpsBound) {
             // add listener
@@ -409,7 +603,9 @@ public class TrackingActivity extends Activity {
 
             // hide notification
             try {
-                gpsService.hideNotification();
+                if (!gpsService.isRunning()) {
+                    gpsService.hideNotification();
+                }
             } catch (RemoteException ex) {
                 Log.d(TAG, "onStart() -> hide notification failed", ex);
             }
@@ -441,6 +637,9 @@ public class TrackingActivity extends Activity {
             case R.id.menu_connect_hr:
                 performConnect();
                 return true;
+            case R.id.menu_settings:
+                openSettingsActivity();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -461,6 +660,26 @@ public class TrackingActivity extends Activity {
         }
 
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (gpsBound) {
+            try {
+                if (gpsService.isRunning()) {
+                    super.onBackPressed();
+                } else {
+                    startActivity(new Intent(this, PlanesActivity.class));
+                    finish();
+                }
+            } catch (RemoteException ex) {
+                // suppress this
+            }
+        }
+    }
+
+    private void openSettingsActivity() {
+        startActivity(new Intent(this, SettingsActivity.class));
     }
 
     private void loadPlaneData() {
@@ -493,12 +712,33 @@ public class TrackingActivity extends Activity {
                 if (e == null) {
                     onPlaneLoaded(parseObject);
                 } else {
-                    Toast.makeText(TrackingActivity.this, "Plane not found.", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(TrackingActivity.this, PlanesActivity.class));
-                    finish();
+
+                    try {
+                        if (!gpsBound || !gpsService.isRunning()) {
+                            Toast.makeText(TrackingActivity.this, "Plane not found.", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(TrackingActivity.this, PlanesActivity.class));
+                            finish();
+                        }
+                    } catch (RemoteException ex) {
+                        // suppress this
+                    }
                 }
             }
         });
+    }
+
+    private void startTracking() {
+        mStartButton.setEnabled(false);
+        String planeId = getIntent().getStringExtra(SELECTED_PLANE_PARSE_ID);
+        if (planeId != null) {
+            try {
+                gpsService.startTrackingSession(ParseUser.getCurrentUser().getObjectId(), planeId);
+            } catch (RemoteException ex) {
+                mStartButton.setEnabled(true);
+            }
+        } else {
+            mStartButton.setEnabled(true);
+        }
     }
 
     private void onPlaneLoaded(Aircraft plane) {
@@ -517,15 +757,15 @@ public class TrackingActivity extends Activity {
     private void showLogoutDialog() {
         new AlertDialog.Builder(this)
                 .setCancelable(true)
-                .setTitle("Confirm logout")
-                .setMessage("Are you sure you want to log out?")
-                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                .setTitle(R.string.logout_dialog_title)
+                .setMessage(R.string.logout_dialog_message)
+                .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.dismiss();
                     }
                 })
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.dismiss();
@@ -547,11 +787,173 @@ public class TrackingActivity extends Activity {
             }
         }
         if (showProgress) {
-            ProgressDialog pDialog = new ProgressDialog(this);
-            pDialog.setIndeterminate(true);
-            pDialog.setCancelable(false);
-            pDialog.setMessage("Waiting for the service to finish...");
-            pDialog.show();
+            finishingProgressDialog = new ProgressDialog(this);
+            finishingProgressDialog.setIndeterminate(true);
+            finishingProgressDialog.setCancelable(false);
+            finishingProgressDialog.setMessage(getText(R.string.waiting_for_service_to_finish));
+            finishingProgressDialog.show();
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (finishingProgressDialog != null && finishingProgressDialog.isShowing()) {
+                            finishingProgressDialog.dismiss();
+                            stopService(new Intent(TrackingActivity.this, GPSService.class));
+                            gpsServiceListener.onTrackingSessionFinished();
+                        }
+                    } catch (Exception ex) {
+                        Log.w(TAG, "stopGPSService(): failed to stop the service", ex);
+                    }
+                }
+            }, 30 * 1000L);
+        }
+    }
+
+    private Circle addMapCircle(LatLng latLng) {
+        int radius = prefHelper.getInt(Constants.CONFIG_RADAR_RADIUS, Constants.DEFAULT_RADAR_RADIUS);
+        return mapCircle = mMap.addCircle(
+                    new CircleOptions()
+                            .center(latLng)
+                            .radius(radius)
+                            .strokeWidth(1)
+                            .strokeColor(Color.argb(180, 0, 0, 255))
+                            .fillColor(Color.parseColor("#200084d3"))
+            );
+    }
+
+    private void updateNearbyPlanes(Location loc) {
+        if (loc == null)
+            return;
+        Map<String, Object> params = new HashMap<String, Object>();
+        int radius = prefHelper.getInt(Constants.CONFIG_RADAR_RADIUS, Constants.DEFAULT_RADAR_RADIUS);
+        params.put("d", radius);
+        params.put("lat", loc.getLatitude());
+        params.put("lon", loc.getLongitude());
+        if (mPlane != null)
+            params.put("aircraftId", mPlane.getObjectId());
+        if (loc.hasAltitude())
+            params.put("alt", loc.getAltitude());
+        params.put("t", System.currentTimeMillis());
+
+        ParseCloud.callFunctionInBackground("getNearbyAircrafts", params, new FunctionCallback<List<HashMap<String, Object>>>() {
+            @Override
+            public void done(List<HashMap<String, Object>> aircrafts, ParseException e) {
+                if (e != null) {
+                    Log.w(TAG, "getNearbyAircrafts() cloud code failed with exception", e);
+                } else {
+                    Log.d(TAG, "getNearbyAircrafts() returned: " + aircrafts);
+                    refreshNearbyPlanes(aircrafts);
+                }
+            }
+        });
+    }
+
+    private void refreshNearbyPlanes(List<HashMap<String, Object>> planes) {
+
+        if (planes == null)
+            planes = Collections.emptyList();
+
+        if (nearbyPlanes.size() > planes.size()) {
+            CommonTools.vibrate(TrackingActivity.this, new long[]{0, 500, 200, 200, 200, 500}, -1);
+        } else if (nearbyPlanes.size() < planes.size()) {
+            CommonTools.vibrate(TrackingActivity.this, new long[]{0, 200, 200, 500, 200, 200}, -1);
+        }
+
+        // remove other planes from the map
+        Iterator<Map.Entry<String, Marker>> it = markers.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, Marker> entry = it.next();
+            entry.getValue().remove();
+        }
+        markers.clear();
+        nearbyPlanes.clear();
+
+        for (Map<String, Object> planeInfo: planes) {
+            String aircraftId = planeInfo.get("aircraftId").toString();
+            String userId = planeInfo.get("userId").toString();
+            if (mPlane.getObjectId().equals(aircraftId))
+                continue;
+            String sessionId = planeInfo.get("sessionId").toString();
+            Date updatedAt = (Date) planeInfo.get("updatedAt");
+            Map<String, Object> lastPoint = (Map<String, Object>) planeInfo.get("lastPoint");
+            if (lastPoint != null) {
+                Number lat = (Number) lastPoint.get("lat");
+                Number lon = (Number) lastPoint.get("lon");
+                Number bea = (Number) lastPoint.get("bea");
+                Number vel = (Number) lastPoint.get("vel");
+                Number alt = (Number) lastPoint.get("alt");
+                Marker marker = mMap.addMarker(
+                        new MarkerOptions()
+                                .position(new LatLng(lat.doubleValue(), lon.doubleValue()))
+                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_airplane_black))
+                                .flat(true)
+                                .anchor(0.5f, 0.5f)
+                                .rotation(bea != null ? bea.floatValue() : 0)
+                );
+                markers.put(aircraftId, marker);
+                nearbyPlanes.put(marker.getId(), planeInfo);
+            }
+        }
+
+        if (selectedAircraftId != null) {
+            Marker marker = markers.get(selectedAircraftId);
+            if (marker == null) {
+                selectedAircraftId = null;
+                mMapOverlay.setVisibility(View.GONE);
+            } else {
+                marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_airplane_red));
+                Map<String, Object> planeInfo = nearbyPlanes.get(marker.getId());
+                Map<String, Object> lastPoint = (Map<String, Object>) planeInfo.get("lastPoint");
+                if (lastPoint != null) {
+                    Number lat = (Number) lastPoint.get("lat");
+                    Number lon = (Number) lastPoint.get("lon");
+                    Number bea = (Number) lastPoint.get("bea");
+                    Number vel = (Number) lastPoint.get("vel");
+                    Number alt = (Number) lastPoint.get("alt");
+
+                    try {
+                        Aircraft aircraft = ParseQuery.getQuery(Aircraft.class)
+                                .fromPin("planes")
+                                .get(selectedAircraftId);
+                        if (aircraft != null) {
+                            mOverlayAircraftName.setText(aircraft.getName());
+                            mOverlayCallName.setText(aircraft.getCallName());
+                        }
+                    } catch (Exception ex) {
+                        mOverlayAircraftName.setText("Unknown");
+                        mOverlayCallName.setText("N/A");
+                    }
+
+                    mOverlaySpeed.setText((vel != null ? Math.round(vel.floatValue()*3.6f) : "?") + " km/h");
+                    if (lastLocation != null && lastLocation.hasAltitude() && alt!=null) {
+                        int delta = Math.round(alt.floatValue() - (float) lastLocation.getAltitude());
+                        if (delta > 0) {
+                            mOverlayHeight.setText("+" + delta + " m");
+                            mOverlayHeight.setTextColor(Color.GREEN);
+                        } else if (delta < 0) {
+                            mOverlayHeight.setText("-" + delta + " m");
+                            mOverlayHeight.setTextColor(Color.RED);
+                        } else {
+                            mOverlayHeight.setText("±0 m");
+                            mOverlayHeight.setTextColor(Color.BLACK);
+                        }
+                    } else {
+                        mOverlayHeight.setText((alt != null ? alt.floatValue() : "?") + " m");
+                        mOverlayHeight.setTextColor(Color.BLACK);
+                    }
+                    if (lastLocation != null && lat != null && lon != null) {
+                        double d = SphericalUtil.computeDistanceBetween(
+                                new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()),
+                                new LatLng(lat.doubleValue(), lon.doubleValue()));
+                        mOverlayDistance.setText(Math.round(d) + " m");
+                    } else {
+                        mOverlayDistance.setText("? m");
+                    }
+                    mMapOverlay.setVisibility(View.VISIBLE);
+                }
+            }
+        } else {
+            mMapOverlay.setVisibility(View.GONE);
         }
     }
 
@@ -649,7 +1051,7 @@ public class TrackingActivity extends Activity {
             }
         }
 
-        dialogBuilder.setTitle("Select heart rate monitor");
+        dialogBuilder.setTitle(R.string.title_select_hrm);
         alertSelectDevice = dialogBuilder.create();
         final Object leScanCallback = (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2)
                 ? null : new BluetoothAdapter.LeScanCallback() {
@@ -761,16 +1163,16 @@ public class TrackingActivity extends Activity {
         // Ask user to enable GPS or logout
         new AlertDialog.Builder(this)
                 .setCancelable(true)
-                .setTitle("Geo Location Services")
-                .setMessage("Geo Location Services and GPS are not available. Please, enable GPS Satellites in Settings to continue.")
-                .setNegativeButton("Log out", new DialogInterface.OnClickListener() {
+                .setTitle(R.string.title_gps_disabled)
+                .setMessage(R.string.message_gps_disabled)
+                .setNegativeButton(R.string.log_out_button, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.dismiss();
                         performLogout(true);
                     }
                 })
-                .setPositiveButton("Go to Settings", new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.go_to_gps_settings_button, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         dialogInterface.dismiss();
@@ -783,10 +1185,12 @@ public class TrackingActivity extends Activity {
 
         @Override
         public void onLocationChanged(final Location location) throws RemoteException {
+            final long t = System.currentTimeMillis();
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    lastLocationUpdate = System.currentTimeMillis();
+                    lastLocationUpdate = t;
+                    lastLocation = location;
                     if (location.hasSpeed())
                         mSpeedView.setText(String.format("%.2f km/h", location.getSpeed()*3.6f));
                     if (location.hasAltitude())
@@ -794,16 +1198,35 @@ public class TrackingActivity extends Activity {
                     else
                         mAltitudeView.setText("N/A");
 
-                    if (mMap != null)
-                        mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(location.getLatitude(), location.getLongitude())));
+                    if (mMap != null) {
+                        LatLng myLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+                        if (mapCircle == null)
+                            mapCircle = addMapCircle(myLatLng);
+                        int radius = prefHelper.getInt(Constants.CONFIG_RADAR_RADIUS, Constants.DEFAULT_RADAR_RADIUS);
+                        mapCircle.setCenter(myLatLng);
+                        mapCircle.setRadius(radius);
+                        CameraUpdate cameraUpdate = null;
+                        if (location.hasBearing()) {
+                            CameraPosition p = mMap.getCameraPosition();
+                            cameraUpdate = CameraUpdateFactory.newCameraPosition(new CameraPosition(myLatLng, p.zoom, p.tilt, location.getBearing()));
+                        } else {
+                            cameraUpdate = CameraUpdateFactory.newLatLng(myLatLng);
+                        }
+                        mMap.animateCamera(cameraUpdate);
+                    }
                 }
             });
 
         }
 
         @Override
-        public void onHeartRateChanged(int heartRate) throws RemoteException {
-
+        public void onHeartRateChanged(final int heartRate) throws RemoteException {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    mHeartRateView.setText(heartRate + " bpm");
+                }
+            });
         }
 
         @Override
@@ -817,11 +1240,18 @@ public class TrackingActivity extends Activity {
                 @Override
                 public void run() {
                     try {
+                        mStartButton.setVisibility(View.GONE);
+                        mStopButton.setVisibility(View.VISIBLE);
+                        mStartButton.setEnabled(false);
                         mStopButton.setEnabled(true);
                         loadPlaneData();
                         if (!TrackingActivity.this.isFinishing())
                             Toast.makeText(TrackingActivity.this, "Tracking session is running. SessionId="
                                     + airSessionId, Toast.LENGTH_SHORT).show();
+
+                        if (gpsService != null && gpsBound) {
+                            gpsService.showNotification();
+                        }
                     } catch(Exception ex) {
                         // suppress this
                     }
@@ -837,6 +1267,7 @@ public class TrackingActivity extends Activity {
                 public void run() {
                     try {
                         if (!TrackingActivity.this.isFinishing()) {
+                            mStopButton.setEnabled(false);
                             startActivity(new Intent(TrackingActivity.this, LoginActivity.class));
                             TrackingActivity.this.finish();
                         }
@@ -849,22 +1280,46 @@ public class TrackingActivity extends Activity {
         }
 
         @Override
-        public void onHRMStatusChanged(final String address, String name, int oldStatus, int newStatus) throws RemoteException {
-            if (newStatus == LeHRMonitor.CONNECTED_STATUS) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mHRMonitorStatusView.setText(address);
+        public void onHRMStatusChanged(final String address, final String name, final int oldStatus, final int newStatus) throws RemoteException {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (newStatus == LeHRMonitor.CONNECTED_STATUS) {
+                        mHRMonitorStatusView.setText(getText(R.string.hrm_connected) + " " + address);
                         mConnectHRMonitorButton.setVisibility(View.GONE);
+                        mHeartRateView.setVisibility(View.VISIBLE);
+                        mDeviceNameView.setText(name == null ? getText(R.string.hrm_no_name) : name);
+                        mConnectHRMonitorButton.setEnabled(true);
                     }
-                });
-            }
+                    if (newStatus == LeHRMonitor.CONNECTING_STATUS) {
+                        mHRMonitorStatusView.setText(R.string.hrm_connecting);
+                        mDeviceNameView.setText(name == null ? "No name" : name);
+                        mConnectHRMonitorButton.setEnabled(false);
+                    }
+                    if (newStatus == LeHRMonitor.DISCONNECTING_STATUS) {
+                        mHRMonitorStatusView.setText(R.string.hrm_disconnected);
+                        mConnectHRMonitorButton.setVisibility(View.VISIBLE);
+                        mDeviceNameView.setText(name == null ? getText(R.string.hrm_no_name) : name);
+                        mHeartRateView.setVisibility(View.GONE);
+                        mConnectHRMonitorButton.setEnabled(true);
+                    }
+                    if (newStatus == LeHRMonitor.READY_STATUS) {
+                        mHRMonitorStatusView.setText(R.string.hrm_ready);
+                        mConnectHRMonitorButton.setVisibility(View.VISIBLE);
+                        mDeviceNameView.setText(R.string.hrm_no_device);
+                        mHeartRateView.setVisibility(View.GONE);
+                        mConnectHRMonitorButton.setEnabled(true);
+                    }
+                }
+            });
+
             if (oldStatus == LeHRMonitor.CONNECTED_STATUS) {
                 // monitor is disconnected
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        mHRMonitorStatusView.setText("Not connected");
+                        mHRMonitorStatusView.setText(R.string.hrm_not_connected);
+                        mHeartRateView.setVisibility(View.GONE);
                         mConnectHRMonitorButton.setVisibility(View.VISIBLE);
                     }
                 });

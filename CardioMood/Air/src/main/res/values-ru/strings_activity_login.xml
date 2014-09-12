@@ -1,0 +1,17 @@
+<resources>
+        <string name="title_activity_login">CardioMood Air</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Пароль</string>
+    <string name="action_sign_in">Вход в систему</string>
+    <string name="action_sign_in_short">Войти</string>
+
+    <string name="error_invalid_email">Данный email неверный.</string>
+    <string name="error_invalid_password">Пароль слишком короткий</string>
+    <string name="error_incorrect_password">Неверный пароль</string>
+    <string name="error_field_required">Это поле является обязательным</string>
+    <string name="error_no_internet">Нет доступа к интернету</string>
+    <string name="menu_refresh">Обновить</string>
+    <string name="select_user_from_list_below">Выберите пользователя из списка:</string>
+</resources>

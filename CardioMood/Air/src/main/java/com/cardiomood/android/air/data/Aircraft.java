@@ -21,4 +21,8 @@ public class Aircraft extends ParseObject {
         return getString("aircraftType");
     }
 
+    public String getCallName() {
+        return getString("callName");
+    }
+
 }
