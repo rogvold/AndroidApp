@@ -6,8 +6,10 @@ import java.util.concurrent.TimeUnit;
 
 public abstract class WorkerThread<T> extends Thread {
 
-    public static final long POLL_TIMEOUT = 200;
+    public static final long POLL_TIMEOUT = 100;
 
+
+    private final Object lock = new Object();
     private final BlockingQueue<T> queue = new LinkedBlockingQueue();
     private volatile boolean finished = false;
     private long lastItemTime = 0;
@@ -44,8 +46,10 @@ public abstract class WorkerThread<T> extends Thread {
     }
 
     public void put(T e) {
-        if (!finished)
-            queue.add(e);
+        synchronized (lock) {
+            if (!finished)
+                queue.add(e);
+        }
     }
 
     public void onStart() {}
@@ -65,11 +69,15 @@ public abstract class WorkerThread<T> extends Thread {
     }
 
     public void finishWork() {
-        finished = true;
+        synchronized (lock) {
+            finished = true;
+        }
     }
 
     public boolean isFinished() {
-        return finished;
+        synchronized (lock) {
+            return finished;
+        }
     }
 
     public abstract void processItem(T item);
