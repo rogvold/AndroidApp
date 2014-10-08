@@ -39,6 +39,8 @@ import org.json.JSONArray;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -62,6 +64,7 @@ public class GPSService extends Service {
     private String hrmAddress;
     private volatile Location lastLocation;
     private volatile double lastStress = -1;
+    private List<Location> locations;
 
     private DataCollectorThread workerThread;
     private NotificationCompat.Builder mBuilder;
@@ -191,7 +194,8 @@ public class GPSService extends Service {
             if (listener == null)
                 return;
             synchronized (listeners) {
-                listeners.remove(listener);
+                // todo: it should be listeners.remove(listener); but it won't work :(
+                listeners.clear();
             }
         }
 
@@ -325,6 +329,17 @@ public class GPSService extends Service {
         public String getUserId() throws RemoteException {
             synchronized (lock) {
                 return airSession == null ? null : airSession.getUserId();
+            }
+        }
+
+        @Override
+        public Location[] getPath() throws RemoteException {
+            synchronized (lock) {
+                if (locations == null)
+                    return new Location[0];
+                Location[] path = new Location[locations.size()];
+                locations.toArray(path);
+                return path;
             }
         }
 
@@ -496,6 +511,7 @@ public class GPSService extends Service {
         workerThread = new DataCollectorThread();
         workerThread.setSession(airSession);
         workerThread.start();
+        locations = new ArrayList<Location>();
 
         isServiceStarted = true;
     }
@@ -544,8 +560,14 @@ public class GPSService extends Service {
         gpsMonitor.setListener(new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-               if (isRunning() && workerThread != null)
+               if (isRunning() && workerThread != null) {
                    workerThread.put(getDataPoint(location));
+                   synchronized (lock) {
+                       if (location.hasAccuracy() && location.getAccuracy() < 20) {
+                           locations.add(location);
+                       }
+                   }
+               }
                lastLocation = location;
                synchronized (listeners) {
                    for (GPSServiceListener l: listeners) {
@@ -631,7 +653,7 @@ public class GPSService extends Service {
     private class DataCollectorThread extends WorkerThread<DataPoint> {
 
         private final Gson GSON = new Gson();
-        private final List<DataPoint> portion = new ArrayList<DataPoint>();
+        private final List<DataPoint> portion = new LinkedList<DataPoint>();
 
         private final long INTERVAL = 2000L;
 
@@ -645,6 +667,10 @@ public class GPSService extends Service {
         @Override
         public void onStop() {
             if (session != null) {
+
+                // while (!processItems(portion));
+                // todo: we must do something about portion if it is not empty!
+
                 session.setEndDate(getLastItemTime());
 
                 try {
@@ -680,7 +706,6 @@ public class GPSService extends Service {
                     long time = System.currentTimeMillis();
                     if (processItems(portion)) {
                         lastSuccessTime = time;
-                        portion.clear();
                     }
                 }
             }
@@ -691,16 +716,39 @@ public class GPSService extends Service {
             portion.add(item);
         }
 
-        private boolean processItems(List<DataPoint> items) {
-            if (session == null)
-                return false;
+        private List<DataPoint> getFirstNElements(List<DataPoint> items, int n) {
+            List<DataPoint> chunk = new ArrayList<DataPoint>(n);
+            Iterator<DataPoint> it = items.iterator();
+            for (int count=0; it.hasNext() && count<n; count++) {
+                chunk.add(it.next());
+            }
+            return chunk;
+        }
 
+        private void removeFirstNElements(List<DataPoint> items, int n) {
+            if (items.size() <= n) {
+                items.clear();
+                return;
+            }
+            Iterator<DataPoint> it = items.iterator();
+            for (int count=0; it.hasNext() && count<n; count++) {
+                it.next();
+                it.remove();
+            }
+        }
+
+        private boolean processItems(List<DataPoint> items) {
+            if (session == null || items.isEmpty())
+                return true;
+
+            List<DataPoint> chunk = getFirstNElements(items, 50);
             Map<String, Object> params = new HashMap<String, Object>();
             try {
                 params.put("sessionId", session.getObjectId());
-                params.put("points", new JSONArray(GSON.toJson(items)));
+                params.put("points", new JSONArray(GSON.toJson(chunk)));
             } catch (Exception ex) {
-                throw new RuntimeException("Failed to prepare params", ex);
+                Log.w(TAG, "workerThread.porcessItems(): Failed to prepare params", ex);
+                return false;
             }
 
             try {
@@ -710,7 +758,10 @@ public class GPSService extends Service {
                 return false;
             }
 
-            return true;
+            removeFirstNElements(items, 50);
+            if (items.isEmpty())
+                return true;
+            else return false;
         }
     }
 

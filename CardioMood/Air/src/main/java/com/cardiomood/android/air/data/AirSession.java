@@ -10,6 +10,7 @@ import com.parse.ParseObject;
 public class AirSession extends ParseObject {
 
     public String getAircraftId() {
+
         return getString("aircraftId");
     }
 

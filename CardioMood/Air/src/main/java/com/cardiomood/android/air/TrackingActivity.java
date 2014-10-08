@@ -32,6 +32,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -61,6 +62,8 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.SphericalUtil;
 import com.parse.DeleteCallback;
 import com.parse.FunctionCallback;
@@ -172,6 +175,7 @@ public class TrackingActivity extends Activity {
     // view
     private MapFragment mMapFragment;
     private GoogleMap mMap;
+    private RelativeLayout mControlPanelView;
     private View mCurrentUserView;
     private TextView mInternetView;
     private TextView mAltitudeView;
@@ -189,6 +193,7 @@ public class TrackingActivity extends Activity {
     private TextView mOverlaySpeed;
     private TextView mOverlayHeight;
     private ProgressDialog finishingProgressDialog;
+    private Button mShowControlPanelButton;
 
     // check current state
     private Timer checkStatusTimer = new Timer("check_status");
@@ -202,8 +207,11 @@ public class TrackingActivity extends Activity {
     private Circle mapCircle;
     private Map<String, Marker> markers = new HashMap<String, Marker>();
     private Map<String, Map<String, Object>> nearbyPlanes = new HashMap<String, Map<String, Object>>();
+    private List<String> radarList = new ArrayList<String>();
     private String selectedAircraftId = null;
     private GestureDetector overlayGestureDetector;
+    private boolean drawTrack = true;
+    private List<Polyline> route = new ArrayList<Polyline>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -226,6 +234,8 @@ public class TrackingActivity extends Activity {
 
         // initialize view
         setContentView(R.layout.activity_tracking);
+
+        mControlPanelView = (RelativeLayout) findViewById(R.id.control_panel);
 
         mCurrentUserView = findViewById(R.id.current_user_box);
         final TextView text1 = (TextView) mCurrentUserView.findViewById(android.R.id.text1);
@@ -281,6 +291,17 @@ public class TrackingActivity extends Activity {
             @Override
             public void onClick(View v) {
                 performConnect();
+            }
+        });
+
+        mShowControlPanelButton = (Button) findViewById(R.id.show_hide_control_panel_button);
+        mShowControlPanelButton.setOnTouchListener(TouchEffect.FADE_ON_TOUCH);
+        mShowControlPanelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mControlPanelView.isShown())
+                    mControlPanelView.setVisibility(View.VISIBLE);
+                else mControlPanelView.setVisibility(View.GONE);
             }
         });
 
@@ -391,10 +412,13 @@ public class TrackingActivity extends Activity {
                     LatLng myLatLng = new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude());
                     // setup initial map coordinated
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLatLng, 14));
+                } else {
+                    mMap.animateCamera(CameraUpdateFactory.zoomTo(14));
                 }
                 mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                     @Override
                     public boolean onMarkerClick(Marker marker) {
+                        mControlPanelView.setVisibility(View.GONE);
                         Map<String, Object> planeInfo = nearbyPlanes.get(marker.getId());
                         if (planeInfo != null) {
                             selectedAircraftId = (String) planeInfo.get("aircraftId");
@@ -419,6 +443,12 @@ public class TrackingActivity extends Activity {
                             mMapOverlay.setVisibility(View.VISIBLE);
                         }
                         return true;
+                    }
+                });
+                mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+                    @Override
+                    public void onMapClick(LatLng latLng) {
+                        mControlPanelView.setVisibility(View.GONE);
                     }
                 });
             }
@@ -548,6 +578,7 @@ public class TrackingActivity extends Activity {
                     }
                 });
             }
+
         };
 
         checkGPSTask = new TimerTask() {
@@ -618,6 +649,15 @@ public class TrackingActivity extends Activity {
         } else {
             Toast.makeText(this, "Google Play Services are not available. " +
                     "Some features will be disabled.", Toast.LENGTH_SHORT).show();
+        }
+
+        drawTrack = prefHelper.getBoolean(Constants.CONFIG_DRAW_TRACK, true, true);
+        Log.d(TAG, "onResume(): config.draw_track = " + drawTrack);
+        if (!drawTrack) {
+            for (Polyline line: route) {
+                line.remove();
+            }
+            route.clear();
         }
     }
 
@@ -712,7 +752,6 @@ public class TrackingActivity extends Activity {
                 if (e == null) {
                     onPlaneLoaded(parseObject);
                 } else {
-
                     try {
                         if (!gpsBound || !gpsService.isRunning()) {
                             Toast.makeText(TrackingActivity.this, "Plane not found.", Toast.LENGTH_SHORT).show();
@@ -795,9 +834,13 @@ public class TrackingActivity extends Activity {
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
+                    // waiting dialog is still showing. Got some network problem???
+                    // try to finish service correctly
                     try {
                         if (finishingProgressDialog != null && finishingProgressDialog.isShowing()) {
+                            // todo: inform the user that the service is taking too long to finish
                             finishingProgressDialog.dismiss();
+                            finishingProgressDialog = null;
                             stopService(new Intent(TrackingActivity.this, GPSService.class));
                             gpsServiceListener.onTrackingSessionFinished();
                         }
@@ -816,8 +859,8 @@ public class TrackingActivity extends Activity {
                             .center(latLng)
                             .radius(radius)
                             .strokeWidth(1)
-                            .strokeColor(Color.argb(180, 0, 0, 255))
-                            .fillColor(Color.parseColor("#200084d3"))
+                            .strokeColor(Color.argb(180, 255, 0, 0))
+                            .fillColor(Color.argb(32, 255, 0, 0))
             );
     }
 
@@ -825,8 +868,8 @@ public class TrackingActivity extends Activity {
         if (loc == null)
             return;
         Map<String, Object> params = new HashMap<String, Object>();
-        int radius = prefHelper.getInt(Constants.CONFIG_RADAR_RADIUS, Constants.DEFAULT_RADAR_RADIUS);
-        params.put("d", radius);
+//        int radius = prefHelper.getInt(Constants.CONFIG_RADAR_RADIUS, Constants.DEFAULT_RADAR_RADIUS);
+//        params.put("d", radius);
         params.put("lat", loc.getLatitude());
         params.put("lon", loc.getLongitude());
         if (mPlane != null)
@@ -840,6 +883,7 @@ public class TrackingActivity extends Activity {
             public void done(List<HashMap<String, Object>> aircrafts, ParseException e) {
                 if (e != null) {
                     Log.w(TAG, "getNearbyAircrafts() cloud code failed with exception", e);
+                    refreshNearbyPlanes(Collections.EMPTY_LIST);
                 } else {
                     Log.d(TAG, "getNearbyAircrafts() returned: " + aircrafts);
                     refreshNearbyPlanes(aircrafts);
@@ -853,11 +897,7 @@ public class TrackingActivity extends Activity {
         if (planes == null)
             planes = Collections.emptyList();
 
-        if (nearbyPlanes.size() > planes.size()) {
-            CommonTools.vibrate(TrackingActivity.this, new long[]{0, 500, 200, 200, 200, 500}, -1);
-        } else if (nearbyPlanes.size() < planes.size()) {
-            CommonTools.vibrate(TrackingActivity.this, new long[]{0, 200, 200, 500, 200, 200}, -1);
-        }
+        int radius = prefHelper.getInt(Constants.CONFIG_RADAR_RADIUS, Constants.DEFAULT_RADAR_RADIUS);
 
         // remove other planes from the map
         Iterator<Map.Entry<String, Marker>> it = markers.entrySet().iterator();
@@ -868,6 +908,10 @@ public class TrackingActivity extends Activity {
         markers.clear();
         nearbyPlanes.clear();
 
+        LatLng myLatLng = (lastLocation != null)
+                ? new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()) : null;
+
+        List<String> radarList = new ArrayList<String>(planes.size());
         for (Map<String, Object> planeInfo: planes) {
             String aircraftId = planeInfo.get("aircraftId").toString();
             String userId = planeInfo.get("userId").toString();
@@ -882,9 +926,10 @@ public class TrackingActivity extends Activity {
                 Number bea = (Number) lastPoint.get("bea");
                 Number vel = (Number) lastPoint.get("vel");
                 Number alt = (Number) lastPoint.get("alt");
+                LatLng latLng = new LatLng(lat.doubleValue(), lon.doubleValue());
                 Marker marker = mMap.addMarker(
                         new MarkerOptions()
-                                .position(new LatLng(lat.doubleValue(), lon.doubleValue()))
+                                .position(latLng)
                                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_airplane_black))
                                 .flat(true)
                                 .anchor(0.5f, 0.5f)
@@ -892,8 +937,24 @@ public class TrackingActivity extends Activity {
                 );
                 markers.put(aircraftId, marker);
                 nearbyPlanes.put(marker.getId(), planeInfo);
+
+                if (myLatLng != null) {
+                    double distance = SphericalUtil.computeDistanceBetween(myLatLng, latLng);
+                    if (distance <= radius) {
+                        // add this plane into the radarList
+                        radarList.add(aircraftId);
+                    }
+                }
             }
         }
+
+        if (this.radarList.size() > radarList.size()) {
+            CommonTools.vibrate(TrackingActivity.this, new long[]{0, 500, 200, 200, 200, 500}, -1);
+        } else if (this.radarList.size() < radarList.size()) {
+            CommonTools.vibrate(TrackingActivity.this, new long[]{0, 200, 200, 500, 200, 200}, -1);
+        }
+
+        this.radarList = radarList;
 
         if (selectedAircraftId != null) {
             Marker marker = markers.get(selectedAircraftId);
@@ -1189,6 +1250,7 @@ public class TrackingActivity extends Activity {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+                    Location pLoc = lastLocation;
                     lastLocationUpdate = t;
                     lastLocation = location;
                     if (location.hasSpeed())
@@ -1199,6 +1261,7 @@ public class TrackingActivity extends Activity {
                         mAltitudeView.setText("N/A");
 
                     if (mMap != null) {
+                        // draw radar circle
                         LatLng myLatLng = new LatLng(location.getLatitude(), location.getLongitude());
                         if (mapCircle == null)
                             mapCircle = addMapCircle(myLatLng);
@@ -1212,6 +1275,18 @@ public class TrackingActivity extends Activity {
                         } else {
                             cameraUpdate = CameraUpdateFactory.newLatLng(myLatLng);
                         }
+
+                        // draw path
+                        if (pLoc != null && drawTrack) {
+                            Polyline line = mMap.addPolyline(new PolylineOptions()
+                                    .add(new LatLng(pLoc.getLatitude(), pLoc.getLongitude()), myLatLng)
+                                    .width(5)
+                                    .color(Color.BLUE)
+                                    .visible(drawTrack)
+                            );
+                            route.add(line);
+                        }
+
                         mMap.animateCamera(cameraUpdate);
                     }
                 }
@@ -1240,6 +1315,8 @@ public class TrackingActivity extends Activity {
                 @Override
                 public void run() {
                     try {
+                        mControlPanelView.setVisibility(View.GONE);
+
                         mStartButton.setVisibility(View.GONE);
                         mStopButton.setVisibility(View.VISIBLE);
                         mStartButton.setEnabled(false);
@@ -1249,8 +1326,31 @@ public class TrackingActivity extends Activity {
                             Toast.makeText(TrackingActivity.this, "Tracking session is running. SessionId="
                                     + airSessionId, Toast.LENGTH_SHORT).show();
 
+                        route.clear();
                         if (gpsService != null && gpsBound) {
                             gpsService.showNotification();
+
+                            drawTrack = prefHelper.getBoolean(Constants.CONFIG_DRAW_TRACK, true, true);
+
+                            if (mMap != null && drawTrack) {
+                                // extract path and draw it!
+                                Location[] path = gpsService.getPath();
+                                for (int i=1; i<path.length; i++) {
+                                    Polyline line = mMap.addPolyline(
+                                        new PolylineOptions()
+                                            .add(
+                                                    new LatLng(path[i - 1].getLatitude(), path[i - 1].getLongitude()),
+                                                    new LatLng(path[i].getLatitude(), path[i].getLongitude())
+                                            )
+                                            .width(5)
+                                            .color(Color.BLUE)
+                                            .visible(drawTrack)
+                                    );
+                                    route.add(line);
+                                }
+                                if (path.length > 0)
+                                    lastLocation = path[path.length - 1];
+                            }
                         }
                     } catch(Exception ex) {
                         // suppress this
@@ -1285,7 +1385,7 @@ public class TrackingActivity extends Activity {
                 @Override
                 public void run() {
                     if (newStatus == LeHRMonitor.CONNECTED_STATUS) {
-                        mHRMonitorStatusView.setText(getText(R.string.hrm_connected) + " " + address);
+                        mHRMonitorStatusView.setText(/* getText(R.string.hrm_connected) + " " + */address);
                         mConnectHRMonitorButton.setVisibility(View.GONE);
                         mHeartRateView.setVisibility(View.VISIBLE);
                         mDeviceNameView.setText(name == null ? getText(R.string.hrm_no_name) : name);

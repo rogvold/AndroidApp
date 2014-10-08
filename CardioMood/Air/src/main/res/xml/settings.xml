@@ -8,6 +8,12 @@
             android:key="config.radar_radius"
             android:title="@string/pref_title_radar_radius"/>
 
+        <CheckBoxPreference
+            android:key="config.draw_track"
+            android:title="@string/pref_title_draw_track"
+            android:summary="@string/pref_summary_draw_track"
+            android:defaultValue="true"/>
+
         <!--<Preference-->
             <!--android:key="config.config.selected_aircraft_id"-->
             <!--android:title="@string/pref_title_selected_aircraft" />-->

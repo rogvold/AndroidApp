@@ -4,6 +4,7 @@ package com.cardiomood.android.air.fragments;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.IntListPreference;
 
 import com.cardiomood.android.air.R;
@@ -15,6 +16,7 @@ public class SettingsFragment extends PreferenceActivityBase.AbstractMainFragmen
 
 
     private IntListPreference radarRadiusPref;
+    private CheckBoxPreference drawTrackPref;
 
     private PreferenceHelper helper;
 
@@ -31,11 +33,13 @@ public class SettingsFragment extends PreferenceActivityBase.AbstractMainFragmen
         radarRadiusPref.setEntryValues(getResources().getIntArray(R.array.values_radar_radius));
         radarRadiusPref.setDefaultValue(String.valueOf(Constants.DEFAULT_RADAR_RADIUS));
 
+        drawTrackPref = (CheckBoxPreference) findPreference(Constants.CONFIG_DRAW_TRACK);
+
         refreshSummaries();
     }
 
     private void refreshSummaries() {
-        updatePrefSummary(radarRadiusPref);
+        updatePrefSummary(radarRadiusPref, drawTrackPref);
     }
 
 

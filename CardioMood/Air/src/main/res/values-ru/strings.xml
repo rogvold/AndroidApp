@@ -12,7 +12,7 @@
     <string name="failed_to_refresh_planes_list">Не удалось обновить список самолетов. \nПроверьте интернет подключение.</string>
     <string name="message_gps_disabled">Сервисы GPS не доступны. Пожалуйста, включите Спутники GPS в настройках.</string>
     <string name="hrm_not_connected">Не подключен</string>
-    <string name="hrm_ready">Готов к подключению...</string>
+    <string name="hrm_ready">Готов</string>
     <string name="hrm_no_name">Без имени</string>
     <string name="hrm_disconnected">Подключение потеряно.</string>
     <string name="hrm_connecting">Подключение...</string>
@@ -23,5 +23,7 @@
     <string name="title_general_settings">Общие настройки</string>
     <string name="pref_title_selected_aircraft">Авиасудно по умолчанию</string>
     <string name="bluetooth_is_not_available">Bluetooth не доступен.</string>
+    <string name="pref_title_draw_track">Показывать пройденный маршрут</string>
+    <string name="pref_summary_draw_track">Рисовать пройденный путь на карте.</string>
 
 </resources>

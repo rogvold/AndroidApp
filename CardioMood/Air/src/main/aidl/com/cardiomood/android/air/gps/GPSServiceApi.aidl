@@ -62,4 +62,6 @@ interface GPSServiceApi {
 
     String getUserId();
 
+    Location[] getPath();
+
 }
