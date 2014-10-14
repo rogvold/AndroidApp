@@ -2,30 +2,52 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
+    android:paddingTop="0dp"
+    android:paddingBottom="4dp"
     tools:context="com.cardiomood.android.air.PlanesActivity">
 
-    <include layout="@android:layout/simple_list_item_2" android:id="@+id/current_user_box"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/top_panel">
+
+        <include layout="@layout/two_lines_layout"
+            android:id="@+id/current_user_box"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"/>
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textStyle="bold"
+            android:layout_gravity="center_vertical"
+            android:textAppearance="@android:style/TextAppearance.Holo.Medium.Inverse"
+            android:id="@+id/button_history"
+            android:text="@string/button_history"/>
+
+    </LinearLayout>
 
     <View
         android:id="@+id/separator_1"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@android:color/darker_gray"
-        android:layout_below="@+id/current_user_box"
+        android:layout_below="@+id/top_panel"
         android:layout_alignParentLeft="true" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/separator_1"
-        android:layout_above="@+id/start_button"
+        android:layout_above="@+id/bottom_panel"
         android:orientation="vertical"
-        android:paddingTop="16dp"
-        android:paddingBottom="16dp">
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -51,13 +73,22 @@
 
     </LinearLayout>
 
-    <Button
+    <LinearLayout
+        android:id="@+id/bottom_panel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/button_continue"
+        android:orientation="vertical"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:id="@+id/start_button" />
+        android:layout_alignParentStart="true">
 
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/button_continue"
+            android:id="@+id/start_button"
+            android:background="@android:color/holo_green_dark"
+            android:textStyle="bold"
+            android:textAppearance="@android:style/TextAppearance.Holo.Medium.Inverse"/>
+    </LinearLayout>
 </RelativeLayout>

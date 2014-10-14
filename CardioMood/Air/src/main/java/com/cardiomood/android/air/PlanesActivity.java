@@ -22,6 +22,10 @@ import android.widget.Toast;
 
 import com.cardiomood.android.air.data.AirSession;
 import com.cardiomood.android.air.data.Aircraft;
+import com.cardiomood.android.air.data.SynchronizableParseObject;
+import com.cardiomood.android.air.db.HelperFactory;
+import com.cardiomood.android.air.db.SyncDAO;
+import com.cardiomood.android.air.db.entity.SyncEntity;
 import com.cardiomood.android.air.tools.ParseTools;
 import com.cardiomood.android.tools.CommonTools;
 import com.parse.FindCallback;
@@ -31,7 +35,9 @@ import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -42,6 +48,7 @@ public class PlanesActivity extends Activity {
     private ListView mPlanesListView;
     private View mCurrentUserView;
     private Button mStartButton;
+    private Button mHistoryButton;
 
     private ArrayAdapter<Aircraft> planesListAdapter;
     private List<Aircraft> planesList;
@@ -96,6 +103,14 @@ public class PlanesActivity extends Activity {
             }
         });
 
+        mHistoryButton = (Button) findViewById(R.id.button_history);
+        mHistoryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openHistoryActivity();
+            }
+        });
+
         TextView text1 = (TextView) mCurrentUserView.findViewById(android.R.id.text1);
         text1.setText(ParseTools.getUserFullName(currentUser));
         TextView text2 = (TextView) mCurrentUserView.findViewById(android.R.id.text2);
@@ -105,7 +120,7 @@ public class PlanesActivity extends Activity {
         planesList = new ArrayList<Aircraft>();
         planesListAdapter = new PlanesListArrayAdapter(this, planesList);
         mPlanesListView.setAdapter(planesListAdapter);
-        refreshPlanes();
+        refreshPlanes(false);
     }
 
     private void trySelectedPlane(final Aircraft plane) {
@@ -125,6 +140,10 @@ public class PlanesActivity extends Activity {
                         }
                     }
                 });
+    }
+
+    private void openHistoryActivity() {
+        startActivity(new Intent(this, HistoryActivity.class));
     }
 
     private void showExistingSessionDialog(final Aircraft plane, final List<AirSession> airSessions) {
@@ -181,7 +200,7 @@ public class PlanesActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_refresh:
-                refreshPlanes();
+                refreshPlanes(false);
                 return true;
             case R.id.menu_settings:
                 openSettingsActivity();
@@ -223,7 +242,7 @@ public class PlanesActivity extends Activity {
         finish();
     }
 
-    private void refreshPlanes() {
+    private void refreshPlanes(final boolean fromPin) {
         if (!CommonTools.isNetworkAvailable(this)) {
             Toast.makeText(this, R.string.backend_servers_are_not_vailable, Toast.LENGTH_SHORT).show();
         }
@@ -238,8 +257,14 @@ public class PlanesActivity extends Activity {
         refreshing = true;
         invalidateOptionsMenu();
 
+        // prepare query
         planesQuery = ParseQuery.getQuery(Aircraft.class)
                 .orderByAscending("name");
+        if (fromPin) {
+            planesQuery.fromPin("planes");
+        }
+
+        // execute query
         planesQuery.findInBackground(new FindCallback<Aircraft>() {
             @Override
             public void done(List<Aircraft> parseObjects, ParseException e) {
@@ -250,11 +275,22 @@ public class PlanesActivity extends Activity {
                     selectedPlane = null;
                     mPlanesListView.clearChoices();
                     mStartButton.setEnabled(false);
-                    ParseObject.pinAllInBackground("planes", parseObjects);
+                    if (!fromPin) {
+                        ParseObject.pinAllInBackground("planes", parseObjects);
+                        try {
+                            syncWithDB(parseObjects);
+                        } catch (SQLException ex) {
+                            Log.w(TAG, "failed to sync remote data with local DB", ex);
+                        }
+                    }
                 } else {
                     Log.w(TAG, "Failed to refresh planes list.", e);
-                    Toast.makeText(PlanesActivity.this, R.string.failed_to_refresh_planes_list, Toast.LENGTH_SHORT).show();
+                    if (!fromPin) {
+                        Toast.makeText(PlanesActivity.this, R.string.failed_to_refresh_planes_list, Toast.LENGTH_SHORT).show();
+                        refreshPlanes(true);
+                    }
                     mStartButton.setEnabled(selectedPlane != null && mPlanesListView.getSelectedItemPosition() >= 0);
+
                 }
                 planesQuery = null;
                 refreshing = false;
@@ -262,6 +298,30 @@ public class PlanesActivity extends Activity {
             }
         });
     }
+
+    private void syncWithDB(List<? extends SynchronizableParseObject> planes) throws SQLException {
+        for (SynchronizableParseObject plane: planes) {
+            SyncEntity entity = SyncEntity.fromParseObject(plane, plane.getEntityClass());
+            SyncDAO dao = HelperFactory.getHelper().getDaoForClass(entity.getClass());
+            SyncEntity existingEntity = dao.findBySyncId(entity.getSyncId());
+
+            if (existingEntity == null) {
+                dao.create(dao.getDataClass().cast(entity));
+            } else {
+                // compare updated_at field
+                boolean updateRequired = entity.getSyncDate().after(
+                        existingEntity.getSyncDate() != null ?
+                                existingEntity.getSyncDate() : new Date(0)
+                );
+                if (updateRequired) {
+                    entity.setId(existingEntity.getId());
+                    dao.update(dao.getDataClass().cast(entity));
+                }
+            }
+
+        }
+    }
+
 
     public class PlanesListArrayAdapter extends ArrayAdapter<Aircraft> {
 

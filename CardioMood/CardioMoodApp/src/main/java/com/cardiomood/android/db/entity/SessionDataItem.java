@@ -15,7 +15,7 @@ public abstract class SessionDataItem<T> implements Serializable {
     @DatabaseField(index = true, canBeNull = false, columnName = "session_id", foreign = true, foreignAutoRefresh = true, maxForeignAutoRefreshLevel = 2)
     private ContinuousSessionEntity session;
     @DatabaseField(canBeNull = false, columnName = "time_stamp", defaultValue = "0")
-    protected long timestamp;
+    private long timestamp;
 
     public Long getId() {
         return id;

@@ -25,5 +25,6 @@
     <string name="bluetooth_is_not_available">Bluetooth не доступен.</string>
     <string name="pref_title_draw_track">Показывать пройденный маршрут</string>
     <string name="pref_summary_draw_track">Рисовать пройденный путь на карте.</string>
+    <string name="button_history">Полеты</string>
 
 </resources>

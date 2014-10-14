@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.cardiomood.android.air.data.AirSession;
 import com.cardiomood.android.air.data.Aircraft;
+import com.cardiomood.android.air.db.HelperFactory;
 import com.parse.Parse;
 import com.parse.ParseObject;
 
@@ -24,5 +25,16 @@ public class AirApplication extends Application {
         ParseObject.registerSubclass(AirSession.class);
         Parse.enableLocalDatastore(this);
         Parse.initialize(this, PARSE_APPLICATION_ID, PARSE_CLIENT_KEY);
+
+        // prepare database
+        HelperFactory.setHelper(getApplicationContext());
+    }
+
+    @Override
+    public void onTerminate() {
+        // release database
+        HelperFactory.releaseHelper();
+
+        super.onTerminate();
     }
 }

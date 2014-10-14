@@ -25,11 +25,16 @@ import com.cardiomood.android.air.TrackingActivity;
 import com.cardiomood.android.air.data.AirSession;
 import com.cardiomood.android.air.data.Aircraft;
 import com.cardiomood.android.air.data.DataPoint;
+import com.cardiomood.android.air.db.HelperFactory;
+import com.cardiomood.android.air.db.entity.AirSessionEntity;
+import com.cardiomood.android.air.db.entity.DataPointEntity;
+import com.cardiomood.android.air.db.entity.SyncEntity;
 import com.cardiomood.android.tools.thread.WorkerThread;
 import com.cardiomood.heartrate.bluetooth.LeHRMonitor;
 import com.cardiomood.math.HeartRateUtils;
 import com.cardiomood.math.window.DataWindow;
 import com.google.gson.Gson;
+import com.j256.ormlite.dao.RuntimeExceptionDao;
 import com.parse.Parse;
 import com.parse.ParseCloud;
 import com.parse.ParseException;
@@ -38,6 +43,7 @@ import com.parse.ParseObject;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -421,6 +427,9 @@ public class GPSService extends Service {
         ParseObject.registerSubclass(AirSession.class);
         Parse.initialize(this, AirApplication.PARSE_APPLICATION_ID, AirApplication.PARSE_CLIENT_KEY);
 
+        // initialize DB
+        HelperFactory.setHelper(this);
+
         // create NotificationManager
         mBuilder = setupNotificationBuilder();
         // create notification
@@ -659,9 +668,24 @@ public class GPSService extends Service {
 
         private long lastSuccessTime;
         private AirSession session = null;
+        private AirSessionEntity sessionEntity = null;
+        private RuntimeExceptionDao<DataPointEntity, Long> dataPointDao = HelperFactory.getHelper()
+                .getRuntimeExceptionDao(DataPointEntity.class);
+        private RuntimeExceptionDao<AirSessionEntity, Long> airSessionDao = HelperFactory.getHelper()
+                .getRuntimeExceptionDao(AirSessionEntity.class);
+
 
         public void setSession(AirSession session) {
             this.session = session;
+
+            if (session != null) {
+                sessionEntity = SyncEntity.fromParseObject(session, AirSessionEntity.class);
+                try {
+                    airSessionDao.create(sessionEntity);
+                } catch (Exception ex) {
+                    Log.w(TAG, "setSession() - failed to persist AirSessionEntity", ex);
+                }
+            }
         }
 
         @Override
@@ -672,13 +696,21 @@ public class GPSService extends Service {
                 // todo: we must do something about portion if it is not empty!
 
                 session.setEndDate(getLastItemTime());
+                sessionEntity.setEndDate(getLastItemTime());
+                airSessionDao.update(sessionEntity);
 
                 try {
                     session.save();
+                    if (portion.isEmpty()) {
+                        sessionEntity.setSyncDate(session.getUpdatedAt());
+                    }
                 } catch (ParseException ex) {
                     Log.w(TAG, "workerThread.onStop() -> failed to save session", ex);
                     session.saveEventually();
+                    sessionEntity.setSyncDate(new Date());
                 }
+
+                airSessionDao.update(sessionEntity);
 
                 // notify listeners
                 synchronized (listeners) {
@@ -708,6 +740,31 @@ public class GPSService extends Service {
                         lastSuccessTime = time;
                     }
                 }
+            }
+        }
+
+        @Override
+        public void put(DataPoint e) {
+            super.put(e);
+            if (sessionEntity != null) {
+                DataPointEntity entity = new DataPointEntity();
+                entity.setT(e.getT());
+                entity.setHR(e.getHR());
+                entity.setAccuracy(e.getAcc());
+                entity.setAltitude(e.getAlt());
+                entity.setBearing(e.getBea());
+                entity.setLatitude(e.getLat());
+                entity.setLongitude(e.getLon());
+                entity.setSessionId(sessionEntity.getId());
+                entity.setSyncSessionId(sessionEntity.getSyncId());
+                entity.setStress(e.getStress());
+                entity.setVelocity(e.getVel());
+                entity.setCreationDate(new Date(e.getT()));
+                entity.setSyncDate(entity.getCreationDate());
+                RuntimeExceptionDao<DataPointEntity, Long> dataPointDao = HelperFactory.getHelper().getRuntimeExceptionDao(DataPointEntity.class);
+                dataPointDao.create(entity);
+
+                sessionEntity.setSyncDate(entity.getSyncDate());
             }
         }
 
@@ -752,6 +809,7 @@ public class GPSService extends Service {
             }
 
             try {
+                // send to parse
                 ParseCloud.callFunction("saveNewPoints", params);
             } catch (ParseException ex) {
                 Log.w(TAG, "processItems() -> saveNewPoints() cloud function call failed", ex);
