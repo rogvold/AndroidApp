@@ -2,6 +2,7 @@ package com.cardiomood.android.air.db.entity;
 
 import com.cardiomood.android.air.db.annotations.ParseClass;
 import com.cardiomood.android.air.db.annotations.ParseField;
+import com.cardiomood.android.air.db.tools.ParseValueConverter;
 import com.cardiomood.android.air.tools.ReflectionUtils;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
@@ -26,6 +27,10 @@ public abstract class SyncEntity {
 
     @DatabaseField(columnName = "creation_timestamp", dataType = DataType.DATE_LONG)
     private Date creationDate;
+
+    @DatabaseField(columnName = "deleted", dataType = DataType.BOOLEAN)
+    @ParseField(name = "deleted")
+    private boolean deleted;
 
     public Long getId() {
         return id;
@@ -59,27 +64,49 @@ public abstract class SyncEntity {
         this.creationDate = creationDate;
     }
 
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
+
     public static <T extends SyncEntity> void fromParseObject(final ParseObject parseObject, final T entity) {
         try {
+            // extract value converter
+            Class<? extends SyncEntity> entityClass = entity.getClass();
+            ParseClass classAnnotation = entityClass.getAnnotation(ParseClass.class);
+            // TODO: converters must be cached!
+            final ParseValueConverter converter = classAnnotation.valueConverterClass().newInstance();
+
             ReflectionUtils.doWithFields(
-                    entity.getClass(),
+                    entityClass,
                     new ReflectionUtils.FieldCallback() {
                         @Override
                         public void doWith(Field field) throws IllegalArgumentException, IllegalAccessException {
-                            ParseField a = field.getAnnotation(ParseField.class);
-                            if (a == null)
+                            // extract Parse field name
+                            ParseField fieldAnnotation = field.getAnnotation(ParseField.class);
+                            if (fieldAnnotation == null)
                                 return;
                             String parseFieldName = field.getName();
-                            if (a.name() != null && !a.name().isEmpty()) {
-                                parseFieldName = a.name();
+                            if (fieldAnnotation.name() != null && !fieldAnnotation.name().isEmpty()) {
+                                parseFieldName = fieldAnnotation.name();
                             }
 
-                            boolean accessible = field.isAccessible();
-                            field.setAccessible(true);
-                            Object remoteValue = parseObject.get(parseFieldName);
-                            Class localValueType = field.getType();
-                            field.set(entity, convertValue(remoteValue, localValueType));
-                            field.setAccessible(accessible);
+                            try {
+                                boolean accessible = field.isAccessible();
+                                field.setAccessible(true);
+                                Object remoteValue = parseObject.get(parseFieldName);
+                                Class localValueType = field.getType();
+
+                                field.set(entity, converter.convertValue(remoteValue, localValueType));
+
+                                // restore accessible flag
+                                field.setAccessible(accessible);
+                            } catch (Exception ex) {
+                                // TODO: add log message here
+                            }
                         }
                     }
             );
@@ -100,88 +127,6 @@ public abstract class SyncEntity {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
-    }
-
-    private static <T> T convertValue(Object value, Class<T> targetClass) {
-        if (targetClass.isInstance(value)) {
-            // no need to convert types
-            return (T) value;
-        }
-
-        // special handling for null value
-        if (value == null) {
-            if (targetClass.isPrimitive()) {
-                // return 0 or FALSE or null
-                if (char.class.equals(targetClass))
-                    return (T) new Character('\u0000');
-                if (boolean.class.equals(targetClass))
-                    return (T) Boolean.FALSE;
-                if (byte.class.equals(targetClass))
-                    return (T) Byte.valueOf((byte) 0);
-                if (short.class.equals(targetClass))
-                    return (T) Short.valueOf((short) 0);
-                if (int.class.equals(targetClass))
-                    return (T) Integer.valueOf(0);
-                if (long.class.equals(targetClass))
-                    return (T) Long.valueOf(0L);
-                if (float.class.equals(targetClass))
-                    return (T) Float.valueOf(0.0f);
-                if (double.class.equals(targetClass))
-                    return (T) Double.valueOf(0.0d);
-            }
-
-            // just return null
-            return null;
-        }
-
-        // ok, value is not null and requires conversion
-        if (String.class.equals(targetClass)) {
-            // numbers will be converted to String too! :)
-            return (T) value.toString();
-        }
-
-        if (Date.class.equals(targetClass)) {
-            if (Number.class.isInstance(value)) {
-                return (T) new Date(((Number) value).longValue());
-            }
-        }
-
-        if (Long.class.equals(targetClass)) {
-            if (Date.class.isInstance(value)) {
-                return (T) Long.valueOf((Long) value);
-            }
-        }
-
-        // target class is not String
-        if (Boolean.class.equals(targetClass)) {
-            return (T) Boolean.valueOf(value.toString());
-        }
-        if (Character.class.equals(targetClass)) {
-            if (value.toString().length() == 1) {
-                return (T) Character.valueOf(value.toString().charAt(0));
-            }
-        }
-        if (Byte.class.equals(targetClass)) {
-            return (T) Byte.valueOf(value.toString());
-        }
-        if (Short.class.equals(targetClass)) {
-            return (T) Short.valueOf(value.toString());
-        }
-        if (Integer.class.equals(targetClass)) {
-            return (T) Integer.valueOf(value.toString());
-        }
-        if (Long.class.equals(targetClass)) {
-            return (T) Long.valueOf(value.toString());
-        }
-        if (Float.class.equals(targetClass)) {
-            return (T) Float.valueOf(value.toString());
-        }
-        if (Double.class.equals(targetClass)) {
-            return (T) Double.valueOf(value.toString());
-        }
-
-        // just try to cast (this probably won't work)
-        return (T) value;
     }
 
     public static <T extends SyncEntity, P extends ParseObject> void toParseObject(final T entity, final P parseObject) {

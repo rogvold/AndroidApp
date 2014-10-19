@@ -4,16 +4,19 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.cardiomood.android.air.data.DataPoint;
 import com.cardiomood.android.air.db.entity.AirSessionEntity;
 import com.cardiomood.android.air.db.entity.AircraftEntity;
 import com.cardiomood.android.air.db.entity.DataPointEntity;
 import com.cardiomood.android.air.db.entity.SyncEntity;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
+import com.j256.ormlite.misc.TransactionManager;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 
 import java.sql.SQLException;
+import java.util.concurrent.Callable;
 
 /**
  * Created by danon on 27.05.2014.
@@ -29,8 +32,9 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     private PreferenceHelper pHelper;
     private SQLiteDatabase database;
 
-    private AircraftDAO aircraftDao = null;
-    private AirSessionDAO airSessionDao = null;
+    private volatile AircraftDAO aircraftDao = null;
+    private volatile AirSessionDAO airSessionDao = null;
+    private volatile DataPointDAO dataPointDao = null;
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -77,21 +81,27 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
         return mContext;
     }
 
-    public AircraftDAO getAircraftDao() throws SQLException {
+    public synchronized AircraftDAO getAircraftDao() throws SQLException {
         if (aircraftDao == null) {
             aircraftDao = new AircraftDAO(getConnectionSource(), AircraftEntity.class);
+            aircraftDao.setObjectCache(true);
         }
-
         return aircraftDao;
-
     }
 
-    public AirSessionDAO getAirSessionDao() throws SQLException {
+    public synchronized AirSessionDAO getAirSessionDao() throws SQLException {
         if (airSessionDao == null) {
             airSessionDao = new AirSessionDAO(getConnectionSource(), AirSessionEntity.class);
+            airSessionDao.setObjectCache(true);
         }
-
         return airSessionDao;
+    }
+
+    public synchronized DataPointDAO getDataPointDao() throws SQLException {
+        if (dataPointDao == null) {
+            dataPointDao = new DataPointDAO(getConnectionSource(), DataPointEntity.class);
+        }
+        return dataPointDao;
     }
 
     public <T extends SyncEntity> SyncDAO<T, Long> getDaoForClass(Class<T> clazz) throws SQLException {
@@ -99,9 +109,16 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
             return (SyncDAO<T, Long>) getAircraftDao();
         if (AirSessionEntity.class.equals(clazz))
             return (SyncDAO<T, Long>) getAirSessionDao();
+        if (DataPoint.class.equals(clazz)) {
+            return (SyncDAO<T, Long>) getDataPointDao();
+        }
 
         // not supported class!!!
         throw new IllegalArgumentException("Class " + clazz + " is not supported!");
+    }
+
+    public synchronized void callInTransaction(Callable<Void> callable) throws SQLException {
+        TransactionManager.callInTransaction(getConnectionSource(), callable);
     }
 
 }

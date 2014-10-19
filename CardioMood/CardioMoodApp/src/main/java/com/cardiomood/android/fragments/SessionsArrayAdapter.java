@@ -29,7 +29,7 @@ import java.util.Map;
  */
 public class SessionsArrayAdapter extends ArrayAdapter<ContinuousSessionEntity> {
 
-    private static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.MEDIUM);;
+    private static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.MEDIUM);
     private int selectedPosition = -1;
     private DatabaseHelper databaseHelper;
     private Map<Long, Long> cache = Collections.synchronizedMap(new HashMap<Long, Long>());

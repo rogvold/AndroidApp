@@ -10,7 +10,6 @@ import com.parse.ParseObject;
 public class AirSession extends ParseObject {
 
     public String getAircraftId() {
-
         return getString("aircraftId");
     }
 
@@ -33,5 +32,4 @@ public class AirSession extends ParseObject {
     public void setEndDate(Long endDate) {
         put("endDate", endDate);
     }
-
 }

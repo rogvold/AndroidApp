@@ -831,6 +831,12 @@ public class TrackingActivity extends Activity {
             finishingProgressDialog.setCancelable(false);
             finishingProgressDialog.setMessage(getText(R.string.waiting_for_service_to_finish));
             finishingProgressDialog.show();
+            finishingProgressDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                @Override
+                public void onDismiss(DialogInterface dialog) {
+                    finishingProgressDialog = null;
+                }
+            });
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -1368,6 +1374,9 @@ public class TrackingActivity extends Activity {
                     try {
                         if (!TrackingActivity.this.isFinishing()) {
                             mStopButton.setEnabled(false);
+                            if (finishingProgressDialog != null && finishingProgressDialog.isShowing()) {
+                                finishingProgressDialog.dismiss();
+                            }
                             startActivity(new Intent(TrackingActivity.this, LoginActivity.class));
                             TrackingActivity.this.finish();
                         }

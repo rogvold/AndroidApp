@@ -17,11 +17,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cardiomood.android.air.db.AirSessionDAO;
+import com.cardiomood.android.air.db.AircraftDAO;
 import com.cardiomood.android.air.db.HelperFactory;
 import com.cardiomood.android.air.db.entity.AirSessionEntity;
+import com.cardiomood.android.air.db.entity.AircraftEntity;
 import com.parse.ParseUser;
 
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -31,10 +35,13 @@ import bolts.Task;
 
 public class HistoryActivity extends Activity implements AdapterView.OnItemClickListener {
 
+    private static final String TAG = HistoryActivity.class.getSimpleName();
+    private static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.MEDIUM);
+
     private ListView airSessionsListView;
 
-    private ArrayAdapter<AirSessionEntity> sessionArrayAdapter;
-    private List<AirSessionEntity> airSessions;
+    private ArrayAdapter<AirSessionInfo> sessionArrayAdapter;
+    private List<AirSessionInfo> airSessions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,12 +52,12 @@ public class HistoryActivity extends Activity implements AdapterView.OnItemClick
         airSessionsListView.setOnItemClickListener(this);
 
         // initialize planes list
-        airSessions = new ArrayList<AirSessionEntity>();
+        airSessions = new ArrayList<AirSessionInfo>();
         sessionArrayAdapter = new AirSessionListArrayAdapter(this, airSessions);
         airSessionsListView.setAdapter(sessionArrayAdapter);
+
         refreshSessionList();
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -70,9 +77,9 @@ public class HistoryActivity extends Activity implements AdapterView.OnItemClick
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        AirSessionEntity entity = sessionArrayAdapter.getItem(position);
+        AirSessionInfo info = sessionArrayAdapter.getItem(position);
         Intent intent = new Intent(this, DebriefingActivity.class);
-        intent.putExtra(DebriefingActivity.EXTRA_SESSION_ID, entity.getId());
+        intent.putExtra(DebriefingActivity.EXTRA_SESSION_ID, info.syncId);
         startActivity(intent);
     }
 
@@ -84,28 +91,73 @@ public class HistoryActivity extends Activity implements AdapterView.OnItemClick
                 return dao.queryBuilder()
                         .orderBy("creation_timestamp", false)
                         .where().eq("sync_user_id", ParseUser.getCurrentUser().getObjectId())
+                        .and().ne("deleted", true)
                         .query();
             }
-        }).continueWith(new Continuation<List<AirSessionEntity>, Object>() {
+        }).continueWithTask(new Continuation<List<AirSessionEntity>, Task<List<AirSessionInfo>>>() {
             @Override
-            public Object then(Task<List<AirSessionEntity>> listTask) throws Exception {
-                if (listTask.isFaulted()) {
+            public Task<List<AirSessionInfo>> then(Task<List<AirSessionEntity>> task) throws Exception {
+                if (task.isFaulted()) {
                     Toast.makeText(HistoryActivity.this, "Task failed with exception: "
-                            + listTask.getError().getMessage(), Toast.LENGTH_SHORT).show();
-                } else if (listTask.isCompleted()) {
+                            + task.getError().getMessage(), Toast.LENGTH_SHORT).show();
+                } else if (task.isCompleted()) {
+                    return extractSessionInfoAsync(task.getResult());
+                }
+                return null;
+            }
+        }).continueWith(new Continuation<List<AirSessionInfo>, Object>() {
+            @Override
+            public Object then(Task<List<AirSessionInfo>> task) throws Exception {
+                if (HistoryActivity.this.isFinishing()) {
+                    return null;
+                }
+
+                if (task.isFaulted()) {
+                    Toast.makeText(HistoryActivity.this, "Task failed with exception: "
+                            + task.getError().getMessage(), Toast.LENGTH_SHORT).show();
+                } else if (task.isCompleted()) {
                     airSessions.clear();
-                    airSessions.addAll(listTask.getResult());
+                    airSessions.addAll(task.getResult());
                     sessionArrayAdapter.notifyDataSetChanged();
                 }
                 return null;
             }
+        }, Task.UI_THREAD_EXECUTOR);
+    }
+
+    public Task<List<AirSessionInfo>> extractSessionInfoAsync(final List<AirSessionEntity> sessions) {
+        return Task.callInBackground(new Callable<List<AirSessionInfo>>() {
+            @Override
+            public List<AirSessionInfo> call() throws Exception {
+                AircraftDAO aircraftDAO = HelperFactory.getHelper().getAircraftDao();
+                List<AirSessionInfo> result = new ArrayList<AirSessionInfo>(sessions.size());
+                for (AirSessionEntity entity: sessions) {
+                    AirSessionInfo info = new AirSessionInfo();
+                    info.id = entity.getId();
+                    info.creationDate = entity.getCreationDate();
+                    info.lastUpdated = entity.getSyncDate();
+                    info.name = entity.getName();
+                    info.syncId = entity.getSyncId();
+                    info.planeSyncId = entity.getSyncAircraftId();
+                    AircraftEntity aircraft = aircraftDAO.findBySyncId(info.planeSyncId);
+                    if (aircraft != null) {
+                        info.planeId = aircraft.getId();
+                        info.planeName = aircraft.getName();
+                        info.planeCallName = aircraft.getCallName();
+                        info.planeNumber = aircraft.getAircraftId();
+                        info.planeType = aircraft.getAircraftType();
+                        result.add(info);
+                    }
+                }
+                return result;
+            }
         });
     }
 
-    public class AirSessionListArrayAdapter extends ArrayAdapter<AirSessionEntity> {
+    public class AirSessionListArrayAdapter extends ArrayAdapter<AirSessionInfo> {
 
-        public AirSessionListArrayAdapter(Context context, List<AirSessionEntity> src) {
-            super(context, android.R.layout.simple_list_item_2, src);
+        public AirSessionListArrayAdapter(Context context, List<AirSessionInfo> src) {
+            super(context, R.layout.two_lines_layout, src);
         }
 
         @Override
@@ -113,25 +165,38 @@ public class HistoryActivity extends Activity implements AdapterView.OnItemClick
             return getCustomView(position, convertView, parent);
         }
 
-        @Override
-        public View getDropDownView(int position, View convertView, ViewGroup parent) {
-            return getCustomView(position, convertView, parent);
-        }
-
         private View getCustomView(int position, View convertView, ViewGroup parent) {
             LayoutInflater inflater = getLayoutInflater();
             View itemView = inflater.inflate(R.layout.two_lines_layout, parent, false);
             itemView.setBackgroundResource(R.drawable.list_selector_background);
-            AirSessionEntity entity = getItem(position);
+            AirSessionInfo info = getItem(position);
 
             TextView text1 = (TextView) itemView.findViewById(android.R.id.text1);
-            text1.setText("AirSession " + entity.getCreationDate().toString());
             text1.setTypeface(null, Typeface.NORMAL);
+            if (info.name == null || info.name.trim().isEmpty()) {
+                text1.setText(info.planeName + " " + info.planeNumber);
+            } else {
+                text1.setText(info.name.trim());
+            }
 
             TextView text2 = (TextView) itemView.findViewById(android.R.id.text2);
-            text2.setText("<some extra info>");
+            text2.setText(DATE_FORMAT.format(info.creationDate));
 
             return itemView;
         }
+    }
+
+    public static class AirSessionInfo {
+        long id;
+        String syncId;
+        Date creationDate;
+        Date lastUpdated;
+        String name;
+        long planeId;
+        String planeSyncId;
+        String planeType;
+        String planeName;
+        String planeCallName;
+        String planeNumber;
     }
 }

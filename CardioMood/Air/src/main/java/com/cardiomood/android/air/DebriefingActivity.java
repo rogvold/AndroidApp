@@ -15,7 +15,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.j256.ormlite.dao.RuntimeExceptionDao;
 
@@ -32,7 +31,7 @@ public class DebriefingActivity extends Activity {
 
     private MapFragment mapFragment;
     private GoogleMap map;
-    private long sessionId;
+    private String sessionSyncId;
 
     private volatile AirSessionEntity sessionEntity;
 
@@ -41,9 +40,9 @@ public class DebriefingActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_debriefing);
 
-        sessionId = getIntent().getLongExtra(EXTRA_SESSION_ID, -1L);
-        if (sessionId < 0) {
-            Toast.makeText(this, "Provide a valid sessionId", Toast.LENGTH_SHORT).show();
+        sessionSyncId = getIntent().getStringExtra(EXTRA_SESSION_ID);
+        if (sessionSyncId == null) {
+            Toast.makeText(this, "Provide a valid sessionSyncId", Toast.LENGTH_SHORT).show();
             finish();
         }
 
@@ -77,14 +76,14 @@ public class DebriefingActivity extends Activity {
             @Override
             public List<DataPointEntity> call() throws Exception {
                 AirSessionDAO sessionDao = HelperFactory.getHelper().getAirSessionDao();
-                AirSessionEntity sessionEntity = sessionDao.queryForId(sessionId);
+                AirSessionEntity sessionEntity = sessionDao.findBySyncId(sessionSyncId);
                 DebriefingActivity.this.sessionEntity = sessionEntity;
 
                 if (sessionEntity != null) {
                     RuntimeExceptionDao<DataPointEntity, Long> dao = HelperFactory.getHelper().getRuntimeExceptionDao(DataPointEntity.class);
                     return dao.queryBuilder()
                             .orderBy("creation_timestamp", true)
-                            .where().eq("session_id", sessionId)
+                            .where().eq("sync_session_id", sessionSyncId)
                             .query();
                 }
                 return null;
@@ -97,36 +96,36 @@ public class DebriefingActivity extends Activity {
                     Toast.makeText(DebriefingActivity.this, "Failed to load data due to exception!\n"+listTask.getError().getMessage(), Toast.LENGTH_SHORT).show();
                     finish();
                 } else if (listTask.isCompleted()) {
-                     drawRoute(listTask.getResult());
+                    List<DataPointEntity> points = listTask.getResult();
+                    PolylineOptions opt = new PolylineOptions()
+                            .width(3)
+                            .color(Color.BLUE);
+                    for (int i = 1; i < points.size(); i++) {
+                        opt.add(
+                                new LatLng(points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude()),
+                                new LatLng(points.get(i).getLatitude(), points.get(i).getLongitude())
+                        );
+                    }
+                    drawRoute(
+                            opt,
+                            new LatLng(
+                            points.get(points.size() - 1).getLatitude(),
+                            points.get(points.size() - 1).getLongitude()
+                        )
+                    );
                 }
                 return null;
             }
         });
     }
 
-    private void drawRoute(final List<DataPointEntity> points) {
+    private void drawRoute(final PolylineOptions opt, final LatLng zoomPoint) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 if (map != null) {
-                    for (int i = 1; i < points.size(); i++) {
-                        Polyline line = map.addPolyline(
-                                new PolylineOptions()
-                                        .add(
-                                                new LatLng(points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude()),
-                                                new LatLng(points.get(i).getLatitude(), points.get(i).getLongitude())
-                                        )
-                                        .width(5)
-                                        .color(Color.BLUE)
-                        );
-                    }
-                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(
-                            new LatLng(
-                                    points.get(points.size() - 1).getLatitude(),
-                                    points.get(points.size() - 1).getLongitude()
-                            ),
-                            13
-                    ));
+                    map.addPolyline(opt);
+                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(zoomPoint, 13));
                 }
             }
         });

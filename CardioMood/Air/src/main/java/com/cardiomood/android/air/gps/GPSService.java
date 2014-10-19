@@ -24,7 +24,6 @@ import com.cardiomood.android.air.R;
 import com.cardiomood.android.air.TrackingActivity;
 import com.cardiomood.android.air.data.AirSession;
 import com.cardiomood.android.air.data.Aircraft;
-import com.cardiomood.android.air.data.DataPoint;
 import com.cardiomood.android.air.db.HelperFactory;
 import com.cardiomood.android.air.db.entity.AirSessionEntity;
 import com.cardiomood.android.air.db.entity.DataPointEntity;
@@ -96,8 +95,8 @@ public class GPSService extends Service {
             double rr[] = window.getIntervals().getElements();
             double stressIndex = HeartRateUtils.getSI(rr);
             lastStress = stressIndex;
-            if (isRunning()&& workerThread != null && lastLocation != null) {
-                DataPoint dp = getDataPoint(lastLocation);
+            if (isRunning() && workerThread != null && lastLocation != null) {
+                DataPointEntity dp = getDataPoint(lastLocation);
                 dp.setT(System.currentTimeMillis());
                 workerThread.put(dp);
             }
@@ -121,7 +120,7 @@ public class GPSService extends Service {
             }
             if (isRunning()&& workerThread != null) {
                 if (lastLocation != null) {
-                    DataPoint dp = getDataPoint(lastLocation);
+                    DataPointEntity dp = getDataPoint(lastLocation);
                     dp.setT(System.currentTimeMillis());
                     workerThread.put(dp);
                 }
@@ -607,15 +606,15 @@ public class GPSService extends Service {
         return gpsMonitor;
     }
 
-    private DataPoint getDataPoint(Location loc) {
-        DataPoint dp = new DataPoint();
+    private DataPointEntity getDataPoint(Location loc) {
+        DataPointEntity dp = new DataPointEntity();
         if (loc != null) {
-            dp.setLat(loc.getLatitude());
-            dp.setLon(loc.getLongitude());
-            dp.setAlt(loc.hasAltitude() ? loc.getAltitude() : null);
-            dp.setAcc(loc.hasAccuracy() ? loc.getAccuracy() : null);
-            dp.setBea(loc.hasBearing() ? loc.getBearing() : null);
-            dp.setVel(loc.hasSpeed() ? loc.getSpeed() : null);
+            dp.setLatitude(loc.getLatitude());
+            dp.setLongitude(loc.getLongitude());
+            dp.setAltitude(loc.hasAltitude() ? loc.getAltitude() : null);
+            dp.setAccuracy(loc.hasAccuracy() ? loc.getAccuracy() : null);
+            dp.setBearing(loc.hasBearing() ? loc.getBearing() : null);
+            dp.setVelocity(loc.hasSpeed() ? loc.getSpeed() : null);
             dp.setT(loc.getTime());
         }
         dp.setHR(hrMonitor.getConnectionStatus() == LeHRMonitor.CONNECTED_STATUS ? hrMonitor.getLastBPM() : null);
@@ -659,10 +658,10 @@ public class GPSService extends Service {
     }
 
 
-    private class DataCollectorThread extends WorkerThread<DataPoint> {
+    private class DataCollectorThread extends WorkerThread<DataPointEntity> {
 
         private final Gson GSON = new Gson();
-        private final List<DataPoint> portion = new LinkedList<DataPoint>();
+        private final List<DataPointEntity> portion = new LinkedList<DataPointEntity>();
 
         private final long INTERVAL = 2000L;
 
@@ -693,7 +692,7 @@ public class GPSService extends Service {
             if (session != null) {
 
                 // while (!processItems(portion));
-                // todo: we must do something about portion if it is not empty!
+                // todo: we must do something about __portion__ if it is not empty!
 
                 session.setEndDate(getLastItemTime());
                 sessionEntity.setEndDate(getLastItemTime());
@@ -701,9 +700,9 @@ public class GPSService extends Service {
 
                 try {
                     session.save();
-                    if (portion.isEmpty()) {
+                    //if (portion.isEmpty()) {
                         sessionEntity.setSyncDate(session.getUpdatedAt());
-                    }
+                    //}
                 } catch (ParseException ex) {
                     Log.w(TAG, "workerThread.onStop() -> failed to save session", ex);
                     session.saveEventually();
@@ -744,61 +743,50 @@ public class GPSService extends Service {
         }
 
         @Override
-        public void put(DataPoint e) {
+        public void put(DataPointEntity e) {
             super.put(e);
-            if (sessionEntity != null) {
-                DataPointEntity entity = new DataPointEntity();
-                entity.setT(e.getT());
-                entity.setHR(e.getHR());
-                entity.setAccuracy(e.getAcc());
-                entity.setAltitude(e.getAlt());
-                entity.setBearing(e.getBea());
-                entity.setLatitude(e.getLat());
-                entity.setLongitude(e.getLon());
-                entity.setSessionId(sessionEntity.getId());
-                entity.setSyncSessionId(sessionEntity.getSyncId());
-                entity.setStress(e.getStress());
-                entity.setVelocity(e.getVel());
-                entity.setCreationDate(new Date(e.getT()));
-                entity.setSyncDate(entity.getCreationDate());
-                RuntimeExceptionDao<DataPointEntity, Long> dataPointDao = HelperFactory.getHelper().getRuntimeExceptionDao(DataPointEntity.class);
-                dataPointDao.create(entity);
-
-                sessionEntity.setSyncDate(entity.getSyncDate());
-            }
         }
 
         @Override
-        public void processItem(DataPoint item) {
+        public void processItem(DataPointEntity item) {
             portion.add(item);
+            if (sessionEntity != null) {
+                item.setSessionId(sessionEntity.getId());
+                item.setSyncSessionId(sessionEntity.getSyncId());
+                item.setCreationDate(new Date(item.getT()));
+                item.setSyncDate(item.getCreationDate());
+                dataPointDao.create(item);
+
+                sessionEntity.setSyncDate(item.getSyncDate());
+            }
         }
 
-        private List<DataPoint> getFirstNElements(List<DataPoint> items, int n) {
-            List<DataPoint> chunk = new ArrayList<DataPoint>(n);
-            Iterator<DataPoint> it = items.iterator();
+        private <T> List<T> getFirstNElements(List<T> items, int n) {
+            List<T> chunk = new ArrayList<T>(n);
+            Iterator<T> it = items.iterator();
             for (int count=0; it.hasNext() && count<n; count++) {
                 chunk.add(it.next());
             }
             return chunk;
         }
 
-        private void removeFirstNElements(List<DataPoint> items, int n) {
+        private <T> void removeFirstNElements(List<T> items, int n) {
             if (items.size() <= n) {
                 items.clear();
                 return;
             }
-            Iterator<DataPoint> it = items.iterator();
+            Iterator<T> it = items.iterator();
             for (int count=0; it.hasNext() && count<n; count++) {
                 it.next();
                 it.remove();
             }
         }
 
-        private boolean processItems(List<DataPoint> items) {
+        private boolean processItems(List<DataPointEntity> items) {
             if (session == null || items.isEmpty())
                 return true;
 
-            List<DataPoint> chunk = getFirstNElements(items, 50);
+            List<DataPointEntity> chunk = getFirstNElements(items, 50);
             Map<String, Object> params = new HashMap<String, Object>();
             try {
                 params.put("sessionId", session.getObjectId());
@@ -811,6 +799,10 @@ public class GPSService extends Service {
             try {
                 // send to parse
                 ParseCloud.callFunction("saveNewPoints", params);
+                for (DataPointEntity dp: chunk) {
+                    dp.setSync(true);
+                    dataPointDao.update(dp);
+                }
             } catch (ParseException ex) {
                 Log.w(TAG, "processItems() -> saveNewPoints() cloud function call failed", ex);
                 return false;

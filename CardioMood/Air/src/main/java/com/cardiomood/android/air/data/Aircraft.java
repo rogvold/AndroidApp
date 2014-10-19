@@ -1,14 +1,13 @@
 package com.cardiomood.android.air.data;
 
-import com.cardiomood.android.air.db.entity.AircraftEntity;
-import com.cardiomood.android.air.db.entity.SyncEntity;
 import com.parse.ParseClassName;
+import com.parse.ParseObject;
 
 /**
  * Created by danon on 14.08.2014.
  */
 @ParseClassName("Aircraft")
-public class Aircraft extends SynchronizableParseObject {
+public class Aircraft extends ParseObject {
 
     public String getName() {
         return getString("name");
@@ -26,8 +25,8 @@ public class Aircraft extends SynchronizableParseObject {
         return getString("callName");
     }
 
-    @Override
-    public Class<? extends SyncEntity> getEntityClass() {
-        return AircraftEntity.class;
+    public boolean isDeleted() {
+        return getBoolean("deleted");
     }
+
 }

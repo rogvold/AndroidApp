@@ -5,8 +5,13 @@ import android.app.Application;
 import com.cardiomood.android.air.data.AirSession;
 import com.cardiomood.android.air.data.Aircraft;
 import com.cardiomood.android.air.db.HelperFactory;
+import com.cardiomood.android.air.db.SyncEngine;
+import com.cardiomood.android.air.tools.Constants;
+import com.cardiomood.android.tools.PreferenceHelper;
 import com.parse.Parse;
 import com.parse.ParseObject;
+
+import java.util.Date;
 
 /**
  * Created by danon on 13.08.2014.
@@ -28,6 +33,11 @@ public class AirApplication extends Application {
 
         // prepare database
         HelperFactory.setHelper(getApplicationContext());
+
+        // update SyncEngine
+        PreferenceHelper preferenceHelper = new PreferenceHelper(this, true);
+        long lastSyncDate = preferenceHelper.getLong(Constants.CONFIG_LAST_SYNC_TIMESTAMP, 0L);
+        SyncEngine.getInstance().setLastSyncDate(new Date(lastSyncDate));
     }
 
     @Override
