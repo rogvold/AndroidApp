@@ -569,6 +569,10 @@ public class NewMeasurementFragment extends Fragment {
         msg.getData().setClassLoader(CardioDataPackage.class.getClassLoader());
         CardioDataPackage data = msg.getData().getParcelable("data");
         heartRateView.setText(String.valueOf(data.getBpm()));
+
+        if (data.getBpm() == 0) {
+            CommonTools.vibrate(getActivity(), 1000);
+        }
     }
 
     private void onSessionStarted(Message msg) {
@@ -595,6 +599,12 @@ public class NewMeasurementFragment extends Fragment {
         hrmState = newStatus;
         if (getActivity() == null)
             return;
+
+        if (newStatus != LeHRMonitor.CONNECTED_STATUS) {
+            // disconnected
+            if (mCurrentSessionId > 0L)
+                onSessionFinished(null);
+        }
 
         if (oldStatus == LeHRMonitor.CONNECTING_STATUS &&
                 (newStatus == LeHRMonitor.READY_STATUS || newStatus == LeHRMonitor.DISCONNECTING_STATUS)) {
@@ -661,12 +671,6 @@ public class NewMeasurementFragment extends Fragment {
             startSessionButton.setEnabled(false);
             stopSessionButton.setVisibility(View.GONE);
             return;
-        }
-
-        if (oldStatus == LeHRMonitor.CONNECTED_STATUS || newStatus != LeHRMonitor.CONNECTED_STATUS) {
-            // disconnected
-            if (mCurrentSessionId > 0L)
-                onSessionFinished(null);
         }
 
         hrmStatusView.setText(R.string.hrm_not_connected);

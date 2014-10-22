@@ -1,15 +1,23 @@
 package com.cardiomood.android.mipt.service;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.app.TaskStackBuilder;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.cardiomood.android.mipt.MainActivity;
+import com.cardiomood.android.mipt.R;
 import com.cardiomood.android.mipt.db.CardioItemDAO;
 import com.cardiomood.android.mipt.db.CardioSessionDAO;
 import com.cardiomood.android.mipt.db.HelperFactory;
@@ -27,6 +35,8 @@ import java.util.concurrent.Callable;
 public class CardioMonitoringService extends Service {
 
     private static final String TAG = CardioMonitoringService.class.getSimpleName();
+
+    private static final int SERVICE_NOTIFICATION_ID = 4343;
 
     /* Commands to the service */
     public static final int MSG_UNREGISTER_CLIENT = 0;
@@ -59,6 +69,8 @@ public class CardioMonitoringService extends Service {
     private LeHRMonitor hrMonitor;
     private String mDeviceAddress;
     private List<Messenger> mClients;
+    private NotificationManager mNotificationManager;
+    private NotificationCompat.Builder mNotificationBuilder;
 
     private volatile CardioSessionEntity mCardioSession = null;
     private WorkerThread<CardioDataPackage> mWorkerThread;
@@ -115,16 +127,27 @@ public class CardioMonitoringService extends Service {
         }
 
         @Override
-        public void onConnectionStatusChanged(int oldStatus, int newStatus) {
-            for (Messenger m: mClients) {
-                try {
-                    Message msg = Message.obtain(null, MSG_CONNECTION_STATUS_CHANGED, oldStatus, newStatus);
-                    msg.getData().putString("deviceAddress", mDeviceAddress);
-                    m.send(msg);
-                } catch (RemoteException ex) {
-                    Log.w(TAG, "onConnectionStatusChanged() failed", ex);
+        public void onConnectionStatusChanged(final int oldStatus, final int newStatus) {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (newStatus != LeHRMonitor.CONNECTED_STATUS) {
+                        if (mCardioSession != null && mWorkerThread != null) {
+                            handleEndSessionRequest(Message.obtain(null, MSG_END_SESSION));
+                        }
+                    }
+                    for (Messenger m: mClients) {
+                        try {
+                            Message msg = Message.obtain(null, MSG_CONNECTION_STATUS_CHANGED, oldStatus, newStatus);
+                            msg.getData().putString("deviceAddress", mDeviceAddress);
+                            m.send(msg);
+                        } catch (RemoteException ex) {
+                            Log.w(TAG, "onConnectionStatusChanged() failed", ex);
+                        }
+                    }
                 }
-            }
+            });
+
         }
 
         @Override
@@ -179,6 +202,13 @@ public class CardioMonitoringService extends Service {
         hrMonitor = null;
         mClients = new ArrayList<Messenger>();
 
+        // create NotificationManager
+        mNotificationBuilder = setupNotificationBuilder();
+        // create notification
+        mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+
         HelperFactory.setHelper(getApplicationContext());
     }
 
@@ -197,6 +227,41 @@ public class CardioMonitoringService extends Service {
 
         HelperFactory.releaseHelper();
         super.onDestroy();
+    }
+
+    private NotificationCompat.Builder setupNotificationBuilder() {
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.ic_launcher)
+                        .setContentTitle("MIPT Health is running")
+                        .setContentText("Click this to open the app")
+                        .setOngoing(true);
+
+        Intent resultIntent = new Intent(this, MainActivity.class);
+
+        PendingIntent resultPendingIntent = null;
+
+        if (Build.VERSION.SDK_INT >= 16) {
+            // The stack builder object will contain an artificial back stack for the
+            // started Activity.
+            // This ensures that navigating backward from the Activity leads out of
+            // your application to the Home screen.
+            TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+            // Adds the back stack for the Intent (but not the Intent itself)
+            stackBuilder.addParentStack(MainActivity.class);
+            // Adds the Intent that starts the Activity to the top of the stack
+            stackBuilder.addNextIntent(resultIntent);
+            resultPendingIntent =
+                    stackBuilder.getPendingIntent(
+                            0,
+                            PendingIntent.FLAG_UPDATE_CURRENT
+                    );
+        } else {
+            resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
+        }
+        mBuilder.setContentIntent(resultPendingIntent);
+
+        return mBuilder;
     }
 
     private void reloadMonitor() {
@@ -390,16 +455,23 @@ public class CardioMonitoringService extends Service {
     private void handleEndSessionRequest(Message msg) {
         try {
             try {
-                HelperFactory.getHelper().callInTransaction(new Callable<Void>() {
-                    @Override
-                    public Void call() throws Exception {
-                        CardioSessionDAO sessionDao = HelperFactory.getHelper().getCardioSessionDao();
-                        mCardioSession.setEndTimestamp(System.currentTimeMillis());
-                        mCardioSession.setSyncDate(new Date(mCardioSession.getEndTimestamp()));
-                        sessionDao.update(mCardioSession);
-                        return null;
+                if (mCardioSession != null) {
+                    HelperFactory.getHelper().callInTransaction(new Callable<Void>() {
+                        @Override
+                        public Void call() throws Exception {
+                            CardioSessionDAO sessionDao = HelperFactory.getHelper().getCardioSessionDao();
+                            mCardioSession.setEndTimestamp(System.currentTimeMillis());
+                            mCardioSession.setSyncDate(new Date(mCardioSession.getEndTimestamp()));
+                            sessionDao.update(mCardioSession);
+                            return null;
+                        }
+                    });
+
+                    // stop worker thread
+                    if (mWorkerThread != null) {
+                        mWorkerThread.finishWork();
                     }
-                });
+                }
 
                 // SUCCESS
                 if (msg.replyTo != null) {
@@ -409,8 +481,7 @@ public class CardioMonitoringService extends Service {
                     msg.replyTo.send(response);
                 }
 
-                // stop worker thread
-                mWorkerThread.finishWork();
+
             } catch (SQLException ex) {
                 if (msg.replyTo != null) {
                     Message response = Message.obtain(null, RESP_END_SESSION_RESULT, RESULT_FAIL, 0);
@@ -422,6 +493,22 @@ public class CardioMonitoringService extends Service {
             Log.d(TAG, "handleStartSessionRequest() failed", ex);
         }
     }
+
+    public void showNotification() {
+        if (mNotificationManager == null || mNotificationBuilder == null) {
+            // onCreate() wasn't invoked????
+            return;
+        }
+
+        if (mCardioSession != null) {
+            startForeground(SERVICE_NOTIFICATION_ID, mNotificationBuilder.build());
+        }
+    }
+
+    public void hideNotification() {
+        stopForeground(true);
+    }
+
 
     private class CardioDataCollector extends WorkerThread<CardioDataPackage> {
 
@@ -441,10 +528,24 @@ public class CardioMonitoringService extends Service {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    hideNotification();
                     mCardioSession = null;
                     disconnect();
                 }
             });
+        }
+
+        @Override
+        public void onStart() {
+            super.onStart();
+            if (cardioSession != null) {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        showNotification();
+                    }
+                });
+            }
         }
 
         @Override

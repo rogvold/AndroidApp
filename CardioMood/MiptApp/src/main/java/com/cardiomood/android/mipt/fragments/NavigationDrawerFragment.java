@@ -25,6 +25,7 @@ import android.widget.TextView;
 import com.cardiomood.android.mipt.R;
 import com.cardiomood.android.mipt.tools.Constants;
 import com.cardiomood.android.tools.PreferenceHelper;
+import com.cardiomood.android.tools.TimeAgo;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -176,7 +177,8 @@ public class NavigationDrawerFragment extends Fragment {
                 if (!isAdded()) {
                     return;
                 }
-                mLastSyncView.setText(DATE_FORMAT.format(new Date(mPrefHelper.getLong(Constants.APP_LAST_SYNC_TIMESTAMP, 0L))));
+                long lastSync = mPrefHelper.getLong(Constants.APP_LAST_SYNC_TIMESTAMP, 0L);
+                mLastSyncView.setText(TimeAgo.getTimeAgo(getActivity(), lastSync));
 
                 if (!mUserLearnedDrawer) {
                     // The user manually opened the drawer; store this flag to prevent auto-showing

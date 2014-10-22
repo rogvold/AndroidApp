@@ -113,6 +113,7 @@ public class HistoryFragment extends ListFragment {
                         .orderBy("creation_timestamp", false)
                         .where().eq("sync_user_id", ParseUser.getCurrentUser().getObjectId())
                         .and().ne("deleted", true)
+                        .and().ne("end_timestamp", 0L)
                         .query();
             }
         }).continueWith(new Continuation<List<CardioSessionEntity>, Object>() {
