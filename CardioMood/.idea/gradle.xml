@@ -9,7 +9,6 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/Air" />
-            <option value="$PROJECT_DIR$/AndroidControls" />
             <option value="$PROJECT_DIR$/CardioMoodApp" />
             <option value="$PROJECT_DIR$/CardioSportApp" />
             <option value="$PROJECT_DIR$/ClientServerInteraction" />
@@ -17,7 +16,9 @@
             <option value="$PROJECT_DIR$/HeartRate" />
             <option value="$PROJECT_DIR$/HeartRateApp" />
             <option value="$PROJECT_DIR$/Math" />
+            <option value="$PROJECT_DIR$/MiptApp" />
             <option value="$PROJECT_DIR$/ShinobiCharts" />
+            <option value="$PROJECT_DIR$/Widgets" />
             <option value="$PROJECT_DIR$/WorkoutAssistantApp" />
             <option value="$PROJECT_DIR$/facebook" />
           </set>

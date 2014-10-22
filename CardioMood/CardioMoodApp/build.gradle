@@ -61,7 +61,7 @@ dependencies {
     compile project(':CommonTools')
     compile project(':Math')
     compile project(':ShinobiCharts')
-    compile project(':AndroidControls')
+    compile project(':Widgets')
     compile project(':ClientServerInteraction')
     compile project(':facebook')
 }

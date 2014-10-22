@@ -17,7 +17,7 @@ public class RRIntervalEntity extends SessionDataItem<JsonRRInterval> {
     protected double rrTime;
 
     public RRIntervalEntity() {
-        timestamp = System.currentTimeMillis();
+        setTimestamp(System.currentTimeMillis());
     }
 
     public RRIntervalEntity(int heartBeatsPerMinute, double rrTime) {

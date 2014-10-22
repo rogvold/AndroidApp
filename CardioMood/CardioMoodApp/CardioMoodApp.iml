@@ -99,9 +99,9 @@
     <orderEntry type="library" exported="" name="GraphView-3.0" level="project" />
     <orderEntry type="library" exported="" name="commons-math3-3.3" level="project" />
     <orderEntry type="library" exported="" name="jackson-mapper-asl-1.9.0" level="project" />
+    <orderEntry type="module" module-name="Widgets" exported="" />
     <orderEntry type="module" module-name="ShinobiCharts" exported="" />
     <orderEntry type="module" module-name="CommonTools" exported="" />
-    <orderEntry type="module" module-name="AndroidControls" exported="" />
     <orderEntry type="module" module-name="facebook" exported="" />
     <orderEntry type="module" module-name="Math" exported="" />
     <orderEntry type="module" module-name="ClientServerInteraction" exported="" />

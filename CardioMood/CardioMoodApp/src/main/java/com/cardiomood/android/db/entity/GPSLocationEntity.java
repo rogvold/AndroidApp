@@ -28,11 +28,11 @@ public class GPSLocationEntity extends SessionDataItem<JsonGPS> {
     private Double accuracy;
 
     public GPSLocationEntity() {
-        timestamp = System.currentTimeMillis();
+        setTimestamp(System.currentTimeMillis());
     }
 
     public GPSLocationEntity(Location location) {
-        timestamp = System.currentTimeMillis();
+        setTimestamp(System.currentTimeMillis());
         lat = location.getLatitude();
         lon = location.getLongitude();
         if (location.hasAltitude())

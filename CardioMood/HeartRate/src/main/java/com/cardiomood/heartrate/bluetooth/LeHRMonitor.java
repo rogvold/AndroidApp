@@ -42,6 +42,7 @@ public abstract class LeHRMonitor {
     private int connectionStatus = INITIAL_STATUS;
     private Context context;
     private Callback callback;
+    private boolean enableBroadcasts = true;
 
     private final Object lock = new Object();
     private Timer timer = new Timer("freeze_timer");
@@ -54,26 +55,29 @@ public abstract class LeHRMonitor {
     public static LeHRMonitor getMonitor(Context context) {
         LeHRMonitor monitor = null;
         try {
-            monitor = new AndroidLeHRMonitor(context);
-            if (monitor.isSupported())
-                return monitor;
-        } catch (NoClassDefFoundError ex) {
-            Log.w(TAG, "getMonitor(): this is not Android 4.3+ device.", ex);
+            try {
+                monitor = new AndroidLeHRMonitor(context);
+                if (monitor.isSupported())
+                    return monitor;
+            } catch (NoClassDefFoundError ex) {
+                Log.w(TAG, "getMonitor(): this is not Android 4.3+ device.", ex);
+            }
+
+            try {
+                monitor = new MotorolaLeHRMonitor(context);
+                if (monitor.isSupported())
+                    return monitor;
+            } catch (NoClassDefFoundError ex) {
+                Log.w(TAG, "getMonitor(): this device not Motorola.", ex);
+            }
+        } catch (Throwable th) {
+            try {
+                return new FallbackMonitor(context);
+            } catch (NoClassDefFoundError ex) {
+                Log.wtf(TAG, "getMonitor(): this cannot be happening...", ex);
+            }
         }
 
-        try {
-            monitor = new MotorolaLeHRMonitor(context);
-            if (monitor.isSupported())
-                return monitor;
-        } catch (NoClassDefFoundError ex) {
-            Log.w(TAG, "getMonitor(): this device not Motorola.", ex);
-        }
-
-        try {
-            return new FallbackMonitor(context);
-        } catch (NoClassDefFoundError ex) {
-            Log.wtf(TAG, "getMonitor(): shit just got real...", ex);
-        }
 
         return null;
     }
@@ -84,6 +88,10 @@ public abstract class LeHRMonitor {
     public abstract void disconnect();
     public abstract void close();
     public abstract BluetoothAdapter getCurrentBluetoothAdapter();
+
+    public void enableBroadcasts(boolean enable) {
+        enableBroadcasts = enable;
+    }
 
     public void setCallback(Callback callback) {
         this.callback = callback;
@@ -131,6 +139,15 @@ public abstract class LeHRMonitor {
         }
     }
 
+    public boolean isConnected() {
+        return CONNECTED_STATUS == getConnectionStatus();
+    }
+
+    public boolean isConnectingOrConnected() {
+        return (getConnectionStatus() == CONNECTING_STATUS ||
+                getConnectionStatus() == CONNECTED_STATUS);
+    }
+
     public int getConnectionStatus() {
         return connectionStatus;
     }
@@ -143,9 +160,11 @@ public abstract class LeHRMonitor {
     }
 
     protected void notifyBatteryLevel(int batteryLevel) {
-        Intent intent = new Intent(ACTION_BATTERY_LEVEL);
-        intent.putExtra(EXTRA_BATTERY_LEVEL, batteryLevel);
-        context.sendBroadcast(intent);
+        if (enableBroadcasts) {
+            Intent intent = new Intent(ACTION_BATTERY_LEVEL);
+            intent.putExtra(EXTRA_BATTERY_LEVEL, batteryLevel);
+            context.sendBroadcast(intent);
+        }
 
         if (callback != null) {
             callback.onBatteryLevelReceived(batteryLevel);
@@ -153,10 +172,12 @@ public abstract class LeHRMonitor {
     }
 
     protected void notifyConnectionStatusChanged(int oldStatus, int newStatus) {
-        Intent intent = new Intent(ACTION_CONNECTION_STATUS_CHANGED);
-        intent.putExtra(EXTRA_OLD_STATUS, oldStatus);
-        intent.putExtra(EXTRA_NEW_STATUS, newStatus);
-        context.sendBroadcast(intent);
+        if (enableBroadcasts) {
+            Intent intent = new Intent(ACTION_CONNECTION_STATUS_CHANGED);
+            intent.putExtra(EXTRA_OLD_STATUS, oldStatus);
+            intent.putExtra(EXTRA_NEW_STATUS, newStatus);
+            context.sendBroadcast(intent);
+        }
 
         if (callback != null) {
             callback.onConnectionStatusChanged(oldStatus, newStatus);
@@ -183,10 +204,12 @@ public abstract class LeHRMonitor {
     }
 
     protected void notifyBPMChanged(int oldBPM, int newBPM) {
-        Intent intent = new Intent(ACTION_BPM_CHANGED);
-        intent.putExtra(EXTRA_OLD_BPM, oldBPM);
-        intent.putExtra(EXTRA_NEW_BPM, newBPM);
-        context.sendBroadcast(intent);
+        if (enableBroadcasts) {
+            Intent intent = new Intent(ACTION_BPM_CHANGED);
+            intent.putExtra(EXTRA_OLD_BPM, oldBPM);
+            intent.putExtra(EXTRA_NEW_BPM, newBPM);
+            context.sendBroadcast(intent);
+        }
 
         if (callback != null) {
             callback.onBPMChanged(newBPM);
@@ -195,11 +218,13 @@ public abstract class LeHRMonitor {
 
     protected void notifyHeartRateDataReceived(int bpm, short energyExpended, short[] rrIntervals) {
         Log.d(TAG, "notifyHeartRateDataReceived(): bpm=" + bpm);
-        Intent intent = new Intent(ACTION_HEART_RATE_DATA_RECEIVED);
-        intent.putExtra(EXTRA_BPM, bpm);
-        intent.putExtra(EXTRA_ENERGY_EXPENDED, energyExpended);
-        intent.putExtra(EXTRA_INTERVALS, rrIntervals);
-        context.sendBroadcast(intent);
+        if (enableBroadcasts) {
+            Intent intent = new Intent(ACTION_HEART_RATE_DATA_RECEIVED);
+            intent.putExtra(EXTRA_BPM, bpm);
+            intent.putExtra(EXTRA_ENERGY_EXPENDED, energyExpended);
+            intent.putExtra(EXTRA_INTERVALS, rrIntervals);
+            context.sendBroadcast(intent);
+        }
 
         if (callback != null) {
             callback.onDataReceived(bpm, rrIntervals);
