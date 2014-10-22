@@ -13,7 +13,6 @@
       <module fileurl="file://$PROJECT_DIR$/Math/Math.iml" filepath="$PROJECT_DIR$/Math/Math.iml" />
       <module fileurl="file://$PROJECT_DIR$/MiptApp/MiptApp.iml" filepath="$PROJECT_DIR$/MiptApp/MiptApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/ShinobiCharts/ShinobiCharts.iml" filepath="$PROJECT_DIR$/ShinobiCharts/ShinobiCharts.iml" />
-      <module fileurl="file://$PROJECT_DIR$/Widgets/Widgets.iml" filepath="$PROJECT_DIR$/Widgets/Widgets.iml" />
       <module fileurl="file://$PROJECT_DIR$/WorkoutAssistantApp/WorkoutAssistantApp.iml" filepath="$PROJECT_DIR$/WorkoutAssistantApp/WorkoutAssistantApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/facebook/facebook.iml" filepath="$PROJECT_DIR$/facebook/facebook.iml" />
     </modules>
