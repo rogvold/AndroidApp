@@ -567,6 +567,7 @@ public class CardioMonitoringService extends Service {
                     itemDao.create(entity);
                 }
 
+                sessionDAO.refresh(cardioSession);
                 cardioSession.setSyncDate(new Date());
                 sessionDAO.update(cardioSession);
             } catch (SQLException ex) {

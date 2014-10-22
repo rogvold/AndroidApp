@@ -581,8 +581,8 @@ public class NewMeasurementFragment extends Fragment {
             mCurrentSessionId = msg.getData().getLong("sessionId", -1L);
             startSessionButton.setEnabled(false);
             startSessionButton.setVisibility(View.GONE);
-            stopSessionButton.setEnabled(true);
-            stopSessionButton.setVisibility(View.VISIBLE);
+//            stopSessionButton.setEnabled(true);
+//            stopSessionButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -606,11 +606,13 @@ public class NewMeasurementFragment extends Fragment {
                 onSessionFinished(null);
         }
 
-        if (oldStatus == LeHRMonitor.CONNECTING_STATUS &&
-                (newStatus == LeHRMonitor.READY_STATUS || newStatus == LeHRMonitor.DISCONNECTING_STATUS)) {
-            Toast.makeText(getActivity(), "Connection failed.", Toast.LENGTH_SHORT).show();
-        } else {
-            Toast.makeText(getActivity(), "Status changed from " + oldStatus + " to " + newStatus +"!", Toast.LENGTH_SHORT).show();
+        if (oldStatus >= 0) {
+            if (oldStatus == LeHRMonitor.CONNECTING_STATUS &&
+                    (newStatus == LeHRMonitor.READY_STATUS || newStatus == LeHRMonitor.DISCONNECTING_STATUS)) {
+                Toast.makeText(getActivity(), "Connection failed.", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getActivity(), "Status changed from " + oldStatus + " to " + newStatus + "!", Toast.LENGTH_SHORT).show();
+            }
         }
 
         if (newStatus == LeHRMonitor.CONNECTED_STATUS) {
@@ -628,8 +630,8 @@ public class NewMeasurementFragment extends Fragment {
             } else {
                 startSessionButton.setVisibility(View.GONE);
                 startSessionButton.setEnabled(false);
-                stopSessionButton.setVisibility(View.VISIBLE);
-                stopSessionButton.setEnabled(true);
+                //stopSessionButton.setVisibility(View.VISIBLE);
+                //stopSessionButton.setEnabled(true);
             }
             return;
         }
@@ -673,6 +675,7 @@ public class NewMeasurementFragment extends Fragment {
             return;
         }
 
+        // default state
         hrmStatusView.setText(R.string.hrm_not_connected);
         hrmDeviceNameView.setText(R.string.select_hrm_device);
         connectButton.setText(R.string.connect_button);
@@ -683,5 +686,6 @@ public class NewMeasurementFragment extends Fragment {
         startSessionButton.setVisibility(View.VISIBLE);
         startSessionButton.setEnabled(false);
         stopSessionButton.setVisibility(View.GONE);
+        stopSessionButton.setEnabled(false);
     }
 }

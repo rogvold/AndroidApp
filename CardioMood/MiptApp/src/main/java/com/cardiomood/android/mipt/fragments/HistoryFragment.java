@@ -26,6 +26,8 @@ import com.cardiomood.android.mipt.db.entity.CardioSessionEntity;
 import com.cardiomood.android.mipt.parse.CardioSession;
 import com.cardiomood.android.mipt.tools.Constants;
 import com.cardiomood.android.tools.PreferenceHelper;
+import com.cardiomood.math.HeartRateUtils;
+import com.cardiomood.math.filter.PisarukArtifactFilter;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.parse.ParseUser;
@@ -201,16 +203,32 @@ public class HistoryFragment extends ListFragment {
 
                                     List<Long> t = new ArrayList<Long>(items.size());
                                     List<Integer> rrs = new ArrayList<Integer>(items.size());
-
                                     for (CardioItemEntity item: items) {
                                         t.add(item.getT());
                                         rrs.add(item.getRr());
                                     }
+
                                     remoteObject.put("rrs", rrs);
                                     remoteObject.put("times", t);
                                     if (remoteObject.getEndTimestamp() == 0L) {
                                         remoteObject.put("endTimestamp", localObject.getEndTimestamp());
                                     }
+
+                                    // calculate stress
+                                    double[][] stress = calculateStress(t, rrs);
+                                    remoteObject.remove("stressTimes");
+                                    List<Double> values = new ArrayList<Double>(stress[0].length);
+                                    for (double time: stress[0]) {
+                                        values.add(time);
+                                    }
+                                    remoteObject.addAll("stressTimes", values);
+
+                                    values = new ArrayList<Double>(stress[1].length);
+                                    for (double time: stress[1]) {
+                                        values.add(time);
+                                    }
+                                    remoteObject.remove("stressValues");
+                                    remoteObject.addAll("stressValues", values);
                                 } catch (Exception ex) {
                                     throw new RuntimeException(ex);
                                 }
@@ -237,6 +255,23 @@ public class HistoryFragment extends ListFragment {
                 },
                 Task.UI_THREAD_EXECUTOR
         );
+    }
+
+    private double[][] calculateStress(List<Long> times, List<Integer> rrs) {
+        double t[] = new double[times.size()];
+        double r[] = new double[rrs.size()];
+
+        // put into double[] arrays
+        for (int i=0; i < Math.min(r.length, t.length); i++) {
+            t[i] = times.get(i);
+            r[i] = rrs.get(i);
+        }
+
+        // filter out artifacts
+        r = new PisarukArtifactFilter().doFilter(r);
+
+        // calculate stress
+        return HeartRateUtils.getSI(r, t, 2 * 60 * 1000, 5000);
     }
 
 

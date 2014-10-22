@@ -28,7 +28,6 @@ import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.TimeAgo;
 
 import java.text.DateFormat;
-import java.util.Date;
 
 /**
  * Fragment used for managing interactions for and presentation of a navigation drawer.
@@ -108,7 +107,9 @@ public class NavigationDrawerFragment extends Fragment {
                 R.layout.fragment_navigation_drawer, container, false);
 
         mLastSyncView = (TextView) root.findViewById(R.id.lastSyncDate);
-        mLastSyncView.setText(DATE_FORMAT.format(new Date(mPrefHelper.getLong(Constants.APP_LAST_SYNC_TIMESTAMP, 0L))));
+
+        long lastSync = mPrefHelper.getLong(Constants.APP_LAST_SYNC_TIMESTAMP, 0L);
+        mLastSyncView.setText(TimeAgo.getTimeAgo(getActivity(), lastSync));
 
         mDrawerListView = (ListView) root.findViewById(R.id.listView);
         mDrawerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {

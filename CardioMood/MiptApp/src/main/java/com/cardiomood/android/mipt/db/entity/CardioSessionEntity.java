@@ -27,7 +27,7 @@ public class CardioSessionEntity extends SyncEntity {
 
     @ParseField
     @DatabaseField(columnName = "end_timestamp")
-    private long endTimestamp;
+    private Long endTimestamp;
 
     public String getName() {
         return name;
@@ -54,7 +54,7 @@ public class CardioSessionEntity extends SyncEntity {
     }
 
     public long getEndTimestamp() {
-        return endTimestamp;
+        return endTimestamp == null ? 0L : endTimestamp;
     }
 
     public void setEndTimestamp(long endTimestamp) {

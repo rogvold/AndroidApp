@@ -24,6 +24,7 @@ dependencies {
 
     compile project(':CommonTools')
     compile project(':HeartRate')
+    compile project(":Math")
     //compile project(':CardioMoodWidgets')
 
     compile 'com.j256.ormlite:ormlite-android:4.48'
