@@ -111,6 +111,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/timer_block"
+        android:layout_above="@+id/start_session_button"
         android:orientation="vertical"
         android:gravity="center">
 
@@ -130,7 +131,8 @@
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="8dp"
         android:id="@+id/start_session_button"
-        android:enabled="false"/>
+        android:enabled="false"
+        android:visibility="visible"/>
 
     <Button
         android:layout_width="match_parent"

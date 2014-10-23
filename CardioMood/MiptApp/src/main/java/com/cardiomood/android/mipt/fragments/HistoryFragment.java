@@ -295,7 +295,7 @@ public class HistoryFragment extends ListFragment {
             TextView text1 = (TextView) itemView.findViewById(android.R.id.text1);
             text1.setTypeface(null, Typeface.NORMAL);
             if (entity.getName() == null || entity.getName().trim().isEmpty()) {
-                text1.setText("Session " + DATE_FORMAT.format(entity.getCreationDate()));
+                text1.setText("Session " + DATE_FORMAT.format(new Date(entity.getStartTimestamp())));
             } else {
                 text1.setText(entity.getName().trim());
             }

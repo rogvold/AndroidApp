@@ -16,6 +16,8 @@ import android.view.ViewGroup;
 import com.cardiomood.android.mipt.fragments.HistoryFragment;
 import com.cardiomood.android.mipt.fragments.NavigationDrawerFragment;
 import com.cardiomood.android.mipt.fragments.NewMeasurementFragment;
+import com.cardiomood.android.mipt.tools.Constants;
+import com.cardiomood.android.tools.PreferenceHelper;
 import com.parse.ParseUser;
 
 public class MainActivity extends Activity
@@ -32,6 +34,8 @@ public class MainActivity extends Activity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
+
+    private PreferenceHelper pHelper;
 
 
     @Override
@@ -54,6 +58,8 @@ public class MainActivity extends Activity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        pHelper = new PreferenceHelper(this, true);
     }
 
     @Override
@@ -121,6 +127,7 @@ public class MainActivity extends Activity
 
 
     private void performLogout() {
+        pHelper.putLong(Constants.APP_LAST_SYNC_TIMESTAMP, 0L);
         ParseUser.logOut();
         startActivity(new Intent(this, LoginActivity.class));
         finish();

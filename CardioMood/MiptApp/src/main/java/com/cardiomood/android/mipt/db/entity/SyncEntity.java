@@ -105,7 +105,8 @@ public abstract class SyncEntity {
                                 // restore accessible flag
                                 field.setAccessible(accessible);
                             } catch (Exception ex) {
-                                // TODO: add log message here
+                                throw new RuntimeException("Failed to process field "
+                                        + field.getName() + " with annotation " + fieldAnnotation);
                             }
                         }
                     }
@@ -150,10 +151,10 @@ public abstract class SyncEntity {
             }
 
             // update updatedAt
-            if (entity.getCreationDate() != null) {
+            if (entity.getSyncDate() != null) {
                 Field updatedAtField = ParseObject.class.getDeclaredField("updatedAt");
                 updatedAtField.setAccessible(true);
-                updatedAtField.set(parseObject, entity.getCreationDate());
+                updatedAtField.set(parseObject, entity.getSyncDate());
                 updatedAtField.setAccessible(false);
             }
 

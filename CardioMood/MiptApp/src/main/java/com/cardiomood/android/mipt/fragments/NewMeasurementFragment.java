@@ -32,21 +32,33 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cardiomood.android.mipt.R;
+import com.cardiomood.android.mipt.db.CardioItemDAO;
+import com.cardiomood.android.mipt.db.CardioSessionDAO;
 import com.cardiomood.android.mipt.db.HelperFactory;
+import com.cardiomood.android.mipt.db.entity.CardioItemEntity;
 import com.cardiomood.android.mipt.db.entity.CardioSessionEntity;
 import com.cardiomood.android.mipt.parse.ParseTools;
 import com.cardiomood.android.mipt.service.CardioDataPackage;
 import com.cardiomood.android.mipt.service.CardioMonitoringService;
 import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.heartrate.bluetooth.LeHRMonitor;
+import com.jjoe64.graphview.CustomLabelFormatter;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.GraphViewSeries;
+import com.jjoe64.graphview.LineGraphView;
 import com.parse.ParseUser;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Callable;
+
+import bolts.Continuation;
+import bolts.Task;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -71,12 +83,16 @@ public class NewMeasurementFragment extends Fragment {
     private Button startSessionButton;
     private Button stopSessionButton;
     private TextView timeElapsedView;
+    private GraphView mGraphView;
 
     // State
     private boolean hrmConnected = false;
     private int hrmState = LeHRMonitor.INITIAL_STATUS;
     private boolean mScanning = false;
     private long mCurrentSessionId = -1L;
+    private CardioSessionEntity mCurrentSession = null;
+    private GraphViewSeries mHeartRateSeries = null;
+    private long graphT = 0;
 
     // Tools
     LeHRMonitor hrMonitor;
@@ -102,6 +118,11 @@ public class NewMeasurementFragment extends Fragment {
                 case CardioMonitoringService.RESP_STATUS:
                     mCurrentSessionId = msg.getData().getLong("sessionId", -1L);
                     onConnectionStatusChanged(-1, msg.arg1, msg.getData().getString("deviceAddress"));
+                    if (mCurrentSessionId > 0L) {
+                        msg.what = CardioMonitoringService.RESP_START_SESSION_RESULT;
+                        msg.arg1 = CardioMonitoringService.RESULT_SUCCESS;
+                        onSessionStarted(msg);
+                    }
                     break;
                 case CardioMonitoringService.MSG_CONNECTION_STATUS_CHANGED:
                     onConnectionStatusChanged(msg.arg1, msg.arg2, msg.getData().getString("deviceAddress"));
@@ -256,6 +277,52 @@ public class NewMeasurementFragment extends Fragment {
         emptyMessageView = (TextView) root.findViewById(R.id.empty_message);
 
         chartContainer = (LinearLayout) root.findViewById(R.id.graph_container);
+
+        mGraphView = new LineGraphView(getActivity(), "Heart Rate") {
+
+            @Override
+            protected double getMaxY() {
+                double maxY = super.getMaxY() + 5;
+                if (maxY < 80)
+                    return 80;
+                if (maxY > 200)
+                    return 200;
+                return maxY;
+            }
+
+
+            @Override
+            protected double getMinY() {
+                double minY = super.getMinY() - 5;
+                if (minY < 30)
+                    return 30;
+                if (minY > 120)
+                    return 120;
+                return minY;
+            }
+        };
+        mGraphView.setVisibility(View.GONE);
+        mGraphView.setScrollable(true);
+        mGraphView.setViewPort(0, 60);
+        mGraphView.setCustomLabelFormatter(new CustomLabelFormatter() {
+            @Override
+            public String formatLabel(double value, boolean isValueX) {
+                if (isValueX) {
+                    if (value <= 0) return "-";
+                    else return CommonTools.timeToHumanString(Math.round(value * 1000));
+                } else {
+                    return String.valueOf(Math.round(value));
+                }
+            }
+        });
+        mGraphView.getGraphViewStyle().setTextSize(16);
+        mGraphView.getGraphViewStyle().setNumVerticalLabels(10);
+        mGraphView.getGraphViewStyle().setNumHorizontalLabels(7);
+
+        mHeartRateSeries = new GraphViewSeries(new GraphView.GraphViewData[0]);
+        mGraphView.addSeries(mHeartRateSeries);
+
+        chartContainer.addView(mGraphView);
 
         return root;
     }
@@ -570,6 +637,18 @@ public class NewMeasurementFragment extends Fragment {
         CardioDataPackage data = msg.getData().getParcelable("data");
         heartRateView.setText(String.valueOf(data.getBpm()));
 
+        if (mCurrentSession != null && graphT >= 0) {
+            int[] rr = data.getRr();
+            if (rr != null) {
+                for (int r: rr) {
+                    mHeartRateSeries.appendData(
+                            new GraphView.GraphViewData(graphT/1000, Math.round(60000.f/r)),
+                            true, 1000);
+                    graphT += r;
+                }
+            }
+        }
+
         if (data.getBpm() == 0) {
             CommonTools.vibrate(getActivity(), 1000);
         }
@@ -583,6 +662,7 @@ public class NewMeasurementFragment extends Fragment {
             startSessionButton.setVisibility(View.GONE);
 //            stopSessionButton.setEnabled(true);
 //            stopSessionButton.setVisibility(View.VISIBLE);
+            loadSessionData(mCurrentSessionId);
         }
     }
 
@@ -687,5 +767,62 @@ public class NewMeasurementFragment extends Fragment {
         startSessionButton.setEnabled(false);
         stopSessionButton.setVisibility(View.GONE);
         stopSessionButton.setEnabled(false);
+    }
+
+    private void loadSessionData(final long sessionId) {
+        graphT = -1;
+        Task.callInBackground(new Callable<CardioSessionEntity>() {
+            @Override
+            public CardioSessionEntity call() throws Exception {
+                CardioSessionDAO dao = HelperFactory.getHelper().getCardioSessionDao();
+                return dao.queryForId(sessionId);
+            }
+        }).onSuccess(new Continuation<CardioSessionEntity, CardioSessionEntity>() {
+            @Override
+            public CardioSessionEntity then(Task<CardioSessionEntity> task) throws Exception {
+                mCurrentSession = task.getResult();
+                return mCurrentSession;
+            }
+        }, Task.UI_THREAD_EXECUTOR).onSuccess(new Continuation<CardioSessionEntity, List<Integer>>() {
+            @Override
+            public List<Integer> then(Task<CardioSessionEntity> task) throws Exception {
+                long sessionId = task.getResult().getId();
+                CardioItemDAO dao = HelperFactory.getHelper().getCardioItemDao();
+                List<CardioItemEntity> items = dao.queryBuilder()
+                        .orderBy("_id", true)
+                        .where().eq("session_id", sessionId).query();
+                List<Integer> result = new ArrayList<Integer>(items.size());
+                for (CardioItemEntity item : items) {
+                    result.add(item.getRr());
+                }
+                return result;
+            }
+        }, Task.BACKGROUND_EXECUTOR).continueWith(new Continuation<List<Integer>, Void>() {
+            @Override
+            public Void then(Task<List<Integer>> task) throws Exception {
+                if (task.isFaulted()) {
+                    Context ctx = getActivity();
+                    if (ctx != null) {
+                        Toast.makeText(ctx, "Failed to load session data", Toast.LENGTH_SHORT).show();
+                    }
+                } else if (task.isCompleted()) {
+                    emptyMessageView.setVisibility(View.GONE);
+
+                    // init example series data
+                    List<Integer> items = task.getResult();
+                    GraphView.GraphViewData[] data = new GraphView.GraphViewData[items.size()];
+                    graphT = 0;
+                    for (int i=0; i<items.size(); i++) {
+                        int rr = items.get(i);
+                        int bpm = Math.round(60000.0f/rr);
+                        data[i] = new GraphView.GraphViewData(graphT/1000, bpm);
+                        graphT += rr;
+                    }
+                    mHeartRateSeries.resetData(data);
+                    mGraphView.setVisibility(View.VISIBLE);
+                }
+                return null;
+            }
+        }, Task.UI_THREAD_EXECUTOR);
     }
 }
