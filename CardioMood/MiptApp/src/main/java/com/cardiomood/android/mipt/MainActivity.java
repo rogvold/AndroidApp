@@ -13,9 +13,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.cardiomood.android.mipt.fragments.AboutFragment;
 import com.cardiomood.android.mipt.fragments.HistoryFragment;
 import com.cardiomood.android.mipt.fragments.NavigationDrawerFragment;
-import com.cardiomood.android.mipt.fragments.NewMeasurementFragment;
+import com.cardiomood.android.mipt.fragments.NewMeasurementFragment_;
 import com.cardiomood.android.mipt.tools.Constants;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.parse.ParseUser;
@@ -99,7 +100,7 @@ public class MainActivity extends Activity
             // Only show items in the action bar relevant to this screen
             // if the drawer is not showing. Otherwise, let the drawer
             // decide what to show in the action bar.
-            getMenuInflater().inflate(R.menu.main, menu);
+            getMenuInflater().inflate(R.menu.activity_main, menu);
             restoreActionBar();
             return true;
         }
@@ -149,9 +150,11 @@ public class MainActivity extends Activity
         public static Fragment newInstance(int sectionNumber) {
             switch (sectionNumber) {
                 case 1:
-                    return NewMeasurementFragment.newInstance();
+                    return new NewMeasurementFragment_();
                 case 2:
-                    return HistoryFragment.newInstance();
+                    return new HistoryFragment();
+                case 3:
+                    return new AboutFragment();
                 default:
                     PlaceholderFragment fragment = new PlaceholderFragment();
                     Bundle args = new Bundle();

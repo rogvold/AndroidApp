@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cardiomood.android.mipt.R;
+import com.cardiomood.android.mipt.SessionViewActivity_;
 import com.cardiomood.android.mipt.db.CardioItemDAO;
 import com.cardiomood.android.mipt.db.CardioSessionDAO;
 import com.cardiomood.android.mipt.db.HelperFactory;
@@ -59,11 +60,6 @@ public class HistoryFragment extends ListFragment {
     private PreferenceHelper mPrefHelper;
     private ProgressDialog pDialog = null;
 
-    public static HistoryFragment newInstance() {
-        HistoryFragment fragment = new HistoryFragment();
-        return fragment;
-    }
-
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -103,7 +99,10 @@ public class HistoryFragment extends ListFragment {
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        super.onListItemClick(l, v, position, id);
+        CardioSessionEntity entity = mSessionAdapter.getItem(position);
+        SessionViewActivity_.intent(getActivity())
+                .sessionId(entity.getId())
+                .start();
     }
 
     private void refreshSessionList() {

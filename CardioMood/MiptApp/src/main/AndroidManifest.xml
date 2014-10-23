@@ -35,11 +35,20 @@
         </activity>
 
         <service
-            android:name=".service.CardioMonitoringService"
+            android:name="com.cardiomood.android.mipt.service.CardioMonitoringService"
             android:enabled="true"
             android:exported="false"
-            android:process=":heart_rate">
+            android:process=":heart_rate" >
         </service>
+
+        <activity
+            android:name="com.cardiomood.android.mipt.SessionViewActivity_"
+            android:label="@string/title_activity_session_view"
+            android:parentActivityName="com.cardiomood.android.mipt.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.cardiomood.android.mipt.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

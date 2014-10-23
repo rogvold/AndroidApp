@@ -32,6 +32,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cardiomood.android.mipt.R;
+import com.cardiomood.android.mipt.SessionViewActivity_;
+import com.cardiomood.android.mipt.components.HeartRateGraphView;
 import com.cardiomood.android.mipt.db.CardioItemDAO;
 import com.cardiomood.android.mipt.db.CardioSessionDAO;
 import com.cardiomood.android.mipt.db.HelperFactory;
@@ -42,11 +44,13 @@ import com.cardiomood.android.mipt.service.CardioDataPackage;
 import com.cardiomood.android.mipt.service.CardioMonitoringService;
 import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.heartrate.bluetooth.LeHRMonitor;
-import com.jjoe64.graphview.CustomLabelFormatter;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GraphViewSeries;
-import com.jjoe64.graphview.LineGraphView;
 import com.parse.ParseUser;
+
+import org.androidannotations.annotations.AfterViews;
+import org.androidannotations.annotations.EFragment;
+import org.androidannotations.annotations.ViewById;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -65,6 +69,7 @@ import bolts.Task;
  * Use the {@link NewMeasurementFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
+@EFragment(R.layout.fragment_new_measurement)
 public class NewMeasurementFragment extends Fragment {
 
     private static final String TAG = NewMeasurementFragment.class.getSimpleName();
@@ -72,18 +77,31 @@ public class NewMeasurementFragment extends Fragment {
     public static final int REQUEST_ENABLE_BT = 2;
 
     // UI
-    private TextView userNameView;
-    private TextView userEmailView;
-    private TextView hrmDeviceNameView;
-    private TextView hrmStatusView;
-    private TextView heartRateView;
-    private Button connectButton;
-    private LinearLayout chartContainer;
-    private TextView emptyMessageView;
-    private Button startSessionButton;
-    private Button stopSessionButton;
-    private TextView timeElapsedView;
-    private GraphView mGraphView;
+    @ViewById(android.R.id.text1)
+    protected TextView userNameView;
+    @ViewById(android.R.id.text2)
+    protected TextView userEmailView;
+    @ViewById(R.id.hrm_device_name)
+    protected TextView hrmDeviceNameView;
+    @ViewById(R.id.hr_monitor_status)
+    protected TextView hrmStatusView;
+    @ViewById(R.id.heart_rate)
+    protected TextView heartRateView;
+    @ViewById(R.id.connect_hr_monitor_button)
+    protected Button connectButton;
+    @ViewById(R.id.graph_container)
+    protected LinearLayout chartContainer;
+    @ViewById(R.id.empty_message)
+    protected TextView emptyMessageView;
+    @ViewById(R.id.start_session_button)
+    protected Button startSessionButton;
+    @ViewById(R.id.stop_session_button)
+    protected Button stopSessionButton;
+    @ViewById(R.id.time_elapsed)
+    protected TextView timeElapsedView;
+
+    //chart is added manually
+    protected GraphView mGraphView;
 
     // State
     private boolean hrmConnected = false;
@@ -221,26 +239,18 @@ public class NewMeasurementFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View root = inflater.inflate(R.layout.fragment_new_measurement, container, false);
+        super.onCreateView(inflater, container, savedInstanceState);
+        return null;
+    }
 
-        userNameView = (TextView) root.findViewById(android.R.id.text1);
-        userEmailView = (TextView) root.findViewById(android.R.id.text2);
-
+    @AfterViews
+    public void afterViews() {
         // user info block
         ParseUser user = ParseUser.getCurrentUser();
         userEmailView.setText(user.getEmail());
         userNameView.setText(ParseTools.getUserFullName(user));
 
-        // HRM info block
-        hrmDeviceNameView = (TextView) root.findViewById(R.id.hrm_device_name);
-        hrmStatusView = (TextView) root.findViewById(R.id.hr_monitor_status);
-        heartRateView = (TextView) root.findViewById(R.id.heart_rate);
-
-        connectButton = (Button) root.findViewById(R.id.connect_hr_monitor_button);
         connectButton.setOnClickListener(connectButtonListener);
-
-        startSessionButton = (Button) root.findViewById(R.id.start_session_button);
         startSessionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -255,7 +265,6 @@ public class NewMeasurementFragment extends Fragment {
             }
         });
 
-        stopSessionButton = (Button) root.findViewById(R.id.stop_session_button);
         stopSessionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -271,60 +280,14 @@ public class NewMeasurementFragment extends Fragment {
             }
         });
 
-        timeElapsedView = (TextView) root.findViewById(R.id.time_elapsed);
-
-        // GraphView block
-        emptyMessageView = (TextView) root.findViewById(R.id.empty_message);
-
-        chartContainer = (LinearLayout) root.findViewById(R.id.graph_container);
-
-        mGraphView = new LineGraphView(getActivity(), "Heart Rate") {
-
-            @Override
-            protected double getMaxY() {
-                double maxY = super.getMaxY() + 5;
-                if (maxY < 80)
-                    return 80;
-                if (maxY > 200)
-                    return 200;
-                return maxY;
-            }
-
-
-            @Override
-            protected double getMinY() {
-                double minY = super.getMinY() - 5;
-                if (minY < 30)
-                    return 30;
-                if (minY > 120)
-                    return 120;
-                return minY;
-            }
-        };
+        // Init Graph View
+        mGraphView = new HeartRateGraphView(getActivity());
         mGraphView.setVisibility(View.GONE);
-        mGraphView.setScrollable(true);
-        mGraphView.setViewPort(0, 60);
-        mGraphView.setCustomLabelFormatter(new CustomLabelFormatter() {
-            @Override
-            public String formatLabel(double value, boolean isValueX) {
-                if (isValueX) {
-                    if (value <= 0) return "-";
-                    else return CommonTools.timeToHumanString(Math.round(value * 1000));
-                } else {
-                    return String.valueOf(Math.round(value));
-                }
-            }
-        });
-        mGraphView.getGraphViewStyle().setTextSize(16);
-        mGraphView.getGraphViewStyle().setNumVerticalLabels(10);
-        mGraphView.getGraphViewStyle().setNumHorizontalLabels(7);
 
         mHeartRateSeries = new GraphViewSeries(new GraphView.GraphViewData[0]);
         mGraphView.addSeries(mHeartRateSeries);
 
         chartContainer.addView(mGraphView);
-
-        return root;
     }
 
     @Override
@@ -642,7 +605,7 @@ public class NewMeasurementFragment extends Fragment {
             if (rr != null) {
                 for (int r: rr) {
                     mHeartRateSeries.appendData(
-                            new GraphView.GraphViewData(graphT/1000, Math.round(60000.f/r)),
+                            new GraphView.GraphViewData(graphT, Math.round(60000.f/r)),
                             true, 1000);
                     graphT += r;
                 }
@@ -667,7 +630,17 @@ public class NewMeasurementFragment extends Fragment {
     }
 
     private void onSessionFinished(Message msg) {
-        mCurrentSessionId = -1L;
+        if (mCurrentSessionId >0) {
+            if (!isDetached()) {
+                SessionViewActivity_.intent(getActivity())
+                        .sessionId(mCurrentSessionId)
+                        .renameSession(true)
+                        .start();
+
+                CommonTools.vibrate(getActivity(), new long[]{0, 500, 300, 500}, -1);
+            }
+            mCurrentSessionId = -1L;
+        }
         startSessionButton.setEnabled(false);
         startSessionButton.setVisibility(View.VISIBLE);
         stopSessionButton.setEnabled(false);
@@ -815,7 +788,7 @@ public class NewMeasurementFragment extends Fragment {
                     for (int i=0; i<items.size(); i++) {
                         int rr = items.get(i);
                         int bpm = Math.round(60000.0f/rr);
-                        data[i] = new GraphView.GraphViewData(graphT/1000, bpm);
+                        data[i] = new GraphView.GraphViewData(graphT, bpm);
                         graphT += rr;
                     }
                     mHeartRateSeries.resetData(data);

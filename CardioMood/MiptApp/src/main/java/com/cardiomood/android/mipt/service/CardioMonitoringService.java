@@ -14,7 +14,6 @@ import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.cardiomood.android.mipt.MainActivity;
 import com.cardiomood.android.mipt.R;
@@ -190,7 +189,6 @@ public class CardioMonitoringService extends Service {
      */
     @Override
     public IBinder onBind(Intent intent) {
-        Toast.makeText(getApplicationContext(), "binding", Toast.LENGTH_SHORT).show();
         return mMessenger.getBinder();
     }
 
@@ -237,10 +235,9 @@ public class CardioMonitoringService extends Service {
                         .setContentText("Click this to open the app")
                         .setOngoing(true);
 
+        // setup notification intents
         Intent resultIntent = new Intent(this, MainActivity.class);
-
         PendingIntent resultPendingIntent = null;
-
         if (Build.VERSION.SDK_INT >= 16) {
             // The stack builder object will contain an artificial back stack for the
             // started Activity.
