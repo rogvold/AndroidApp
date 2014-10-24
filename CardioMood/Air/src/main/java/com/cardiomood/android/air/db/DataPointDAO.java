@@ -1,6 +1,7 @@
 package com.cardiomood.android.air.db;
 
 import com.cardiomood.android.air.db.entity.DataPointEntity;
+import com.cardiomood.android.sync.ormlite.SyncDAO;
 import com.j256.ormlite.support.ConnectionSource;
 
 import java.sql.SQLException;

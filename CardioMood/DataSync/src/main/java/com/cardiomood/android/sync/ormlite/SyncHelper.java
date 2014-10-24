@@ -1,7 +1,6 @@
-package com.cardiomood.android.mipt.db;
+package com.cardiomood.android.sync.ormlite;
 
-import com.cardiomood.android.mipt.db.entity.SyncEntity;
-import com.cardiomood.android.mipt.parse.ParseTools;
+import com.cardiomood.android.sync.parse.ParseTools;
 import com.j256.ormlite.stmt.QueryBuilder;
 import com.j256.ormlite.stmt.Where;
 import com.parse.ParseException;
@@ -16,11 +15,9 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 
 /**
- * Created by antondanhsin on 19/10/14.
+ * Created by antondanhsin on 24/10/14.
  */
-public enum SyncEngine {
-
-    INSTANCE;
+public class SyncHelper {
 
     private static final String PARSE_USER_ID_FIELD = "userId";
     private static final String PARSE_UPDATED_AT_FIELD = "updatedAt";
@@ -34,9 +31,11 @@ public enum SyncEngine {
 
     private Date lastSyncDate = new Date(0);
     private String userId = null;
+    private SyncDatabaseHelper syncDatabaseHelper = null;
 
-    public static SyncEngine getInstance() {
-        return INSTANCE;
+
+    public SyncHelper(SyncDatabaseHelper syncDatabaseHelper) {
+        this.syncDatabaseHelper = syncDatabaseHelper;
     }
 
     public Date getLastSyncDate() {
@@ -55,7 +54,7 @@ public enum SyncEngine {
         this.userId = userId;
     }
 
-    synchronized public <P extends ParseObject, E extends SyncEntity> void synObjects(
+    public <P extends ParseObject, E extends SyncEntity> void synObjects(
             final Class<P> parseClass,
             final Class<E> entityClass,
             final boolean userAware,
@@ -71,7 +70,7 @@ public enum SyncEngine {
         final List<P> remoteObjects = ParseTools.findAllParseObjects(query);
 
         // get updated local objects
-        final SyncDAO<E, Long> syncDao = HelperFactory.getHelper().getDaoForClass(entityClass);
+        final SyncDAO<E, Long> syncDao = syncDatabaseHelper.getSyncDao(entityClass);
         QueryBuilder<E, Long> dbQuery = syncDao.queryBuilder();
         //dbQuery.orderBy(DB_OBJECT_ID_FIELD, true);
         Where<E, Long> where = dbQuery.where().gt(DB_UPDATED_AT_FIELD, lastSyncDate);
@@ -79,12 +78,12 @@ public enum SyncEngine {
             where.and().eq(DB_USER_ID_FIELD, userId);
         final List<E> localObjects = where.query();
 
-        HelperFactory.getHelper().callInTransaction(new Callable<Void>() {
+        syncDatabaseHelper.callInTransaction(new Callable<Void>() {
             @Override
             public Void call() throws Exception {
                 // create local object map
                 Map<String, E> localObjectMap = new HashMap<String, E>(localObjects.size());
-                for (E localObject: localObjects) {
+                for (E localObject : localObjects) {
                     localObjectMap.put(localObject.getSyncId(), localObject);
                 }
 

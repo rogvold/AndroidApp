@@ -8,6 +8,7 @@
       <module fileurl="file://$PROJECT_DIR$/CardioSportApp/CardioSportApp.iml" filepath="$PROJECT_DIR$/CardioSportApp/CardioSportApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/ClientServerInteraction/ClientServerInteraction.iml" filepath="$PROJECT_DIR$/ClientServerInteraction/ClientServerInteraction.iml" />
       <module fileurl="file://$PROJECT_DIR$/CommonTools/CommonTools.iml" filepath="$PROJECT_DIR$/CommonTools/CommonTools.iml" />
+      <module fileurl="file://$PROJECT_DIR$/DataSync/DataSync.iml" filepath="$PROJECT_DIR$/DataSync/DataSync.iml" />
       <module fileurl="file://$PROJECT_DIR$/HeartRate/HeartRate.iml" filepath="$PROJECT_DIR$/HeartRate/HeartRate.iml" />
       <module fileurl="file://$PROJECT_DIR$/HeartRateApp/HeartRateApp.iml" filepath="$PROJECT_DIR$/HeartRateApp/HeartRateApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/Math/Math.iml" filepath="$PROJECT_DIR$/Math/Math.iml" />

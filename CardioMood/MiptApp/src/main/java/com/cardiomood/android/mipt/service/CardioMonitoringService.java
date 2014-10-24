@@ -457,6 +457,7 @@ public class CardioMonitoringService extends Service {
                         @Override
                         public Void call() throws Exception {
                             CardioSessionDAO sessionDao = HelperFactory.getHelper().getCardioSessionDao();
+                            sessionDao.refresh(mCardioSession);
                             mCardioSession.setEndTimestamp(System.currentTimeMillis());
                             mCardioSession.setSyncDate(new Date(mCardioSession.getEndTimestamp()));
                             sessionDao.update(mCardioSession);

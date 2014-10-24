@@ -1,4 +1,4 @@
-package com.cardiomood.android.mipt.parse;
+package com.cardiomood.android.sync.parse;
 
 import android.text.TextUtils;
 
@@ -16,7 +16,11 @@ import bolts.Task;
 /**
  * Created by danon on 14.08.2014.
  */
-public abstract class ParseTools {
+public final class ParseTools {
+
+    private ParseTools() {
+        // don't instantiate this!
+    }
 
     public static final int DEFAULT_PARSE_QUERY_LIMIT = 100;
 

@@ -1,4 +1,4 @@
-package com.cardiomood.android.air.db.tools;
+package com.cardiomood.android.sync.parse;
 
 import java.util.Date;
 

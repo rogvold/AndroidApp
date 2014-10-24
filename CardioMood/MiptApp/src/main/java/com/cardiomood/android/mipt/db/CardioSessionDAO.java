@@ -1,6 +1,7 @@
 package com.cardiomood.android.mipt.db;
 
 import com.cardiomood.android.mipt.db.entity.CardioSessionEntity;
+import com.cardiomood.android.sync.ormlite.SyncDAO;
 import com.j256.ormlite.support.ConnectionSource;
 
 import java.sql.SQLException;

@@ -43,7 +43,7 @@ import com.cardiomood.android.air.gps.GPSService;
 import com.cardiomood.android.air.gps.GPSServiceApi;
 import com.cardiomood.android.air.gps.GPSServiceListener;
 import com.cardiomood.android.air.tools.Constants;
-import com.cardiomood.android.air.tools.ParseTools;
+import com.cardiomood.android.sync.parse.ParseTools;
 import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.ReachabilityTest;

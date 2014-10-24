@@ -1,3 +1,10 @@
 <menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     tools:context="com.cardiomood.android.air.HistoryActivity">
+
+    <item android:id="@+id/menu_refresh"
+        android:title="@string/menu_refresh"
+        android:icon="@drawable/ic_action_refresh"
+        android:showAsAction="always"/>
+
 </menu>

@@ -22,18 +22,12 @@ import android.widget.Toast;
 
 import com.cardiomood.android.air.data.AirSession;
 import com.cardiomood.android.air.data.Aircraft;
-import com.cardiomood.android.air.db.DataPointDAO;
 import com.cardiomood.android.air.db.HelperFactory;
-import com.cardiomood.android.air.db.SyncEngine;
-import com.cardiomood.android.air.db.entity.AirSessionEntity;
-import com.cardiomood.android.air.db.entity.AircraftEntity;
-import com.cardiomood.android.air.db.entity.DataPointEntity;
-import com.cardiomood.android.air.db.entity.SyncEntity;
 import com.cardiomood.android.air.tools.Constants;
-import com.cardiomood.android.air.tools.ParseTools;
+import com.cardiomood.android.sync.ormlite.SyncHelper;
+import com.cardiomood.android.sync.parse.ParseTools;
 import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.android.tools.PreferenceHelper;
-import com.j256.ormlite.stmt.DeleteBuilder;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -44,10 +38,6 @@ import com.parse.SaveCallback;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Callable;
-
-import bolts.Continuation;
-import bolts.Task;
 
 
 public class PlanesActivity extends Activity {
@@ -65,6 +55,9 @@ public class PlanesActivity extends Activity {
     private Aircraft selectedPlane = null;
     private boolean refreshing = false;
 
+    private SyncHelper syncHelper;
+    private PreferenceHelper prefHelper;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,8 +69,15 @@ public class PlanesActivity extends Activity {
             return;
         }
 
-        // update SyncEngine
-        SyncEngine.getInstance().setUserId(ParseUser.getCurrentUser().getObjectId());
+        // create PreferenceHelper
+        prefHelper = new PreferenceHelper(this, true);
+        long lastSyncDate = prefHelper.getLong(Constants.CONFIG_LAST_SYNC_TIMESTAMP, 0L);
+
+        // create SyncHelper
+        syncHelper = new SyncHelper(HelperFactory.getHelper());
+        syncHelper.setUserId(ParseUser.getCurrentUser().getObjectId());
+        syncHelper.setLastSyncDate(new Date(lastSyncDate));
+
 
         // initialize view
         setContentView(R.layout.activity_planes);
@@ -255,6 +255,7 @@ public class PlanesActivity extends Activity {
     }
 
     private void performLogout() {
+        prefHelper.remove(Constants.CONFIG_LAST_SYNC_TIMESTAMP);
         ParseUser.logOut();
         startActivity(new Intent(this, LoginActivity.class));
         finish();
@@ -311,70 +312,6 @@ public class PlanesActivity extends Activity {
                 invalidateOptionsMenu();
             }
         });
-
-        Task.callInBackground(new Callable<Date>() {
-            @Override
-            public Date call() throws Exception {
-                Date syncDate = new Date();
-                SyncEngine.getInstance().synObjects(Aircraft.class, AircraftEntity.class, false, null);
-                SyncEngine.getInstance().synObjects(AirSession.class, AirSessionEntity.class,
-                        true, new SyncEngine.SyncCallback<AirSession, AirSessionEntity>() {
-                            @Override
-                            public void onSaveLocally(AirSessionEntity localObject, AirSession remoteObject) {
-                                // delete and reload all data points
-                                try {
-                                    DataPointDAO dao = HelperFactory.getHelper().getDataPointDao();
-
-                                    // delete!
-                                    Log.d(TAG, "SyncCallback.onSaveLocally() deleting points for session " + localObject.getSyncId());
-                                    DeleteBuilder<DataPointEntity, Long> del = dao.deleteBuilder();
-                                    del.where().eq("sync_session_id", localObject.getSyncId());
-                                    del.delete();
-
-                                    ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery("AirSessionPoint")
-                                            .whereEqualTo("sessionId", localObject.getSyncId())
-                                            .orderByAscending("t");
-                                    List<ParseObject> remoteObjects = ParseTools.findAllParseObjects(parseQuery);
-                                    Log.d(TAG, "SyncCallback.onSaveLocally() saving data points for session: " + remoteObjects.size());
-
-                                    for (ParseObject point: remoteObjects) {
-                                        DataPointEntity entity = SyncEntity.fromParseObject(point, DataPointEntity.class);
-                                        entity.setSync(true);
-                                        dao.create(entity);
-                                    }
-
-                                    if (remoteObjects.isEmpty()) {
-                                        localObject.setDeleted(true);
-                                        localObject.setSyncDate(new Date());
-                                    }
-                                } catch (Exception ex) {
-                                    Log.e(TAG, "onSaveLocally() failed with exception", ex);
-                                }
-                            }
-
-                            @Override
-                            public void onSaveRemotely(AirSessionEntity localObject, AirSession remoteObject) {
-                                // submit data points that don't have "is_sync = true"
-                            }
-                        });
-                return syncDate;
-            }
-        }).continueWith(new Continuation<Date, Object>() {
-            @Override
-            public Date then(Task<Date> task) throws Exception {
-                if (task.isFaulted()) {
-                    Toast.makeText(PlanesActivity.this, "Faulted", Toast.LENGTH_SHORT).show();
-                    Log.w(TAG, "sync failed", task.getError());
-                } else if (task.isCompleted()) {
-                    Toast.makeText(PlanesActivity.this, "Completed", Toast.LENGTH_SHORT).show();
-                    SyncEngine.getInstance().setLastSyncDate(task.getResult());
-                    new PreferenceHelper(PlanesActivity.this, true)
-                            .putLong(Constants.CONFIG_LAST_SYNC_TIMESTAMP, SyncEngine.getInstance().getLastSyncDate().getTime());
-                }
-                return null;
-            }
-        }, Task.UI_THREAD_EXECUTOR);
-
     }
 
     public class PlanesListArrayAdapter extends ArrayAdapter<Aircraft> {

@@ -1,8 +1,9 @@
 package com.cardiomood.android.air.db.entity;
 
 import com.cardiomood.android.air.db.DataPointDAO;
-import com.cardiomood.android.air.db.annotations.ParseClass;
-import com.cardiomood.android.air.db.annotations.ParseField;
+import com.cardiomood.android.sync.annotations.ParseClass;
+import com.cardiomood.android.sync.annotations.ParseField;
+import com.cardiomood.android.sync.ormlite.SyncEntity;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
@@ -12,7 +13,7 @@ import java.io.Serializable;
  * Created by antondanhsin on 08/10/14.
  */
 @DatabaseTable(tableName = "air_session_points", daoClass = DataPointDAO.class)
-@ParseClass
+@ParseClass(name = "AirSessionPoint")
 public class DataPointEntity extends SyncEntity implements Serializable {
 
     @DatabaseField(columnName = "session_id")

@@ -1,6 +1,7 @@
 package com.cardiomood.android.air.db;
 
 import com.cardiomood.android.air.db.entity.AircraftEntity;
+import com.cardiomood.android.sync.ormlite.SyncDAO;
 import com.j256.ormlite.support.ConnectionSource;
 
 import java.sql.SQLException;
@@ -12,12 +13,6 @@ public class AircraftDAO extends SyncDAO<AircraftEntity, Long> {
 
     public AircraftDAO(ConnectionSource connectionSource, Class<AircraftEntity> dataClass) throws SQLException {
         super(connectionSource, dataClass);
-    }
-
-    public AircraftEntity findBySyncId(String syncId) throws SQLException{
-        return queryForFirst(
-                queryBuilder().limit(1L).where().eq("sync_id", syncId).prepare()
-        );
     }
 
 }

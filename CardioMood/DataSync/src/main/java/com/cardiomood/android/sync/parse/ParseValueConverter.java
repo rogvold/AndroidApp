@@ -1,4 +1,4 @@
-package com.cardiomood.android.mipt.db.tools;
+package com.cardiomood.android.sync.parse;
 
 /**
  * Created by antondanhsin on 18/10/14.

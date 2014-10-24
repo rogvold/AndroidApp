@@ -31,7 +31,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cardiomood.android.air.gps.GPSService;
-import com.cardiomood.android.air.tools.ParseTools;
+import com.cardiomood.android.sync.parse.ParseTools;
 import com.cardiomood.android.tools.CommonTools;
 import com.parse.FindCallback;
 import com.parse.ParseException;

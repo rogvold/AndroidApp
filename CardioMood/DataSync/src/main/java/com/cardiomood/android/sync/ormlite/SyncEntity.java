@@ -1,9 +1,9 @@
-package com.cardiomood.android.air.db.entity;
+package com.cardiomood.android.sync.ormlite;
 
-import com.cardiomood.android.air.db.annotations.ParseClass;
-import com.cardiomood.android.air.db.annotations.ParseField;
-import com.cardiomood.android.air.db.tools.ParseValueConverter;
-import com.cardiomood.android.air.tools.ReflectionUtils;
+import com.cardiomood.android.sync.annotations.ParseClass;
+import com.cardiomood.android.sync.annotations.ParseField;
+import com.cardiomood.android.sync.parse.ParseValueConverter;
+import com.cardiomood.android.tools.ReflectionUtils;
 import com.j256.ormlite.field.DataType;
 import com.j256.ormlite.field.DatabaseField;
 import com.parse.ParseObject;
@@ -77,6 +77,10 @@ public abstract class SyncEntity {
             // extract value converter
             Class<? extends SyncEntity> entityClass = entity.getClass();
             ParseClass classAnnotation = entityClass.getAnnotation(ParseClass.class);
+
+            if (classAnnotation == null) {
+                throw new IllegalArgumentException("Class " + entityClass.getName() + " must declare annotation " + ParseClass.class.getName());
+            }
             // TODO: converters must be cached!
             final ParseValueConverter converter = classAnnotation.valueConverterClass().newInstance();
 
@@ -105,7 +109,8 @@ public abstract class SyncEntity {
                                 // restore accessible flag
                                 field.setAccessible(accessible);
                             } catch (Exception ex) {
-                                // TODO: add log message here
+                                throw new RuntimeException("Failed to process field "
+                                        + field.getName() + " with annotation " + fieldAnnotation);
                             }
                         }
                     }
@@ -150,10 +155,10 @@ public abstract class SyncEntity {
             }
 
             // update updatedAt
-            if (entity.getCreationDate() != null) {
+            if (entity.getSyncDate() != null) {
                 Field updatedAtField = ParseObject.class.getDeclaredField("updatedAt");
                 updatedAtField.setAccessible(true);
-                updatedAtField.set(parseObject, entity.getCreationDate());
+                updatedAtField.set(parseObject, entity.getSyncDate());
                 updatedAtField.setAccessible(false);
             }
 
@@ -172,7 +177,10 @@ public abstract class SyncEntity {
 
                             boolean accessible = field.isAccessible();
                             field.setAccessible(true);
-                            parseObject.put(parseFieldName, field.get(entity));
+                            Object value = field.get(entity);
+                            if (value != null)
+                                parseObject.put(parseFieldName, value);
+                            else parseObject.remove(parseFieldName);
                             field.setAccessible(accessible);
                         }
                     }

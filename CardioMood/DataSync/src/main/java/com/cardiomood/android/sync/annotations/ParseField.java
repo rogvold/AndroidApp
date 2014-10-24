@@ -1,4 +1,4 @@
-package com.cardiomood.android.air.db.annotations;
+package com.cardiomood.android.sync.annotations;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;

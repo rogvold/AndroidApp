@@ -21,11 +21,11 @@ import com.cardiomood.android.mipt.SessionViewActivity_;
 import com.cardiomood.android.mipt.db.CardioItemDAO;
 import com.cardiomood.android.mipt.db.CardioSessionDAO;
 import com.cardiomood.android.mipt.db.HelperFactory;
-import com.cardiomood.android.mipt.db.SyncEngine;
 import com.cardiomood.android.mipt.db.entity.CardioItemEntity;
 import com.cardiomood.android.mipt.db.entity.CardioSessionEntity;
 import com.cardiomood.android.mipt.parse.CardioSession;
 import com.cardiomood.android.mipt.tools.Constants;
+import com.cardiomood.android.sync.ormlite.SyncHelper;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.math.HeartRateUtils;
 import com.cardiomood.math.filter.PisarukArtifactFilter;
@@ -147,15 +147,16 @@ public class HistoryFragment extends ListFragment {
         pDialog.show();
 
         final Date lastSyncDate = new Date(mPrefHelper.getLong(Constants.APP_LAST_SYNC_TIMESTAMP, 0L));
-        SyncEngine.getInstance().setUserId(ParseUser.getCurrentUser().getObjectId());
-        SyncEngine.getInstance().setLastSyncDate(lastSyncDate);
+        final SyncHelper syncHelper = new SyncHelper(HelperFactory.getHelper());
+        syncHelper.setUserId(ParseUser.getCurrentUser().getObjectId());
+        syncHelper.setLastSyncDate(lastSyncDate);
 
         Task.callInBackground(new Callable<Long>() {
             @Override
             public Long call() throws Exception {
                 long sync = System.currentTimeMillis();
-                SyncEngine.getInstance().synObjects(CardioSession.class, CardioSessionEntity.class,
-                        true, new SyncEngine.SyncCallback<CardioSession, CardioSessionEntity>() {
+                syncHelper.synObjects(CardioSession.class, CardioSessionEntity.class,
+                        true, new SyncHelper.SyncCallback<CardioSession, CardioSessionEntity>() {
                             @Override
                             public void onSaveLocally(CardioSessionEntity localObject, CardioSession remoteObject) {
                                 try {
@@ -247,7 +248,9 @@ public class HistoryFragment extends ListFragment {
                         }
 
                         refreshSessionList();
-                        pDialog.dismiss();
+                        if (pDialog != null) {
+                            pDialog.dismiss();
+                        }
                         pDialog = null;
                         return null;
                     }

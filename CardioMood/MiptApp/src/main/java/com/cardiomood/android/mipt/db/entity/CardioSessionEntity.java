@@ -1,8 +1,9 @@
 package com.cardiomood.android.mipt.db.entity;
 
 import com.cardiomood.android.mipt.db.CardioSessionDAO;
-import com.cardiomood.android.mipt.db.annotations.ParseClass;
-import com.cardiomood.android.mipt.db.annotations.ParseField;
+import com.cardiomood.android.sync.annotations.ParseClass;
+import com.cardiomood.android.sync.annotations.ParseField;
+import com.cardiomood.android.sync.ormlite.SyncEntity;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 

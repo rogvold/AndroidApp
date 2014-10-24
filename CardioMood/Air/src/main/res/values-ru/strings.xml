@@ -26,5 +26,9 @@
     <string name="pref_title_draw_track">Показывать пройденный маршрут</string>
     <string name="pref_summary_draw_track">Рисовать пройденный путь на карте.</string>
     <string name="button_history">Полеты</string>
+    <string name="loading_session_data">Загрузка информации о полете...</string>
+    <string name="title_activity_debriefing">Разбор полетов</string>
+    <string name="title_activity_history">Мои полеты</string>
+    <string name="hello_world"></string>
 
 </resources>

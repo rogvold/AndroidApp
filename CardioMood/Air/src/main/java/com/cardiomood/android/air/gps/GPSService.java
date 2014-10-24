@@ -27,7 +27,7 @@ import com.cardiomood.android.air.data.Aircraft;
 import com.cardiomood.android.air.db.HelperFactory;
 import com.cardiomood.android.air.db.entity.AirSessionEntity;
 import com.cardiomood.android.air.db.entity.DataPointEntity;
-import com.cardiomood.android.air.db.entity.SyncEntity;
+import com.cardiomood.android.sync.ormlite.SyncEntity;
 import com.cardiomood.android.tools.thread.WorkerThread;
 import com.cardiomood.heartrate.bluetooth.LeHRMonitor;
 import com.cardiomood.math.HeartRateUtils;
@@ -694,6 +694,7 @@ public class GPSService extends Service {
                 // while (!processItems(portion));
                 // todo: we must do something about __portion__ if it is not empty!
 
+                airSessionDao.refresh(sessionEntity);
                 session.setEndDate(getLastItemTime());
                 sessionEntity.setEndDate(getLastItemTime());
                 airSessionDao.update(sessionEntity);
@@ -757,7 +758,9 @@ public class GPSService extends Service {
                 item.setSyncDate(item.getCreationDate());
                 dataPointDao.create(item);
 
+                airSessionDao.refresh(sessionEntity);
                 sessionEntity.setSyncDate(item.getSyncDate());
+                airSessionDao.update(sessionEntity);
             }
         }
 

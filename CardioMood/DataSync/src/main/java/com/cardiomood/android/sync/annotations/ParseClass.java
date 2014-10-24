@@ -1,7 +1,7 @@
-package com.cardiomood.android.mipt.db.annotations;
+package com.cardiomood.android.sync.annotations;
 
-import com.cardiomood.android.mipt.db.tools.ParseValueConverter;
-import com.cardiomood.android.mipt.db.tools.SimpleParseValueConverter;
+import com.cardiomood.android.sync.parse.ParseValueConverter;
+import com.cardiomood.android.sync.parse.SimpleParseValueConverter;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

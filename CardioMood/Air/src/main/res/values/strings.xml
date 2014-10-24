@@ -31,5 +31,6 @@
     <string name="button_history">History</string>
     <string name="title_activity_history">History</string>
     <string name="title_activity_debriefing">Debriefing</string>
+    <string name="loading_session_data">Loading session data...</string>
 
 </resources>

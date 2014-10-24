@@ -1,6 +1,5 @@
-package com.cardiomood.android.mipt.db;
+package com.cardiomood.android.sync.ormlite;
 
-import com.cardiomood.android.mipt.db.entity.SyncEntity;
 import com.j256.ormlite.dao.BaseDaoImpl;
 import com.j256.ormlite.support.ConnectionSource;
 
