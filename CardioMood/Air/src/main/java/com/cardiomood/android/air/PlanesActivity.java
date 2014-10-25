@@ -28,6 +28,7 @@ import com.cardiomood.android.sync.ormlite.SyncHelper;
 import com.cardiomood.android.sync.parse.ParseTools;
 import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.android.tools.PreferenceHelper;
+import com.cardiomood.android.tools.ui.TouchEffect;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -108,6 +109,7 @@ public class PlanesActivity extends Activity {
 
         mStartButton = (Button) findViewById(R.id.start_button);
         mStartButton.setEnabled(false);
+        mStartButton.setOnTouchListener(TouchEffect.FADE_ON_TOUCH);
         mStartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -116,6 +118,7 @@ public class PlanesActivity extends Activity {
         });
 
         mHistoryButton = (Button) findViewById(R.id.button_history);
+        mHistoryButton.setOnTouchListener(TouchEffect.FADE_ON_TOUCH);
         mHistoryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -136,6 +139,7 @@ public class PlanesActivity extends Activity {
     }
 
     private void trySelectedPlane(final Aircraft plane) {
+        mStartButton.setEnabled(false);
         ParseQuery.getQuery(AirSession.class)
                 .whereDoesNotExist("endDate")
                 .whereEqualTo("aircraftId", plane.getObjectId())
@@ -150,6 +154,7 @@ public class PlanesActivity extends Activity {
                                 showExistingSessionDialog(plane, airSessions);
                             }
                         }
+                        mStartButton.setEnabled(true);
                     }
                 });
     }

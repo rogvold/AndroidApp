@@ -36,7 +36,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.cardiomood.android.air.data.AirSession;
 import com.cardiomood.android.air.data.Aircraft;
 import com.cardiomood.android.air.gps.GPSMonitor;
 import com.cardiomood.android.air.gps.GPSService;
@@ -65,14 +64,12 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.SphericalUtil;
-import com.parse.DeleteCallback;
 import com.parse.FunctionCallback;
 import com.parse.GetCallback;
 import com.parse.ParseCloud;
 import com.parse.ParseException;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
-import com.parse.SaveCallback;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -85,10 +82,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Callable;
-
-import bolts.Continuation;
-import bolts.Task;
 
 
 public class TrackingActivity extends Activity {
@@ -110,7 +103,7 @@ public class TrackingActivity extends Activity {
 
     // current state variables
     private Aircraft mPlane = null;
-    private volatile AirSession mAirSession = null;
+    private volatile String mAirSessionId = null;
 
     private GPSServiceApi gpsService;
     private boolean gpsBound;
@@ -478,17 +471,8 @@ public class TrackingActivity extends Activity {
         super.onSaveInstanceState(outState);
 
         Log.d(TAG, "onSaveInstanceState()");
-        if (mAirSession != null && mAirSession.getObjectId() != null) {
-            outState.putString("sessionId", mAirSession.getObjectId());
-            mAirSession.pinInBackground(new SaveCallback() {
-                @Override
-                public void done(ParseException e) {
-                    if (e != null) {
-                        Log.w(TAG, "onSaveInstanceState() -> " +
-                                "failed to save session to the local data store", e);
-                    }
-                }
-            });
+        if (mAirSessionId != null) {
+            outState.putString("sessionId", mAirSessionId);
         }
     }
 
@@ -497,43 +481,7 @@ public class TrackingActivity extends Activity {
         super.onRestoreInstanceState(savedInstanceState);
 
         Log.d(TAG, "onRestoreInstanceState()");
-        final String sessionId = savedInstanceState.getString("sessionId");
-        if (sessionId != null ) {
-            Task.callInBackground(new Callable<AirSession>() {
-                @Override
-                public AirSession call() throws Exception {
-                    return ParseQuery.getQuery(AirSession.class)
-                            .fromLocalDatastore()
-                            .get(sessionId);
-                }
-            }).continueWith(new Continuation<AirSession, AirSession>() {
-                @Override
-                public AirSession then(Task<AirSession> task) throws Exception {
-                    if (task.isCompleted()) {
-                        mAirSession = task.getResult();
-                        return mAirSession;
-                    } else {
-                        Log.d(TAG, "task was not finished", task.getError());
-                        throw new Exception(task.getError());
-                    }
-                }
-            }).onSuccess(new Continuation<AirSession, Void>() {
-                @Override
-                public Void then(Task<AirSession> task) throws Exception {
-                    if (task.isCompleted()) {
-                        task.getResult().unpinInBackground(new DeleteCallback() {
-                            @Override
-                            public void done(ParseException e) {
-                                if (e != null) {
-                                    Log.w(TAG, "failed to unpin session", e);
-                                }
-                            }
-                        });
-                    }
-                    return null;
-                }
-            });
-        }
+        mAirSessionId = savedInstanceState.getString("sessionId");
     }
 
     @Override
@@ -768,29 +716,13 @@ public class TrackingActivity extends Activity {
 
     private void startTracking() {
         mStartButton.setEnabled(false);
-        final String planeId = getIntent().getStringExtra(SELECTED_PLANE_PARSE_ID);
-        final String userId = ParseUser.getCurrentUser().getObjectId();
+        String planeId = getIntent().getStringExtra(SELECTED_PLANE_PARSE_ID);
         if (planeId != null) {
-            Task.call(new Callable<Object>() {
-                @Override
-                public Object call() throws Exception {
-                    if (gpsService != null)
-                        gpsService.startTrackingSession(userId, planeId);
-                    return null;
-                }
-            }).continueWith(new Continuation<Object, Object>() {
-                @Override
-                public Object then(Task<Object> task) throws Exception {
-                    if (task.isFaulted()) {
-                        mStartButton.setEnabled(true);
-                        Toast.makeText(TrackingActivity.this, "Failed.", Toast.LENGTH_SHORT).show();
-                        Log.e(TAG, "gpsService.startTrackingSession() failed", task.getError());
-                    }
-                    return null;
-                }
-            }, Task.UI_THREAD_EXECUTOR);
-
-
+            try {
+                gpsService.startTrackingSession(ParseUser.getCurrentUser().getObjectId(), planeId);
+            } catch (RemoteException ex) {
+                mStartButton.setEnabled(true);
+            }
         } else {
             mStartButton.setEnabled(true);
         }
@@ -1337,6 +1269,7 @@ public class TrackingActivity extends Activity {
                 @Override
                 public void run() {
                     try {
+                        mAirSessionId = airSessionId;
                         mControlPanelView.setVisibility(View.GONE);
 
                         mStartButton.setVisibility(View.GONE);
@@ -1392,10 +1325,18 @@ public class TrackingActivity extends Activity {
                             mStopButton.setEnabled(false);
                             if (finishingProgressDialog != null && finishingProgressDialog.isShowing()) {
                                 finishingProgressDialog.dismiss();
+                                finishingProgressDialog = null;
                             }
-                            startActivity(new Intent(TrackingActivity.this, LoginActivity.class));
-                            TrackingActivity.this.finish();
-                        }
+                            if (mAirSessionId != null) {
+                                Intent intent = new Intent(TrackingActivity.this, DebriefingActivity.class);
+                                intent.putExtra(DebriefingActivity.EXTRA_SESSION_ID, mAirSessionId);
+                                startActivity(intent);
+                                mAirSessionId = null;
+                            } else
+                                startActivity(new Intent(TrackingActivity.this, LoginActivity.class));
+                                finish();
+                                mAirSessionId = null;
+                             }
                     } catch(Exception ex) {
                         // suppress this
                     }

@@ -32,6 +32,7 @@ import com.cardiomood.android.sync.ormlite.SyncEntity;
 import com.cardiomood.android.sync.ormlite.SyncHelper;
 import com.cardiomood.android.sync.parse.ParseTools;
 import com.cardiomood.android.tools.PreferenceHelper;
+import com.cardiomood.android.tools.ui.TouchEffect;
 import com.google.gson.Gson;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.parse.ParseCloud;
@@ -366,6 +367,8 @@ public class HistoryActivity extends Activity implements AdapterView.OnItemClick
 
             TextView text2 = (TextView) itemView.findViewById(android.R.id.text2);
             text2.setText(DATE_FORMAT.format(info.creationDate));
+
+            itemView.setOnTouchListener(TouchEffect.FADE_ON_TOUCH);
 
             return itemView;
         }

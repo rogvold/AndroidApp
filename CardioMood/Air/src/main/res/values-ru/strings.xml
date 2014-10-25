@@ -4,7 +4,7 @@
     <string name="app_name">Air</string>
     <string name="title_activity_main">CardioMood Air</string>
     <string name="action_settings">Настройки</string>
-    <string name="title_activity_tracking">Flight Tracking</string>
+    <string name="title_activity_tracking">Мониторинг</string>
     <string name="title_other_devices">Другие устройства</string>
     <string name="select_device">Выберите датчик</string>
     <string name="no">Нет</string>
@@ -30,5 +30,9 @@
     <string name="title_activity_debriefing">Разбор полетов</string>
     <string name="title_activity_history">Мои полеты</string>
     <string name="hello_world"></string>
+    <string name="type_new_name">Укажите новое имя для этоко полета:</string>
+    <string name="menu_rename">Переименовать</string>
+    <string name="rename_session">Переименовать полет</string>
+    <string name="untitled_flight">Без имени</string>
 
 </resources>

@@ -1,3 +1,9 @@
 <menu xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     tools:context="com.cardiomood.android.air.DebriefingActivity">
+
+    <item android:id="@+id/menu_rename"
+        android:title="@string/menu_rename"
+        android:showAsAction="always"/>
+
 </menu>

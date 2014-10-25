@@ -208,11 +208,7 @@ public class GPSService extends Service {
         public void startTrackingSession(String userId, String aircraftId) throws RemoteException {
             synchronized (lock) {
                 finishing = false;
-                try {
-                    createTrackingSession(userId, aircraftId);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
+                createTrackingSession(userId, aircraftId);
             }
         }
 

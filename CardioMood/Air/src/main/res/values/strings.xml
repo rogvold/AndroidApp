@@ -32,5 +32,9 @@
     <string name="title_activity_history">History</string>
     <string name="title_activity_debriefing">Debriefing</string>
     <string name="loading_session_data">Loading session data...</string>
+    <string name="rename_session">Rename flight</string>
+    <string name="menu_rename">Rename</string>
+    <string name="type_new_name">Specify new name for this flight:</string>
+    <string name="untitled_flight">Untitled</string>
 
 </resources>
