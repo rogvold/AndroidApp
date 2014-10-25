@@ -29,30 +29,30 @@ public class DataPointEntity extends SyncEntity implements Serializable {
 
     @DatabaseField(columnName = "lat")
     @ParseField(name = "lat")
-    private double latitude;
+    private double lat;
 
     @DatabaseField(columnName = "lon")
     @ParseField(name = "lon")
-    private double longitude;
+    private double lon;
 
     @DatabaseField(columnName = "alt")
     @ParseField(name = "alt")
-    private Double altitude;
+    private Double alt;
 
     @DatabaseField(columnName = "bea")
     @ParseField(name = "bea")
-    private Float bearing;
+    private Float bea;
 
     @DatabaseField(columnName = "vel")
     @ParseField(name = "vel")
-    private Float velocity;
+    private Float vel;
 
     @DatabaseField(columnName = "acc")
     @ParseField(name = "acc")
-    private Float accuracy;
+    private Float acc;
 
     @DatabaseField(columnName = "hr")
-    @ParseField(name = "hr")
+    @ParseField(name = "HR")
     private Integer HR;
 
     @DatabaseField(columnName = "stress")
@@ -87,51 +87,51 @@ public class DataPointEntity extends SyncEntity implements Serializable {
     }
 
     public double getLatitude() {
-        return latitude;
+        return lat;
     }
 
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
+    public void setLatitude(double lat) {
+        this.lat = lat;
     }
 
     public double getLongitude() {
-        return longitude;
+        return lon;
     }
 
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
+    public void setLongitude(double lon) {
+        this.lon = lon;
     }
 
     public Double getAltitude() {
-        return altitude;
+        return alt;
     }
 
-    public void setAltitude(Double altitude) {
-        this.altitude = altitude;
+    public void setAltitude(Double alt) {
+        this.alt = alt;
     }
 
     public Float getBearing() {
-        return bearing;
+        return bea;
     }
 
-    public void setBearing(Float bearing) {
-        this.bearing = bearing;
+    public void setBearing(Float bea) {
+        this.bea = bea;
     }
 
     public Float getVelocity() {
-        return velocity;
+        return vel;
     }
 
-    public void setVelocity(Float velocity) {
-        this.velocity = velocity;
+    public void setVelocity(Float vel) {
+        this.vel = vel;
     }
 
     public Float getAccuracy() {
-        return accuracy;
+        return vel;
     }
 
     public void setAccuracy(Float accuracy) {
-        this.accuracy = accuracy;
+        this.vel = vel;
     }
 
     public Integer getHR() {

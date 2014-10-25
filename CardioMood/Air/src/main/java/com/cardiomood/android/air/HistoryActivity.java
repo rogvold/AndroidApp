@@ -153,12 +153,21 @@ public class HistoryActivity extends Activity implements AdapterView.OnItemClick
                         true, new SyncHelper.SyncCallback<AirSession, AirSessionEntity>() {
                             @Override
                             public void onSaveLocally(AirSessionEntity localObject, AirSession remoteObject) {
-                                // delete and reload all data points
                                 try {
-                                    DataPointDAO dao = HelperFactory.getHelper().getDataPointDao();
-                                    // delete!
+                                    if (localObject.getId() != null) {
+                                        // already exists...
+                                        if (remoteObject.getBoolean("deleted")) {
+                                            return;
+                                        }
+                                        if (localObject.isDeleted() && remoteObject.getBoolean("deleted")) {
+                                            return;
+                                        }
+                                        // remote object was recovered (un-deleted)
+                                    }
+                                    DataPointDAO pointDao = HelperFactory.getHelper().getDataPointDao();
+                                    // delete old points first!
                                     Log.d(TAG, "SyncCallback.onSaveLocally() deleting points for session " + localObject.getSyncId());
-                                    DeleteBuilder<DataPointEntity, Long> del = dao.deleteBuilder();
+                                    DeleteBuilder<DataPointEntity, Long> del = pointDao.deleteBuilder();
                                     del.where().eq("sync_session_id", localObject.getSyncId());
                                     del.delete();
 
@@ -172,7 +181,7 @@ public class HistoryActivity extends Activity implements AdapterView.OnItemClick
                                     for (ParseObject point : remoteObjects) {
                                         DataPointEntity entity = SyncEntity.fromParseObject(point, DataPointEntity.class);
                                         entity.setSync(true);
-                                        dao.create(entity);
+                                        pointDao.create(entity);
                                     }
 
                                     if (remoteObjects.isEmpty()) {
@@ -234,12 +243,14 @@ public class HistoryActivity extends Activity implements AdapterView.OnItemClick
                     Log.w(TAG, "sync failed", task.getError());
                 } else if (task.isCompleted()) {
                     prefHelper.putLong(Constants.CONFIG_LAST_SYNC_TIMESTAMP, task.getResult());
-                    refreshSessionList();
-                    if (pDialog != null) {
-                        pDialog.dismiss();
-                    }
-                    pDialog = null;
                 }
+
+                refreshSessionList();
+                if (pDialog != null) {
+                    pDialog.dismiss();
+                }
+                pDialog = null;
+
                 return null;
             }
         }, Task.UI_THREAD_EXECUTOR);

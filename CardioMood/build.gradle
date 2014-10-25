@@ -16,4 +16,10 @@ allprojects {
         mavenCentral()
     }
 
+    configurations {
+
+        all*.exclude group: 'com.parse'
+
+    }
+
 }

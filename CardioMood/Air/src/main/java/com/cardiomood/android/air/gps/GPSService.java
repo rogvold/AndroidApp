@@ -208,7 +208,11 @@ public class GPSService extends Service {
         public void startTrackingSession(String userId, String aircraftId) throws RemoteException {
             synchronized (lock) {
                 finishing = false;
-                createTrackingSession(userId, aircraftId);
+                try {
+                    createTrackingSession(userId, aircraftId);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         }
 
@@ -392,20 +396,22 @@ public class GPSService extends Service {
         private void onSessionCreated(AirSession session) {
             airSession = session;
 
-            // start monitoring
-            mHandler.post(new Runnable() {
-                public void run() {
-                    GPSService.this.start();
-                }
-            });
+            if (session != null) {
+                // start monitoring
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        GPSService.this.start();
+                    }
+                });
 
-            // notify listeners
-            synchronized (listeners) {
-                for (GPSServiceListener l: listeners) {
-                    try {
-                        l.onTrackingSessionStarted(session.getUserId(), session.getAircraftId(), session.getObjectId());
-                    } catch (RemoteException ex) {
-                        Log.w(TAG, "onSessionCreated() -> failed to notify listener", ex);
+                // notify listeners
+                synchronized (listeners) {
+                    for (GPSServiceListener l : listeners) {
+                        try {
+                            l.onTrackingSessionStarted(session.getUserId(), session.getAircraftId(), session.getObjectId());
+                        } catch (RemoteException ex) {
+                            Log.w(TAG, "onSessionCreated() -> failed to notify listener", ex);
+                        }
                     }
                 }
             }
@@ -702,11 +708,12 @@ public class GPSService extends Service {
                 try {
                     session.save();
                     //if (portion.isEmpty()) {
-                        sessionEntity.setSyncDate(session.getUpdatedAt());
+                    airSessionDao.refresh(sessionEntity);
+                    sessionEntity.setSyncDate(session.getUpdatedAt());
                     //}
                 } catch (ParseException ex) {
                     Log.w(TAG, "workerThread.onStop() -> failed to save session", ex);
-                    session.saveEventually();
+                    airSessionDao.refresh(sessionEntity);
                     sessionEntity.setSyncDate(new Date());
                 }
 

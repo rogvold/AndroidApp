@@ -768,13 +768,29 @@ public class TrackingActivity extends Activity {
 
     private void startTracking() {
         mStartButton.setEnabled(false);
-        String planeId = getIntent().getStringExtra(SELECTED_PLANE_PARSE_ID);
+        final String planeId = getIntent().getStringExtra(SELECTED_PLANE_PARSE_ID);
+        final String userId = ParseUser.getCurrentUser().getObjectId();
         if (planeId != null) {
-            try {
-                gpsService.startTrackingSession(ParseUser.getCurrentUser().getObjectId(), planeId);
-            } catch (RemoteException ex) {
-                mStartButton.setEnabled(true);
-            }
+            Task.call(new Callable<Object>() {
+                @Override
+                public Object call() throws Exception {
+                    if (gpsService != null)
+                        gpsService.startTrackingSession(userId, planeId);
+                    return null;
+                }
+            }).continueWith(new Continuation<Object, Object>() {
+                @Override
+                public Object then(Task<Object> task) throws Exception {
+                    if (task.isFaulted()) {
+                        mStartButton.setEnabled(true);
+                        Toast.makeText(TrackingActivity.this, "Failed.", Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "gpsService.startTrackingSession() failed", task.getError());
+                    }
+                    return null;
+                }
+            }, Task.UI_THREAD_EXECUTOR);
+
+
         } else {
             mStartButton.setEnabled(true);
         }
