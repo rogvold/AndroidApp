@@ -678,13 +678,31 @@ public class GPSService extends Service {
 
         public void setSession(AirSession session) {
             this.session = session;
+        }
 
+        @Override
+        public void onStart() {
             if (session != null) {
                 sessionEntity = SyncEntity.fromParseObject(session, AirSessionEntity.class);
                 try {
                     airSessionDao.create(sessionEntity);
                 } catch (Exception ex) {
                     Log.w(TAG, "setSession() - failed to persist AirSessionEntity", ex);
+
+                    // notify listeners
+                    synchronized (listeners) {
+                        List<GPSServiceListener> toRemove = new ArrayList<GPSServiceListener>();
+                        for (GPSServiceListener l: listeners) {
+                            try {
+                                l.onTrackingSessionFinished();
+                            } catch (RemoteException e) {
+                                Log.w(TAG, "stopTrackingSession() -> failed to notify listener", e);
+                                if (ex instanceof DeadObjectException)
+                                    toRemove.add(l);
+                            }
+                        }
+                        listeners.removeAll(toRemove);
+                    }
                 }
             }
         }

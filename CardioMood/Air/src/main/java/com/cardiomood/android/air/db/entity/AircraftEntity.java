@@ -15,6 +15,9 @@ import java.io.Serializable;
 @DatabaseTable(tableName = "aircrafts", daoClass = AircraftDAO.class) @ParseClass(name = "Aircraft")
 public class AircraftEntity extends SyncEntity implements Serializable {
 
+    @DatabaseField(columnName = "_id", generatedId = true)
+    private Long id;
+
     @DatabaseField(columnName = "aircraft_id")
     @ParseField(name = "aircraftId")
     private String aircraftId;
@@ -30,6 +33,14 @@ public class AircraftEntity extends SyncEntity implements Serializable {
     @DatabaseField(columnName = "aircraft_type")
     @ParseField(name = "aircraftType")
     private String aircraftType;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getAircraftId() {
         return aircraftId;

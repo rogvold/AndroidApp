@@ -4,7 +4,7 @@
     package="com.cardiomood.android.air" >
 
     <application
-        android:name=".AirApplication"
+        android:name="com.cardiomood.android.air.AirApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"

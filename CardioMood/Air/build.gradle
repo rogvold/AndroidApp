@@ -36,15 +36,15 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    //compile fileTree(dir: 'libs', include: ['*.jar'])
     compile project(':CommonTools')
     compile project(':HeartRate')
     compile project(':Math')
-    compile project(':DataSync')
+
+
+    compile 'com.cardiomood.android:android-data-sync:0.2.2'
 
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'com.google.android.gms:play-services:5.0.89'
     compile 'com.google.maps.android:android-maps-utils:0.3'
-//    compile 'com.j256.ormlite:ormlite-android:4.48+'
-//    compile 'com.parse.bolts:bolts-android:1.1.3'
 }

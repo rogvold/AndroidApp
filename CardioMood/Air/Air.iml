@@ -81,6 +81,7 @@
     <orderEntry type="jdk" jdkName="Android API 19 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="ormlite-android-4.48" level="project" />
+    <orderEntry type="library" exported="" name="android-data-sync-0.2.2" level="project" />
     <orderEntry type="library" exported="" name="android-maps-utils-0.3" level="project" />
     <orderEntry type="library" exported="" name="gson-2.2.4" level="project" />
     <orderEntry type="library" exported="" name="ormlite-core-4.48" level="project" />
@@ -90,7 +91,6 @@
     <orderEntry type="library" exported="" name="play-services-5.0.89" level="project" />
     <orderEntry type="library" exported="" name="commons-math3-3.3" level="project" />
     <orderEntry type="module" module-name="CommonTools" exported="" />
-    <orderEntry type="module" module-name="DataSync" exported="" />
     <orderEntry type="module" module-name="Math" exported="" />
     <orderEntry type="module" module-name="HeartRate" exported="" />
   </component>

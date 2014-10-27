@@ -6,9 +6,7 @@ import android.util.Log;
 
 import com.cardiomood.android.mipt.db.entity.CardioItemEntity;
 import com.cardiomood.android.mipt.db.entity.CardioSessionEntity;
-import com.cardiomood.android.sync.ormlite.SyncDAO;
-import com.cardiomood.android.sync.ormlite.SyncDatabaseHelper;
-import com.cardiomood.android.sync.ormlite.SyncEntity;
+import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.support.ConnectionSource;
 import com.j256.ormlite.table.TableUtils;
 
@@ -17,11 +15,11 @@ import java.sql.SQLException;
 /**
  * Created by danon on 27.05.2014.
  */
-public class DatabaseHelper extends SyncDatabaseHelper {
+public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 
     private static final String TAG = DatabaseHelper.class.getSimpleName();
 
-    private static final String DATABASE_NAME   = "cardiomood_air.db";
+    private static final String DATABASE_NAME   = "cardiomood_mipt.db";
     private static final int DATABASE_VERSION   = 1;
 
     private Context mContext;
@@ -73,14 +71,6 @@ public class DatabaseHelper extends SyncDatabaseHelper {
             cardioItemDao.setObjectCache(true);
         }
         return cardioItemDao;
-    }
-
-    public <T extends SyncEntity> SyncDAO<T, Long> getSyncDao(Class<T> clazz) throws SQLException {
-        if (CardioSessionEntity.class.equals(clazz))
-            return (SyncDAO<T, Long>) getCardioSessionDao();
-
-        // not supported class!!!
-        throw new IllegalArgumentException("Class " + clazz + " is not supported!");
     }
 
 }

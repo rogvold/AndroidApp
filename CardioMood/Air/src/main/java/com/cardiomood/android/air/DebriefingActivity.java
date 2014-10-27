@@ -119,19 +119,24 @@ public class DebriefingActivity extends Activity {
                 PolylineOptions opt = new PolylineOptions()
                         .width(3)
                         .color(Color.BLUE);
-                for (int i = 1; i < points.size(); i++) {
-                    opt.add(
-                            new LatLng(points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude()),
-                            new LatLng(points.get(i).getLatitude(), points.get(i).getLongitude())
+                if (points.size() > 0) {
+                    for (int i = 1; i < points.size(); i++) {
+                        opt.add(
+                                new LatLng(points.get(i - 1).getLatitude(), points.get(i - 1).getLongitude()),
+                                new LatLng(points.get(i).getLatitude(), points.get(i).getLongitude())
+                        );
+                    }
+                    drawRoute(
+                            opt,
+                            new LatLng(
+                                    points.get(points.size() - 1).getLatitude(),
+                                    points.get(points.size() - 1).getLongitude()
+                            )
                     );
+                } else {
+                    drawRoute(opt, null);
                 }
-                drawRoute(
-                        opt,
-                        new LatLng(
-                                points.get(points.size() - 1).getLatitude(),
-                                points.get(points.size() - 1).getLongitude()
-                        )
-                );
+
                 return null;
             }
         }).continueWith(new Continuation<Object, Object>() {
@@ -150,9 +155,14 @@ public class DebriefingActivity extends Activity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                if (opt.getPoints().size() < 2) {
+                    Toast.makeText(DebriefingActivity.this, "This session is empty.", Toast.LENGTH_SHORT).show();
+                }
                 if (map != null) {
                     map.addPolyline(opt);
-                    map.animateCamera(CameraUpdateFactory.newLatLngZoom(zoomPoint, 13));
+                    if (zoomPoint != null) {
+                        map.animateCamera(CameraUpdateFactory.newLatLngZoom(zoomPoint, 13));
+                    }
                 }
             }
         });
@@ -223,11 +233,13 @@ public class DebriefingActivity extends Activity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                String name = mSession.getName();
-                if (name == null || name.trim().isEmpty()) {
-                    setTitle(R.string.untitled_flight);
-                } else {
-                    setTitle(name.trim());
+                if (mSession != null) {
+                    String name = mSession.getName();
+                    if (name == null || name.trim().isEmpty()) {
+                        setTitle(R.string.untitled_flight);
+                    } else {
+                        setTitle(name.trim());
+                    }
                 }
             }
         });

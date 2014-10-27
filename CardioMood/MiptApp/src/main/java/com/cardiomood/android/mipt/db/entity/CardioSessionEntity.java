@@ -14,6 +14,9 @@ import com.j256.ormlite.table.DatabaseTable;
 @ParseClass(name = "CardioSession")
 public class CardioSessionEntity extends SyncEntity {
 
+    @DatabaseField(columnName = "_id", generatedId = true)
+    private Long id;
+
     @ParseField
     @DatabaseField(columnName = "name")
     private String name;
@@ -29,6 +32,14 @@ public class CardioSessionEntity extends SyncEntity {
     @ParseField
     @DatabaseField(columnName = "end_timestamp")
     private Long endTimestamp;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;

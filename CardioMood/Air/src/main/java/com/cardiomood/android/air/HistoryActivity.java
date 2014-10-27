@@ -18,8 +18,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.cardiomood.android.air.data.AirSession;
-import com.cardiomood.android.air.data.Aircraft;
 import com.cardiomood.android.air.db.AirSessionDAO;
 import com.cardiomood.android.air.db.AircraftDAO;
 import com.cardiomood.android.air.db.DataPointDAO;
@@ -28,6 +26,7 @@ import com.cardiomood.android.air.db.entity.AirSessionEntity;
 import com.cardiomood.android.air.db.entity.AircraftEntity;
 import com.cardiomood.android.air.db.entity.DataPointEntity;
 import com.cardiomood.android.air.tools.Constants;
+import com.cardiomood.android.sync.SyncException;
 import com.cardiomood.android.sync.ormlite.SyncEntity;
 import com.cardiomood.android.sync.ormlite.SyncHelper;
 import com.cardiomood.android.sync.parse.ParseTools;
@@ -149,11 +148,11 @@ public class HistoryActivity extends Activity implements AdapterView.OnItemClick
             @Override
             public Long call() throws Exception {
                 long syncDate = System.currentTimeMillis();
-                syncHelper.synObjects(Aircraft.class, AircraftEntity.class, false, null);
-                syncHelper.synObjects(AirSession.class, AirSessionEntity.class,
-                        true, new SyncHelper.SyncCallback<AirSession, AirSessionEntity>() {
+                syncHelper.synObjects(AircraftEntity.class, false, null);
+                syncHelper.synObjects(AirSessionEntity.class,
+                        true, new SyncHelper.SyncCallback<AirSessionEntity>() {
                             @Override
-                            public void onSaveLocally(AirSessionEntity localObject, AirSession remoteObject) {
+                            public void onSaveLocally(AirSessionEntity localObject, ParseObject remoteObject) throws Exception {
                                 try {
                                     if (localObject.getId() != null) {
                                         // already exists...
@@ -191,12 +190,12 @@ public class HistoryActivity extends Activity implements AdapterView.OnItemClick
                                     }
                                 } catch (Exception ex) {
                                     Log.e(TAG, "onSaveLocally() failed with exception", ex);
-                                    throw new RuntimeException(ex);
+                                    throw new SyncException(ex);
                                 }
                             }
 
                             @Override
-                            public void onSaveRemotely(AirSessionEntity localObject, AirSession remoteObject) {
+                            public void onSaveRemotely(AirSessionEntity localObject, ParseObject remoteObject) throws Exception {
                                 // submit data points that don't have "is_sync = true"
                                 // Assuming local object already has sync_id
                                 publishSyncProgress("Uploading data for session " + localObject.getSyncId());
@@ -230,7 +229,7 @@ public class HistoryActivity extends Activity implements AdapterView.OnItemClick
                                     }
                                 } catch (Exception ex) {
                                     Log.e(TAG, "onSaveRemotely() failed with exception", ex);
-                                    throw new RuntimeException(ex);
+                                    throw new SyncException(ex);
                                 }
                             }
                         });

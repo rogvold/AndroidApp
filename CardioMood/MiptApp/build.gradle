@@ -53,7 +53,8 @@ dependencies {
     compile project(':CommonTools')
     compile project(':HeartRate')
     compile project(":Math")
-    compile project(":DataSync")
+    //compile project(":DataSync")
+    compile 'com.cardiomood.android:android-data-sync:0.2'
 
     compile 'com.android.support:support-v4:21.0.0'
     compile 'com.jjoe64:graphview:3.1.3'

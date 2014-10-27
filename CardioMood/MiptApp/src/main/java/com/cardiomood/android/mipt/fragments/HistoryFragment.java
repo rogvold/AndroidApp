@@ -31,6 +31,7 @@ import com.cardiomood.math.HeartRateUtils;
 import com.cardiomood.math.filter.PisarukArtifactFilter;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.stmt.DeleteBuilder;
+import com.parse.ParseObject;
 import com.parse.ParseUser;
 
 import org.json.JSONArray;
@@ -155,10 +156,12 @@ public class HistoryFragment extends ListFragment {
             @Override
             public Long call() throws Exception {
                 long sync = System.currentTimeMillis();
-                syncHelper.synObjects(CardioSession.class, CardioSessionEntity.class,
-                        true, new SyncHelper.SyncCallback<CardioSession, CardioSessionEntity>() {
+                syncHelper.synObjects(
+                        CardioSessionEntity.class,
+                        true,
+                        new SyncHelper.SyncCallback<CardioSessionEntity>() {
                             @Override
-                            public void onSaveLocally(CardioSessionEntity localObject, CardioSession remoteObject) {
+                            public void onSaveLocally(CardioSessionEntity localObject, ParseObject remoteObject) {
                                 try {
                                     CardioSessionDAO sessionDao = HelperFactory.getHelper().getCardioSessionDao();
                                     CardioItemDAO itemDao = HelperFactory.getHelper().getCardioItemDao();
@@ -168,8 +171,8 @@ public class HistoryFragment extends ListFragment {
                                         del.where().eq("session_id", localObject.getId());
                                         del.delete();
                                     }
-                                    JSONArray rrs = remoteObject.getRrs();
-                                    JSONArray times = remoteObject.getT();
+                                    JSONArray rrs = ((CardioSession) remoteObject).getRrs();
+                                    JSONArray times = ((CardioSession) remoteObject).getT();
                                     for (int i=0; i<rrs.length(); i++) {
                                         CardioItemEntity item = new CardioItemEntity();
                                         item.setRr(rrs.getInt(i));
@@ -193,7 +196,7 @@ public class HistoryFragment extends ListFragment {
                             }
 
                             @Override
-                            public void onSaveRemotely(CardioSessionEntity localObject, CardioSession remoteObject) {
+                            public void onSaveRemotely(CardioSessionEntity localObject, ParseObject remoteObject) {
                                 try {
                                     CardioItemDAO itemDao = HelperFactory.getHelper().getCardioItemDao();
                                     List<CardioItemEntity> items = itemDao.queryBuilder()
@@ -210,7 +213,7 @@ public class HistoryFragment extends ListFragment {
 
                                     remoteObject.put("rrs", rrs);
                                     remoteObject.put("times", t);
-                                    if (remoteObject.getEndTimestamp() == 0L) {
+                                    if (((CardioSession) remoteObject).getEndTimestamp() == 0L) {
                                         remoteObject.put("endTimestamp", localObject.getEndTimestamp());
                                     }
 
@@ -233,7 +236,8 @@ public class HistoryFragment extends ListFragment {
                                     throw new RuntimeException(ex);
                                 }
                             }
-                        });
+                        }
+                );
                 return sync;
             }
         }).continueWith(

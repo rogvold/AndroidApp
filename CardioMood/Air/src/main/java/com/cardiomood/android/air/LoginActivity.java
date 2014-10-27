@@ -204,6 +204,7 @@ public class LoginActivity extends Activity{
                                     "Check your internet connection.", Toast.LENGTH_SHORT).show();
                         }
                         if (mProgressDialog.isShowing()) {
+                            userQuery = null;
                             mProgressDialog.dismiss();
                         }
                     }

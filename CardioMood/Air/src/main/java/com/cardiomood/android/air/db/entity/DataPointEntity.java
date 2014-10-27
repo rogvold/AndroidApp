@@ -16,6 +16,9 @@ import java.io.Serializable;
 @ParseClass(name = "AirSessionPoint")
 public class DataPointEntity extends SyncEntity implements Serializable {
 
+    @DatabaseField(columnName = "_id", generatedId = true)
+    private Long id;
+
     @DatabaseField(columnName = "session_id")
     private long sessionId;
 
@@ -61,6 +64,14 @@ public class DataPointEntity extends SyncEntity implements Serializable {
 
     @DatabaseField(columnName = "is_sync")
     private boolean sync;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public long getSessionId() {
         return sessionId;

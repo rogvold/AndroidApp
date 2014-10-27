@@ -15,6 +15,9 @@ import java.io.Serializable;
 @DatabaseTable(tableName = "air_sessions", daoClass = AirSessionDAO.class) @ParseClass(name = "AirSession")
 public class AirSessionEntity extends SyncEntity implements Serializable {
 
+    @DatabaseField(columnName = "_id", generatedId = true)
+    private Long id;
+
     @DatabaseField(columnName = "sync_user_id")
     @ParseField(name = "userId")
     private String syncUserId;
@@ -30,6 +33,14 @@ public class AirSessionEntity extends SyncEntity implements Serializable {
     @DatabaseField(columnName = "name")
     @ParseField(name = "name")
     private String name;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getSyncUserId() {
         return syncUserId;
