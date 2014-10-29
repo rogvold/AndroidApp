@@ -1,3 +1,5 @@
+import org.apache.tools.ant.filters.ExpandProperties
+
 import java.text.DateFormat
 
 apply plugin: 'com.android.application'
@@ -50,20 +52,52 @@ android {
 
     // Insert the build number into strings.xml
     android.applicationVariants.all {
+
+        // Perform resource filtering
         variant -> variant.mergeResources.doLast {
-            //ext.env = System.getenv()
-            DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT)
-            String buildDate = dateFormat.format(new Date());
-            if (buildDate != null) {
-                File valuesFile = file("${buildDir}/intermediates/res/${variant.dirName}/values/values.xml")
-                println("Replacing buildDate in " + valuesFile)
-                println("Build date = " + buildDate)
-                String content = valuesFile.getText('UTF-8')
-                content = content.replaceAll(/BUILD_DATE/, buildDate)
-                valuesFile.write(content, 'UTF-8')
-            }
+            filterResources(variant)
         }
     }
+
+
+}
+
+def filterResources(buildVariant) {
+
+    //Setup temp directory to filter the resources
+    File resFiltered = file("${buildDir}/res/all/filtered/${buildVariant.dirName}")
+    if(resFiltered.exists()){
+        resFiltered.delete()
+    }
+
+    //Copy and filter the resources.
+    copy {
+        from(buildVariant.processResources.resDir) {
+            include '**/*.xml'
+
+            DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT)
+            String buildDate = dateFormat.format(new Date());
+
+            //Could be improved upon to pull from a properties file, etc.
+            ant.properties['app.build_date'] = buildDate
+
+            filter(ExpandProperties, project: ant.project)
+        }
+
+        from(buildVariant.processResources.resDir) {
+            exclude '**/*.xml'
+        }
+
+        into resFiltered
+
+    }
+
+    //Delete all the original resource files
+    file(buildVariant.processResources.resDir).deleteDir()
+    //Replace with the filtered ones.
+    resFiltered.renameTo(file(buildVariant.processResources.resDir))
+    //Delete the original 'filtered' directory
+    file( "${buildDir}/res/all/filtered").deleteDir()
 }
 
 dependencies {
