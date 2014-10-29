@@ -1,8 +1,8 @@
 package com.cardiomood.android;
 
-import android.app.Application;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
+import android.support.multidex.MultiDexApplication;
 import android.util.Log;
 
 import com.cardiomood.android.db.DatabaseHelper;
@@ -17,7 +17,7 @@ import java.util.Set;
 /**
  * Created by danshin on 31.10.13.
  */
-public class CardioMoodApplication extends Application {
+public class CardioMoodApplication extends MultiDexApplication {
 
     private static final String PARSE_APP_ID = "D00uihFFqj0K9yAoecTzR5t4VxJeSGfYOee4LciN";
     private static final String PARSE_CLIENT_KEY = "vaqte7MiPMce9h4HFCnmTnkieIOarA9WPoCcxVnk";

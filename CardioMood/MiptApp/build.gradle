@@ -107,9 +107,13 @@ dependencies {
     compile project(':HeartRate')
     compile project(":Math")
     compile 'com.cardiomood.android:android-data-sync:0.2.2'
+    compile 'com.cardiomood.android:android-widgets:0.1.1'
+    compile 'com.jjoe64:graphview:3.1.+'
+    compile 'org.androidannotations:androidannotations:3.+'
+
 
     compile 'com.android.support:support-v4:21.0.0'
-    compile 'com.jjoe64:graphview:3.1.+'
-    compile 'com.cardiomood.android:android-widgets:0.1'
-    compile 'org.androidannotations:androidannotations:3.1'
+    compile 'com.android.support:appcompat-v7:21.0.0'
+    compile 'com.android.support:cardview-v7:21.0.0'
+    compile 'com.android.support:recyclerview-v7:21.0.0'
 }

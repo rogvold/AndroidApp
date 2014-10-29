@@ -123,6 +123,8 @@ public class HeartRateMonitoringFragment extends Fragment implements FragmentCal
         View v = inflater.inflate(R.layout.fragment_heart_rate_monitoring, container, false);
 
         progressBar = (CircularProgressBar) v.findViewById(R.id.measurement_progress);
+        progressBar.setTextSize(27 * getResources().getDisplayMetrics().density);
+        progressBar.setLineWidth(40 * getResources().getDisplayMetrics().density);
         progressBar.setLabelConverter(new CircularProgressBar.LabelConverter() {
             @Override
             public String getLabelFor(float progress, float max, Paint paint) {

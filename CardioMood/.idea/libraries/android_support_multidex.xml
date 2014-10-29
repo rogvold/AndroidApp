@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="android-support-multidex">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/CardioMoodApp/libs/android-support-multidex.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

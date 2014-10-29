@@ -1,8 +1,8 @@
 package com.cardiomood.android.mipt;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,7 +35,7 @@ import java.util.Date;
 import java.util.List;
 
 @EActivity(R.layout.activity_session_view)
-public class SessionViewActivity extends Activity {
+public class SessionViewActivity extends ActionBarActivity {
 
     private static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
 

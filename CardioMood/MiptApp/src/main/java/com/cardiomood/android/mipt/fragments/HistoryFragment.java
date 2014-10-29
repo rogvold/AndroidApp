@@ -1,10 +1,10 @@
 package com.cardiomood.android.mipt.fragments;
 
-import android.app.ListFragment;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.v4.app.ListFragment;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;

@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 19
+    compileSdkVersion 21
     buildToolsVersion "20.0.0"
 
     defaultConfig {
         applicationId "com.cardiomood.android.air"
         minSdkVersion 14
-        targetSdkVersion 19
+        targetSdkVersion 21
         versionCode 1
         versionName "1.0"
     }
@@ -45,6 +45,6 @@ dependencies {
     compile 'com.cardiomood.android:android-data-sync:0.2.2'
 
     compile 'com.google.code.gson:gson:2.2.4'
-    compile 'com.google.android.gms:play-services:5.0.89'
+    compile 'com.google.android.gms:play-services:6.+'
     compile 'com.google.maps.android:android-maps-utils:0.3'
 }

@@ -263,6 +263,8 @@ public class ConnectionFragment extends Fragment {
             }
         });
 
+        measurementProgress.setLineWidth(40 * getResources().getDisplayMetrics().density);
+        measurementProgress.setTextSize(27 * getResources().getDisplayMetrics().density);
         measurementProgress.setLabelConverter(new CircularProgressBar.LabelConverter() {
             @Override
             public String getLabelFor(float progress, float max, Paint paint) {

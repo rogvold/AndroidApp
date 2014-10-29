@@ -77,29 +77,33 @@
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/rs" />
       <excludeFolder url="file://$MODULE_DIR$/build/intermediates/symbols" />
       <excludeFolder url="file://$MODULE_DIR$/build/outputs" />
+      <excludeFolder url="file://$MODULE_DIR$/build/tmp" />
     </content>
-    <orderEntry type="jdk" jdkName="Android API 20 Platform" jdkType="Android SDK" />
+    <orderEntry type="jdk" jdkName="Android API 21 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" exported="" name="support-v13-20.0.0" level="project" />
     <orderEntry type="library" exported="" name="ormlite-android-4.48" level="project" />
-    <orderEntry type="library" exported="" name="CWAC-EndlessAdapter" level="project" />
+    <orderEntry type="library" exported="" name="cardview-v7-21.0.0" level="project" />
+    <orderEntry type="library" exported="" name="recyclerview-v7-21.0.0" level="project" />
     <orderEntry type="library" exported="" name="flurryAnalytics_3.4.0" level="project" />
+    <orderEntry type="library" exported="" name="CWAC-EndlessAdapter" level="project" />
     <orderEntry type="library" exported="" name="jackson-core-asl-1.9.0" level="project" />
-    <orderEntry type="library" exported="" name="android-widgets-0.1" level="project" />
+    <orderEntry type="library" exported="" name="support-v4-21.0.0" level="project" />
     <orderEntry type="library" exported="" name="gson-2.2.4" level="project" />
     <orderEntry type="library" exported="" name="Parse-1.4.1" level="project" />
     <orderEntry type="library" exported="" name="codegist-common-2.0.0-RC1" level="project" />
     <orderEntry type="library" exported="" name="codegist-crest-2.0.0-RC1" level="project" />
-    <orderEntry type="library" exported="" name="play-services-5.0.89" level="project" />
-    <orderEntry type="library" exported="" name="support-v4-20.0.0" level="project" />
     <orderEntry type="library" exported="" name="commons-io-2.4" level="project" />
+    <orderEntry type="library" exported="" name="android-widgets-0.1.1" level="project" />
+    <orderEntry type="library" exported="" name="support-annotations-21.0.0" level="project" />
     <orderEntry type="library" exported="" name="ormlite-core-4.48" level="project" />
     <orderEntry type="library" exported="" name="CWAC-AdapterWrapper" level="project" />
-    <orderEntry type="library" exported="" name="appcompat-v7-20.0.0" level="project" />
-    <orderEntry type="library" exported="" name="support-annotations-20.0.0" level="project" />
+    <orderEntry type="library" exported="" name="android-support-multidex" level="project" />
     <orderEntry type="library" exported="" name="GraphView-3.0" level="project" />
     <orderEntry type="library" exported="" name="commons-math3-3.3" level="project" />
     <orderEntry type="library" exported="" name="jackson-mapper-asl-1.9.0" level="project" />
+    <orderEntry type="library" exported="" name="play-services-6.1.71" level="project" />
+    <orderEntry type="library" exported="" name="support-v13-21.0.0" level="project" />
+    <orderEntry type="library" exported="" name="appcompat-v7-21.0.0" level="project" />
     <orderEntry type="module" module-name="ShinobiCharts" exported="" />
     <orderEntry type="module" module-name="CommonTools" exported="" />
     <orderEntry type="module" module-name="facebook" exported="" />

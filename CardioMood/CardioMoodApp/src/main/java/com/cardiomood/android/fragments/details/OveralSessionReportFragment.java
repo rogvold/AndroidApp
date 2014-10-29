@@ -55,6 +55,7 @@ public class OveralSessionReportFragment extends AbstractSessionReportFragment {
         meanStressIndex = (TextView) v.findViewById(R.id.mean_stress);
 
         speedometer = (SpeedometerGauge) v.findViewById(R.id.speedometer);
+        speedometer.setMaxSpeed(300);
         speedometer.setLabelConverter(new SpeedometerGauge.LabelConverter() {
             @Override
             public String getLabelFor(double progress, double maxProgress) {
