@@ -12,6 +12,8 @@ import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.parse.Parse;
 import com.parse.PushService;
 
+import java.util.Set;
+
 /**
  * Created by danshin on 31.10.13.
  */
@@ -29,14 +31,26 @@ public class CardioMoodApplication extends Application {
         getTracker();
         database = getHelper().getWritableDatabase();
 
+        initParse();
+    }
+
+    protected void initParse() {
         try {
             String country = getResources().getConfiguration().locale.getCountry();
             String locale = getResources().getConfiguration().locale.toString();
             String language = getResources().getConfiguration().locale.getLanguage();
 
+            // 0. init parse.com
             Parse.initialize(this, PARSE_APP_ID, PARSE_CLIENT_KEY);
             PushService.setDefaultPushCallback(this, LoginActivity.class);
-            // 1. Set up channels
+
+            // 1. clear push subscriptions
+            Set<String> subscriptions = PushService.getSubscriptions(this);
+            for (String channel: subscriptions) {
+                PushService.unsubscribe(this, channel);
+            }
+
+            // 2. Set up push channels
             PushService.subscribe(this, "type-beta", LoginActivity.class);
             PushService.subscribe(this, "country-" + country, LoginActivity.class);
             PushService.subscribe(this, "locale-" + locale, LoginActivity.class);
@@ -44,7 +58,7 @@ public class CardioMoodApplication extends Application {
             PushService.subscribe(this, "os-android", LoginActivity.class);
             PushService.subscribe(this, "sdk-" + Build.VERSION.SDK_INT, LoginActivity.class);
         } catch (Exception ex) {
-            Log.e("CardioMoodApplication", "onCreate(): failed to initialize parse");
+            Log.e("CardioMoodApplication", "initParse(): failed to initialize parse");
         }
     }
 

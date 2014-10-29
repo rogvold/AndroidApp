@@ -2,6 +2,7 @@
 <resources>
 
     <string name="app_name">CardioMood MIPT</string>
+    <string name="build_date">BUILD_DATE</string>
     <string name="title_activity_login">MIPT Health</string>
     <string name="menu_refresh">Refresh</string>
     <string name="backend_servers_are_not_vailable">Backend servers are not available at the moment. \\nCheck your Internet connection and try again.</string>

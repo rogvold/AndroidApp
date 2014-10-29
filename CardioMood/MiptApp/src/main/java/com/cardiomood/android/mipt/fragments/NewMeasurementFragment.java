@@ -50,6 +50,7 @@ import com.parse.ParseUser;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
+import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 
 import java.sql.SQLException;
@@ -64,15 +65,12 @@ import java.util.concurrent.Callable;
 import bolts.Continuation;
 import bolts.Task;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link NewMeasurementFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 @EFragment(R.layout.fragment_new_measurement)
 public class NewMeasurementFragment extends Fragment {
 
     private static final String TAG = NewMeasurementFragment.class.getSimpleName();
+
+    private static final int MAX_GRAPH_VIEW_POINTS = 500;
 
     public static final int REQUEST_ENABLE_BT = 2;
 
@@ -104,30 +102,31 @@ public class NewMeasurementFragment extends Fragment {
     protected GraphView mGraphView;
 
     // State
-    private boolean hrmConnected = false;
-    private int hrmState = LeHRMonitor.INITIAL_STATUS;
-    private boolean mScanning = false;
-    private long mCurrentSessionId = -1L;
-    private CardioSessionEntity mCurrentSession = null;
-    private GraphViewSeries mHeartRateSeries = null;
-    private long graphT = 0;
+    protected boolean hrmConnected = false;
+    protected int hrmState = LeHRMonitor.INITIAL_STATUS;
+    protected boolean mScanning = false;
+    protected long mCurrentSessionId = -1L;
+    protected CardioSessionEntity mCurrentSession = null;
+    protected GraphViewSeries mHeartRateSeries = null;
+    protected long graphT = 0;
+    protected boolean sessionDataLoaded = false;
 
     // Tools
-    LeHRMonitor hrMonitor;
-    private Handler mHandler;
+    protected LeHRMonitor hrMonitor;
+    protected Handler mHandler;
 
     // timer
-    private Timer sessionTimer = new Timer("session_timer");
-    private TimerTask updateUiTask = null;
+    protected Timer sessionTimer = new Timer("session_timer");
+    protected TimerTask updateUiTask = null;
 
     // Service
     /** Messenger for communicating with the service. */
     Messenger mCardioService = null;
 
     /** Flag indicating whether we have called bind on the service. */
-    boolean mCardioServiceBound;
+    protected boolean mCardioServiceBound;
 
-    private class IncomingHandler extends Handler {
+    protected class IncomingHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
@@ -174,12 +173,12 @@ public class NewMeasurementFragment extends Fragment {
         }
     }
 
-    private Messenger mMessenger = new Messenger(new IncomingHandler());
+    protected Messenger mMessenger = new Messenger(new IncomingHandler());
 
     /**
      * Class for interacting with the main interface of the service.
      */
-    private ServiceConnection mConnection = new ServiceConnection() {
+    protected ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className, IBinder service) {
             // This is called when the connection with the service has been
             // established, giving us the object we can use to
@@ -201,9 +200,10 @@ public class NewMeasurementFragment extends Fragment {
         }
     };
 
-    private View.OnClickListener connectButtonListener = new View.OnClickListener() {
+    protected View.OnClickListener connectButtonListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            connectButton.setEnabled(false);
             if (!hrmConnected) {
                 performConnect();
             } else {
@@ -517,6 +517,9 @@ public class NewMeasurementFragment extends Fragment {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
                     scanLeDevice(bluetoothAdapter, false, (BluetoothAdapter.LeScanCallback) leScanCallback);
                 }
+                // nothing selected
+                if (LeHRMonitor.CONNECTING_STATUS != hrmState)
+                    connectButton.setEnabled(true);
             }
         });
         AdapterView.OnItemClickListener mPairedListClickListener = new AdapterView.OnItemClickListener() {
@@ -529,13 +532,15 @@ public class NewMeasurementFragment extends Fragment {
                 String info = ((TextView) v).getText().toString();
                 //Log.d(TAG, "mPairedListClickListener.onItemClick(): the total length is " + info.length());
                 String deviceAddress = info.substring(info.lastIndexOf("\n")+1);
-
+                sessionDataLoaded = true;
                 connectDeviceAddress(deviceAddress);
-                alertSelectDevice.dismiss();
+                alertSelectDevice.cancel();
                 alertSelectDevice = null;
             }
         };
         pairedListView.setOnItemClickListener(mPairedListClickListener);
+        // preventing double click
+        connectButton.setEnabled(false);
         alertSelectDevice.show();
     }
 
@@ -595,18 +600,21 @@ public class NewMeasurementFragment extends Fragment {
         } return true;
     }
 
-    private void onDataReceived(Message msg) {
+    protected void onDataReceived(Message msg) {
         msg.getData().setClassLoader(CardioDataPackage.class.getClassLoader());
         CardioDataPackage data = msg.getData().getParcelable("data");
+        if (data == null)
+            return;
+
         heartRateView.setText(String.valueOf(data.getBpm()));
 
-        if (mCurrentSession != null && graphT >= 0) {
+        if (mCurrentSession != null && sessionDataLoaded) {
             int[] rr = data.getRr();
             if (rr != null) {
                 for (int r: rr) {
                     mHeartRateSeries.appendData(
                             new GraphView.GraphViewData(graphT, Math.round(60000.f/r)),
-                            true, 1000);
+                            true, MAX_GRAPH_VIEW_POINTS);
                     graphT += r;
                 }
             }
@@ -718,7 +726,8 @@ public class NewMeasurementFragment extends Fragment {
             hrmStatusView.setText(R.string.hrm_ready);
             hrmDeviceNameView.setText(R.string.select_hrm_device);
             connectButton.setText(R.string.connect_button);
-            connectButton.setEnabled(true);
+            if (alertSelectDevice == null || !alertSelectDevice.isShowing())
+                connectButton.setEnabled(true);
             connectButton.setVisibility(View.VISIBLE);
             hrmConnected = false;
             heartRateView.setVisibility(View.GONE);
@@ -742,7 +751,9 @@ public class NewMeasurementFragment extends Fragment {
         stopSessionButton.setEnabled(false);
     }
 
-    private void loadSessionData(final long sessionId) {
+    @UiThread
+    protected void loadSessionData(final long sessionId) {
+        sessionDataLoaded = false;
         graphT = -1;
         Task.callInBackground(new Callable<CardioSessionEntity>() {
             @Override
@@ -783,17 +794,19 @@ public class NewMeasurementFragment extends Fragment {
 
                     // init example series data
                     List<Integer> items = task.getResult();
-                    GraphView.GraphViewData[] data = new GraphView.GraphViewData[items.size()];
+                    GraphView.GraphViewData[] data =
+                            new GraphView.GraphViewData[Math.min(items.size(), MAX_GRAPH_VIEW_POINTS)];
                     graphT = 0;
-                    for (int i=0; i<items.size(); i++) {
+                    for (int j=0, i=Math.max(items.size() - data.length, 0); i<items.size(); i++, j++) {
                         int rr = items.get(i);
                         int bpm = Math.round(60000.0f/rr);
-                        data[i] = new GraphView.GraphViewData(graphT, bpm);
+                        data[j] = new GraphView.GraphViewData(graphT, bpm);
                         graphT += rr;
                     }
                     mHeartRateSeries.resetData(data);
                     mGraphView.setVisibility(View.VISIBLE);
                 }
+                sessionDataLoaded = true;
                 return null;
             }
         }, Task.UI_THREAD_EXECUTOR);

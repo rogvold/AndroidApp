@@ -24,6 +24,7 @@ import com.cardiomood.android.mipt.db.entity.CardioItemEntity;
 import com.cardiomood.android.mipt.db.entity.CardioSessionEntity;
 import com.cardiomood.android.tools.thread.WorkerThread;
 import com.cardiomood.heartrate.bluetooth.LeHRMonitor;
+import com.j256.ormlite.misc.TransactionManager;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -410,7 +411,7 @@ public class CardioMonitoringService extends Service {
         try {
             try {
                 final String parseUserId = msg.getData().getString("parseUserId");
-                HelperFactory.getHelper().callInTransaction(new Callable<Void>() {
+                TransactionManager.callInTransaction(HelperFactory.getHelper().getConnectionSource(), new Callable<Void>() {
                     @Override
                     public Void call() throws Exception {
                         CardioSessionDAO sessionDao = HelperFactory.getHelper().getCardioSessionDao();
@@ -453,7 +454,7 @@ public class CardioMonitoringService extends Service {
         try {
             try {
                 if (mCardioSession != null) {
-                    HelperFactory.getHelper().callInTransaction(new Callable<Void>() {
+                    TransactionManager.callInTransaction(HelperFactory.getHelper().getConnectionSource(), new Callable<Void>() {
                         @Override
                         public Void call() throws Exception {
                             CardioSessionDAO sessionDao = HelperFactory.getHelper().getCardioSessionDao();
@@ -513,6 +514,7 @@ public class CardioMonitoringService extends Service {
         private CardioSessionEntity cardioSession;
         private CardioSessionDAO sessionDAO;
         private CardioItemDAO itemDao;
+        private long T = -1;
 
         private CardioDataCollector(CardioSessionEntity cardioSession) throws SQLException {
             this.cardioSession = cardioSession;
@@ -523,6 +525,7 @@ public class CardioMonitoringService extends Service {
         @Override
         public void onStop() {
             super.onStop();
+            T = -1;
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -553,7 +556,13 @@ public class CardioMonitoringService extends Service {
                 return;
             }
             try {
-                long t = item.getTimestamp();
+                if (T < 0) {
+                    // save start of session
+                    T = item.getTimestamp();
+                }
+
+                // t = milliseconds from the beginning
+                long t = item.getTimestamp() - T;
                 for (int rr : item.getRr()) {
                     CardioItemEntity entity = new CardioItemEntity();
                     entity.setSession(cardioSession);
