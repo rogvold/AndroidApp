@@ -2,9 +2,11 @@ package com.cardiomood.android.mipt.fragments;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,7 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cardiomood.android.mipt.R;
-import com.cardiomood.android.mipt.SessionViewActivity_;
+import com.cardiomood.android.mipt.SessionViewActivity;
 import com.cardiomood.android.mipt.db.CardioItemDAO;
 import com.cardiomood.android.mipt.db.CardioSessionDAO;
 import com.cardiomood.android.mipt.db.HelperFactory;
@@ -101,9 +103,9 @@ public class HistoryFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         CardioSessionEntity entity = mSessionAdapter.getItem(position);
-        SessionViewActivity_.intent(getActivity())
-                .sessionId(entity.getId())
-                .start();
+        Intent intent = new Intent(getActivity(), SessionViewActivity.class);
+        intent.putExtra(SessionViewActivity.EXTRA_SESSION_ID, entity.getId());
+        startActivity(intent);
     }
 
     private void refreshSessionList() {
@@ -245,6 +247,7 @@ public class HistoryFragment extends ListFragment {
                     @Override
                     public Object then(Task<Long> task) throws Exception {
                         if (task.isFaulted()) {
+                            Log.w(TAG, "Sync failed with exception", task.getError());
                             if (getActivity() != null)
                                 Toast.makeText(getActivity(), "Sync failed.", Toast.LENGTH_SHORT).show();
                         } else if (task.isCompleted()) {

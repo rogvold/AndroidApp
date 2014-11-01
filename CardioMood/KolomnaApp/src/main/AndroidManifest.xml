@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.cardiomood.android.kolomna" >
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <application
+        android:name="com.cardiomood.android.kolomna.KolomnaApplication"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:name="com.cardiomood.android.kolomna.LoginActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:label="@string/title_activity_login"
+            android:screenOrientation="portrait" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.cardiomood.android.kolomna.MainActivity"
+            android:label="@string/title_activity_main" >
+        </activity>
+
+        <service
+            android:name="com.cardiomood.android.kolomna.service.CardioMonitoringService"
+            android:enabled="true"
+            android:exported="false"
+            android:process=":heart_rate" >
+        </service>
+
+        <activity
+            android:name="com.cardiomood.android.kolomna.SessionViewActivity"
+            android:label="@string/title_activity_session_view"
+            android:parentActivityName="com.cardiomood.android.kolomna.MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.cardiomood.android.mipt.MainActivity" />
+        </activity>
+    </application>
+
+</manifest>

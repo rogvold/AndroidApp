@@ -8,9 +8,11 @@
       <module fileurl="file://$PROJECT_DIR$/ClientServerInteraction/ClientServerInteraction.iml" filepath="$PROJECT_DIR$/ClientServerInteraction/ClientServerInteraction.iml" />
       <module fileurl="file://$PROJECT_DIR$/CommonTools/CommonTools.iml" filepath="$PROJECT_DIR$/CommonTools/CommonTools.iml" />
       <module fileurl="file://$PROJECT_DIR$/HeartRate/HeartRate.iml" filepath="$PROJECT_DIR$/HeartRate/HeartRate.iml" />
+      <module fileurl="file://$PROJECT_DIR$/KolomnaApp/KolomnaApp.iml" filepath="$PROJECT_DIR$/KolomnaApp/KolomnaApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/Math/Math.iml" filepath="$PROJECT_DIR$/Math/Math.iml" />
       <module fileurl="file://$PROJECT_DIR$/MiptApp/MiptApp.iml" filepath="$PROJECT_DIR$/MiptApp/MiptApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/ShinobiCharts/ShinobiCharts.iml" filepath="$PROJECT_DIR$/ShinobiCharts/ShinobiCharts.iml" />
+      <module fileurl="file://$PROJECT_DIR$/StepCounter/StepCounter.iml" filepath="$PROJECT_DIR$/StepCounter/StepCounter.iml" />
       <module fileurl="file://$PROJECT_DIR$/facebook/facebook.iml" filepath="$PROJECT_DIR$/facebook/facebook.iml" />
     </modules>
   </component>

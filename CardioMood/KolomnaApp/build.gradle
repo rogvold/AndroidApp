@@ -1,0 +1,155 @@
+import org.apache.tools.ant.filters.ExpandProperties
+
+import java.text.DateFormat
+
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 21
+    buildToolsVersion "20.0.0"
+
+    defaultConfig {
+        applicationId "com.cardiomood.android.kolomna"
+        minSdkVersion 14
+        targetSdkVersion 21
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            runProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+
+    // This is only needed if you project structure doesn't fit the one found here
+    // http://tools.android.com/tech-docs/new-build-system/user-guide#TOC-Project-Structure
+//    sourceSets {
+//        main {
+//            manifest.srcFile 'src/main/AndroidManifest.xml'
+//            java.srcDirs = ['src/main/java', 'build/generated/source/apt/${variant.dirName}']
+//            resources.srcDirs = ['src/main/resources']
+//            res.srcDirs = ['src/main/res']
+//            assets.srcDirs = ['src/main/assets']
+//        }
+//    }
+
+    // Insert the build number into strings.xml
+    android.applicationVariants.all {
+
+            // Perform resource filtering
+        variant -> variant.mergeResources.doLast {
+            filterResources(variant)
+        }
+    }
+
+
+}
+
+def filterResources(buildVariant) {
+
+    //Setup temp directory to filter the resources
+    File resFiltered = file("${buildDir}/res/all/filtered/${buildVariant.dirName}")
+    if(resFiltered.exists()){
+        resFiltered.delete()
+    }
+
+    //Copy and filter the resources.
+    copy {
+        from(buildVariant.processResources.resDir) {
+            include '**/*.xml'
+
+            DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT)
+            String buildDate = dateFormat.format(new Date());
+
+            //Could be improved upon to pull from a properties file, etc.
+            ant.properties['app.build_date'] = buildDate
+
+            filter(ExpandProperties, project: ant.project)
+        }
+
+        from(buildVariant.processResources.resDir) {
+            exclude '**/*.xml'
+        }
+
+        into resFiltered
+
+    }
+
+    //Delete all the original resource files
+    file(buildVariant.processResources.resDir).deleteDir()
+    //Replace with the filtered ones.
+    resFiltered.renameTo(file(buildVariant.processResources.resDir))
+    //Delete the original 'filtered' directory
+    file( "${buildDir}/res/all/filtered").deleteDir()
+}
+
+def toCamelCase(String string) {
+    String result = ""
+    string.findAll("[^\\W]+") { String word ->
+        result += word.capitalize()
+    }
+    return result
+}
+
+afterEvaluate { project ->
+    Configuration runtimeConfiguration = project.configurations.getByName('compile')
+    ResolutionResult resolution = runtimeConfiguration.incoming.resolutionResult
+    // Forces resolve of configuration
+    ModuleVersionIdentifier module = resolution.getAllComponents().find { it.moduleVersion.name.equals("play-services") }.moduleVersion
+
+    String prepareTaskName = "prepare${toCamelCase("${module.group} ${module.name} ${module.version}")}Library"
+    File playServiceRootFolder = project.tasks.find { it.name.equals(prepareTaskName) }.explodedDir
+
+    Task stripPlayServices = project.tasks.create(name: 'stripPlayServices', group: "Strip") {
+        inputs.files new File(playServiceRootFolder, "classes.jar")
+        outputs.dir playServiceRootFolder
+        description 'Strip useless packages from Google Play Services library to avoid reaching dex limit'
+
+        doLast {
+            copy {
+                from(file(new File(playServiceRootFolder, "classes.jar")))
+                into(file(playServiceRootFolder))
+                rename { fileName ->
+                    fileName = "classes_orig.jar"
+                }
+            }
+            tasks.create(name: "stripPlayServices" + module.version, type: Jar) {
+                destinationDir = playServiceRootFolder
+                archiveName = "classes.jar"
+                from(zipTree(new File(playServiceRootFolder, "classes_orig.jar"))) {
+                    exclude "com/google/ads/**"
+                    exclude "com/google/android/gms/games/**"
+                    exclude "com/google/android/gms/plus/**"
+                    exclude "com/google/android/gms/drive/**"
+                    exclude "com/google/android/gms/ads/**"
+                }
+            }.execute()
+            delete file(new File(playServiceRootFolder, "classes_orig.jar"))
+        }
+    }
+
+    project.tasks.findAll { it.name.startsWith('prepare') && it.name.endsWith('Dependencies') }.each { Task task ->
+        task.dependsOn stripPlayServices
+    }
+}
+
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    compile project(':CommonTools')
+    compile project(':HeartRate')
+    compile project(":Math")
+    compile 'com.cardiomood.android:android-data-sync:0.2.2'
+    compile 'com.cardiomood.android:android-widgets:0.1.1'
+    compile 'com.jjoe64:graphview:3.1.+'
+    compile 'com.jakewharton:butterknife:6.0.0'
+
+
+    compile 'com.android.support:support-v4:21.0.0'
+    compile 'com.android.support:appcompat-v7:21.0.0'
+    compile 'com.android.support:cardview-v7:21.0.0'
+    compile 'com.android.support:recyclerview-v7:21.0.0'
+}

@@ -42,7 +42,7 @@
         </service>
 
         <activity
-            android:name="com.cardiomood.android.mipt.SessionViewActivity_"
+            android:name="com.cardiomood.android.mipt.SessionViewActivity"
             android:label="@string/title_activity_session_view"
             android:parentActivityName="com.cardiomood.android.mipt.MainActivity" >
             <meta-data

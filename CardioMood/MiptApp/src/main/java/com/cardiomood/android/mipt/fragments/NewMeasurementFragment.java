@@ -32,29 +32,25 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cardiomood.android.mipt.R;
-import com.cardiomood.android.mipt.SessionViewActivity_;
+import com.cardiomood.android.mipt.SessionViewActivity;
 import com.cardiomood.android.mipt.components.HeartRateGraphView;
 import com.cardiomood.android.mipt.db.CardioItemDAO;
 import com.cardiomood.android.mipt.db.CardioSessionDAO;
 import com.cardiomood.android.mipt.db.HelperFactory;
-import com.cardiomood.android.mipt.db.entity.CardioItemEntity;
 import com.cardiomood.android.mipt.db.entity.CardioSessionEntity;
 import com.cardiomood.android.mipt.service.CardioDataPackage;
 import com.cardiomood.android.mipt.service.CardioMonitoringService;
 import com.cardiomood.android.sync.parse.ParseTools;
 import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.heartrate.bluetooth.LeHRMonitor;
+import com.j256.ormlite.dao.GenericRawResults;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GraphViewSeries;
 import com.parse.ParseUser;
 
-import org.androidannotations.annotations.AfterViews;
-import org.androidannotations.annotations.EFragment;
-import org.androidannotations.annotations.UiThread;
-import org.androidannotations.annotations.ViewById;
-
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -64,8 +60,9 @@ import java.util.concurrent.Callable;
 
 import bolts.Continuation;
 import bolts.Task;
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 
-@EFragment(R.layout.fragment_new_measurement)
 public class NewMeasurementFragment extends Fragment {
 
     private static final String TAG = NewMeasurementFragment.class.getSimpleName();
@@ -75,27 +72,27 @@ public class NewMeasurementFragment extends Fragment {
     public static final int REQUEST_ENABLE_BT = 2;
 
     // UI
-    @ViewById(android.R.id.text1)
+    @InjectView(android.R.id.text1)
     protected TextView userNameView;
-    @ViewById(android.R.id.text2)
+    @InjectView(android.R.id.text2)
     protected TextView userEmailView;
-    @ViewById(R.id.hrm_device_name)
+    @InjectView(R.id.hrm_device_name)
     protected TextView hrmDeviceNameView;
-    @ViewById(R.id.hr_monitor_status)
+    @InjectView(R.id.hr_monitor_status)
     protected TextView hrmStatusView;
-    @ViewById(R.id.heart_rate)
+    @InjectView(R.id.heart_rate)
     protected TextView heartRateView;
-    @ViewById(R.id.connect_hr_monitor_button)
+    @InjectView(R.id.connect_hr_monitor_button)
     protected Button connectButton;
-    @ViewById(R.id.graph_container)
+    @InjectView(R.id.graph_container)
     protected LinearLayout chartContainer;
-    @ViewById(R.id.empty_message)
+    @InjectView(R.id.empty_message)
     protected TextView emptyMessageView;
-    @ViewById(R.id.start_session_button)
+    @InjectView(R.id.start_session_button)
     protected Button startSessionButton;
-    @ViewById(R.id.stop_session_button)
+    @InjectView(R.id.stop_session_button)
     protected Button stopSessionButton;
-    @ViewById(R.id.time_elapsed)
+    @InjectView(R.id.time_elapsed)
     protected TextView timeElapsedView;
 
     //chart is added manually
@@ -240,11 +237,9 @@ public class NewMeasurementFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
-        return null;
-    }
+        View root = inflater.inflate(R.layout.fragment_new_measurement, container, false);
+        ButterKnife.inject(this, root);
 
-    @AfterViews
-    public void afterViews() {
         // user info block
         ParseUser user = ParseUser.getCurrentUser();
         userEmailView.setText(user.getEmail());
@@ -288,6 +283,8 @@ public class NewMeasurementFragment extends Fragment {
         mGraphView.addSeries(mHeartRateSeries);
 
         chartContainer.addView(mGraphView);
+
+        return root;
     }
 
     @Override
@@ -640,10 +637,10 @@ public class NewMeasurementFragment extends Fragment {
     private void onSessionFinished(Message msg) {
         if (mCurrentSessionId >0) {
             if (!isDetached()) {
-                SessionViewActivity_.intent(getActivity())
-                        .sessionId(mCurrentSessionId)
-                        .renameSession(true)
-                        .start();
+                Intent intent = new Intent(getActivity(), SessionViewActivity.class);
+                intent.putExtra(SessionViewActivity.EXTRA_SESSION_ID, mCurrentSessionId);
+                intent.putExtra(SessionViewActivity.EXTRA_RENAME_SESSION, true);
+                startActivity(intent);
 
                 CommonTools.vibrate(getActivity(), new long[]{0, 500, 300, 500}, -1);
             }
@@ -751,7 +748,6 @@ public class NewMeasurementFragment extends Fragment {
         stopSessionButton.setEnabled(false);
     }
 
-    @UiThread
     protected void loadSessionData(final long sessionId) {
         sessionDataLoaded = false;
         graphT = -1;
@@ -772,13 +768,17 @@ public class NewMeasurementFragment extends Fragment {
             public List<Integer> then(Task<CardioSessionEntity> task) throws Exception {
                 long sessionId = task.getResult().getId();
                 CardioItemDAO dao = HelperFactory.getHelper().getCardioItemDao();
-                List<CardioItemEntity> items = dao.queryBuilder()
-                        .orderBy("_id", true)
-                        .where().eq("session_id", sessionId).query();
-                List<Integer> result = new ArrayList<Integer>(items.size());
-                for (CardioItemEntity item : items) {
-                    result.add(item.getRr());
+                GenericRawResults<String[]> items = dao.queryBuilder()
+                        .selectColumns("_id", "rr")
+                        .orderBy("_id", false)
+                        .limit((long) MAX_GRAPH_VIEW_POINTS)
+                        .where().eq("session_id", sessionId)
+                        .queryRaw();
+                List<Integer> result = new ArrayList<Integer>();
+                for (String[] item : items) {
+                    result.add(Integer.valueOf(item[1]));
                 }
+                Collections.reverse(result);
                 return result;
             }
         }, Task.BACKGROUND_EXECUTOR).continueWith(new Continuation<List<Integer>, Void>() {

@@ -17,7 +17,7 @@ import android.view.ViewGroup;
 import com.cardiomood.android.mipt.fragments.AboutFragment;
 import com.cardiomood.android.mipt.fragments.HistoryFragment;
 import com.cardiomood.android.mipt.fragments.NavigationDrawerFragment;
-import com.cardiomood.android.mipt.fragments.NewMeasurementFragment_;
+import com.cardiomood.android.mipt.fragments.NewMeasurementFragment;
 import com.cardiomood.android.mipt.tools.Constants;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.parse.ParseUser;
@@ -151,7 +151,7 @@ public class MainActivity extends ActionBarActivity
         public static Fragment newInstance(int sectionNumber) {
             switch (sectionNumber) {
                 case 1:
-                    return new NewMeasurementFragment_();
+                    return new NewMeasurementFragment();
                 case 2:
                     return new HistoryFragment();
                 case 3:

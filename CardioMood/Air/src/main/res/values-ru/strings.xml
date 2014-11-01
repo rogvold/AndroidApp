@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Air</string>
-    <string name="title_activity_main">CardioMood Air</string>
+    <string name="app_name">FlyTrack</string>
+    <string name="title_activity_main">FlyTrack</string>
     <string name="action_settings">Настройки</string>
     <string name="title_activity_tracking">Мониторинг</string>
     <string name="title_other_devices">Другие устройства</string>

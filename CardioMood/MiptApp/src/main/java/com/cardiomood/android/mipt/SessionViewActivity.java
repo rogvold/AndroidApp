@@ -2,7 +2,9 @@ package com.cardiomood.android.mipt;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,56 +17,88 @@ import android.widget.Toast;
 import com.cardiomood.android.mipt.components.HeartRateGraphView;
 import com.cardiomood.android.mipt.db.CardioItemDAO;
 import com.cardiomood.android.mipt.db.CardioSessionDAO;
-import com.cardiomood.android.mipt.db.DatabaseHelper;
-import com.cardiomood.android.mipt.db.entity.CardioItemEntity;
+import com.cardiomood.android.mipt.db.HelperFactory;
 import com.cardiomood.android.mipt.db.entity.CardioSessionEntity;
+import com.j256.ormlite.dao.GenericRawResults;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GraphViewSeries;
 
-import org.androidannotations.annotations.AfterExtras;
-import org.androidannotations.annotations.AfterViews;
-import org.androidannotations.annotations.Background;
-import org.androidannotations.annotations.EActivity;
-import org.androidannotations.annotations.Extra;
-import org.androidannotations.annotations.OrmLiteDao;
-import org.androidannotations.annotations.UiThread;
-import org.androidannotations.annotations.ViewById;
-
+import java.sql.SQLException;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.Callable;
 
-@EActivity(R.layout.activity_session_view)
+import bolts.Continuation;
+import bolts.Task;
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+
 public class SessionViewActivity extends ActionBarActivity {
 
+    private static final String TAG = SessionViewActivity.class.getSimpleName();
     private static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM);
 
-    private static final String EXTRA_SESSION_ID = "com.cardiomood.android.mipt.EXTRA_SESSION_ID";
-    private static final String EXTRA_RENAME_SESSION = "com.cardiomood.android.mipt.EXTRA_RENAME_SESSION";
+    public static final String EXTRA_SESSION_ID = "com.cardiomood.android.kolomna.EXTRA_SESSION_ID";
+    public static final String EXTRA_RENAME_SESSION = "com.cardiomood.android.kolomna.EXTRA_RENAME_SESSION";
 
 
-    @Extra(EXTRA_SESSION_ID)
     protected Long sessionId;
-    @Extra(EXTRA_RENAME_SESSION)
     protected boolean renameSession;
 
     // DAO objects
-    @OrmLiteDao(helper = DatabaseHelper.class, model = CardioSessionEntity.class)
     protected CardioSessionDAO sessionDAO;
-    @OrmLiteDao(helper = DatabaseHelper.class, model = CardioItemEntity.class)
     protected CardioItemDAO itemDAO;
 
     private CardioSessionEntity mSession;
 
-    @ViewById(R.id.session_name)
+    @InjectView(R.id.session_name)
     protected TextView sessionName;
-    @ViewById(R.id.session_start_date)
+    @InjectView(R.id.session_start_date)
     protected TextView startDate;
-    @ViewById(R.id.graph_container)
+    @InjectView(R.id.graph_container)
     protected LinearLayout chartContainer;
 
     private GraphView mGraphView;
     private GraphViewSeries mHeartRateSeries;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_session_view);
+
+        if (savedInstanceState == null) {
+            renameSession = getIntent().getBooleanExtra(EXTRA_RENAME_SESSION, false);
+        }
+        sessionId = getIntent().getLongExtra(EXTRA_SESSION_ID, -1);
+
+        if (sessionId == null || sessionId < 0) {
+            Toast.makeText(this, "Session ID is null. Closing...", Toast.LENGTH_SHORT).show();
+            finish();
+        }
+
+        ButterKnife.inject(this);
+
+        // Init Graph View
+        mGraphView = new HeartRateGraphView(this);
+
+        mHeartRateSeries = new GraphViewSeries(new GraphView.GraphViewData[0]);
+        mGraphView.addSeries(mHeartRateSeries);
+        chartContainer.addView(mGraphView);
+
+        try {
+            sessionDAO = HelperFactory.getHelper().getCardioSessionDao();
+            itemDAO = HelperFactory.getHelper().getCardioItemDao();
+        } catch (SQLException ex) {
+            Log.e(TAG, "onCreate() failed to obtain DAO", ex);
+            Toast.makeText(this, "Failed to obtain DAO", Toast.LENGTH_SHORT).show();
+            finish();
+        }
+
+        // load data in background
+        loadSessionDataInBackground(sessionId);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -87,72 +121,79 @@ public class SessionViewActivity extends ActionBarActivity {
         }
     }
 
+    protected void loadSessionDataInBackground(final Long sessionId) {
+        Task.callInBackground(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                if (sessionId == null) {
+                    throw new IllegalArgumentException("Session ID is null");
+                }
+                CardioSessionEntity session = sessionDAO.queryForId(sessionId);
+                GenericRawResults<String[]> results = itemDAO.queryBuilder()
+                        .orderBy("_id", true)
+                        .selectColumns("_id", "rr")
+                        .where().eq("session_id", sessionId)
+                        .queryRaw();
+                try {
+                    List<Integer> items = new ArrayList<Integer>();
+                    for (String[] row : results) {
+                        items.add(Integer.valueOf(row[1]));
+                    }
+                    onSessionLoaded(session, items);
+                } finally {
+                    results.close();
+                }
+                return null;
+            }
+        }).continueWith(new Continuation<Object, Object>() {
+            @Override
+            public Object then(Task<Object> task) throws Exception {
+                if (task.isFaulted()) {
+                    onSessionLoadFailed(task.getError(), sessionId);
+                }
+                return null;
+            }
+        });
 
-    @AfterExtras
-    protected void afterExtras() {
-        if (sessionId == null) {
-            Toast.makeText(this, "Session ID is null. Closing...", Toast.LENGTH_SHORT).show();
-            finish();
-        }
-    }
 
-    @AfterViews
-    protected void afterViews() {
-        // Init Graph View
-        mGraphView = new HeartRateGraphView(this);
-
-        mHeartRateSeries = new GraphViewSeries(new GraphView.GraphViewData[0]);
-        mGraphView.addSeries(mHeartRateSeries);
-        chartContainer.addView(mGraphView);
-
-        // load data in background
-        loadSessionDataInBackground(sessionId);
-    }
-
-    @Background(id = "load_session")
-    protected void loadSessionDataInBackground(Long sessionId) {
-        if (sessionId == null) {
-            throw new IllegalArgumentException("Session ID is null");
-        }
         try {
-            CardioSessionEntity session = sessionDAO.queryForId(sessionId);
-            List<CardioItemEntity> items = itemDAO.queryBuilder()
-                    .orderBy("_id", true).where().eq("session_id", sessionId)
-                    .query();
-            onSessionLoaded(session, items);
+
         } catch (Exception ex) {
             onSessionLoadFailed(ex, sessionId);
         }
     }
 
-    @UiThread
-    protected void onSessionLoaded(CardioSessionEntity session, List<CardioItemEntity> items) {
-        mSession = session;
-        if (renameSession) {
-            renameSession = false;
-            showRenameDialog();
-        }
+    protected void onSessionLoaded(final CardioSessionEntity session, final List<Integer> items) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mSession = session;
+                if (renameSession) {
+                    renameSession = false;
+                    showRenameDialog();
+                }
 
-        if (session.getName() == null || session.getName().trim().isEmpty()) {
-            sessionName.setText("<Untitled Session>");
-        } else {
-            sessionName.setText(session.getName().trim());
-        }
-        startDate.setText(DATE_FORMAT.format(new Date(session.getStartTimestamp())));
+                if (session.getName() == null || session.getName().trim().isEmpty()) {
+                    sessionName.setText("<Untitled Session>");
+                } else {
+                    sessionName.setText(session.getName().trim());
+                }
+                startDate.setText(DATE_FORMAT.format(new Date(session.getStartTimestamp())));
 
-        GraphView.GraphViewData[] data = new GraphView.GraphViewData[items.size()];
-        long t = 0;
-        for (int i=0; i<data.length; i++) {
-            CardioItemEntity item = items.get(i);
-            data[i] = new GraphView.GraphViewData(t, 60*1000.d/item.getRr());
-            t += item.getRr();
-        }
-        mHeartRateSeries.resetData(data);
+                GraphView.GraphViewData[] data = new GraphView.GraphViewData[items.size()];
+                long t = 0;
+                for (int i = 0; i < data.length; i++) {
+                    Integer item = items.get(i);
+                    data[i] = new GraphView.GraphViewData(t, 60 * 1000.d / item);
+                    t += item;
+                }
+                mHeartRateSeries.resetData(data);
+            }
+        });
     }
 
-    @UiThread
     protected void onSessionLoadFailed(Exception ex, Long sessionId) {
-        Toast.makeText(this, "Failed to load session with ID=" + sessionId, Toast.LENGTH_SHORT).show();
+        showToast("Failed to load session with ID=" + sessionId);
     }
 
     private void showRenameDialog() {
@@ -207,19 +248,28 @@ public class SessionViewActivity extends ActionBarActivity {
         }
     }
 
-
-    @UiThread
-    protected void showToast(CharSequence message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    protected void showToast(final CharSequence message) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(SessionViewActivity.this, message, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    @UiThread
     protected void onSessionRenamed() {
-        String name = mSession.getName();
-        if (name == null || name.trim().isEmpty()) {
-            sessionName.setText("<Untitled Session>");
-        } else {
-            sessionName.setText(name.trim());
-        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String name = mSession.getName();
+                if (name == null || name.trim().isEmpty()) {
+                    sessionName.setText("<Untitled Session>");
+                } else {
+                    sessionName.setText(name.trim());
+                }
+            }
+        });
+
     }
 }
+

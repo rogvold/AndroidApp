@@ -1,5 +1,5 @@
 <resources>
-        <string name="title_activity_login">CardioMood Air</string>
+        <string name="title_activity_login">FlyTrack</string>
 
     <!-- Strings related to login -->
     <string name="prompt_email">Email</string>
