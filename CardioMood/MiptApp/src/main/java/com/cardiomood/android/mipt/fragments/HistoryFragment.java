@@ -32,8 +32,10 @@ import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.math.HeartRateUtils;
 import com.cardiomood.math.filter.PisarukArtifactFilter;
 import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.dao.GenericRawResults;
 import com.j256.ormlite.stmt.DeleteBuilder;
 import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 import org.json.JSONArray;
@@ -41,6 +43,7 @@ import org.json.JSONArray;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -154,96 +157,19 @@ public class HistoryFragment extends ListFragment {
         syncHelper.setUserId(ParseUser.getCurrentUser().getObjectId());
         syncHelper.setLastSyncDate(lastSyncDate);
 
-        Task.callInBackground(new Callable<Long>() {
-            @Override
-            public Long call() throws Exception {
-                long sync = System.currentTimeMillis();
-                syncHelper.synObjects(
-                        CardioSessionEntity.class,
-                        true,
-                        new SyncHelper.SyncCallback<CardioSessionEntity>() {
-                            @Override
-                            public void onSaveLocally(CardioSessionEntity localObject, ParseObject remoteObject) {
-                                try {
-                                    CardioSessionDAO sessionDao = HelperFactory.getHelper().getCardioSessionDao();
-                                    CardioItemDAO itemDao = HelperFactory.getHelper().getCardioItemDao();
-                                    Dao.CreateOrUpdateStatus status = sessionDao.createOrUpdate(localObject);
-                                    if (status.isUpdated()) {
-                                        DeleteBuilder<CardioItemEntity, Long> del = itemDao.deleteBuilder();
-                                        del.where().eq("session_id", localObject.getId());
-                                        del.delete();
-                                    }
-                                    JSONArray rrs = ((CardioSession) remoteObject).getRrs();
-                                    JSONArray times = ((CardioSession) remoteObject).getT();
-                                    for (int i=0; i<rrs.length(); i++) {
-                                        CardioItemEntity item = new CardioItemEntity();
-                                        item.setRr(rrs.getInt(i));
-                                        item.setBpm(Math.round(60 * (item.getRr() / 1000.0f)));
-                                        item.setT(times.getLong(i));
-                                        item.setSession(localObject);
-                                        itemDao.create(item);
-                                    }
+        Task.callInBackground(
+                new Callable<Long>() {
 
-                                    if (localObject.getEndTimestamp() == 0L) {
-                                        // update endTimestamp
-                                        if (rrs.length() == 0) {
-                                            localObject.setEndTimestamp(localObject.getStartTimestamp());
-                                        } else {
-                                            localObject.setEndTimestamp(rrs.getLong(rrs.length() - 1));
-                                        }
-                                    }
-                                } catch (Exception ex) {
-                                    throw new RuntimeException(ex);
-                                }
-                            }
-
-                            @Override
-                            public void onSaveRemotely(CardioSessionEntity localObject, ParseObject remoteObject) {
-                                try {
-                                    CardioItemDAO itemDao = HelperFactory.getHelper().getCardioItemDao();
-                                    List<CardioItemEntity> items = itemDao.queryBuilder()
-                                            .orderBy("_id", true)
-                                            .where().eq("session_id", localObject.getId())
-                                            .query();
-
-                                    List<Long> t = new ArrayList<Long>(items.size());
-                                    List<Integer> rrs = new ArrayList<Integer>(items.size());
-                                    for (CardioItemEntity item: items) {
-                                        t.add(item.getT());
-                                        rrs.add(item.getRr());
-                                    }
-
-                                    remoteObject.put("rrs", rrs);
-                                    remoteObject.put("times", t);
-                                    if (((CardioSession) remoteObject).getEndTimestamp() == 0L) {
-                                        remoteObject.put("endTimestamp", localObject.getEndTimestamp());
-                                    }
-
-                                    // calculate stress
-                                    double[][] stress = calculateStress(t, rrs);
-                                    remoteObject.remove("stressTimes");
-                                    List<Double> values = new ArrayList<Double>(stress[0].length);
-                                    for (double time: stress[0]) {
-                                        values.add(time);
-                                    }
-                                    remoteObject.addAll("stressTimes", values);
-
-                                    values = new ArrayList<Double>(stress[1].length);
-                                    for (double time: stress[1]) {
-                                        values.add(time);
-                                    }
-                                    remoteObject.remove("stressValues");
-                                    remoteObject.addAll("stressValues", values);
-                                } catch (Exception ex) {
-                                    throw new RuntimeException(ex);
-                                }
-                            }
-                        }
-                );
-                return sync;
-            }
-        }).continueWith(
+                    @Override
+                    public Long call() throws Exception {
+                      long sync = System.currentTimeMillis();
+                      syncHelper.synObjects(CardioSessionEntity.class, true, new SyncCallback());
+                      return sync;
+                    }
+                }
+        ).continueWith(
                 new Continuation<Long, Object>() {
+
                     @Override
                     public Object then(Task<Long> task) throws Exception {
                         if (task.isFaulted()) {
@@ -262,8 +188,7 @@ public class HistoryFragment extends ListFragment {
                         return null;
                     }
                 },
-                Task.UI_THREAD_EXECUTOR
-        );
+                Task.UI_THREAD_EXECUTOR);
     }
 
     private double[][] calculateStress(List<Long> times, List<Integer> rrs) {
@@ -271,7 +196,7 @@ public class HistoryFragment extends ListFragment {
         double r[] = new double[rrs.size()];
 
         // put into double[] arrays
-        for (int i=0; i < Math.min(r.length, t.length); i++) {
+        for (int i = 0; i < Math.min(r.length, t.length); i++) {
             t[i] = times.get(i);
             r[i] = rrs.get(i);
         }
@@ -313,6 +238,106 @@ public class HistoryFragment extends ListFragment {
             text2.setText("Last updated: " + DATE_FORMAT.format(entity.getSyncDate()));
 
             return itemView;
+        }
+    }
+
+    private class SyncCallback implements SyncHelper.SyncCallback<CardioSessionEntity> {
+
+        private final int CHUNK_SIZE = 5000;
+
+        @Override
+        public void onSaveLocally(CardioSessionEntity localObject, ParseObject remoteObject) throws Exception {
+            CardioSessionDAO sessionDao = HelperFactory.getHelper().getCardioSessionDao();
+            CardioItemDAO itemDao = HelperFactory.getHelper().getCardioItemDao();
+            Dao.CreateOrUpdateStatus status = sessionDao.createOrUpdate(localObject);
+            if (status.isUpdated()) {
+                DeleteBuilder<CardioItemEntity, Long> del = itemDao.deleteBuilder();
+                del.where().eq("session_id", localObject.getId());
+                del.delete();
+            }
+
+            List<ParseObject> chunks = ParseQuery.getQuery("CardioDataChunk")
+                    .whereEqualTo("sessionId", remoteObject.getObjectId())
+                    .orderByAscending("number")
+                    .find();
+
+            long lastT = localObject.getStartTimestamp();
+            for (ParseObject chunk: chunks) {
+                JSONArray rrs = chunk.getJSONArray("rrs");
+                JSONArray times = chunk.getJSONArray("times");
+                for (int i = 0; i < rrs.length(); i++) {
+                    CardioItemEntity item = new CardioItemEntity();
+                    item.setRr(rrs.getInt(i));
+                    item.setBpm(Math.round(60 * (item.getRr() / 1000.0f)));
+                    item.setT(times.getLong(i));
+                    item.setSession(localObject);
+                    itemDao.create(item);
+
+                    if (item.getT() < 1000000000000000L) {
+                        lastT = item.getT() + localObject.getStartTimestamp();
+                    } else {
+                        lastT = item.getT();
+                    }
+                }
+            }
+            if (localObject.getEndTimestamp() == 0L) {
+                // update endTimestamp
+                localObject.setEndTimestamp(lastT);
+            }
+        }
+
+        @Override
+        public void onSaveRemotely(CardioSessionEntity localObject, ParseObject remoteObject) throws Exception {
+            CardioItemDAO itemDao = HelperFactory.getHelper().getCardioItemDao();
+            GenericRawResults<String[]> results = itemDao.queryBuilder()
+                    .selectColumns("_id", "rr", "t")
+                    .orderBy("_id", true)
+                    .where().eq("session_id", localObject.getId())
+                    .queryRaw();
+            if (remoteObject.getObjectId() == null) {
+                // remote object is new
+                remoteObject.save();
+            } else {
+                // remote object already exists
+                // assuming the data points already up-to-date
+                return;
+            }
+
+            // TODO: delete all cardio data chunks for this session!
+            List<Integer> allRRs = new ArrayList<Integer>();
+            List<Long> allTs = new ArrayList<Long>();
+            try {
+                Iterator<String[]> it = results.iterator();
+                int number = 1;
+                do {
+                    List<Long> t = new ArrayList<Long>(CHUNK_SIZE);
+                    List<Integer> rrs = new ArrayList<Integer>(CHUNK_SIZE);
+                    for (int i = 0; i < CHUNK_SIZE && it.hasNext(); i++) {
+                        if (it.hasNext()) {
+                            String[] row = it.next();
+                            Integer rrValue = Integer.valueOf(row[1]);
+                            Long tValue = Long.valueOf(row[2]);
+                            rrs.add(rrValue);
+                            t.add(tValue);
+                        }
+                    }
+                    ParseObject chunk = ParseObject.create("CardioDataChunk");
+                    chunk.put("sessionId", remoteObject.getObjectId());
+                    chunk.put("rrs", rrs);
+                    chunk.put("times", t);
+                    chunk.put("number", number);
+                    chunk.save();
+                    allTs.addAll(t);
+                    allRRs.addAll(rrs);
+                    number++;
+                } while (it.hasNext());
+            } finally {
+                results.close();
+            }
+
+            if (((CardioSession) remoteObject).getEndTimestamp() == 0L) {
+                remoteObject.put("endTimestamp", localObject.getEndTimestamp());
+            }
         }
     }
 

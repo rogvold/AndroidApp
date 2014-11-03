@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="graphview-3.1.4">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/KolomnaApp/build/intermediates/exploded-aar/com.jjoe64/graphview/3.1.4/classes.jar!/" />
+      <root url="file://$PROJECT_DIR$/KolomnaApp/build/intermediates/exploded-aar/com.jjoe64/graphview/3.1.4/res" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

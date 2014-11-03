@@ -10,45 +10,55 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
-        android:name="com.cardiomood.android.kolomna.KolomnaApplication"
+        android:name=".KolomnaApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:largeHeap="true"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.cardiomood.android.kolomna.LoginActivity"
+            android:name=".LoginActivity"
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:label="@string/title_activity_login"
             android:screenOrientation="portrait" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name="com.cardiomood.android.kolomna.MainActivity"
+            android:name=".MainActivity"
             android:label="@string/title_activity_main" >
         </activity>
 
         <service
-            android:name="com.cardiomood.android.kolomna.service.CardioMonitoringService"
+            android:name=".service.CardioMonitoringService"
             android:enabled="true"
             android:exported="false"
             android:process=":heart_rate" >
         </service>
 
         <activity
-            android:name="com.cardiomood.android.kolomna.SessionViewActivity"
+            android:name=".SessionViewActivity"
             android:label="@string/title_activity_session_view"
-            android:parentActivityName="com.cardiomood.android.kolomna.MainActivity" >
+            android:parentActivityName=".MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.cardiomood.android.mipt.MainActivity" />
+                android:value="com.cardiomood.android.kolomna.MainActivity" />
         </activity>
+
+        <receiver
+            android:name=".receiver.BootCompletedReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:label="Fix broken session after boot completed">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

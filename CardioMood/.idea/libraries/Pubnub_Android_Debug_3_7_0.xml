@@ -4,10 +4,6 @@
       <root url="jar://$PROJECT_DIR$/KolomnaApp/libs/Pubnub-Android-Debug-3.7.0.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES>
-      <root url="file://$PROJECT_DIR$/../../PubNub/java/src1" />
-      <root url="file://$PROJECT_DIR$/../../PubNub/java/src" />
-      <root url="file://$PROJECT_DIR$/../../PubNub/java/srcPubnubApi" />
-    </SOURCES>
+    <SOURCES />
   </library>
 </component>

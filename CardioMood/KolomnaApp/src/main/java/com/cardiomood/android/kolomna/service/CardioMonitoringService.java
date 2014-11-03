@@ -88,8 +88,10 @@ public class CardioMonitoringService extends Service {
     volatile CardioSessionEntity mCardioSession = null;
     WorkerThread<CardioDataPackage> mWorkerThread;
 
-    Pubnub pubnub = new Pubnub("pub-c-9846b61b-9673-4129-892c-07336a570198",
-            "sub-c-6487bba8-5e02-11e4-9f5a-02ee2ddab7fe");
+//    Pubnub pubnub = new Pubnub("pub-c-9846b61b-9673-4129-892c-07336a570198",
+//            "sub-c-6487bba8-5e02-11e4-9f5a-02ee2ddab7fe");
+    Pubnub pubnub = new Pubnub("pub-c-a86ef89b-7858-4b4c-8f89-c4348bfc4b79",
+            "sub-c-e5ae235a-4c3e-11e4-9e3d-02ee2ddab7fe");
 
     /**
      * Handler of incoming messages from clients.
@@ -527,7 +529,7 @@ public class CardioMonitoringService extends Service {
 
     private class PubnubWorkerThread extends WorkerThread<JSONObject> {
 
-        private final String CHANNEL_NAME = "my_channel";
+        private final String CHANNEL_NAME = "KolomnaRealTime";
         private Queue<JSONObject> buffer = new LinkedList<JSONObject>();
 
         @Override

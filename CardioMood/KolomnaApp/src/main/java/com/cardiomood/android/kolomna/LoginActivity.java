@@ -178,6 +178,7 @@ public class LoginActivity extends ActionBarActivity {
         userQuery = ParseUser.getQuery();
         userQuery.orderByAscending("lastName")
                 .orderByAscending("firstName")
+                .whereEqualTo("userRole", "Trainee")
                 .findInBackground(new FindCallback<ParseUser>() {
                     @Override
                     public void done(List<ParseUser> parseUsers, ParseException e) {

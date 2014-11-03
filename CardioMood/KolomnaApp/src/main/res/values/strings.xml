@@ -45,5 +45,6 @@
     <string name="rename_session">Rename Session</string>
     <string name="menu_rename">Rename</string>
     <string name="about_message">Developed by CardioMood</string>
+    <string name="title_section0">My Profile</string>
 
 </resources>

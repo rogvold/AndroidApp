@@ -13,8 +13,8 @@ import com.parse.ParseObject;
 public class KolomnaApplication extends Application {
 
     // TODO: change parse.com keys!
-    private static final String PARSE_APP_ID = "KNYnAGgkTVXhSXGzccX33w7ayISaEZBTYd01Qr8X";
-    private static final String PARSE_CLIENT_KEY = "OyULWCmLxnor6DPJjEWJrHU1p2F5jsVSVozsdo4f";
+    private static final String PARSE_APP_ID = "8BiAfjRaj4S9AvHHKKXWOHX40PnEkDdgBEZlp4VY";
+    private static final String PARSE_CLIENT_KEY = "Dmqfv4QW3LcBOLfMhxUzkR2a9NQokjVz5dx0O2fv";
 
     @Override
     public void onCreate() {

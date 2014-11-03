@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.cardiomood.android.kolomna.fragments.AboutFragment;
+import com.cardiomood.android.kolomna.fragments.EditParseUserFragment;
 import com.cardiomood.android.kolomna.fragments.HistoryFragment;
 import com.cardiomood.android.kolomna.fragments.NavigationDrawerFragment;
 import com.cardiomood.android.kolomna.fragments.NewMeasurementFragment;
@@ -76,12 +77,15 @@ public class MainActivity extends ActionBarActivity
     public void onSectionAttached(int number) {
         switch (number) {
             case 1:
-                mTitle = getString(R.string.title_section1);
+                mTitle = getString(R.string.title_section0);
                 break;
             case 2:
-                mTitle = getString(R.string.title_section2);
+                mTitle = getString(R.string.title_section1);
                 break;
             case 3:
+                mTitle = getString(R.string.title_section2);
+                break;
+            case 4:
                 mTitle = getString(R.string.title_section3);
                 break;
         }
@@ -151,10 +155,12 @@ public class MainActivity extends ActionBarActivity
         public static Fragment newInstance(int sectionNumber) {
             switch (sectionNumber) {
                 case 1:
-                    return new NewMeasurementFragment();
+                    return new EditParseUserFragment();
                 case 2:
-                    return new HistoryFragment();
+                    return new NewMeasurementFragment();
                 case 3:
+                    return new HistoryFragment();
+                case 4:
                     return new AboutFragment();
                 default:
                     PlaceholderFragment fragment = new PlaceholderFragment();
