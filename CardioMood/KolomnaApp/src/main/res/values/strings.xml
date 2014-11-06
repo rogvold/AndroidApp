@@ -24,7 +24,7 @@
     <string name="prompt_password">Password</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="action_sign_in">Sign in</string>
-    <string name="hr">HR:</string>
+    <string name="hr">&#59631;</string>
     <string name="select_hrm_device">Select device</string>
     <string name="connect_button">Connect</string>
     <string name="hrm_not_connected">Not connected</string>
@@ -46,5 +46,11 @@
     <string name="menu_rename">Rename</string>
     <string name="about_message">Developed by CardioMood</string>
     <string name="title_section0">My Profile</string>
+    <string name="aerobic_threshold">Aerobic threshold:</string>
+    <string name="anaerobic_threshold">Anaerobic threshold:</string>
+    <string name="resting_heart_rate">Resting heart rate:</string>
+    <string name="hint_resting_heart_rate">e.g. 52</string>
+    <string name="hint_aerobic_threshold">e.g. 140</string>
+    <string name="hint_anaerobic_threshold">e.g. 167</string>
 
 </resources>

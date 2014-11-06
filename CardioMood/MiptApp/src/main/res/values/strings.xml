@@ -24,7 +24,7 @@
     <string name="prompt_password">Password</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="action_sign_in">Sign in</string>
-    <string name="hr">HR:</string>
+    <string name="hr">&#59631;</string>
     <string name="select_hrm_device">Select device</string>
     <string name="connect_button">Connect</string>
     <string name="hrm_not_connected">Not connected</string>

@@ -175,6 +175,7 @@ public class LoginActivity extends ActionBarActivity {
         mProgressDialog.show();
 
         // request user list
+        ParseQuery.getQuery("_User");
         userQuery = ParseUser.getQuery();
         userQuery.orderByAscending("lastName")
                 .orderByAscending("firstName")

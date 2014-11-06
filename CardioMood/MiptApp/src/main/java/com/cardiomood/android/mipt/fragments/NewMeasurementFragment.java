@@ -345,6 +345,7 @@ public class NewMeasurementFragment extends Fragment {
                     performConnect();
                 } else {
                     Log.e(TAG, "onActivityResult(): BT not enabled");
+                    connectButton.setEnabled(true);
                 }
                 break;
         }

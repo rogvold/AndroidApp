@@ -86,7 +86,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="ormlite-android-4.48" level="project" />
     <orderEntry type="library" exported="" name="cardview-v7-21.0.0" level="project" />
-    <orderEntry type="library" exported="" name="recyclerview-v7-21.0.0" level="project" />
     <orderEntry type="library" exported="" name="support-v4-21.0.0" level="project" />
     <orderEntry type="library" exported="" name="graphview-3.1.4" level="project" />
     <orderEntry type="library" exported="" name="Pubnub-Android-Debug-3.7.0" level="project" />

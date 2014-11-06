@@ -21,14 +21,18 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.cardiomood.android.kolomna.R;
 import com.cardiomood.android.tools.PreferenceHelper;
-import com.cardiomood.android.tools.R;
+import com.parse.ParseObject;
 import com.parse.ParseUser;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+
+import bolts.Continuation;
+import bolts.Task;
 
 /**
  * Project: CardioMood Kolomna
@@ -51,6 +55,10 @@ public class EditParseUserFragment extends Fragment implements TextWatcher {
     public static final String USER_BIRTH_DATE_KEY      = "birthDate";
     public static final String USER_SEX_KEY				= "gender";
     public static final String USER_PHONE_NUMBER_KEY    = "phone";
+    public static final String USER_RESTING_HR_KEY      = "restingHeartRate";
+    public static final String USER_AEROBIC_THRESHOLD_KEY = "aerobicThreshold";
+    public static final String USER_ANAEROBIC_THRESHOLD_KEY = "anaerobicThreshold";
+
 
     public static final String PREFERRED_MEASUREMENT_SYSTEM = "app.preferred_measurement_system";
 
@@ -71,6 +79,9 @@ public class EditParseUserFragment extends Fragment implements TextWatcher {
     private TextView heightMajorUnitsView;
     private TextView weightMinorUnitsView;
     private TextView heightMinorUnitsView;
+    private EditText restingHeartRateView;
+    private EditText aerobicThresholdView;
+    private EditText anaerobicThresholdView;
 
     private Callback callback;
     private boolean emailEditable = false;
@@ -108,7 +119,7 @@ public class EditParseUserFragment extends Fragment implements TextWatcher {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_profile, container, false);
+        View v = inflater.inflate(R.layout.fragment_edit_parse_user, container, false);
 
         emailView = (EditText) v.findViewById(R.id.editTextEmail);
         firstNameView = (EditText) v.findViewById(R.id.editTextFirstName);
@@ -139,6 +150,9 @@ public class EditParseUserFragment extends Fragment implements TextWatcher {
                 }
             }
         });
+        restingHeartRateView = (EditText) v.findViewById(R.id.resting_heart_rate);
+        aerobicThresholdView = (EditText) v.findViewById(R.id.aerobic_threshold);
+        anaerobicThresholdView = (EditText) v.findViewById(R.id.anaerobic_threshold);
 
         weightMajorView = (EditText) v.findViewById(R.id.weight_major);
         weightMinorView = (EditText) v.findViewById(R.id.weight_minor);
@@ -150,8 +164,13 @@ public class EditParseUserFragment extends Fragment implements TextWatcher {
         heightMajorUnitsView = (TextView) v.findViewById(R.id.height_major_units);
         heightMinorUnitsView = (TextView) v.findViewById(R.id.height_minor_units);
 
-        if (emailEditable)
+        if (emailEditable) {
             emailView.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+            emailView.setFocusable(true);
+        } else {
+            emailView.setInputType(InputType.TYPE_NULL);
+            emailView.setFocusable(false);
+        }
 
         return v;
     }
@@ -184,6 +203,18 @@ public class EditParseUserFragment extends Fragment implements TextWatcher {
         firstNameView.setText(user.getString(USER_FIRST_NAME_KEY));
         lastNameView.setText(user.getString(USER_LAST_NAME_KEY));
         phoneNumberView.setText(user.getString(USER_PHONE_NUMBER_KEY));
+
+        if (user.has(USER_RESTING_HR_KEY))
+            restingHeartRateView.setText(String.valueOf(user.getInt(USER_RESTING_HR_KEY)));
+        else restingHeartRateView.setText(null);
+
+        if (user.has(USER_AEROBIC_THRESHOLD_KEY))
+            aerobicThresholdView.setText(String.valueOf(user.getInt(USER_AEROBIC_THRESHOLD_KEY)));
+        else aerobicThresholdView.setText(null);
+
+        if (user.has(USER_ANAEROBIC_THRESHOLD_KEY))
+            anaerobicThresholdView.setText(String.valueOf(user.getInt(USER_ANAEROBIC_THRESHOLD_KEY)));
+        else anaerobicThresholdView.setText(null);
 
         String gender = user.getString(USER_SEX_KEY);
         if (gender == null) {
@@ -266,6 +297,9 @@ public class EditParseUserFragment extends Fragment implements TextWatcher {
         heightMajorView.addTextChangedListener(this);
         heightMinorView.addTextChangedListener(this);
         birthdayView.addTextChangedListener(this);
+        restingHeartRateView.addTextChangedListener(this);
+        aerobicThresholdView.addTextChangedListener(this);
+        anaerobicThresholdView.addTextChangedListener(this);
         genderView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -297,6 +331,9 @@ public class EditParseUserFragment extends Fragment implements TextWatcher {
         heightMinorView.removeTextChangedListener(this);
         birthdayView.removeTextChangedListener(this);
         genderView.setOnItemSelectedListener(null);
+        restingHeartRateView.removeTextChangedListener(this);
+        aerobicThresholdView.removeTextChangedListener(this);
+        anaerobicThresholdView.removeTextChangedListener(this);
     }
 
     @Override
@@ -322,6 +359,24 @@ public class EditParseUserFragment extends Fragment implements TextWatcher {
             user.put(USER_LAST_NAME_KEY, lastNameView.getText().toString());
             user.put(USER_PHONE_NUMBER_KEY, phoneNumberView.getText().toString());
 
+            if (restingHeartRateView.getText().toString().isEmpty()) {
+                user.remove(USER_RESTING_HR_KEY);
+            } else {
+                user.put(USER_RESTING_HR_KEY, Integer.parseInt(restingHeartRateView.getText().toString()));
+            }
+
+            if (aerobicThresholdView.getText().toString().isEmpty()) {
+                user.remove(USER_AEROBIC_THRESHOLD_KEY);
+            } else {
+                user.put(USER_AEROBIC_THRESHOLD_KEY, Integer.parseInt(aerobicThresholdView.getText().toString()));
+            }
+
+            if (anaerobicThresholdView.getText().toString().isEmpty()) {
+                user.remove(USER_ANAEROBIC_THRESHOLD_KEY);
+            } else {
+                user.put(USER_ANAEROBIC_THRESHOLD_KEY, Integer.parseInt(anaerobicThresholdView.getText().toString()));
+            }
+
             int gender = genderView.getSelectedItemPosition();
             if (gender == 0) {
                 user.put(USER_SEX_KEY, "MALE");
@@ -339,7 +394,7 @@ public class EditParseUserFragment extends Fragment implements TextWatcher {
                 if (!TextUtils.isEmpty(weightMinorView.getText().toString())) {
                     oz = Float.parseFloat(weightMinorView.getText().toString());
                 }
-                user.put(USER_WEIGHT_KEY, lb/2.20462f + oz/16f/2.20462f);
+                user.put(USER_WEIGHT_KEY, lb / 2.20462f + oz / 16f / 2.20462f);
             } else {
                 float kg = 0;
                 float g = 0;
@@ -349,7 +404,7 @@ public class EditParseUserFragment extends Fragment implements TextWatcher {
                 if (!TextUtils.isEmpty(weightMinorView.getText().toString())) {
                     g = Float.parseFloat(weightMinorView.getText().toString());
                 }
-                user.put(USER_WEIGHT_KEY, kg + g/1000);
+                user.put(USER_WEIGHT_KEY, kg + g / 1000);
             }
 
             if ("IMPERIAL".equalsIgnoreCase(unitSystem)) {
@@ -361,7 +416,7 @@ public class EditParseUserFragment extends Fragment implements TextWatcher {
                 if (!TextUtils.isEmpty(heightMinorView.getText().toString())) {
                     in = Float.parseFloat(heightMinorView.getText().toString());
                 }
-                user.put(USER_HEIGHT_KEY, ft*0.3048f + in*0.0254f);
+                user.put(USER_HEIGHT_KEY, ft * 0.3048f + in * 0.0254f);
             } else {
                 float m = 0;
                 float cm = 0;
@@ -371,7 +426,7 @@ public class EditParseUserFragment extends Fragment implements TextWatcher {
                 if (!TextUtils.isEmpty(heightMinorView.getText().toString())) {
                     cm = Float.parseFloat(heightMinorView.getText().toString());
                 }
-                user.put(USER_HEIGHT_KEY, m + cm/100);
+                user.put(USER_HEIGHT_KEY, m + cm / 100);
             }
 
             if (!TextUtils.isEmpty(birthdayView.getText().toString()))
@@ -421,6 +476,21 @@ public class EditParseUserFragment extends Fragment implements TextWatcher {
         if (callback != null) {
             callback.onSync();
         }
+        ParseUser.getCurrentUser()
+                .fetchInBackground()
+                .continueWith(new Continuation<ParseObject, Object>() {
+                    @Override
+                    public Object then(Task<ParseObject> task) throws Exception {
+                        if (task.isFaulted()) {
+                            // failed
+                        } else if (task.isCompleted()) {
+                            user = (ParseUser) task.getResult();
+                            reloadData();
+                        }
+                        return null;
+                    }
+                }, Task.UI_THREAD_EXECUTOR);
+
     }
 
     public void setCallback(Callback callback) {

@@ -15,58 +15,13 @@ android {
         release {
             runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled = true
+            shrinkResources true
         }
     }
-
-//    // Insert the build number into strings.xml
-//    android.applicationVariants.all {
-//
-//        // Perform resource filtering
-//        variant -> variant.mergeResources.doLast {
-//            filterResources(variant)
-//        }
-//    }
-
-
 }
 
-//def filterResources(buildVariant) {
-//
-//    //Setup temp directory to filter the resources
-//    File resFiltered = file("${buildDir}/res/all/filtered/${buildVariant.dirName}")
-//    if(resFiltered.exists()){
-//        resFiltered.delete()
-//    }
-//
-//    //Copy and filter the resources.
-//    copy {
-//        from(buildVariant.processResources.resDir) {
-//            include '**/*.xml'
-//
-//            DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT)
-//            String buildDate = dateFormat.format(new Date());
-//
-//            //Could be improved upon to pull from a properties file, etc.
-//            ant.properties['app.build_date'] = buildDate
-//
-//            filter(ExpandProperties, project: ant.project)
-//        }
-//
-//        from(buildVariant.processResources.resDir) {
-//            exclude '**/*.xml'
-//        }
-//
-//        into resFiltered
-//
-//    }
-//
-//    //Delete all the original resource files
-//    file(buildVariant.processResources.resDir).deleteDir()
-//    //Replace with the filtered ones.
-//    resFiltered.renameTo(file(buildVariant.processResources.resDir))
-//    //Delete the original 'filtered' directory
-//    file( "${buildDir}/res/all/filtered").deleteDir()
-//}
+apply from: '../buildDate.gradle'
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])

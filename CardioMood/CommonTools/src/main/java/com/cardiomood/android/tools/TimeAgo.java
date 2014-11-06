@@ -19,11 +19,6 @@ public class TimeAgo {
 
 
     public static String getTimeAgo(Context ctx, long time) {
-//        if (time < 1000000000000L) {
-//            // if timestamp given in seconds, convert to millis
-//            time *= 1000;
-//        }
-
         long now = System.currentTimeMillis();
         if (time > now || time < 0) {
             return "(none)";
