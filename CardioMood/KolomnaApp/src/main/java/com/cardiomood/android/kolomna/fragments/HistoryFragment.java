@@ -243,7 +243,7 @@ public class HistoryFragment extends ListFragment {
 
     private class SyncCallback implements SyncHelper.SyncCallback<CardioSessionEntity> {
 
-        private final int CHUNK_SIZE = 5000;
+        private final int CHUNK_SIZE = 3000;
 
         @Override
         public void onSaveLocally(CardioSessionEntity localObject, ParseObject remoteObject) throws Exception {

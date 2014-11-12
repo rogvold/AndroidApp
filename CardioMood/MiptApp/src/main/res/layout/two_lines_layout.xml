@@ -5,6 +5,7 @@
     android:layout_height="wrap_content"
     android:mode="twoLine"
     android:orientation="vertical"
+    android:paddingLeft="8dp"
     >
 
     <TextView android:id="@android:id/text1"

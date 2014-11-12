@@ -243,7 +243,7 @@ public class HistoryFragment extends ListFragment {
 
     private class SyncCallback implements SyncHelper.SyncCallback<CardioSessionEntity> {
 
-        private final int CHUNK_SIZE = 5000;
+        private final int CHUNK_SIZE = 3000;
 
         @Override
         public void onSaveLocally(CardioSessionEntity localObject, ParseObject remoteObject) throws Exception {
@@ -310,6 +310,7 @@ public class HistoryFragment extends ListFragment {
                 Iterator<String[]> it = results.iterator();
                 int number = 1;
                 do {
+                    long firstT = -1l;
                     List<Long> t = new ArrayList<Long>(CHUNK_SIZE);
                     List<Integer> rrs = new ArrayList<Integer>(CHUNK_SIZE);
                     for (int i = 0; i < CHUNK_SIZE && it.hasNext(); i++) {
@@ -318,7 +319,10 @@ public class HistoryFragment extends ListFragment {
                             Integer rrValue = Integer.valueOf(row[1]);
                             Long tValue = Long.valueOf(row[2]);
                             rrs.add(rrValue);
-                            t.add(tValue);
+                            if (firstT >= 0) {
+                                firstT = tValue;
+                            }
+                            t.add(tValue - firstT);
                         }
                     }
                     ParseObject chunk = ParseObject.create("CardioDataChunk");
@@ -331,6 +335,11 @@ public class HistoryFragment extends ListFragment {
                     allRRs.addAll(rrs);
                     number++;
                 } while (it.hasNext());
+                if (allRRs.isEmpty()) {
+                    remoteObject.put("deleted", true);
+                    localObject.setDeleted(true);
+                    HelperFactory.getHelper().getCardioSessionDao().update(localObject);
+                }
             } finally {
                 results.close();
             }
