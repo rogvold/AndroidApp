@@ -25,7 +25,7 @@ import java.util.Arrays;
 /**
  * Created by danon on 18.11.13.
  */
-@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
 public class MotorolaLeHRMonitor extends LeHRMonitor {
 
     private static final String TAG = MotorolaLeHRMonitor.class.getSimpleName();
