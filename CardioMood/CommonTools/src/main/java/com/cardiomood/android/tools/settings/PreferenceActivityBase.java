@@ -10,6 +10,7 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
+@SuppressWarnings("NewApi") // TODO: this activity will crash on API level < 11
 public abstract class PreferenceActivityBase<F extends PreferenceActivityBase.AbstractMainFragment> extends PreferenceActivity {
 
 	private F fragment;
