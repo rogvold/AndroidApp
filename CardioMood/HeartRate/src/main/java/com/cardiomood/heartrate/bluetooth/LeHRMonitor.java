@@ -44,7 +44,6 @@ public abstract class LeHRMonitor {
     private Callback callback;
     private boolean enableBroadcasts = true;
 
-    private final Object lock = new Object();
     private Timer timer = new Timer("freeze_timer");
     private TimerTask connectingTimeoutTask;
 
@@ -52,9 +51,14 @@ public abstract class LeHRMonitor {
         this.context = context;
     }
 
+    @SuppressWarnings("NewApi")
     public static LeHRMonitor getMonitor(Context context) {
         LeHRMonitor monitor = null;
         try {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                return new FallbackMonitor(context);
+            }
+
             try {
                 monitor = new AndroidLeHRMonitor(context);
                 if (monitor.isSupported())
@@ -71,15 +75,11 @@ public abstract class LeHRMonitor {
                 Log.w(TAG, "getMonitor(): this device not Motorola.", ex);
             }
         } catch (Throwable th) {
-            try {
-                return new FallbackMonitor(context);
-            } catch (NoClassDefFoundError ex) {
-                Log.wtf(TAG, "getMonitor(): this cannot be happening...", ex);
-            }
+            Log.w(TAG, "getMonitor(): this device is not supported");
         }
 
-
-        return null;
+        // returning a mock monitor instance
+        return new FallbackMonitor(context);
     }
 
     public abstract boolean isSupported();

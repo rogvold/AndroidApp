@@ -1,5 +1,6 @@
 package com.cardiomood.heartrate.bluetooth;
 
+import android.annotation.TargetApi;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -8,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
@@ -23,6 +25,7 @@ import java.util.Arrays;
 /**
  * Created by danon on 18.11.13.
  */
+@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 public class MotorolaLeHRMonitor extends LeHRMonitor {
 
     private static final String TAG = MotorolaLeHRMonitor.class.getSimpleName();
