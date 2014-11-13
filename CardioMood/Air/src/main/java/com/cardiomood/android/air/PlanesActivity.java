@@ -1,11 +1,11 @@
 package com.cardiomood.android.air;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -41,7 +41,7 @@ import java.util.Date;
 import java.util.List;
 
 
-public class PlanesActivity extends Activity {
+public class PlanesActivity extends ActionBarActivity {
 
     private static final String TAG = PlanesActivity.class.getSimpleName();
 

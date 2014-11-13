@@ -1,10 +1,10 @@
 package com.cardiomood.android.air;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,7 +31,7 @@ import bolts.Continuation;
 import bolts.Task;
 
 
-public class DebriefingActivity extends Activity {
+public class DebriefingActivity extends ActionBarActivity {
 
     public static final String EXTRA_SESSION_ID = "com.cardiomood.android.air.EXTRA_SESSION_ID";
 

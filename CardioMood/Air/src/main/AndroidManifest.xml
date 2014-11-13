@@ -3,71 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.cardiomood.android.air" >
 
-    <application
-        android:name="com.cardiomood.android.air.AirApplication"
-        android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name"
-        android:theme="@style/AppTheme"
-        android:largeHeap="true"
-        tools:replace="android:label">
-        <meta-data
-            android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" />
-        <meta-data
-            android:name="com.google.android.maps.v2.API_KEY"
-            android:value="@string/google_maps_v2_api_key_release" />
-
-        <activity
-            android:name=".LoginActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden"
-            android:label="@string/title_activity_login"
-            android:screenOrientation="portrait" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".PlanesActivity"
-            android:configChanges="orientation|screenSize|keyboardHidden"
-            android:label="@string/title_activity_main"
-            android:screenOrientation="portrait" >
-        </activity>
-        <activity
-            android:name=".TrackingActivity"
-            android:label="@string/title_activity_tracking"
-            android:screenOrientation="portrait" >
-        </activity>
-
-        <service
-            android:name=".gps.GPSService"
-            android:enabled="true"
-            android:process=":gps_service" />
-
-        <activity
-            android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings" >
-        </activity>
-        <activity
-            android:name=".HistoryActivity"
-            android:label="@string/title_activity_history"
-            android:parentActivityName=".PlanesActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.cardiomood.android.air.PlanesActivity" />
-        </activity>
-        <activity
-            android:name=".DebriefingActivity"
-            android:label="@string/title_activity_debriefing"
-            android:parentActivityName=".HistoryActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.cardiomood.android.air.HistoryActivity" />
-        </activity>
-    </application>
-
     <!-- To auto-complete the email text field in the login form with the user's emails -->
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_PROFILE" />
@@ -84,5 +19,77 @@
     <uses-feature
         android:glEsVersion="0x00020000"
         android:required="true" />
+
+    <application
+        android:name="com.cardiomood.android.air.AirApplication"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:largeHeap="true"
+        android:theme="@style/AppTheme"
+        tools:replace="android:label" >
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="@string/google_maps_v2_api_key_release" />
+
+        <activity
+            android:name="com.cardiomood.android.air.EntryActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_splash_screen"
+            android:theme="@style/FullscreenTheme" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="com.cardiomood.android.air.LoginActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:label="@string/title_activity_login"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.cardiomood.android.air.PlanesActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:label="@string/title_activity_main"
+            android:screenOrientation="portrait" >
+        </activity>
+        <activity
+            android:name="com.cardiomood.android.air.TrackingActivity"
+            android:label="@string/title_activity_tracking"
+            android:screenOrientation="portrait" >
+        </activity>
+
+        <service
+            android:name="com.cardiomood.android.air.gps.GPSService"
+            android:enabled="true"
+            android:process=":gps_service" />
+
+        <activity
+            android:name="com.cardiomood.android.air.SettingsActivity"
+            android:label="@string/title_activity_settings" >
+        </activity>
+        <activity
+            android:name="com.cardiomood.android.air.HistoryActivity"
+            android:label="@string/title_activity_history"
+            android:parentActivityName="com.cardiomood.android.air.PlanesActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.cardiomood.android.air.PlanesActivity" />
+        </activity>
+        <activity
+            android:name="com.cardiomood.android.air.DebriefingActivity"
+            android:label="@string/title_activity_debriefing"
+            android:parentActivityName="com.cardiomood.android.air.HistoryActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.cardiomood.android.air.HistoryActivity" />
+        </activity>
+    </application>
 
 </manifest>

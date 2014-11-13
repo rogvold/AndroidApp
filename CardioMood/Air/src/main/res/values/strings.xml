@@ -36,5 +36,9 @@
     <string name="menu_rename">Rename</string>
     <string name="type_new_name">Specify new name for this flight:</string>
     <string name="untitled_flight">Untitled</string>
+    <string name="title_activity_splash_screen">FlyTrack</string>
+    <string name="fly_track">FlyTrack</string>
+    <string name="extra_text">Brought to you by CardioMood</string>
+    <string name="splash_screen_button">Loading...</string>
 
 </resources>

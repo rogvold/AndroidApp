@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -53,7 +54,7 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.Circle;
@@ -84,7 +85,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 
-public class TrackingActivity extends Activity {
+public class TrackingActivity extends ActionBarActivity {
 
     public static final String SELECTED_PLANE_PARSE_ID = "com.cardiomood.android.air.extra.SELECTED_PLANE_PARSE_ID";
 
@@ -166,7 +167,7 @@ public class TrackingActivity extends Activity {
 
 
     // view
-    private MapFragment mMapFragment;
+    private SupportMapFragment mMapFragment;
     private GoogleMap mMap;
     private RelativeLayout mControlPanelView;
     private View mCurrentUserView;
@@ -390,7 +391,7 @@ public class TrackingActivity extends Activity {
 
         // initialize mapFragment
         if (mMapFragment == null)
-            mMapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+            mMapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
 
         // init google map
         if (mMap == null) {
