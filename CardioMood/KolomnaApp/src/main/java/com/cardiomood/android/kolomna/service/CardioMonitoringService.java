@@ -672,6 +672,8 @@ public class CardioMonitoringService extends Service {
                 message.put("HR", item.getBpm());
                 message.put("t", item.getTimestamp());
                 message.put("userId", cardioSession.getSyncUserId());
+                message.put("s", cardioSession.getStartTimestamp());
+                message.put("localId", cardioSession.getId());
                 if (currentStress != null) {
                     message.put("stress", currentStress);
                 }
