@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -204,9 +205,9 @@ public class PlanesActivity extends ActionBarActivity {
         refreshItem.setEnabled(!refreshing);
 
         if (refreshing) {
-            refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
+            MenuItemCompat.setActionView(refreshItem, R.layout.actionbar_indeterminate_progress);
         } else {
-            refreshItem.setActionView(null);
+            MenuItemCompat.setActionView(refreshItem, null);
         }
 
         return super.onPrepareOptionsMenu(menu);

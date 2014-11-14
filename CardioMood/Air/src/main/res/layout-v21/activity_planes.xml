@@ -4,14 +4,15 @@
     android:layout_height="match_parent"
     android:paddingLeft="8dp"
     android:paddingRight="8dp"
-    android:paddingTop="4dp"
+    android:paddingTop="0dp"
     android:paddingBottom="4dp"
     tools:context="com.cardiomood.android.air.PlanesActivity">
 
     <android.support.v7.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/top_panel">
+        android:id="@+id/top_panel"
+        android:layout_marginTop="8dp">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -34,6 +35,7 @@
                 android:textStyle="bold"
                 style="@style/SecondaryButton"
                 android:layout_gravity="center_vertical"
+                android:textAppearance="@android:style/TextAppearance.Holo.Medium.Inverse"
                 android:id="@+id/button_history"
                 android:text="@string/button_history"/>
 
@@ -44,7 +46,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/top_panel"
-        android:layout_above="@+id/bottom_panel">
+        android:layout_above="@+id/bottom_panel"
+        android:layout_marginTop="8dp">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

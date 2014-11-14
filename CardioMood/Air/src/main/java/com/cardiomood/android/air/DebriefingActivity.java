@@ -19,7 +19,7 @@ import com.cardiomood.android.air.db.entity.AirSessionEntity;
 import com.cardiomood.android.air.db.entity.DataPointEntity;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
 
@@ -35,7 +35,7 @@ public class DebriefingActivity extends ActionBarActivity {
 
     public static final String EXTRA_SESSION_ID = "com.cardiomood.android.air.EXTRA_SESSION_ID";
 
-    private MapFragment mapFragment;
+    private SupportMapFragment mapFragment;
     private GoogleMap map;
     private String sessionSyncId;
 
@@ -56,7 +56,7 @@ public class DebriefingActivity extends ActionBarActivity {
         }
 
         // init Google Map
-        mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+        mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         map = mapFragment.getMap();
         map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 

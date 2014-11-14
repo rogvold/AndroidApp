@@ -19,6 +19,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
@@ -31,9 +32,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -169,7 +168,7 @@ public class TrackingActivity extends ActionBarActivity {
     // view
     private SupportMapFragment mMapFragment;
     private GoogleMap mMap;
-    private RelativeLayout mControlPanelView;
+    private CardView mControlPanelView;
     private View mCurrentUserView;
     private TextView mInternetView;
     private TextView mAltitudeView;
@@ -180,7 +179,7 @@ public class TrackingActivity extends ActionBarActivity {
     private Button mConnectHRMonitorButton;
     private TextView mHeartRateView;
     private TextView mDeviceNameView;
-    private LinearLayout mMapOverlay;
+    private CardView mMapOverlay;
     private TextView mOverlayAircraftName;
     private TextView mOverlayCallName;
     private TextView mOverlayDistance;
@@ -229,7 +228,7 @@ public class TrackingActivity extends ActionBarActivity {
         // initialize view
         setContentView(R.layout.activity_tracking);
 
-        mControlPanelView = (RelativeLayout) findViewById(R.id.control_panel);
+        mControlPanelView = (CardView) findViewById(R.id.control_panel);
 
         mCurrentUserView = findViewById(R.id.current_user_box);
         final TextView text1 = (TextView) mCurrentUserView.findViewById(android.R.id.text1);
@@ -299,7 +298,7 @@ public class TrackingActivity extends ActionBarActivity {
             }
         });
 
-        mMapOverlay = (LinearLayout) findViewById(R.id.map_overlay);
+        mMapOverlay = (CardView) findViewById(R.id.map_overlay);
         mOverlayAircraftName = (TextView) findViewById(R.id.overlay_aircraft_name);
         mOverlayCallName = (TextView) findViewById(R.id.overlay_call_name);
         mOverlayDistance = (TextView) findViewById(R.id.overlay_distance);

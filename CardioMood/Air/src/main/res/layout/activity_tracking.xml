@@ -18,314 +18,323 @@
             android:layout_height="fill_parent"
             android:id="@+id/map"/>
 
-        <RelativeLayout
-            android:id="@+id/control_panel"
+        <android.support.v7.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:visibility="visible"
-            android:layout_margin="4dp"
-            android:paddingTop="4dp"
-            android:paddingLeft="4dp"
-            android:paddingRight="4dp"
-            android:paddingBottom="0dp"
-            android:background="@color/white">
+            android:id="@+id/control_panel"
+            android:layout_margin="4dp">
 
-            <LinearLayout
-                android:id="@+id/top_panel"
+            <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <include layout="@layout/two_lines_layout"
-                    android:id="@+id/current_user_box"
-                    android:layout_height="wrap_content"
-                    android:layout_width="0dp"
-                    android:layout_weight="2.5" />
-
-                <Button
-                    android:layout_gravity="center_vertical"
-                    android:id="@+id/start_button"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="@android:color/holo_green_dark"
-                    android:text="@string/start_button"
-                    android:textStyle="bold"
-                    android:textAppearance="@android:style/TextAppearance.Holo.Medium.Inverse"/>
-
-                <Button
-                    android:layout_gravity="center_vertical"
-                    android:id="@+id/stop_button"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:background="@android:color/holo_red_dark"
-                    android:text="@string/stop_button"
-                    android:visibility="gone"
-                    android:textStyle="bold"
-                    android:textAppearance="@android:style/TextAppearance.Holo.Medium.Inverse"
-                    />
-
-            </LinearLayout>
-
-            <View
-                android:id="@+id/separator_1"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="@android:color/darker_gray"
-                android:layout_below="@+id/top_panel"
-                android:layout_alignParentLeft="true" />
-
-            <LinearLayout
-                android:id="@+id/gps_info_block"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_below="@id/separator_1"
-                android:paddingTop="8dp"
-                android:paddingBottom="8dp">
+                android:paddingTop="0dp"
+                android:paddingLeft="4dp"
+                android:paddingRight="4dp"
+                android:paddingBottom="4dp">
 
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:id="@+id/top_panel"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_weight="1"
-                    android:gravity="center_horizontal"
-                    >
+                    android:orientation="horizontal">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <include layout="@layout/two_lines_layout"
+                        android:id="@+id/current_user_box"
                         android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:layout_width="0dp"
+                        android:layout_weight="2.5" />
+
+                    <Button
+                        android:layout_gravity="center_vertical"
+                        android:id="@+id/start_button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/start_button"
                         android:textStyle="bold"
-                        android:text="@string/internet"
+                        style="@style/PrimaryButton"/>
+
+                    <Button
+                        android:layout_gravity="center_vertical"
+                        android:id="@+id/stop_button"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/stop_button"
+                        android:visibility="gone"
+                        android:textStyle="bold"
+                        style="@style/SecondaryButton"
                         />
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                </LinearLayout>
+
+                <View
+                    android:id="@+id/separator_1"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray"
+                    android:layout_below="@+id/top_panel"
+                    android:layout_alignParentLeft="true" />
+
+                <LinearLayout
+                    android:id="@+id/gps_info_block"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_below="@id/separator_1"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:textStyle="bold"
-                        android:text="N/A"
-                        android:id="@+id/internet"/>
+                        android:orientation="vertical"
+                        android:layout_weight="1"
+                        android:gravity="center_horizontal"
+                        >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:textStyle="bold"
+                            android:text="@string/internet"
+                            />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textStyle="bold"
+                            android:text="N/A"
+                            android:id="@+id/internet"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_weight="1"
+                        android:gravity="center_horizontal"
+                        >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:textStyle="bold"
+                            android:text="@string/altitude"
+                            />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="N/A"
+                            android:id="@+id/altitude"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_weight="1"
+                        android:gravity="center_horizontal"
+                        >
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:textStyle="bold"
+                            android:text="@string/speed"
+                            />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="N/A"
+                            android:id="@+id/speed"/>
+
+                    </LinearLayout>
 
                 </LinearLayout>
 
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:id="@+id/hr_monitor_block"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_weight="1"
-                    android:gravity="center_horizontal"
-                    >
+                    android:orientation="horizontal"
+                    android:layout_below="@id/gps_info_block">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
                         android:textAppearance="?android:attr/textAppearanceSmall"
                         android:textStyle="bold"
-                        android:text="@string/altitude"
-                        />
+                        android:text="@string/hr"/>
+
 
                     <TextView
+                        android:id="@+id/heart_rate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="N/A"
-                        android:id="@+id/altitude"/>
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp"
+                        android:layout_weight="1"
+                        android:visibility="gone"/>
 
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_weight="1"
-                    android:gravity="center_horizontal"
-                    >
-
-                    <TextView
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_weight="10"
+                        android:paddingLeft="8dp"
+                        android:paddingRight="8dp"
+                        android:layout_gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/hrm_device_name"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/select_hrm_device"/>
+
+                        <TextView
+                            android:id="@+id/hr_monitor_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceSmall"
+                            android:text="@string/hrm_not_connected"
+                            android:maxLines="1"
+                            android:ellipsize="none"
+                            android:textStyle="italic"/>
+
+                    </LinearLayout>
+
+                    <Button android:text="@string/connect_button"
+                        android:id="@+id/connect_hr_monitor_button"
+                        android:layout_height="wrap_content"
+                        android:layout_width="wrap_content"
                         android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:textStyle="bold"
-                        android:text="@string/speed"
-                        />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="N/A"
-                        android:id="@+id/speed"/>
+                        android:textStyle="bold"/>
 
                 </LinearLayout>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/hr_monitor_block"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_below="@id/gps_info_block">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textStyle="bold"
-                    android:text="@string/hr"/>
+            </RelativeLayout>
 
 
-                <TextView
-                    android:id="@+id/heart_rate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="N/A"
-                    android:paddingLeft="8dp"
-                    android:paddingRight="8dp"
-                    android:layout_weight="1"
-                    android:visibility="gone"/>
+        </android.support.v7.widget.CardView>
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_weight="10"
-                    android:paddingLeft="8dp"
-                    android:paddingRight="8dp"
-                    android:layout_gravity="center_vertical">
-
-                    <TextView
-                        android:id="@+id/hrm_device_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/select_hrm_device"/>
-
-                    <TextView
-                        android:id="@+id/hr_monitor_status"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceSmall"
-                        android:text="@string/hrm_not_connected"
-                        android:maxLines="1"
-                        android:ellipsize="none"
-                        android:textStyle="italic"/>
-
-                </LinearLayout>
-
-                <Button android:text="@string/connect_button"
-                    android:id="@+id/connect_hr_monitor_button"
-                    android:layout_height="wrap_content"
-                    android:layout_width="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textStyle="bold"/>
-
-            </LinearLayout>
-        </RelativeLayout>
-
-        <LinearLayout
+        <android.support.v7.widget.CardView
             android:id="@+id/map_overlay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:background="@color/white"
-            android:visibility="gone"
             android:layout_margin="4dp"
-            android:orientation="vertical">
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="4dp">
+                android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/overlay_aircraft_name"
-                    android:layout_width="0dp"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="[Aircraft Name]"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp"
-                    android:textStyle="bold"
-                    android:gravity="center_horizontal"
-                    android:textSize="18sp"
-                    android:textColor="@color/black"
-                    />
+                    android:padding="4dp">
 
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="match_parent"
-                    android:background="@color/black"
-                    android:layout_marginLeft="4dp"
-                    android:layout_marginRight="4dp"/>
+                    <TextView
+                        android:id="@+id/overlay_aircraft_name"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="[Aircraft Name]"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"
+                        android:textStyle="bold"
+                        android:gravity="center_horizontal"
+                        android:textSize="18sp"
+                        android:textColor="@color/black"
+                        />
 
-                <TextView
-                    android:id="@+id/overlay_call_name"
-                    android:layout_width="0dp"
+                    <View
+                        android:layout_width="1dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/black"
+                        android:layout_marginLeft="4dp"
+                        android:layout_marginRight="4dp"/>
+
+                    <TextView
+                        android:id="@+id/overlay_call_name"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="[Call name]"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"
+                        android:textStyle="bold"
+                        android:gravity="center_horizontal"
+                        android:textSize="18sp"
+                        android:textColor="@color/black"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="[Call name]"
-                    android:paddingTop="4dp"
+                    android:orientation="horizontal"
                     android:paddingBottom="4dp"
-                    android:textStyle="bold"
-                    android:gravity="center_horizontal"
-                    android:textSize="18sp"
-                    android:textColor="@color/black"/>
+                    android:gravity="center">
+
+                    <TextView android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/ic_ruller_horizontal"
+                        android:layout_marginRight="4dp"/>
+
+                    <TextView
+                        android:id="@+id/overlay_distance"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="(dist)"
+                        android:layout_marginRight="16dp"
+                        android:textSize="16sp"
+                        android:textColor="@color/black"/>
+
+
+                    <TextView android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/ic_ruller_vertical"/>
+
+                    <TextView
+                        android:id="@+id/overlay_height"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="(height)"
+                        android:layout_marginRight="16dp"
+                        android:textSize="16sp"
+                        android:textColor="@color/black"/>
+
+                    <TextView android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/ic_gauge"
+                        android:layout_marginRight="4dp"
+                        />
+
+                    <TextView
+                        android:id="@+id/overlay_speed"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="(speed)"
+                        android:layout_marginRight="4dp"
+                        android:textSize="16sp"
+                        android:textColor="@color/black"/>
+
+                </LinearLayout>
+
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingBottom="4dp"
-                android:gravity="center">
-
-                <TextView android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/ic_ruller_horizontal"
-                    android:layout_marginRight="4dp"/>
-
-                <TextView
-                    android:id="@+id/overlay_distance"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="(dist)"
-                    android:layout_marginRight="16dp"
-                    android:textSize="16sp"
-                    android:textColor="@color/black"/>
-
-
-                <TextView android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/ic_ruller_vertical"/>
-
-                <TextView
-                    android:id="@+id/overlay_height"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="(height)"
-                    android:layout_marginRight="16dp"
-                    android:textSize="16sp"
-                    android:textColor="@color/black"/>
-
-                <TextView android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/ic_gauge"
-                    android:layout_marginRight="4dp"
-                    />
-
-                <TextView
-                    android:id="@+id/overlay_speed"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="(speed)"
-                    android:layout_marginRight="4dp"
-                    android:textSize="16sp"
-                    android:textColor="@color/black"/>
-
-            </LinearLayout>
-
-        </LinearLayout>
+        </android.support.v7.widget.CardView>
 
 
         <Button
@@ -335,7 +344,7 @@
             android:layout_gravity="bottom"
             android:layout_marginLeft="8dp"
             android:background="@drawable/ic_gear"
-            android:layout_marginBottom="64dp"/>
+            android:layout_marginBottom="72dp"/>
 
     </FrameLayout>
 
