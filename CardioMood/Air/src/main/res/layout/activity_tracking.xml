@@ -23,7 +23,9 @@
             android:layout_height="wrap_content"
             android:visibility="visible"
             android:id="@+id/control_panel"
-            android:layout_margin="4dp">
+            android:layout_marginTop="?attr/actionBarSize"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp">
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -83,8 +85,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:layout_below="@id/separator_1"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="8dp">
+                    android:paddingTop="8dp">
 
                     <LinearLayout
                         android:layout_width="0dp"
@@ -166,7 +167,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_below="@id/gps_info_block">
+                    android:paddingTop="8dp"
+                    android:layout_below="@id/gps_info_block"
+                    android:visibility="visible">
 
                     <TextView
                         android:layout_width="wrap_content"

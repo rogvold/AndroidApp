@@ -146,13 +146,18 @@ public class HistoryFragment extends ListFragment {
     }
 
     public void sync() {
+        // show progress dialog
         pDialog = new ProgressDialog(getActivity());
         pDialog.setIndeterminate(true);
         pDialog.setMessage("Synchronizing session data...");
         pDialog.setCancelable(false);
         pDialog.show();
 
-        final Date lastSyncDate = new Date(mPrefHelper.getLong(Constants.APP_LAST_SYNC_TIMESTAMP, 0L));
+        // get last sync date from preferences
+        final Date lastSyncDate = new Date(mPrefHelper.getLong(
+                Constants.APP_LAST_SYNC_TIMESTAMP, 0L));
+
+        // Perform sync
         final SyncHelper syncHelper = new SyncHelper(HelperFactory.getHelper());
         syncHelper.setUserId(ParseUser.getCurrentUser().getObjectId());
         syncHelper.setLastSyncDate(lastSyncDate);
@@ -174,12 +179,16 @@ public class HistoryFragment extends ListFragment {
                     public Object then(Task<Long> task) throws Exception {
                         if (task.isFaulted()) {
                             Log.w(TAG, "Sync failed with exception", task.getError());
-                            if (getActivity() != null)
-                                Toast.makeText(getActivity(), "Sync failed.", Toast.LENGTH_SHORT).show();
+                            if (getActivity() != null) {
+                                Toast.makeText(getActivity(), "Sync failed.",
+                                        Toast.LENGTH_SHORT).show();
+                            }
                         } else if (task.isCompleted()) {
+                            // save new sync date to Preferences
                             mPrefHelper.putLong(Constants.APP_LAST_SYNC_TIMESTAMP, task.getResult());
                         }
 
+                        // refresh UI and hide progress dialog
                         refreshSessionList();
                         if (pDialog != null) {
                             pDialog.dismiss();

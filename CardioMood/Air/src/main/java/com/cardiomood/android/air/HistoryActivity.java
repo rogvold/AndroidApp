@@ -20,34 +20,20 @@ import android.widget.Toast;
 
 import com.cardiomood.android.air.db.AirSessionDAO;
 import com.cardiomood.android.air.db.AircraftDAO;
-import com.cardiomood.android.air.db.DataPointDAO;
 import com.cardiomood.android.air.db.HelperFactory;
 import com.cardiomood.android.air.db.entity.AirSessionEntity;
 import com.cardiomood.android.air.db.entity.AircraftEntity;
-import com.cardiomood.android.air.db.entity.DataPointEntity;
 import com.cardiomood.android.air.tools.Constants;
-import com.cardiomood.android.sync.SyncException;
-import com.cardiomood.android.sync.ormlite.SyncEntity;
 import com.cardiomood.android.sync.ormlite.SyncHelper;
-import com.cardiomood.android.sync.parse.ParseTools;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.ui.TouchEffect;
 import com.google.gson.Gson;
-import com.j256.ormlite.stmt.DeleteBuilder;
-import com.parse.ParseCloud;
-import com.parse.ParseObject;
-import com.parse.ParseQuery;
 import com.parse.ParseUser;
-
-import org.json.JSONArray;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 import bolts.Continuation;
@@ -149,90 +135,90 @@ public class HistoryActivity extends ActionBarActivity implements AdapterView.On
             public Long call() throws Exception {
                 long syncDate = System.currentTimeMillis();
                 syncHelper.synObjects(AircraftEntity.class, false, null);
-                syncHelper.synObjects(AirSessionEntity.class,
-                        true, new SyncHelper.SyncCallback<AirSessionEntity>() {
-                            @Override
-                            public void onSaveLocally(AirSessionEntity localObject, ParseObject remoteObject) throws Exception {
-                                try {
-                                    if (localObject.getId() != null) {
-                                        // already exists...
-                                        if (remoteObject.getBoolean("deleted")) {
-                                            return;
-                                        }
-                                        if (localObject.isDeleted() && remoteObject.getBoolean("deleted")) {
-                                            return;
-                                        }
-                                        // remote object was recovered (un-deleted)
-                                    }
-                                    DataPointDAO pointDao = HelperFactory.getHelper().getDataPointDao();
-                                    // delete old points first!
-                                    Log.d(TAG, "SyncCallback.onSaveLocally() deleting points for session " + localObject.getSyncId());
-                                    DeleteBuilder<DataPointEntity, Long> del = pointDao.deleteBuilder();
-                                    del.where().eq("sync_session_id", localObject.getSyncId());
-                                    del.delete();
-
-                                    publishSyncProgress("Downloading data for session " + localObject.getSyncId());
-                                    ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery("AirSessionPoint")
-                                            .whereEqualTo("sessionId", localObject.getSyncId())
-                                            .orderByAscending("t");
-                                    List<ParseObject> remoteObjects = ParseTools.findAllParseObjects(parseQuery);
-                                    Log.d(TAG, "SyncCallback.onSaveLocally() saving data points for session: " + remoteObjects.size());
-
-                                    for (ParseObject point : remoteObjects) {
-                                        DataPointEntity entity = SyncEntity.fromParseObject(point, DataPointEntity.class);
-                                        entity.setSync(true);
-                                        pointDao.create(entity);
-                                    }
-
-                                    if (remoteObjects.isEmpty()) {
-                                        localObject.setDeleted(true);
-                                        localObject.setSyncDate(new Date());
-                                    }
-                                } catch (Exception ex) {
-                                    Log.e(TAG, "onSaveLocally() failed with exception", ex);
-                                    throw new SyncException(ex);
-                                }
-                            }
-
-                            @Override
-                            public void onSaveRemotely(AirSessionEntity localObject, ParseObject remoteObject) throws Exception {
-                                // submit data points that don't have "is_sync = true"
-                                // Assuming local object already has sync_id
-                                publishSyncProgress("Uploading data for session " + localObject.getSyncId());
-                                try {
-                                    DataPointDAO dao = HelperFactory.getHelper().getDataPointDao();
-                                    List<DataPointEntity> items = dao.queryBuilder()
-                                            .orderBy("_id", true)
-                                            .where().eq("sync_session_id", localObject.getSyncId())
-                                            .and().ne("is_sync", true)
-                                            .query();
-                                    Iterator<DataPointEntity> it = items.iterator();
-                                    while (it.hasNext()) {
-                                        List<DataPointEntity> chunk = new ArrayList<DataPointEntity>(50);
-                                        for (int j=0; j<50 && it.hasNext(); j++) {
-                                            chunk.add(it.next());
-                                        }
-
-                                        Map<String, Object> params = new HashMap<String, Object>();
-                                        params.put("sessionId", localObject.getSyncId());
-                                        params.put("points", new JSONArray(GSON.toJson(chunk)));
-
-                                        // send to parse
-                                        ParseCloud.callFunction("saveNewPoints", params);
-
-                                        // update sync flag
-                                        for (DataPointEntity dp: chunk) {
-                                            dp.setSync(true);
-                                            dao.update(dp);
-                                        }
-
-                                    }
-                                } catch (Exception ex) {
-                                    Log.e(TAG, "onSaveRemotely() failed with exception", ex);
-                                    throw new SyncException(ex);
-                                }
-                            }
-                        });
+//                syncHelper.synObjects(AirSessionEntity.class,
+//                        true, new SyncHelper.SyncCallback<AirSessionEntity>() {
+//                            @Override
+//                            public void onSaveLocally(AirSessionEntity localObject, ParseObject remoteObject) throws Exception {
+//                                try {
+//                                    if (localObject.getId() != null) {
+//                                        // already exists...
+//                                        if (remoteObject.getBoolean("deleted")) {
+//                                            return;
+//                                        }
+//                                        if (localObject.isDeleted() && remoteObject.getBoolean("deleted")) {
+//                                            return;
+//                                        }
+//                                        // remote object was recovered (un-deleted)
+//                                    }
+//                                    DataPointDAO pointDao = HelperFactory.getHelper().getDataPointDao();
+//                                    // delete old points first!
+//                                    Log.d(TAG, "SyncCallback.onSaveLocally() deleting points for session " + localObject.getSyncId());
+//                                    DeleteBuilder<DataPointEntity, Long> del = pointDao.deleteBuilder();
+//                                    del.where().eq("sync_session_id", localObject.getSyncId());
+//                                    del.delete();
+//
+//                                    publishSyncProgress("Downloading data for session " + localObject.getSyncId());
+//                                    ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery("AirSessionPoint")
+//                                            .whereEqualTo("sessionId", localObject.getSyncId())
+//                                            .orderByAscending("t");
+//                                    List<ParseObject> remoteObjects = ParseTools.findAllParseObjects(parseQuery);
+//                                    Log.d(TAG, "SyncCallback.onSaveLocally() saving data points for session: " + remoteObjects.size());
+//
+//                                    for (ParseObject point : remoteObjects) {
+//                                        DataPointEntity entity = SyncEntity.fromParseObject(point, DataPointEntity.class);
+//                                        entity.setSync(true);
+//                                        pointDao.create(entity);
+//                                    }
+//
+//                                    if (remoteObjects.isEmpty()) {
+//                                        localObject.setDeleted(true);
+//                                        localObject.setSyncDate(new Date());
+//                                    }
+//                                } catch (Exception ex) {
+//                                    Log.e(TAG, "onSaveLocally() failed with exception", ex);
+//                                    throw new SyncException(ex);
+//                                }
+//                            }
+//
+//                            @Override
+//                            public void onSaveRemotely(AirSessionEntity localObject, ParseObject remoteObject) throws Exception {
+//                                // submit data points that don't have "is_sync = true"
+//                                // Assuming local object already has sync_id
+//                                publishSyncProgress("Uploading data for session " + localObject.getSyncId());
+//                                try {
+//                                    DataPointDAO dao = HelperFactory.getHelper().getDataPointDao();
+//                                    List<DataPointEntity> items = dao.queryBuilder()
+//                                            .orderBy("_id", true)
+//                                            .where().eq("sync_session_id", localObject.getSyncId())
+//                                            .and().ne("is_sync", true)
+//                                            .query();
+//                                    Iterator<DataPointEntity> it = items.iterator();
+//                                    while (it.hasNext()) {
+//                                        List<DataPointEntity> chunk = new ArrayList<DataPointEntity>(50);
+//                                        for (int j=0; j<50 && it.hasNext(); j++) {
+//                                            chunk.add(it.next());
+//                                        }
+//
+//                                        Map<String, Object> params = new HashMap<String, Object>();
+//                                        params.put("sessionId", localObject.getSyncId());
+//                                        params.put("points", new JSONArray(GSON.toJson(chunk)));
+//
+//                                        // send to parse
+//                                        ParseCloud.callFunction("saveNewPoints", params);
+//
+//                                        // update sync flag
+//                                        for (DataPointEntity dp: chunk) {
+//                                            dp.setSync(true);
+//                                            dao.update(dp);
+//                                        }
+//
+//                                    }
+//                                } catch (Exception ex) {
+//                                    Log.e(TAG, "onSaveRemotely() failed with exception", ex);
+//                                    throw new SyncException(ex);
+//                                }
+//                            }
+//                        });
                 return syncDate;
             }
         }).continueWith(new Continuation<Long, Object>() {
@@ -242,7 +228,7 @@ public class HistoryActivity extends ActionBarActivity implements AdapterView.On
                     Toast.makeText(HistoryActivity.this, "Faulted", Toast.LENGTH_SHORT).show();
                     Log.w(TAG, "sync failed", task.getError());
                 } else if (task.isCompleted()) {
-                    prefHelper.putLong(Constants.CONFIG_LAST_SYNC_TIMESTAMP, task.getResult());
+                    //prefHelper.putLong(Constants.CONFIG_LAST_SYNC_TIMESTAMP, task.getResult());
                 }
 
                 refreshSessionList();
@@ -320,8 +306,15 @@ public class HistoryActivity extends ActionBarActivity implements AdapterView.On
                         info.planeCallName = aircraft.getCallName();
                         info.planeNumber = aircraft.getAircraftId();
                         info.planeType = aircraft.getAircraftType();
-                        result.add(info);
+                    } else {
+                        // unknown aircraft
+                        info.planeId = -1;
+                        info.planeName = "Unknown Aircraft";
+                        info.planeCallName = "";
+                        info.planeNumber = "";
+                        info.planeType = "";
                     }
+                    result.add(info);
                 }
                 return result;
             }

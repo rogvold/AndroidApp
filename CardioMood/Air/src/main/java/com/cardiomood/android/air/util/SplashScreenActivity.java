@@ -1,4 +1,4 @@
-package com.cardiomood.android.air;
+package com.cardiomood.android.air.util;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -8,7 +8,7 @@ import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 
-import com.cardiomood.android.air.util.SystemUiHider;
+import com.cardiomood.android.air.R;
 
 
 /**

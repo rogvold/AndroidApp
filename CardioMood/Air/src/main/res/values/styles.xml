@@ -10,6 +10,19 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="AppTheme.Translucent" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:windowNoTitle">true</item>
+        <!--<item name="android:windowBackground">@android:color/transparent</item>-->
+        <item name="android:colorBackgroundCacheHint">@null</item>
+        <!--<item name="android:windowIsTranslucent">true</item>-->
+        <item name="android:windowAnimationStyle">@android:style/Animation</item>
+        <item name="colorPrimary">@color/translucent_action_bar</item>
+        <item name="colorPrimaryDark">@color/translucent_action_bar</item>
+
+        <!-- Support library compatibility -->
+        <item name="windowActionBarOverlay">true</item>
+    </style>
+
     <style name="PrimaryButton">
         <item name="android:textSize">@dimen/abc_text_size_button_material</item>
         <item name="android:textColor">?android:textColorPrimaryInverse</item>

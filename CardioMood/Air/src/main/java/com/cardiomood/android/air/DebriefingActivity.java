@@ -13,10 +13,10 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.cardiomood.android.air.db.AirSessionDAO;
-import com.cardiomood.android.air.db.DataPointDAO;
 import com.cardiomood.android.air.db.HelperFactory;
+import com.cardiomood.android.air.db.LocationDAO;
 import com.cardiomood.android.air.db.entity.AirSessionEntity;
-import com.cardiomood.android.air.db.entity.DataPointEntity;
+import com.cardiomood.android.air.db.entity.LocationEntity;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -37,34 +37,36 @@ public class DebriefingActivity extends ActionBarActivity {
 
     private SupportMapFragment mapFragment;
     private GoogleMap map;
-    private String sessionSyncId;
+    private long sessionId;
 
     private volatile AirSessionEntity mSession;
 
     private AirSessionDAO sessionDao;
-    private DataPointDAO pointDao;
+    private LocationDAO pointDao;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_debriefing);
 
-        sessionSyncId = getIntent().getStringExtra(EXTRA_SESSION_ID);
-        if (sessionSyncId == null) {
-            Toast.makeText(this, "Provide a valid sessionSyncId", Toast.LENGTH_SHORT).show();
+        sessionId = getIntent().getLongExtra(EXTRA_SESSION_ID, -1L);
+        if (sessionId == -1L) {
+            Toast.makeText(this, "Provide a valid sessionId", Toast.LENGTH_SHORT).show();
             finish();
         }
 
         // init Google Map
         mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         map = mapFragment.getMap();
-        map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        if (map != null) {
+            map.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        }
 
         try {
             sessionDao = HelperFactory.getHelper().getAirSessionDao();
-            pointDao = HelperFactory.getHelper().getDataPointDao();
+            pointDao = HelperFactory.getHelper().getLocationDao();
         } catch (Exception ex) {
-            Toast.makeText(this, "Faile to initialize DAO-objects", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Failed to initialize DAO-objects", Toast.LENGTH_SHORT).show();
             ex.printStackTrace();
             finish();
         }
@@ -96,26 +98,26 @@ public class DebriefingActivity extends ActionBarActivity {
     }
 
     private void loadSessionData() {
-        Task.callInBackground(new Callable<List<DataPointEntity>>() {
+        Task.callInBackground(new Callable<List<LocationEntity>>() {
             @Override
-            public List<DataPointEntity> call() throws Exception {
-                AirSessionEntity sessionEntity = sessionDao.findBySyncId(sessionSyncId);
+            public List<LocationEntity> call() throws Exception {
+                AirSessionEntity sessionEntity = sessionDao.queryForId(sessionId);
                 DebriefingActivity.this.mSession = sessionEntity;
 
                 if (sessionEntity != null) {
                     return pointDao.queryBuilder()
-                            .orderBy("creation_timestamp", true)
-                            .where().eq("sync_session_id", sessionSyncId)
+                            .orderBy("t", true)
+                            .where().eq("session_id", sessionId)
                             .query();
                 }
                 return null;
             }
 
-        }).onSuccess(new Continuation<List<DataPointEntity>, Object>() {
+        }).onSuccess(new Continuation<List<LocationEntity>, Object>() {
             @Override
-            public Object then(Task<List<DataPointEntity>> listTask) throws Exception {
+            public Object then(Task<List<LocationEntity>> listTask) throws Exception {
                 onSessionRenamed();
-                List<DataPointEntity> points = listTask.getResult();
+                List<LocationEntity> points = listTask.getResult();
                 PolylineOptions opt = new PolylineOptions()
                         .width(3)
                         .color(Color.BLUE);

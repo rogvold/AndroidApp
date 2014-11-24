@@ -1,30 +1,21 @@
 package com.cardiomood.android.air.db.entity;
 
-import com.cardiomood.android.air.db.DataPointDAO;
-import com.cardiomood.android.sync.annotations.ParseClass;
+import com.cardiomood.android.air.db.LocationDAO;
 import com.cardiomood.android.sync.annotations.ParseField;
-import com.cardiomood.android.sync.ormlite.SyncEntity;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
-import java.io.Serializable;
-
 /**
- * Created by antondanhsin on 08/10/14.
+ * Created by antondanhsin on 20/10/14.
  */
-@DatabaseTable(tableName = "air_session_points", daoClass = DataPointDAO.class)
-@ParseClass(name = "AirSessionPoint")
-public class DataPointEntity extends SyncEntity implements Serializable {
+@DatabaseTable(tableName = "gps_items", daoClass = LocationDAO.class)
+public class LocationEntity {
 
     @DatabaseField(columnName = "_id", generatedId = true)
     private Long id;
 
-    @DatabaseField(columnName = "session_id")
-    private long sessionId;
-
-    @DatabaseField(columnName = "sync_session_id")
-    @ParseField(name = "sessionId")
-    private String syncSessionId;
+    @DatabaseField(index = true, canBeNull = false, columnName = "session_id", foreign = true, foreignAutoRefresh = true, maxForeignAutoRefreshLevel = 2)
+    private AirSessionEntity session;
 
     @DatabaseField(columnName = "t")
     @ParseField(name = "t")
@@ -54,17 +45,6 @@ public class DataPointEntity extends SyncEntity implements Serializable {
     @ParseField(name = "acc")
     private Float acc;
 
-    @DatabaseField(columnName = "hr")
-    @ParseField(name = "HR")
-    private Integer HR;
-
-    @DatabaseField(columnName = "stress")
-    @ParseField(name = "stress")
-    private Integer stress;
-
-    @DatabaseField(columnName = "is_sync")
-    private boolean sync;
-
     public Long getId() {
         return id;
     }
@@ -73,20 +53,12 @@ public class DataPointEntity extends SyncEntity implements Serializable {
         this.id = id;
     }
 
-    public long getSessionId() {
-        return sessionId;
+    public AirSessionEntity getSession() {
+        return session;
     }
 
-    public void setSessionId(long sessionId) {
-        this.sessionId = sessionId;
-    }
-
-    public String getSyncSessionId() {
-        return syncSessionId;
-    }
-
-    public void setSyncSessionId(String syncSessionId) {
-        this.syncSessionId = syncSessionId;
+    public void setSession(AirSessionEntity session) {
+        this.session = session;
     }
 
     public long getT() {
@@ -143,29 +115,5 @@ public class DataPointEntity extends SyncEntity implements Serializable {
 
     public void setAccuracy(Float accuracy) {
         this.vel = vel;
-    }
-
-    public Integer getHR() {
-        return HR;
-    }
-
-    public void setHR(Integer HR) {
-        this.HR = HR;
-    }
-
-    public Integer getStress() {
-        return stress;
-    }
-
-    public void setStress(Integer stress) {
-        this.stress = stress;
-    }
-
-    public boolean isSync() {
-        return sync;
-    }
-
-    public void setSync(boolean sync) {
-        this.sync = sync;
     }
 }

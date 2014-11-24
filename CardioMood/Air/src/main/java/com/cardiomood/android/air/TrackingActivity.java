@@ -17,6 +17,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
 import android.os.RemoteException;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.CardView;
@@ -37,10 +39,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cardiomood.android.air.data.Aircraft;
+import com.cardiomood.android.air.db.AirSessionDAO;
+import com.cardiomood.android.air.db.HelperFactory;
+import com.cardiomood.android.air.db.entity.AirSessionEntity;
 import com.cardiomood.android.air.gps.GPSMonitor;
-import com.cardiomood.android.air.gps.GPSService;
-import com.cardiomood.android.air.gps.GPSServiceApi;
-import com.cardiomood.android.air.gps.GPSServiceListener;
+import com.cardiomood.android.air.service.TrackingService;
 import com.cardiomood.android.air.tools.Constants;
 import com.cardiomood.android.sync.parse.ParseTools;
 import com.cardiomood.android.tools.CommonTools;
@@ -65,9 +68,9 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.SphericalUtil;
 import com.parse.FunctionCallback;
-import com.parse.GetCallback;
 import com.parse.ParseCloud;
 import com.parse.ParseException;
+import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
@@ -82,9 +85,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Callable;
+
+import bolts.Continuation;
+import bolts.Task;
 
 
-public class TrackingActivity extends ActionBarActivity {
+public class TrackingActivity extends ActionBarActivity implements GoogleMap.OnMyLocationChangeListener {
 
     public static final String SELECTED_PLANE_PARSE_ID = "com.cardiomood.android.air.extra.SELECTED_PLANE_PARSE_ID";
 
@@ -102,68 +109,110 @@ public class TrackingActivity extends ActionBarActivity {
 
 
     // current state variables
+    private String aircraftId = null;
     private Aircraft mPlane = null;
-    private volatile String mAirSessionId = null;
+    private Long mCurrentSessionId = null;
+    private int hrmState = LeHRMonitor.INITIAL_STATUS;
 
-    private GPSServiceApi gpsService;
-    private boolean gpsBound;
-    private ServiceConnection gpsConnection = new ServiceConnection() {
+    private Messenger trackingService;
+    private boolean serviceBound;
+    private ServiceConnection serviceConnection = new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
-            gpsService = GPSServiceApi.Stub.asInterface(service);
-            gpsBound = true;
+            trackingService = new Messenger(service);
+            serviceBound = true;
 
-            // register listener
-            try {
-                gpsService.addListener(gpsServiceListener);
-            } catch (Exception ex) {
-                Log.d(TAG, "onServiceConnected(): api.addListener() failed", ex);
-            }
+            // subscribe for cardio and gps data notification
+            registerClient();
 
-            // hide notification (it is not needed when the UI is active)
-            try {
-                if (!gpsService.isRunning()) {
-                    gpsService.hideNotification();
-                } else {
-                    gpsService.showNotification();
-                }
-            } catch (RemoteException ex) {
-                Log.d(TAG, "onServiceConnected(): api.hideNotification() failed", ex);
-            }
-
-            // check Service status and update UI
-            try {
-                // check whether the tracking session is started
-                if (gpsService.isRunning()) {
-                    gpsServiceListener.onTrackingSessionStarted(gpsService.getUserId(), gpsService.getAircraftId(), gpsService.getAirSessionId());
-                } else {
-                    mStartButton.setVisibility(View.VISIBLE);
-                    mStopButton.setVisibility(View.GONE);
-                    mStartButton.setEnabled(true);
-                    mStopButton.setEnabled(false);
-//                    String planeId = getIntent().getStringExtra(SELECTED_PLANE_PARSE_ID);
-//                    gpsService.startTrackingSession(ParseUser.getCurrentUser().getObjectId(), planeId);
-                }
-
-                // update HR monitor info
-                gpsServiceListener.onHRMStatusChanged(gpsService.getHrmAddress(), gpsService.getHrmName(), LeHRMonitor.INITIAL_STATUS, gpsService.getHrmStatus());
-
-            } catch (RemoteException ex) {
-                Log.d(TAG, "onServiceConnected(): api.isRunning() failed", ex);
-            }
-
+            // request current status of the service
+            requestServiceStatus();
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
-            gpsBound = false;
+            serviceBound = false;
             mStopButton.setEnabled(false);
-            gpsService = null;
+            trackingService = null;
         }
     };
 
+    protected class IncomingHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                //this switch reads the information in the message (usually just
+                //an integer) and will do something depending on which integer is sent
+                case TrackingService.MSG_GET_STATUS:
+                    long sessionId = msg.getData().getLong("sessionId", -1L);
+                    if (sessionId != -1L) {
+                        mCurrentSessionId = sessionId;
+                        aircraftId = msg.getData().getString("aircraftId");
+                    } else {
+                        aircraftId = getIntent().getStringExtra(SELECTED_PLANE_PARSE_ID);
+                        if (aircraftId == null) {
+                            finish();
+                        }
+                    }
+                    onConnectionStatusChanged(-1, msg.arg1, msg.getData().getString("deviceAddress"));
+                    if (sessionId > 0L) {
+                        long startTimestamp = msg.getData().getLong("startTimestamp", 0);
+                        onTrackingSessionStarted(TrackingService.RESULT_SUCCESS, startTimestamp);
+                    } else {
+                        // at this point we can start new tracking session
+                        mStartButton.setEnabled(true);
+                    }
+                    break;
+                case TrackingService.MSG_CONNECTION_STATUS_CHANGED:
+                    onConnectionStatusChanged(msg.arg1, msg.arg2, msg.getData().getString("deviceAddress"));
+                    break;
+                case TrackingService.MSG_INIT_HRM:
+                    if (msg.arg1 == TrackingService.RESULT_FAIL) {
+                        Toast.makeText(TrackingActivity.this, "Failed to initialize Bluetooth SMART.", Toast.LENGTH_SHORT).show();
+                        resetHRM();
+                    } else {
+                        // TODO: assuming RESULT_SUCCESS!
+                        performConnect();
+                    }
+                    break;
+                case TrackingService.MSG_CONNECT_HRM:
+                    if (msg.arg1 == TrackingService.RESULT_FAIL) {
+                        resetHRM();
+                        Toast.makeText(TrackingActivity.this, "Failed to connect.", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                case TrackingService.MSG_HR_DATA:
+                    onCardioDataReceived(msg);
+                    break;
+                case TrackingService.MSG_START_SESSION:
+                    long startTimestamp = msg.getData().getLong("startTimestamp", 0);
+                    sessionId = msg.getData().getLong("sessionId", -1L);
+                    if (sessionId != -1L) {
+                        mCurrentSessionId = sessionId;
+                    }
+                    onTrackingSessionStarted(msg.arg1, startTimestamp);
+                    break;
+                case TrackingService.MSG_END_SESSION:
+                    long endTimestamp = msg.getData().getLong("endTimestamp", 0);
+                    startTimestamp = msg.getData().getLong("startTimestamp", 0);
+                    onTrackingSessionFinished(msg.arg1, startTimestamp, endTimestamp);
+                    break;
+                case TrackingService.MSG_BATTERY_LEVEL:
+                    // TODO: update battery level in the UI
+                    break;
+                case TrackingService.MSG_LOCATION_DATA:
+                    onLocationDataReceived(msg);
+                    break;
+                default:
+                    super.handleMessage(msg);
+            }
+        }
+
+    }
+
+    protected Messenger mMessenger = new Messenger(new IncomingHandler());
 
     // view
     private SupportMapFragment mMapFragment;
@@ -192,7 +241,6 @@ public class TrackingActivity extends ActionBarActivity {
     private Timer checkStatusTimer = new Timer("check_status");
     private TimerTask checkInternetTask = null;
     private TimerTask checkGPSTask = null;
-    private TimerTask checkNearbyPlanes = null;
     private long lastLocationUpdate = 0;
     private Location lastLocation;
 
@@ -203,8 +251,9 @@ public class TrackingActivity extends ActionBarActivity {
     private List<String> radarList = new ArrayList<String>();
     private String selectedAircraftId = null;
     private GestureDetector overlayGestureDetector;
-    private boolean drawTrack = true;
-    private List<Polyline> route = new ArrayList<Polyline>();
+    private boolean drawTrack = false;
+    private Polyline route = null;
+    private PolylineOptions routeOpts = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -223,7 +272,6 @@ public class TrackingActivity extends ActionBarActivity {
         }
 
         prefHelper = new PreferenceHelper(this, true);
-
 
         // initialize view
         setContentView(R.layout.activity_tracking);
@@ -260,7 +308,7 @@ public class TrackingActivity extends ActionBarActivity {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 dialogInterface.dismiss();
-                                stopGPSService();
+                                stopTracking();
                             }
                         }).show();
             }
@@ -272,9 +320,16 @@ public class TrackingActivity extends ActionBarActivity {
         mStartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startTracking();
+                if (serviceBound && !isServiceRunning()) {
+                    startTracking();
+                    mStartButton.setEnabled(false);
+                }
             }
         });
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            findViewById(R.id.hr_monitor_block).setVisibility(View.GONE);
+        }
 
         mHRMonitorStatusView = (TextView) findViewById(R.id.hr_monitor_status);
         mHeartRateView = (TextView) findViewById(R.id.heart_rate);
@@ -292,9 +347,7 @@ public class TrackingActivity extends ActionBarActivity {
         mShowControlPanelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!mControlPanelView.isShown())
-                    mControlPanelView.setVisibility(View.VISIBLE);
-                else mControlPanelView.setVisibility(View.GONE);
+                toggleControlPanel();
             }
         });
 
@@ -305,15 +358,10 @@ public class TrackingActivity extends ActionBarActivity {
         mOverlayHeight = (TextView) findViewById(R.id.overlay_height);
         mOverlaySpeed = (TextView) findViewById(R.id.overlay_speed);
 
-        overlayGestureDetector = new GestureDetector(this, new GestureDetector.OnGestureListener() {
+        overlayGestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onDown(MotionEvent e) {
                 return true;
-            }
-
-            @Override
-            public void onShowPress(MotionEvent e) {
-
             }
 
             @Override
@@ -327,16 +375,11 @@ public class TrackingActivity extends ActionBarActivity {
             }
 
             @Override
-            public void onLongPress(MotionEvent e) {
-
-            }
-
-            @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
                 return true;
             }
         });
-        overlayGestureDetector.setOnDoubleTapListener(new GestureDetector.OnDoubleTapListener() {
+        overlayGestureDetector.setOnDoubleTapListener(new GestureDetector.SimpleOnGestureListener() {
             @Override
             public boolean onSingleTapConfirmed(MotionEvent e) {
                 return true;
@@ -354,12 +397,14 @@ public class TrackingActivity extends ActionBarActivity {
                 return true;
             }
         });
-        mMapOverlay.setOnTouchListener(new TouchEffect() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return overlayGestureDetector.onTouchEvent(event);
-            }
-        });
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            mMapOverlay.setOnTouchListener(new TouchEffect() {
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    return overlayGestureDetector.onTouchEvent(event);
+                }
+            });
+        }
 
         hrMonitor = LeHRMonitor.getMonitor(this);
         gpsMonitor = new GPSMonitor(this);
@@ -382,11 +427,11 @@ public class TrackingActivity extends ActionBarActivity {
         super.onStart();
 
         // start service
-        Intent intent = new Intent(this, GPSService.class);
+        Intent intent = new Intent(this, TrackingService.class);
         startService(intent);
 
         // Bind GPSService
-        bindService(intent, gpsConnection, Context.BIND_AUTO_CREATE);
+        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
 
         // initialize mapFragment
         if (mMapFragment == null)
@@ -411,7 +456,6 @@ public class TrackingActivity extends ActionBarActivity {
                 mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                     @Override
                     public boolean onMarkerClick(Marker marker) {
-                        mControlPanelView.setVisibility(View.GONE);
                         Map<String, Object> planeInfo = nearbyPlanes.get(marker.getId());
                         if (planeInfo != null) {
                             selectedAircraftId = (String) planeInfo.get("aircraftId");
@@ -441,7 +485,9 @@ public class TrackingActivity extends ActionBarActivity {
                 mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
                     @Override
                     public void onMapClick(LatLng latLng) {
-                        mControlPanelView.setVisibility(View.GONE);
+                        if (mControlPanelView.isShown()) {
+                            toggleControlPanel();
+                        }
                     }
                 });
             }
@@ -454,34 +500,15 @@ public class TrackingActivity extends ActionBarActivity {
     protected void onStop() {
         super.onStop();
 
-        if (gpsBound) {
-            // remove listener
-            try {
-                gpsService.removeListener(gpsServiceListener);
-            } catch (RemoteException ex) {
-                Log.d(TAG, "onStop() -> remove listener failed", ex);
-            }
-
-            unbindService(gpsConnection);
+        if (mMap != null) {
+            mMap.setOnMyLocationChangeListener(null);
         }
-    }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-
-        Log.d(TAG, "onSaveInstanceState()");
-        if (mAirSessionId != null) {
-            outState.putString("sessionId", mAirSessionId);
+        if (serviceBound) {
+            // unregister client & unbind service
+            unregisterClient();
+            unbindService(serviceConnection);
         }
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-
-        Log.d(TAG, "onRestoreInstanceState()");
-        mAirSessionId = savedInstanceState.getString("sessionId");
     }
 
     @Override
@@ -490,10 +517,8 @@ public class TrackingActivity extends ActionBarActivity {
 
         checkInternetTask.cancel();
         checkGPSTask.cancel();
-        checkNearbyPlanes.cancel();
         checkInternetTask = null;
         checkGPSTask = null;
-        checkNearbyPlanes = null;
         checkStatusTimer.purge();
     }
 
@@ -537,15 +562,9 @@ public class TrackingActivity extends ActionBarActivity {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            try {
-                                if (gpsBound && gpsService != null) {
-                                    if (gpsService.isRunning()) {
-                                        mAltitudeView.setText("No GPS");
-                                        mSpeedView.setText("No GPS");
-                                    }
-                                }
-                            } catch (RemoteException ex) {
-                                // suppress this!
+                            if (isServiceRunning()) {
+                                mAltitudeView.setText("No GPS");
+                                mSpeedView.setText("No GPS");
                             }
                         }
                     });
@@ -553,43 +572,8 @@ public class TrackingActivity extends ActionBarActivity {
             }
         };
 
-        checkNearbyPlanes = new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    if (gpsBound && gpsService != null) {
-                        if (gpsService.isRunning()) {
-                            updateNearbyPlanes(lastLocation);
-                        }
-                    }
-                } catch (RemoteException ex) {
-                    // suppress this!
-                }
-            }
-        };
-
         checkStatusTimer.schedule(checkInternetTask, 500, 10000);
         checkStatusTimer.schedule(checkGPSTask, 1000, 10000);
-        checkStatusTimer.schedule(checkNearbyPlanes, 500, 3000);
-
-        if (gpsBound) {
-            // add listener
-            try {
-                gpsService.addListener(gpsServiceListener);
-            } catch (RemoteException ex) {
-                Log.d(TAG, "onStart() -> add listener failed", ex);
-            }
-
-            // hide notification
-            try {
-                if (!gpsService.isRunning()) {
-                    gpsService.hideNotification();
-                }
-            } catch (RemoteException ex) {
-                Log.d(TAG, "onStart() -> hide notification failed", ex);
-            }
-        }
-
 
         if (GooglePlayServicesUtil.isGooglePlayServicesAvailable(this) == ConnectionResult.SUCCESS) {
             // Google Play Services available
@@ -601,11 +585,8 @@ public class TrackingActivity extends ActionBarActivity {
 
         drawTrack = prefHelper.getBoolean(Constants.CONFIG_DRAW_TRACK, true, true);
         Log.d(TAG, "onResume(): config.draw_track = " + drawTrack);
-        if (!drawTrack) {
-            for (Polyline line: route) {
-                line.remove();
-            }
-            route.clear();
+        if (route != null) {
+            route.setVisible(drawTrack);
         }
     }
 
@@ -652,85 +633,307 @@ public class TrackingActivity extends ActionBarActivity {
 
     @Override
     public void onBackPressed() {
-        if (gpsBound) {
+        if (isServiceRunning()) {
+            super.onBackPressed();
+        } else {
+            startActivity(new Intent(this, PlanesActivity.class));
+            finish();
+        }
+    }
+
+    @Override
+    public void onMyLocationChange(Location location) {
+        lastLocationUpdate = System.currentTimeMillis();
+        lastLocation = location;
+        if (location.hasSpeed())
+            mSpeedView.setText(String.format("%.2f km/h", location.getSpeed() * 3.6f));
+        if (location.hasAltitude())
+            mAltitudeView.setText(String.format("%d m", (int) location.getAltitude()));
+        else
+            mAltitudeView.setText("N/A");
+
+        if (mMap != null) {
+            // draw radar circle
+            LatLng myLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+            if (mapCircle == null)
+                mapCircle = addMapCircle(myLatLng);
+            int radius = prefHelper.getInt(Constants.CONFIG_RADAR_RADIUS, Constants.DEFAULT_RADAR_RADIUS);
+            mapCircle.setCenter(myLatLng);
+            mapCircle.setRadius(radius);
+            CameraUpdate cameraUpdate = null;
+            if (location.hasBearing()) {
+                CameraPosition p = mMap.getCameraPosition();
+                cameraUpdate = CameraUpdateFactory.newCameraPosition(new CameraPosition(myLatLng, p.zoom, p.tilt, location.getBearing()));
+            } else {
+                cameraUpdate = CameraUpdateFactory.newLatLng(myLatLng);
+            }
+
+            if (routeOpts != null) {
+                routeOpts.add(myLatLng);
+            }
+//            List<LatLng> points = route.getPoints();
+//            points.add(myLatLng);
+//            route.setPoints(points);
+            if (route != null) {
+                route.setVisible(drawTrack);
+            }
+
+            mMap.animateCamera(cameraUpdate);
+        }
+    }
+
+    private void onTrackingSessionStarted(int responseCode, long startTimestamp) {
+        if (responseCode == TrackingService.RESULT_SUCCESS) {
+            mStartButton.setEnabled(false);
+            mStartButton.setVisibility(View.GONE);
+            mStopButton.setEnabled(true);
+            mStopButton.setVisibility(View.VISIBLE);
+
+            // auto hide control panel
+            if (mControlPanelView.isShown()) {
+                toggleControlPanel();
+            }
+
+            loadSessionData(mCurrentSessionId);
+        } else {
+            // TODO: handle failure
+        }
+    }
+
+    private void onTrackingSessionFinished(int responseCode, long startTimestamp, long endTimestamp) {
+        if (route != null) {
+            route.remove();
+            route = null;
+            routeOpts = null;
+        }
+        Toast.makeText(TrackingActivity.this, "Tracking session finished.", Toast.LENGTH_SHORT).show();
+        if (!isFinishing()) {
+            mStopButton.setEnabled(false);
+            if (finishingProgressDialog != null && finishingProgressDialog.isShowing()) {
+                finishingProgressDialog.dismiss();
+                finishingProgressDialog = null;
+            }
+            if (mCurrentSessionId != null) {
+                Intent intent = new Intent(TrackingActivity.this, DebriefingActivity.class);
+                intent.putExtra(DebriefingActivity.EXTRA_SESSION_ID, mCurrentSessionId);
+                startActivity(intent);
+            } else {
+                startActivity(new Intent(TrackingActivity.this, LoginActivity.class));
+            }
+            mCurrentSessionId = null;
+
+            finish();
+        }
+
+    }
+
+    private void onConnectionStatusChanged(int oldStatus, int newStatus, String deviceAddress) {
+        hrmState = newStatus;
+
+        if (oldStatus >= 0) {
+            if (oldStatus == LeHRMonitor.CONNECTING_STATUS &&
+                    (newStatus == LeHRMonitor.READY_STATUS || newStatus == LeHRMonitor.DISCONNECTING_STATUS)) {
+                Toast.makeText(this, "Connection failed.", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Status changed from " + oldStatus + " to " + newStatus + "!", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        if (newStatus == LeHRMonitor.CONNECTED_STATUS) {
+            mHRMonitorStatusView.setText(deviceAddress);
+            mConnectHRMonitorButton.setVisibility(View.GONE);
+            mHeartRateView.setVisibility(View.VISIBLE);
+            mDeviceNameView.setText("Connected");
+            mConnectHRMonitorButton.setEnabled(true);
+        }
+        if (newStatus == LeHRMonitor.CONNECTING_STATUS) {
+            mHRMonitorStatusView.setText(R.string.hrm_connecting);
+            mDeviceNameView.setText(deviceAddress);
+            mConnectHRMonitorButton.setEnabled(false);
+        }
+        if (newStatus == LeHRMonitor.DISCONNECTING_STATUS) {
+            mHRMonitorStatusView.setText(R.string.hrm_disconnected);
+            mConnectHRMonitorButton.setVisibility(View.VISIBLE);
+            mDeviceNameView.setText("No device");
+            mHeartRateView.setVisibility(View.GONE);
+            mConnectHRMonitorButton.setEnabled(true);
+        }
+        if (newStatus == LeHRMonitor.READY_STATUS) {
+            mHRMonitorStatusView.setText(R.string.hrm_ready);
+            mConnectHRMonitorButton.setVisibility(View.VISIBLE);
+            mDeviceNameView.setText(R.string.hrm_no_device);
+            mHeartRateView.setVisibility(View.GONE);
+            mConnectHRMonitorButton.setEnabled(true);
+        }
+
+
+        if (oldStatus == LeHRMonitor.CONNECTED_STATUS) {
+            // monitor is disconnected
+            mHRMonitorStatusView.setText(R.string.hrm_not_connected);
+            mHeartRateView.setVisibility(View.GONE);
+            mConnectHRMonitorButton.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void onCardioDataReceived(Message msg) {
+        mHeartRateView.setText(msg.arg1 + " bpm");
+    }
+
+    private void onLocationDataReceived(Message msg) {
+        // TODO: should use data from google maps!
+//        Location location = msg.getData().getParcelable("location");
+//        if (location != null) {
+//            lastLocationUpdate = System.currentTimeMillis();
+//            lastLocation = location;
+//            if (location.hasSpeed())
+//                mSpeedView.setText(String.format("%.2f km/h", location.getSpeed() * 3.6f));
+//            if (location.hasAltitude())
+//                mAltitudeView.setText(String.format("%d m", (int) location.getAltitude()));
+//            else
+//                mAltitudeView.setText("N/A");
+//
+//            if (mMap != null) {
+//                // draw radar circle
+//                LatLng myLatLng = new LatLng(location.getLatitude(), location.getLongitude());
+//                if (mapCircle == null)
+//                    mapCircle = addMapCircle(myLatLng);
+//                int radius = prefHelper.getInt(Constants.CONFIG_RADAR_RADIUS, Constants.DEFAULT_RADAR_RADIUS);
+//                mapCircle.setCenter(myLatLng);
+//                mapCircle.setRadius(radius);
+//                CameraUpdate cameraUpdate = null;
+//                if (location.hasBearing()) {
+//                    CameraPosition p = mMap.getCameraPosition();
+//                    cameraUpdate = CameraUpdateFactory.newCameraPosition(new CameraPosition(myLatLng, p.zoom, p.tilt, location.getBearing()));
+//                } else {
+//                    cameraUpdate = CameraUpdateFactory.newLatLng(myLatLng);
+//                }
+//
+//                mMap.animateCamera(cameraUpdate);
+//            }
+//        }
+    }
+
+    private void registerClient() {
+        if (serviceBound) {
+            Message msg = Message.obtain(null, TrackingService.MSG_REGISTER_CLIENT);
+            msg.replyTo = mMessenger;
             try {
-                if (gpsService.isRunning()) {
-                    super.onBackPressed();
-                } else {
-                    startActivity(new Intent(this, PlanesActivity.class));
-                    finish();
-                }
+                trackingService.send(msg);
             } catch (RemoteException ex) {
-                // suppress this
+                Log.w(TAG, "registerClient() failed", ex);
             }
         }
     }
 
-    private void openSettingsActivity() {
-        startActivity(new Intent(this, SettingsActivity.class));
+    private void unregisterClient() {
+        if (serviceBound) {
+            Message msg = Message.obtain(null, TrackingService.MSG_UNREGISTER_CLIENT);
+            msg.replyTo = mMessenger;
+            try {
+                trackingService.send(msg);
+            } catch (RemoteException ex) {
+                Log.w(TAG, "unregisterClient() failed", ex);
+            }
+        }
     }
 
-    private void loadPlaneData() {
+    private void requestServiceStatus() {
+        if (serviceBound) {
+            Message msg = Message.obtain(null, TrackingService.MSG_GET_STATUS);
+            msg.replyTo = mMessenger;
+            try {
+                trackingService.send(msg);
+            } catch (RemoteException ex) {
+                Log.w(TAG, "requestConnectionStatus() failed", ex);
+            }
+        }
+    }
+
+    private void startTracking() {
+        if (serviceBound) {
+            Message msg = Message.obtain(null, TrackingService.MSG_START_SESSION);
+            msg.getData().putString("parseUserId", ParseUser.getCurrentUser().getObjectId());
+            msg.getData().putString("aircraftId", aircraftId);
+            msg.replyTo = mMessenger;
+
+            try {
+                trackingService.send(msg);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "startTracking() failed", ex);
+            }
+        }
+    }
+
+    private void requestEndSession() {
+        if (isServiceRunning()) {
+            try {
+                Message msg = Message.obtain(null, TrackingService.MSG_END_SESSION);
+                msg.replyTo = mMessenger;
+                trackingService.send(msg);
+            } catch (RemoteException ex) {
+                Log.e(TAG, "requestEndSession() failed", ex);
+            }
+        }
+    }
+
+    private void connectDevice(String deviceAddress) {
+        if (serviceBound && hrmState == LeHRMonitor.READY_STATUS) {
+            try {
+                Message msg = Message.obtain(null, TrackingService.MSG_CONNECT_HRM);
+                msg.replyTo = mMessenger;
+                msg.getData().putString("deviceAddress", deviceAddress);
+                trackingService.send(msg);
+            } catch (RemoteException ex) {
+                Log.w(TAG, "connectDeviceAddress() failed to send MSG_CONNECT", ex);
+            }
+        } else {
+            throw new IllegalStateException("Incorrect monitor state!");
+        }
+    }
+
+    private void loadSessionData(final long sessionId) {
+        mCurrentSessionId = sessionId;
+
         final TextView text1 = (TextView) mCurrentUserView.findViewById(android.R.id.text1);
         text1.setText(ParseTools.getUserFullName(ParseUser.getCurrentUser()));
         final TextView text2 = (TextView) mCurrentUserView.findViewById(android.R.id.text2);
         text2.setText("Loading...");
 
-        boolean serviceIsRunning = false;
-        try {
-            serviceIsRunning = gpsService.isRunning();
-        } catch (RemoteException ex) {
-            // suppress this
-        }
-
-        String planeId = getIntent().getStringExtra(SELECTED_PLANE_PARSE_ID);
-        if (serviceIsRunning) {
-            try {
-                planeId = gpsService.getAircraftId();
-            } catch (RemoteException ex) {
-                Log.w(TAG, "failed to get planeId from service", ex);
-            }
-        }
-
-        // load plane from Parse
-        ParseQuery query = ParseQuery.getQuery(Aircraft.class);
-        query.getInBackground(planeId, new GetCallback<Aircraft>() {
+        Task.callInBackground(new Callable<AirSessionEntity>() {
             @Override
-            public void done(Aircraft parseObject, ParseException e) {
-                if (e == null) {
-                    onPlaneLoaded(parseObject);
-                } else {
-                    try {
-                        if (!gpsBound || !gpsService.isRunning()) {
-                            Toast.makeText(TrackingActivity.this, "Plane not found.", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(TrackingActivity.this, PlanesActivity.class));
-                            finish();
-                        }
-                    } catch (RemoteException ex) {
-                        // suppress this
-                    }
+            public AirSessionEntity call() throws Exception {
+                AirSessionDAO sessionDao = HelperFactory.getHelper().getAirSessionDao();
+                return sessionDao.queryForId(sessionId);
+            }
+        }).onSuccess(new Continuation<AirSessionEntity, String>() {
+            @Override
+            public String then(Task<AirSessionEntity> task) throws Exception {
+                AirSessionEntity session = task.getResult();
+                onSessionLoaded();
+                return session.getSyncAircraftId();
+            }
+        }, Task.UI_THREAD_EXECUTOR).onSuccess(new Continuation<String, Aircraft>() {
+            @Override
+            public Aircraft then(Task<String> task) throws Exception {
+                Aircraft plane = ParseObject.createWithoutData(Aircraft.class, task.getResult());
+                plane.fetch();
+                return plane;
+            }
+        }, Task.BACKGROUND_EXECUTOR).continueWith(new Continuation<Aircraft, Object>() {
+            @Override
+            public Object then(Task<Aircraft> task) throws Exception {
+                if (task.isFaulted()) {
+                    // TODO: handle the problem
+                } else if (task.isCompleted()) {
+                    mPlane = task.getResult();
+                    showPlaneData();
                 }
+                return null;
             }
-        });
+        }, Task.UI_THREAD_EXECUTOR);
     }
 
-    private void startTracking() {
-        mStartButton.setEnabled(false);
-        String planeId = getIntent().getStringExtra(SELECTED_PLANE_PARSE_ID);
-        if (planeId != null) {
-            try {
-                gpsService.startTrackingSession(ParseUser.getCurrentUser().getObjectId(), planeId);
-            } catch (RemoteException ex) {
-                mStartButton.setEnabled(true);
-            }
-        } else {
-            mStartButton.setEnabled(true);
-        }
-    }
-
-    private void onPlaneLoaded(Aircraft plane) {
-        mPlane = plane;
-
+    private void showPlaneData() {
         // update view
         TextView text1 = (TextView) mCurrentUserView.findViewById(android.R.id.text1);
         TextView text2 = (TextView) mCurrentUserView.findViewById(android.R.id.text2);
@@ -738,8 +941,45 @@ public class TrackingActivity extends ActionBarActivity {
         text2.setText(ParseTools.getUserFullName(ParseUser.getCurrentUser()));
 
         // notify user
-        Toast.makeText(TrackingActivity.this, "Plane: " + plane.getString("name"), Toast.LENGTH_SHORT).show();
+        Toast.makeText(TrackingActivity.this, "Plane: " + mPlane.getName(), Toast.LENGTH_SHORT).show();
     }
+
+    private void onSessionLoaded() {
+        routeOpts = new PolylineOptions()
+                .color(Color.BLUE)
+                .width(2 /* TODO: density! */)
+                .geodesic(true);
+        route = mMap.addPolyline(routeOpts);
+        route.setVisible(drawTrack);
+
+        mMap.setOnMyLocationChangeListener(this);
+    }
+
+    private void toggleControlPanel() {
+        boolean shown = mControlPanelView.isShown();
+        if (shown) {
+            mControlPanelView.setVisibility(View.GONE);
+            getSupportActionBar().hide();
+        } else {
+            getSupportActionBar().show();
+            mControlPanelView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void openSettingsActivity() {
+        startActivity(new Intent(this, SettingsActivity.class));
+    }
+
+
+    private void resetHRM() {
+        try {
+            Message msg = Message.obtain(null, TrackingService.MSG_RESET_HRM);
+            trackingService.send(msg);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "resetHRM() failed", ex);
+        }
+    }
+
 
     private void showLogoutDialog() {
         new AlertDialog.Builder(this)
@@ -761,17 +1001,11 @@ public class TrackingActivity extends ActionBarActivity {
                 }).show();
     }
 
-    private void stopGPSService() {
+    private void stopTracking() {
         boolean showProgress = false;
-        if (gpsBound) {
-            try {
-                if (gpsService.isRunning()) {
-                    gpsService.stopTrackingSession();
-                    showProgress = true;
-                }
-            } catch (RemoteException ex) {
-                Log.w(TAG, "stopGPSService() failed to close the service", ex);
-            }
+        if (isServiceRunning()) {
+            requestEndSession();
+            showProgress = true;
         }
         if (showProgress) {
             finishingProgressDialog = new ProgressDialog(this);
@@ -792,11 +1026,10 @@ public class TrackingActivity extends ActionBarActivity {
                     // try to finish service correctly
                     try {
                         if (finishingProgressDialog != null && finishingProgressDialog.isShowing()) {
-                            // todo: inform the user that the service is taking too long to finish
                             finishingProgressDialog.dismiss();
                             finishingProgressDialog = null;
-                            stopService(new Intent(TrackingActivity.this, GPSService.class));
-                            gpsServiceListener.onTrackingSessionFinished();
+                            stopService(new Intent(TrackingActivity.this, TrackingService.class));
+                            onTrackingSessionFinished(TrackingService.RESULT_FAIL, 0L, 0L);
                         }
                     } catch (Exception ex) {
                         Log.w(TAG, "stopGPSService(): failed to stop the service", ex);
@@ -991,28 +1224,37 @@ public class TrackingActivity extends ActionBarActivity {
         } return true;
     }
 
-    public void performConnect() {
-        try {
-            try {
-                // show dialog to enable bluetoth
-                if (!requestEnableBluetooth())
-                    return;
+    private void performConnect() {
+        if (!requestEnableBluetooth()) {
+            // this will show dialog to enable bluetooth
+            return;
+        }
 
-                // call to initialize service
-               if (!gpsService.initBLE()) {
-                    Toast.makeText(this, "Failed to initialize service. Make sure your device is supported.", Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, "Unable to initialize Bluetooth");
-                    return;
-               }
-            } catch (Exception ex) {
-                Log.e(TAG, "Failed to initialize service.", ex);
-                Toast.makeText(this, "Cannot start Bluetooth.", Toast.LENGTH_SHORT);
-                return;
+        if (hrmState == LeHRMonitor.INITIAL_STATUS || hrmState == LeHRMonitor.DISCONNECTING_STATUS) {
+            // call init first!
+            Message msg = Message.obtain(null, TrackingService.MSG_INIT_HRM);
+            msg.replyTo = mMessenger;
+            try {
+                trackingService.send(msg);
+            } catch (RemoteException ex) {
+                Log.w(TAG, "performConnect() failed to send MSG_INIT_HRM", ex);
             }
+            return;
+        }
+
+        if (hrmState == LeHRMonitor.READY_STATUS) {
             showConnectionDialog();
-        } catch (Exception ex) {
-            Log.d(TAG, "performConnect(): "+ex);
-            ex.printStackTrace();
+        } else {
+            throw new IllegalStateException("Incorrect monitor state!");
+        }
+    }
+
+    private void performDisconnect() {
+        Message msg = Message.obtain(null, TrackingService.MSG_DISCONNECT_HRM);
+        try {
+            trackingService.send(msg);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "performDisconnect() failed to send MSG_DISCONNECT_HRM", ex);
         }
     }
 
@@ -1117,13 +1359,8 @@ public class TrackingActivity extends ActionBarActivity {
                 String info = ((TextView) v).getText().toString();
                 //Log.d(TAG, "mPairedListClickListener.onItemClick(): the total length is " + info.length());
                 String deviceAddress = info.substring(info.lastIndexOf("\n")+1);
-
-                try {
-                    gpsService.connectHRMonitor(deviceAddress);
-                } catch (Exception ex) {
-                    Log.e(TAG, "mBluetoothLeService.connect() failed to connect to the device '" + deviceAddress+"'", ex);
-                }
-                alertSelectDevice.dismiss();
+                connectDevice(deviceAddress);
+                alertSelectDevice.cancel();
                 alertSelectDevice = null;
             }
         };
@@ -1159,15 +1396,18 @@ public class TrackingActivity extends ActionBarActivity {
 
 
     private void performLogout(boolean openLoginActivity) {
+        stopTracking();
+
         // Parse log out
         ParseUser.logOut();
 
         if (!openLoginActivity)
             finish();
-
-        stopGPSService();
     }
 
+    private boolean isServiceRunning() {
+        return serviceBound && mCurrentSessionId != null;
+    }
 
     private void checkGPSEnabled() {
         if (gpsMonitor.isGPSEnabled()) {
@@ -1195,201 +1435,4 @@ public class TrackingActivity extends ActionBarActivity {
                     }
                 }).show();
     }
-
-    private final GPSServiceListener.Stub gpsServiceListener =  new GPSServiceListener.Stub() {
-
-        @Override
-        public void onLocationChanged(final Location location) throws RemoteException {
-            final long t = System.currentTimeMillis();
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Location pLoc = lastLocation;
-                    lastLocationUpdate = t;
-                    lastLocation = location;
-                    if (location.hasSpeed())
-                        mSpeedView.setText(String.format("%.2f km/h", location.getSpeed()*3.6f));
-                    if (location.hasAltitude())
-                        mAltitudeView.setText(String.format("%d m", (int) location.getAltitude()));
-                    else
-                        mAltitudeView.setText("N/A");
-
-                    if (mMap != null) {
-                        // draw radar circle
-                        LatLng myLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-                        if (mapCircle == null)
-                            mapCircle = addMapCircle(myLatLng);
-                        int radius = prefHelper.getInt(Constants.CONFIG_RADAR_RADIUS, Constants.DEFAULT_RADAR_RADIUS);
-                        mapCircle.setCenter(myLatLng);
-                        mapCircle.setRadius(radius);
-                        CameraUpdate cameraUpdate = null;
-                        if (location.hasBearing()) {
-                            CameraPosition p = mMap.getCameraPosition();
-                            cameraUpdate = CameraUpdateFactory.newCameraPosition(new CameraPosition(myLatLng, p.zoom, p.tilt, location.getBearing()));
-                        } else {
-                            cameraUpdate = CameraUpdateFactory.newLatLng(myLatLng);
-                        }
-
-                        // draw path
-                        if (pLoc != null && drawTrack) {
-                            Polyline line = mMap.addPolyline(new PolylineOptions()
-                                    .add(new LatLng(pLoc.getLatitude(), pLoc.getLongitude()), myLatLng)
-                                    .width(5)
-                                    .color(Color.BLUE)
-                                    .visible(drawTrack)
-                            );
-                            route.add(line);
-                        }
-
-                        mMap.animateCamera(cameraUpdate);
-                    }
-                }
-            });
-
-        }
-
-        @Override
-        public void onHeartRateChanged(final int heartRate) throws RemoteException {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    mHeartRateView.setText(heartRate + " bpm");
-                }
-            });
-        }
-
-        @Override
-        public void onStressChanged(double stress) throws RemoteException {
-
-        }
-
-        @Override
-        public void onTrackingSessionStarted(String userId, String aircraftId, final String airSessionId) throws RemoteException {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        mAirSessionId = airSessionId;
-                        mControlPanelView.setVisibility(View.GONE);
-
-                        mStartButton.setVisibility(View.GONE);
-                        mStopButton.setVisibility(View.VISIBLE);
-                        mStartButton.setEnabled(false);
-                        mStopButton.setEnabled(true);
-                        loadPlaneData();
-                        if (!TrackingActivity.this.isFinishing())
-                            Toast.makeText(TrackingActivity.this, "Tracking session is running. SessionId="
-                                    + airSessionId, Toast.LENGTH_SHORT).show();
-
-                        route.clear();
-                        if (gpsService != null && gpsBound) {
-                            gpsService.showNotification();
-
-                            drawTrack = prefHelper.getBoolean(Constants.CONFIG_DRAW_TRACK, true, true);
-
-                            if (mMap != null && drawTrack) {
-                                // extract path and draw it!
-                                Location[] path = gpsService.getPath();
-                                for (int i=1; i<path.length; i++) {
-                                    Polyline line = mMap.addPolyline(
-                                        new PolylineOptions()
-                                            .add(
-                                                    new LatLng(path[i - 1].getLatitude(), path[i - 1].getLongitude()),
-                                                    new LatLng(path[i].getLatitude(), path[i].getLongitude())
-                                            )
-                                            .width(5)
-                                            .color(Color.BLUE)
-                                            .visible(drawTrack)
-                                    );
-                                    route.add(line);
-                                }
-                                if (path.length > 0)
-                                    lastLocation = path[path.length - 1];
-                            }
-                        }
-                    } catch(Exception ex) {
-                        // suppress this
-                    }
-                }
-            });
-        }
-
-        @Override
-        public void onTrackingSessionFinished() throws RemoteException {
-            //Toast.makeText(TrackingActivity.this, "Tracking session finished.", Toast.LENGTH_SHORT).show();
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        if (!TrackingActivity.this.isFinishing()) {
-                            mStopButton.setEnabled(false);
-                            if (finishingProgressDialog != null && finishingProgressDialog.isShowing()) {
-                                finishingProgressDialog.dismiss();
-                                finishingProgressDialog = null;
-                            }
-                            if (mAirSessionId != null) {
-                                Intent intent = new Intent(TrackingActivity.this, DebriefingActivity.class);
-                                intent.putExtra(DebriefingActivity.EXTRA_SESSION_ID, mAirSessionId);
-                                startActivity(intent);
-                                mAirSessionId = null;
-                            } else
-                                startActivity(new Intent(TrackingActivity.this, LoginActivity.class));
-                                finish();
-                                mAirSessionId = null;
-                             }
-                    } catch(Exception ex) {
-                        // suppress this
-                    }
-                }
-            });
-
-        }
-
-        @Override
-        public void onHRMStatusChanged(final String address, final String name, final int oldStatus, final int newStatus) throws RemoteException {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (newStatus == LeHRMonitor.CONNECTED_STATUS) {
-                        mHRMonitorStatusView.setText(/* getText(R.string.hrm_connected) + " " + */address);
-                        mConnectHRMonitorButton.setVisibility(View.GONE);
-                        mHeartRateView.setVisibility(View.VISIBLE);
-                        mDeviceNameView.setText(name == null ? getText(R.string.hrm_no_name) : name);
-                        mConnectHRMonitorButton.setEnabled(true);
-                    }
-                    if (newStatus == LeHRMonitor.CONNECTING_STATUS) {
-                        mHRMonitorStatusView.setText(R.string.hrm_connecting);
-                        mDeviceNameView.setText(name == null ? "No name" : name);
-                        mConnectHRMonitorButton.setEnabled(false);
-                    }
-                    if (newStatus == LeHRMonitor.DISCONNECTING_STATUS) {
-                        mHRMonitorStatusView.setText(R.string.hrm_disconnected);
-                        mConnectHRMonitorButton.setVisibility(View.VISIBLE);
-                        mDeviceNameView.setText(name == null ? getText(R.string.hrm_no_name) : name);
-                        mHeartRateView.setVisibility(View.GONE);
-                        mConnectHRMonitorButton.setEnabled(true);
-                    }
-                    if (newStatus == LeHRMonitor.READY_STATUS) {
-                        mHRMonitorStatusView.setText(R.string.hrm_ready);
-                        mConnectHRMonitorButton.setVisibility(View.VISIBLE);
-                        mDeviceNameView.setText(R.string.hrm_no_device);
-                        mHeartRateView.setVisibility(View.GONE);
-                        mConnectHRMonitorButton.setEnabled(true);
-                    }
-                }
-            });
-
-            if (oldStatus == LeHRMonitor.CONNECTED_STATUS) {
-                // monitor is disconnected
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mHRMonitorStatusView.setText(R.string.hrm_not_connected);
-                        mHeartRateView.setVisibility(View.GONE);
-                        mConnectHRMonitorButton.setVisibility(View.VISIBLE);
-                    }
-                });
-            }
-        }
-    };
 }

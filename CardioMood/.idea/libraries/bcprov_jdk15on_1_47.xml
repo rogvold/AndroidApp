@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="bcprov-jdk15on-1.47">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/KolomnaApp/libs/bcprov-jdk15on-1.47.jar!/" />
+      <root url="jar://$PROJECT_DIR$/Air/libs/bcprov-jdk15on-1.47.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

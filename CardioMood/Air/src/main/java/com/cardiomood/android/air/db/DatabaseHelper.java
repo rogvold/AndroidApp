@@ -6,7 +6,8 @@ import android.util.Log;
 
 import com.cardiomood.android.air.db.entity.AirSessionEntity;
 import com.cardiomood.android.air.db.entity.AircraftEntity;
-import com.cardiomood.android.air.db.entity.DataPointEntity;
+import com.cardiomood.android.air.db.entity.CardioItemEntity;
+import com.cardiomood.android.air.db.entity.LocationEntity;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.j256.ormlite.android.apptools.OrmLiteSqliteOpenHelper;
 import com.j256.ormlite.support.ConnectionSource;
@@ -28,9 +29,10 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     private PreferenceHelper pHelper;
     private SQLiteDatabase database;
 
-    private volatile AircraftDAO aircraftDao = null;
-    private volatile AirSessionDAO airSessionDao = null;
-    private volatile DataPointDAO dataPointDao = null;
+    private AircraftDAO aircraftDao = null;
+    private AirSessionDAO airSessionDao = null;
+    private CardioItemDAO cardioItemDao = null;
+    private LocationDAO locationDao = null;
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -47,16 +49,19 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
 
 
     @Override
-    public void onCreate(SQLiteDatabase database, ConnectionSource connectionSource) {
+    public synchronized void onCreate(SQLiteDatabase database, ConnectionSource connectionSource) {
         Log.d(TAG, "onCreate()");
         try {
             TableUtils.createTable(connectionSource, AircraftEntity.class);
             TableUtils.createTable(connectionSource, AirSessionEntity.class);
-            TableUtils.createTable(connectionSource, DataPointEntity.class);
+            TableUtils.createTable(connectionSource, LocationEntity.class);
+            TableUtils.createTable(connectionSource, CardioItemEntity.class);
 
-            // create DAO clsses
+            // pre-create DAO classes
             getAircraftDao();
             getAirSessionDao();
+            getLocationDao();
+            getCardioItemDao();
         } catch (SQLException ex) {
             Log.e(TAG, "onCreate(): failed to create tables", ex);
         }
@@ -93,10 +98,17 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
         return airSessionDao;
     }
 
-    public synchronized DataPointDAO getDataPointDao() throws SQLException {
-        if (dataPointDao == null) {
-            dataPointDao = new DataPointDAO(getConnectionSource(), DataPointEntity.class);
+    public synchronized LocationDAO getLocationDao() throws SQLException {
+        if (locationDao == null) {
+            locationDao = new LocationDAO(getConnectionSource(), LocationEntity.class);
         }
-        return dataPointDao;
+        return locationDao;
+    }
+
+    public synchronized CardioItemDAO getCardioItemDao() throws SQLException {
+        if (cardioItemDao == null) {
+            cardioItemDao = new CardioItemDAO(getConnectionSource(), CardioItemEntity.class);
+        }
+        return cardioItemDao;
     }
 }

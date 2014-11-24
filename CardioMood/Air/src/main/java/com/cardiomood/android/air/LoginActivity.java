@@ -30,7 +30,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.cardiomood.android.air.gps.GPSService;
 import com.cardiomood.android.sync.parse.ParseTools;
 import com.cardiomood.android.tools.CommonTools;
 import com.parse.FindCallback;
@@ -73,11 +72,7 @@ public class LoginActivity extends ActionBarActivity {
         // check if we already logged in
         ParseUser currentUser = ParseUser.getCurrentUser();
         if (currentUser != null) {
-            if (GPSService.isServiceStarted) {
-                startTrackingActivity();
-            } else {
-                startMainActivity();
-            }
+            startMainActivity();
             return;
         } else {
             Toast.makeText(this, "Welcome! Please, sign in before your take off!",
@@ -202,6 +197,7 @@ public class LoginActivity extends ActionBarActivity {
                             mProgressDialog.dismiss();
                             Toast.makeText(LoginActivity.this, "Something went wrong. \n" +
                                     "Check your internet connection.", Toast.LENGTH_SHORT).show();
+                            Log.e(TAG, "findInBackground() failed", e);
                         }
                         if (mProgressDialog.isShowing()) {
                             userQuery = null;

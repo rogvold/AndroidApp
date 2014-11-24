@@ -7,11 +7,13 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
 import android.os.RemoteException;
 import android.util.Log;
 
-import com.cardiomood.android.air.gps.GPSService;
-import com.cardiomood.android.air.gps.GPSServiceApi;
+import com.cardiomood.android.air.service.TrackingService;
+import com.cardiomood.android.air.util.SplashScreenActivity;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
@@ -26,54 +28,55 @@ public class EntryActivity extends SplashScreenActivity {
 
     private static final String TAG = EntryActivity.class.getSimpleName();
 
-    private volatile boolean sessionRunning = false;
+    private static final long WAIT_TIMEOUT = 1000;
 
-    private GPSServiceApi gpsService;
-    private boolean gpsBound = false;
+    private boolean sessionRunning = false;
+
+    private Messenger trackingService;
+    private boolean trackingServiceBound = false;
     private CountDownLatch latch;
 
     private Task task;
 
-    private ServiceConnection gpsConnection = new ServiceConnection() {
+    private ServiceConnection trackingServiceConnection = new ServiceConnection() {
 
         @Override
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
-            gpsService = GPSServiceApi.Stub.asInterface(service);
-
-            // hide notification (it is not needed when the UI is active)
-            try {
-                if (!gpsService.isRunning()) {
-                    gpsService.hideNotification();
-                } else {
-                    gpsService.showNotification();
-                }
-            } catch (RemoteException ex) {
-                Log.d(TAG, "onServiceConnected(): api.hideNotification() failed", ex);
-            }
-
-            // check Service status and update UI
-            try {
-                // check whether the tracking session is started
-                if (gpsService.isRunning()) {
-                    setSessionRunning(true);
-                } else {
-                    setSessionRunning(false);
-                }
-            } catch (RemoteException ex) {
-                Log.d(TAG, "onServiceConnected(): api.isRunning() failed", ex);
-                setSessionRunning(false);
-            }
-
-            latch.countDown();
+            trackingService = new Messenger(service);
+            requestServiceStatus();
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
-            gpsBound = false;
-            gpsService = null;
+            trackingServiceBound = false;
+            trackingService = null;
         }
     };
+
+    protected class IncomingHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                //this switch reads the information in the message (usually just
+                //an integer) and will do something depending on which integer is sent
+                case TrackingService.MSG_GET_STATUS:
+                    long sessionId = msg.getData().getLong("sessionId", -1L);
+                    // check whether the tracking session is started
+                    if (sessionId != -1L) {
+                        setSessionRunning(true);
+                    } else {
+                        setSessionRunning(false);
+                    }
+                    latch.countDown();
+                    break;
+                default:
+                    super.handleMessage(msg);
+            }
+        }
+    }
+
+    protected Messenger mMessenger = new Messenger(new IncomingHandler());
 
 
     @Override
@@ -114,23 +117,23 @@ public class EntryActivity extends SplashScreenActivity {
             public void run() {
                 latch.countDown();
             }
-        }, 2000L);
+        }, WAIT_TIMEOUT);
 
         // start service
-        Intent intent = new Intent(this, GPSService.class);
+        Intent intent = new Intent(this, TrackingService.class);
         startService(intent);
 
         // Bind GPSService
-        bindService(intent, gpsConnection, Context.BIND_AUTO_CREATE);
-        gpsBound = true;
+        bindService(intent, trackingServiceConnection, Context.BIND_AUTO_CREATE);
+        trackingServiceBound = true;
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
 
-        if (gpsBound) {
-            unbindService(gpsConnection);
+        if (trackingServiceBound) {
+            unbindService(trackingServiceConnection);
         }
     }
 
@@ -145,5 +148,18 @@ public class EntryActivity extends SplashScreenActivity {
             startActivity(new Intent(this, LoginActivity.class));
         }
         finish();
+    }
+
+    void requestServiceStatus() {
+        // check Service status
+        Message msg = Message.obtain(null, TrackingService.MSG_GET_STATUS);
+        msg.replyTo = mMessenger;
+        try {
+            trackingService.send(msg);
+        } catch (RemoteException ex) {
+            Log.d(TAG, "requestServiceStatus(): failed", ex);
+            setSessionRunning(false);
+            latch.countDown();
+        }
     }
 }
