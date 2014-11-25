@@ -20,6 +20,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.CardView;
 import android.util.Log;
@@ -31,6 +32,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -41,12 +44,13 @@ import android.widget.Toast;
 import com.cardiomood.android.air.data.Aircraft;
 import com.cardiomood.android.air.db.AirSessionDAO;
 import com.cardiomood.android.air.db.HelperFactory;
+import com.cardiomood.android.air.db.LocationDAO;
 import com.cardiomood.android.air.db.entity.AirSessionEntity;
+import com.cardiomood.android.air.db.entity.LocationEntity;
 import com.cardiomood.android.air.gps.GPSMonitor;
 import com.cardiomood.android.air.service.TrackingService;
 import com.cardiomood.android.air.tools.Constants;
 import com.cardiomood.android.sync.parse.ParseTools;
-import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.ReachabilityTest;
 import com.cardiomood.android.tools.ui.TouchEffect;
@@ -66,20 +70,23 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.maps.android.SphericalUtil;
 import com.parse.FunctionCallback;
 import com.parse.ParseCloud;
 import com.parse.ParseException;
 import com.parse.ParseObject;
-import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.pubnub.api.Callback;
+import com.pubnub.api.Pubnub;
+import com.pubnub.api.PubnubError;
+import com.pubnub.api.PubnubException;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -247,13 +254,15 @@ public class TrackingActivity extends ActionBarActivity implements GoogleMap.OnM
     // objects on map
     private Circle mapCircle;
     private Map<String, Marker> markers = new HashMap<String, Marker>();
-    private Map<String, Map<String, Object>> nearbyPlanes = new HashMap<String, Map<String, Object>>();
-    private List<String> radarList = new ArrayList<String>();
     private String selectedAircraftId = null;
     private GestureDetector overlayGestureDetector;
-    private boolean drawTrack = false;
+    private boolean drawTrack = true;
     private Polyline route = null;
     private PolylineOptions routeOpts = null;
+    Marker mPositionMarker;
+
+    // Pubnub
+    Pubnub pubnub = new Pubnub("pub-c-a86ef89b-7858-4b4c-8f89-c4348bfc4b79", "sub-c-e5ae235a-4c3e-11e4-9e3d-02ee2ddab7fe");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -442,7 +451,8 @@ public class TrackingActivity extends ActionBarActivity implements GoogleMap.OnM
             mMap = mMapFragment.getMap();
             if (mMap != null) {
                 mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                mMap.setMyLocationEnabled(true);
+//                mMap.setMyLocationEnabled(false);
+//                mMap.getUiSettings().setMyLocationButtonEnabled(false);
                 gpsMonitor = new GPSMonitor(this);
                 Location lastLocation = gpsMonitor.getLastKnownLocation();
                 this.lastLocation = lastLocation;
@@ -456,29 +466,29 @@ public class TrackingActivity extends ActionBarActivity implements GoogleMap.OnM
                 mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
                     @Override
                     public boolean onMarkerClick(Marker marker) {
-                        Map<String, Object> planeInfo = nearbyPlanes.get(marker.getId());
-                        if (planeInfo != null) {
-                            selectedAircraftId = (String) planeInfo.get("aircraftId");
-                            mOverlayDistance.setText("? m");
-                            mOverlayHeight.setText("? m");
-                            mOverlayHeight.setTextColor(Color.BLACK);
-                            mOverlaySpeed.setText("? m");
-
-                            try {
-                                Aircraft aircraft = ParseQuery.getQuery(Aircraft.class)
-                                        .fromPin("planes")
-                                        .get(selectedAircraftId);
-                                if (aircraft != null) {
-                                    mOverlayAircraftName.setText(aircraft.getName());
-                                    mOverlayCallName.setText("Loading...");
-                                }
-                            } catch (Exception ex) {
-                                mOverlayAircraftName.setText("Unknown");
-                                mOverlayCallName.setText("N/A");
-                            }
-
-                            mMapOverlay.setVisibility(View.VISIBLE);
-                        }
+//                        Map<String, Object> planeInfo = nearbyPlanes.get(marker.getId());
+//                        if (planeInfo != null) {
+//                            selectedAircraftId = (String) planeInfo.get("aircraftId");
+//                            mOverlayDistance.setText("? m");
+//                            mOverlayHeight.setText("? m");
+//                            mOverlayHeight.setTextColor(Color.BLACK);
+//                            mOverlaySpeed.setText("? m");
+//
+//                            try {
+//                                Aircraft aircraft = ParseQuery.getQuery(Aircraft.class)
+//                                        .fromPin("planes")
+//                                        .get(selectedAircraftId);
+//                                if (aircraft != null) {
+//                                    mOverlayAircraftName.setText(aircraft.getName());
+//                                    mOverlayCallName.setText("Loading...");
+//                                }
+//                            } catch (Exception ex) {
+//                                mOverlayAircraftName.setText("Unknown");
+//                                mOverlayCallName.setText("N/A");
+//                            }
+//
+//                            mMapOverlay.setVisibility(View.VISIBLE);
+//                        }
                         return true;
                     }
                 });
@@ -492,6 +502,9 @@ public class TrackingActivity extends ActionBarActivity implements GoogleMap.OnM
                 });
             }
         }
+
+        // subscribe to Pubnub channel
+        subscribe();
     }
 
 
@@ -499,6 +512,8 @@ public class TrackingActivity extends ActionBarActivity implements GoogleMap.OnM
     @Override
     protected void onStop() {
         super.onStop();
+
+        unsubscribe();
 
         if (mMap != null) {
             mMap.setOnMyLocationChangeListener(null);
@@ -643,6 +658,9 @@ public class TrackingActivity extends ActionBarActivity implements GoogleMap.OnM
 
     @Override
     public void onMyLocationChange(Location location) {
+        if (location == null)
+            return;
+
         lastLocationUpdate = System.currentTimeMillis();
         lastLocation = location;
         if (location.hasSpeed())
@@ -668,18 +686,64 @@ public class TrackingActivity extends ActionBarActivity implements GoogleMap.OnM
                 cameraUpdate = CameraUpdateFactory.newLatLng(myLatLng);
             }
 
-            if (routeOpts != null) {
-                routeOpts.add(myLatLng);
-            }
-//            List<LatLng> points = route.getPoints();
-//            points.add(myLatLng);
-//            route.setPoints(points);
             if (route != null) {
+                List<LatLng> points = route.getPoints();
+                points.add(myLatLng);
+                route.setPoints(points);
                 route.setVisible(drawTrack);
             }
 
+            if (mPositionMarker == null) {
+                mPositionMarker = mMap.addMarker(
+                        new MarkerOptions()
+                            .flat(true)
+                            .icon(BitmapDescriptorFactory
+                                    .fromResource(R.drawable.ic_airplane_black))
+                            .anchor(0.5f, 0.5f)
+                            .position(new LatLng(location.getLatitude(), location.getLongitude()))
+                            .rotation(location.getBearing())
+                );
+            }
+
+            animateMarker(mPositionMarker, location);
+
             mMap.animateCamera(cameraUpdate);
         }
+    }
+
+    public void animateMarker(final Marker marker, final Location location) {
+        final Handler handler = new Handler();
+        final long start = SystemClock.uptimeMillis();
+        final LatLng startLatLng = marker.getPosition();
+        final double startRotation = marker.getRotation();
+        final long duration = 950;
+
+        final Interpolator interpolator = new LinearInterpolator();
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                long elapsed = SystemClock.uptimeMillis() - start;
+                float t = interpolator.getInterpolation((float) elapsed
+                        / duration);
+
+                double lng = t * location.getLongitude() + (1 - t)
+                        * startLatLng.longitude;
+                double lat = t * location.getLatitude() + (1 - t)
+                        * startLatLng.latitude;
+
+                float rotation = (float) (t * location.getBearing() + (1 - t)
+                        * startRotation);
+
+                marker.setPosition(new LatLng(lat, lng));
+                marker.setRotation(rotation);
+
+                if (t < 1.0) {
+                    // Post again 16ms later.
+                    handler.postDelayed(this, 16);
+                }
+            }
+        });
     }
 
     private void onTrackingSessionStarted(int responseCode, long startTimestamp) {
@@ -780,37 +844,57 @@ public class TrackingActivity extends ActionBarActivity implements GoogleMap.OnM
     }
 
     private void onLocationDataReceived(Message msg) {
-        // TODO: should use data from google maps!
-//        Location location = msg.getData().getParcelable("location");
-//        if (location != null) {
-//            lastLocationUpdate = System.currentTimeMillis();
-//            lastLocation = location;
-//            if (location.hasSpeed())
-//                mSpeedView.setText(String.format("%.2f km/h", location.getSpeed() * 3.6f));
-//            if (location.hasAltitude())
-//                mAltitudeView.setText(String.format("%d m", (int) location.getAltitude()));
-//            else
-//                mAltitudeView.setText("N/A");
-//
-//            if (mMap != null) {
-//                // draw radar circle
-//                LatLng myLatLng = new LatLng(location.getLatitude(), location.getLongitude());
-//                if (mapCircle == null)
-//                    mapCircle = addMapCircle(myLatLng);
-//                int radius = prefHelper.getInt(Constants.CONFIG_RADAR_RADIUS, Constants.DEFAULT_RADAR_RADIUS);
-//                mapCircle.setCenter(myLatLng);
-//                mapCircle.setRadius(radius);
-//                CameraUpdate cameraUpdate = null;
-//                if (location.hasBearing()) {
-//                    CameraPosition p = mMap.getCameraPosition();
-//                    cameraUpdate = CameraUpdateFactory.newCameraPosition(new CameraPosition(myLatLng, p.zoom, p.tilt, location.getBearing()));
-//                } else {
-//                    cameraUpdate = CameraUpdateFactory.newLatLng(myLatLng);
-//                }
-//
-//                mMap.animateCamera(cameraUpdate);
-//            }
-//        }
+        Location location = msg.getData().getParcelable("location");
+        onMyLocationChange(location);
+    }
+
+    private void subscribe() {
+        try {
+            pubnub.subscribe("GPS", new Callback() {
+                @Override
+                public void successCallback(String channel, final Object message) {
+                    Log.d(TAG, "Pubnub.successCallback(): " + message.getClass().getName() + " -> " + message);
+                    if (message instanceof JSONObject) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    updateNearbyPlane((JSONObject) message);
+                                } catch (JSONException ex) {
+                                    Log.w(TAG, "Pubnub.successCallback() failed to parse message", ex);
+                                }
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void errorCallback(String channel, PubnubError error) {
+                    super.errorCallback(channel, error);
+                }
+
+                @Override
+                public void connectCallback(String channel, Object message) {
+                    super.connectCallback(channel, message);
+                }
+
+                @Override
+                public void reconnectCallback(String channel, Object message) {
+                    super.reconnectCallback(channel, message);
+                }
+
+                @Override
+                public void disconnectCallback(String channel, Object message) {
+                    super.disconnectCallback(channel, message);
+                }
+            });
+        } catch (PubnubException ex) {
+            Log.w(TAG, "subscribe() failed", ex);
+        }
+    }
+
+    private void unsubscribe() {
+        pubnub.unsubscribe("GPS");
     }
 
     private void registerClient() {
@@ -835,6 +919,45 @@ public class TrackingActivity extends ActionBarActivity implements GoogleMap.OnM
                 Log.w(TAG, "unregisterClient() failed", ex);
             }
         }
+    }
+
+    private void updateNearbyPlane(JSONObject json) throws JSONException {
+        if (!isServiceRunning() || mPlane == null)
+            return;
+
+        if (json == null) {
+            return;
+        }
+        // 1. extract info
+        String myAircraftId = mPlane.getObjectId();
+        String aircraftId = json.getString("aircraftId");
+        if (myAircraftId.equals(aircraftId)) {
+            return;
+        }
+
+        double lat = json.getDouble("lat");
+        double lon = json.getDouble("lon");
+        float bea = json.has("bea") ? (float) json.getDouble("bea") : 0.0f;
+
+
+        // 2. update marker
+        Marker marker = null;
+        if (markers.containsKey(aircraftId)) {
+            marker = markers.get(aircraftId);
+            marker.setPosition(new LatLng(lat, lon));
+            marker.setRotation(bea);
+        } else {
+            marker = mMap.addMarker(
+                    new MarkerOptions()
+                    .position(new LatLng(lat, lon))
+                    .flat(true)
+                    .anchor(0.5f, 0.5f)
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_airplane_black))
+                    .rotation(bea)
+            );
+            markers.put(aircraftId, marker);
+        }
+        // TODO: 3. vibrate if necessary
     }
 
     private void requestServiceStatus() {
@@ -899,17 +1022,44 @@ public class TrackingActivity extends ActionBarActivity implements GoogleMap.OnM
         final TextView text2 = (TextView) mCurrentUserView.findViewById(android.R.id.text2);
         text2.setText("Loading...");
 
+        // notify user
+        Toast.makeText(this, "Loading...", Toast.LENGTH_SHORT).show();
+
         Task.callInBackground(new Callable<AirSessionEntity>() {
             @Override
             public AirSessionEntity call() throws Exception {
                 AirSessionDAO sessionDao = HelperFactory.getHelper().getAirSessionDao();
                 return sessionDao.queryForId(sessionId);
             }
+        }).onSuccess(new Continuation<AirSessionEntity, AirSessionEntity>() {
+            @Override
+            public AirSessionEntity then(Task<AirSessionEntity> task) throws Exception {
+                LocationDAO pointDao = HelperFactory.getHelper().getLocationDao();
+                AirSessionEntity sessionEntity = task.getResult();
+                if (sessionEntity != null) {
+                    List<LocationEntity> points = pointDao.queryBuilder()
+                            .orderBy("t", true)
+                            .where().eq("session_id", sessionId)
+                            .query();
+                    final List<LatLng> route = new ArrayList<LatLng>(points.size());
+                    for (LocationEntity point: points) {
+                        route.add(new LatLng(point.getLatitude(), point.getLongitude()));
+                    }
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            onSessionLoaded(route);
+                        }
+                    });
+                } else {
+                    throw new IllegalArgumentException("Session not found!");
+                }
+                return sessionEntity;
+            }
         }).onSuccess(new Continuation<AirSessionEntity, String>() {
             @Override
             public String then(Task<AirSessionEntity> task) throws Exception {
                 AirSessionEntity session = task.getResult();
-                onSessionLoaded();
                 return session.getSyncAircraftId();
             }
         }, Task.UI_THREAD_EXECUTOR).onSuccess(new Continuation<String, Aircraft>() {
@@ -944,15 +1094,18 @@ public class TrackingActivity extends ActionBarActivity implements GoogleMap.OnM
         Toast.makeText(TrackingActivity.this, "Plane: " + mPlane.getName(), Toast.LENGTH_SHORT).show();
     }
 
-    private void onSessionLoaded() {
+    private void onSessionLoaded(List<LatLng> points) {
+        float density = getResources().getDisplayMetrics().density;
         routeOpts = new PolylineOptions()
                 .color(Color.BLUE)
-                .width(2 /* TODO: density! */)
+                .width(2 * density)
                 .geodesic(true);
+        routeOpts.addAll(points);
+
         route = mMap.addPolyline(routeOpts);
         route.setVisible(drawTrack);
 
-        mMap.setOnMyLocationChangeListener(this);
+       // mMap.setOnMyLocationChangeListener(this);
     }
 
     private void toggleControlPanel() {
@@ -1081,67 +1234,13 @@ public class TrackingActivity extends ActionBarActivity implements GoogleMap.OnM
 
     private void refreshNearbyPlanes(List<HashMap<String, Object>> planes) {
 
-        if (planes == null)
-            planes = Collections.emptyList();
-
         int radius = prefHelper.getInt(Constants.CONFIG_RADAR_RADIUS, Constants.DEFAULT_RADAR_RADIUS);
 
-        // remove other planes from the map
-        Iterator<Map.Entry<String, Marker>> it = markers.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<String, Marker> entry = it.next();
-            entry.getValue().remove();
-        }
-        markers.clear();
-        nearbyPlanes.clear();
-
-        LatLng myLatLng = (lastLocation != null)
-                ? new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()) : null;
-
-        List<String> radarList = new ArrayList<String>(planes.size());
-        for (Map<String, Object> planeInfo: planes) {
-            String aircraftId = planeInfo.get("aircraftId").toString();
-            String userId = planeInfo.get("userId").toString();
-            if (mPlane.getObjectId().equals(aircraftId))
-                continue;
-            String sessionId = planeInfo.get("sessionId").toString();
-            Date updatedAt = (Date) planeInfo.get("updatedAt");
-            Map<String, Object> lastPoint = (Map<String, Object>) planeInfo.get("lastPoint");
-            if (lastPoint != null) {
-                Number lat = (Number) lastPoint.get("lat");
-                Number lon = (Number) lastPoint.get("lon");
-                Number bea = (Number) lastPoint.get("bea");
-                Number vel = (Number) lastPoint.get("vel");
-                Number alt = (Number) lastPoint.get("alt");
-                LatLng latLng = new LatLng(lat.doubleValue(), lon.doubleValue());
-                Marker marker = mMap.addMarker(
-                        new MarkerOptions()
-                                .position(latLng)
-                                .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_airplane_black))
-                                .flat(true)
-                                .anchor(0.5f, 0.5f)
-                                .rotation(bea != null ? bea.floatValue() : 0)
-                );
-                markers.put(aircraftId, marker);
-                nearbyPlanes.put(marker.getId(), planeInfo);
-
-                if (myLatLng != null) {
-                    double distance = SphericalUtil.computeDistanceBetween(myLatLng, latLng);
-                    if (distance <= radius) {
-                        // add this plane into the radarList
-                        radarList.add(aircraftId);
-                    }
-                }
-            }
-        }
-
-        if (this.radarList.size() > radarList.size()) {
-            CommonTools.vibrate(TrackingActivity.this, new long[]{0, 500, 200, 200, 200, 500}, -1);
-        } else if (this.radarList.size() < radarList.size()) {
-            CommonTools.vibrate(TrackingActivity.this, new long[]{0, 200, 200, 500, 200, 200}, -1);
-        }
-
-        this.radarList = radarList;
+//        if (this.radarList.size() > radarList.size()) {
+//            CommonTools.vibrate(TrackingActivity.this, new long[]{0, 500, 200, 200, 200, 500}, -1);
+//        } else if (this.radarList.size() < radarList.size()) {
+//            CommonTools.vibrate(TrackingActivity.this, new long[]{0, 200, 200, 500, 200, 200}, -1);
+//        }
 
         if (selectedAircraftId != null) {
             Marker marker = markers.get(selectedAircraftId);
@@ -1149,56 +1248,56 @@ public class TrackingActivity extends ActionBarActivity implements GoogleMap.OnM
                 selectedAircraftId = null;
                 mMapOverlay.setVisibility(View.GONE);
             } else {
-                marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_airplane_red));
-                Map<String, Object> planeInfo = nearbyPlanes.get(marker.getId());
-                Map<String, Object> lastPoint = (Map<String, Object>) planeInfo.get("lastPoint");
-                if (lastPoint != null) {
-                    Number lat = (Number) lastPoint.get("lat");
-                    Number lon = (Number) lastPoint.get("lon");
-                    Number bea = (Number) lastPoint.get("bea");
-                    Number vel = (Number) lastPoint.get("vel");
-                    Number alt = (Number) lastPoint.get("alt");
-
-                    try {
-                        Aircraft aircraft = ParseQuery.getQuery(Aircraft.class)
-                                .fromPin("planes")
-                                .get(selectedAircraftId);
-                        if (aircraft != null) {
-                            mOverlayAircraftName.setText(aircraft.getName());
-                            mOverlayCallName.setText(aircraft.getCallName());
-                        }
-                    } catch (Exception ex) {
-                        mOverlayAircraftName.setText("Unknown");
-                        mOverlayCallName.setText("N/A");
-                    }
-
-                    mOverlaySpeed.setText((vel != null ? Math.round(vel.floatValue()*3.6f) : "?") + " km/h");
-                    if (lastLocation != null && lastLocation.hasAltitude() && alt!=null) {
-                        int delta = Math.round(alt.floatValue() - (float) lastLocation.getAltitude());
-                        if (delta > 0) {
-                            mOverlayHeight.setText("+" + delta + " m");
-                            mOverlayHeight.setTextColor(Color.GREEN);
-                        } else if (delta < 0) {
-                            mOverlayHeight.setText("-" + delta + " m");
-                            mOverlayHeight.setTextColor(Color.RED);
-                        } else {
-                            mOverlayHeight.setText("±0 m");
-                            mOverlayHeight.setTextColor(Color.BLACK);
-                        }
-                    } else {
-                        mOverlayHeight.setText((alt != null ? alt.floatValue() : "?") + " m");
-                        mOverlayHeight.setTextColor(Color.BLACK);
-                    }
-                    if (lastLocation != null && lat != null && lon != null) {
-                        double d = SphericalUtil.computeDistanceBetween(
-                                new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()),
-                                new LatLng(lat.doubleValue(), lon.doubleValue()));
-                        mOverlayDistance.setText(Math.round(d) + " m");
-                    } else {
-                        mOverlayDistance.setText("? m");
-                    }
-                    mMapOverlay.setVisibility(View.VISIBLE);
-                }
+//                marker.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_airplane_red));
+//                Map<String, Object> planeInfo = nearbyPlanes.get(marker.getId());
+//                Map<String, Object> lastPoint = (Map<String, Object>) planeInfo.get("lastPoint");
+//                if (lastPoint != null) {
+//                    Number lat = (Number) lastPoint.get("lat");
+//                    Number lon = (Number) lastPoint.get("lon");
+//                    Number bea = (Number) lastPoint.get("bea");
+//                    Number vel = (Number) lastPoint.get("vel");
+//                    Number alt = (Number) lastPoint.get("alt");
+//
+//                    try {
+//                        Aircraft aircraft = ParseQuery.getQuery(Aircraft.class)
+//                                .fromPin("planes")
+//                                .get(selectedAircraftId);
+//                        if (aircraft != null) {
+//                            mOverlayAircraftName.setText(aircraft.getName());
+//                            mOverlayCallName.setText(aircraft.getCallName());
+//                        }
+//                    } catch (Exception ex) {
+//                        mOverlayAircraftName.setText("Unknown");
+//                        mOverlayCallName.setText("N/A");
+//                    }
+//
+//                    mOverlaySpeed.setText((vel != null ? Math.round(vel.floatValue()*3.6f) : "?") + " km/h");
+//                    if (lastLocation != null && lastLocation.hasAltitude() && alt!=null) {
+//                        int delta = Math.round(alt.floatValue() - (float) lastLocation.getAltitude());
+//                        if (delta > 0) {
+//                            mOverlayHeight.setText("+" + delta + " m");
+//                            mOverlayHeight.setTextColor(Color.GREEN);
+//                        } else if (delta < 0) {
+//                            mOverlayHeight.setText("-" + delta + " m");
+//                            mOverlayHeight.setTextColor(Color.RED);
+//                        } else {
+//                            mOverlayHeight.setText("±0 m");
+//                            mOverlayHeight.setTextColor(Color.BLACK);
+//                        }
+//                    } else {
+//                        mOverlayHeight.setText((alt != null ? alt.floatValue() : "?") + " m");
+//                        mOverlayHeight.setTextColor(Color.BLACK);
+//                    }
+//                    if (lastLocation != null && lat != null && lon != null) {
+//                        double d = SphericalUtil.computeDistanceBetween(
+//                                new LatLng(lastLocation.getLatitude(), lastLocation.getLongitude()),
+//                                new LatLng(lat.doubleValue(), lon.doubleValue()));
+//                        mOverlayDistance.setText(Math.round(d) + " m");
+//                    } else {
+//                        mOverlayDistance.setText("? m");
+//                    }
+//                    mMapOverlay.setVisibility(View.VISIBLE);
+//                }
             }
         } else {
             mMapOverlay.setVisibility(View.GONE);

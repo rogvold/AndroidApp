@@ -8,6 +8,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="windowActionBarOverlay">false</item>
     </style>
 
     <style name="AppTheme.Translucent" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -29,6 +30,7 @@
         <item name="android:background">@color/colorPrimary</item>
         <item name="android:layout_gravity">center_vertical</item>
         <item name="android:gravity">center_vertical|center_horizontal</item>
+        <item name="android:padding">8dp</item>
     </style>
 
     <style name="SecondaryButton" parent="Base.TextAppearance.AppCompat.Button">

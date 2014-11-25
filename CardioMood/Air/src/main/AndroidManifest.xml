@@ -71,7 +71,8 @@
 
         <activity
             android:name="com.cardiomood.android.air.SettingsActivity"
-            android:label="@string/title_activity_settings" >
+            android:label="@string/title_activity_settings"
+            android:theme="@style/Theme.Settings">
         </activity>
         <activity
             android:name="com.cardiomood.android.air.HistoryActivity"

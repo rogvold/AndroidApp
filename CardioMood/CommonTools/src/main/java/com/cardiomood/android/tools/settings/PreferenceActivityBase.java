@@ -1,6 +1,7 @@
 package com.cardiomood.android.tools.settings;
 
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
@@ -8,38 +9,73 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
-@SuppressWarnings("NewApi") // TODO: this activity will crash on API level < 11
+import com.cardiomood.android.tools.R;
+
+@SuppressWarnings("NewApi")
 public abstract class PreferenceActivityBase<F extends PreferenceActivityBase.AbstractMainFragment> extends PreferenceActivity {
 
 	private F fragment;
+    private Toolbar mActionBar;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		fragment = createMainFragment();
-		
-		getFragmentManager().beginTransaction()
-				.replace(android.R.id.content, fragment).commit();
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            fragment = createMainFragment();
+
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.content_wrapper, fragment).commit();
+        }
+
+        mActionBar.setTitle(getTitle());
 	}
 	
 	@Override
 	protected void onResume() {
 		super.onResume();
-		
-		// Register the listener whenever a key changes
-		PreferenceManager.getDefaultSharedPreferences(this)
-				.registerOnSharedPreferenceChangeListener(fragment);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            // Register the listener whenever a key changes
+            PreferenceManager.getDefaultSharedPreferences(this)
+                    .registerOnSharedPreferenceChangeListener(fragment);
+        }
 	}
 	
 	@Override
     protected void onPause() {
         super.onPause();
 
-        // Unregister the listener whenever a key changes            
-        PreferenceManager.getDefaultSharedPreferences(this)
-				.unregisterOnSharedPreferenceChangeListener(fragment); 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            // Unregister the listener whenever a key changes
+            PreferenceManager.getDefaultSharedPreferences(this)
+                    .unregisterOnSharedPreferenceChangeListener(fragment);
+        }
+    }
+
+    @Override
+    public void setContentView(int layoutResID) {
+        ViewGroup contentView = (ViewGroup) LayoutInflater.from(this).inflate(
+                R.layout.activity_settings, new LinearLayout(this), false);
+
+        mActionBar = (Toolbar) contentView.findViewById(R.id.action_bar);
+        mActionBar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
+        ViewGroup contentWrapper = (ViewGroup) contentView.findViewById(R.id.content_wrapper);
+        LayoutInflater.from(this).inflate(layoutResID, contentWrapper, true);
+
+        getWindow().setContentView(contentView);
     }
 	
 	public F getFragment() {
@@ -50,7 +86,8 @@ public abstract class PreferenceActivityBase<F extends PreferenceActivityBase.Ab
 	
 	public abstract static class AbstractMainFragment extends PreferenceFragment
 													  implements OnSharedPreferenceChangeListener {
-		public void updatePrefSummary(String defaultSummary, Preference... prefs) {
+
+        public void updatePrefSummary(String defaultSummary, Preference... prefs) {
 			for (Preference pref : prefs) {
 				if (pref instanceof EditTextPreference) {
 					EditTextPreference etp = (EditTextPreference) pref;

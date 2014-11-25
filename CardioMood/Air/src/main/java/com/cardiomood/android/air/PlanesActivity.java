@@ -4,6 +4,8 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
@@ -91,6 +93,9 @@ public class PlanesActivity extends ActionBarActivity {
         mPlanesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                ((PlanesListArrayAdapter) planesListAdapter).selectItem(i);
+                mPlanesListView.invalidateViews();
+
                 selectedPlane = planesListAdapter.getItem(i);
                 selectedPlane.pinInBackground(new SaveCallback() {
                     @Override
@@ -322,6 +327,8 @@ public class PlanesActivity extends ActionBarActivity {
 
     public class PlanesListArrayAdapter extends ArrayAdapter<Aircraft> {
 
+        private int selectedItemPosition = -1;
+
         public PlanesListArrayAdapter(Context context, List<Aircraft> src) {
             super(context, android.R.layout.simple_list_item_2, src);
         }
@@ -336,10 +343,13 @@ public class PlanesActivity extends ActionBarActivity {
             return getCustomView(position, convertView, parent);
         }
 
+        public void selectItem(int i) {
+            selectedItemPosition = i;
+        }
+
         private View getCustomView(int position, View convertView, ViewGroup parent) {
             LayoutInflater inflater = getLayoutInflater();
-            View itemView = inflater.inflate(android.R.layout.simple_list_item_2, parent, false);
-            itemView.setBackgroundResource(R.drawable.list_selector_background);
+            View itemView = inflater.inflate(R.layout.two_lines_layout, parent, false);
             Aircraft plane = getItem(position);
 
             TextView text1 = (TextView) itemView.findViewById(android.R.id.text1);
@@ -347,6 +357,17 @@ public class PlanesActivity extends ActionBarActivity {
 
             TextView text2 = (TextView) itemView.findViewById(android.R.id.text2);
             text2.setText(plane.getAircraftType() + " / " + plane.getAircraftId());
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                itemView.setBackgroundResource(R.drawable.list_selector_background);
+            } else {
+                // fallback for API level < 11
+                if (position == selectedItemPosition) {
+                    itemView.setBackgroundColor(getResources().getColor(R.color.wallet_holo_blue_light));
+                } else {
+                    itemView.setBackgroundColor(Color.TRANSPARENT);
+                }
+            }
 
             return itemView;
         }

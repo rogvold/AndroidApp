@@ -1,6 +1,7 @@
 package com.cardiomood.android.air;
 
 import android.app.Application;
+import android.preference.PreferenceManager;
 
 import com.cardiomood.android.air.data.AirSession;
 import com.cardiomood.android.air.data.Aircraft;
@@ -25,6 +26,9 @@ public class AirApplication extends Application {
         ParseObject.registerSubclass(AirSession.class);
         Parse.enableLocalDatastore(this);
         Parse.initialize(this, PARSE_APPLICATION_ID, PARSE_CLIENT_KEY);
+
+        // default preferences
+        PreferenceManager.setDefaultValues(this, R.xml.settings, false);
 
         // prepare database
         HelperFactory.setHelper(getApplicationContext());

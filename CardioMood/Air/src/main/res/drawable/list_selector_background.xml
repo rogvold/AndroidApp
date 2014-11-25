@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-
-    <item android:drawable="@android:color/transparent" android:state_activated="false"/>
-    <item android:drawable="@android:color/transparent" android:state_activated="false" android:state_pressed="false"/>
-    <item android:drawable="@android:color/holo_blue_bright" android:state_pressed="true"/>
-    <item android:drawable="@android:color/holo_blue_bright" android:state_activated="true"/>
-
+    <item android:drawable="@color/wallet_holo_blue_light" android:state_activated="true"/>
+    <item android:drawable="@color/LightBlue" android:state_pressed="true"/>
+    <item android:drawable="@android:color/transparent"/>
 </selector>

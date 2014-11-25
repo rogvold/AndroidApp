@@ -19,7 +19,8 @@
             android:layout_marginBottom="8dp"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
-            android:layout_marginTop="0dp">
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical">
 
             <include layout="@layout/two_lines_layout"
                 android:id="@+id/current_user_box"
@@ -33,7 +34,6 @@
                 android:layout_weight="1"
                 android:textStyle="bold"
                 style="@style/SecondaryButton"
-                android:layout_gravity="center_vertical"
                 android:id="@+id/button_history"
                 android:text="@string/button_history"/>
 
@@ -54,7 +54,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textAppearance="?android:attr/textAppearanceSmall"
                 android:text="@string/choose_your_aircraft"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
