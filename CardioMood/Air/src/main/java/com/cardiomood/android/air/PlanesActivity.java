@@ -89,7 +89,6 @@ public class PlanesActivity extends ActionBarActivity {
         mCurrentUserView = findViewById(R.id.current_user_box);
         mPlanesListView = (ListView) findViewById(R.id.planes_list);
         mPlanesListView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
-        mPlanesListView.setSelector(R.drawable.list_selector_background);
         mPlanesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -359,7 +358,7 @@ public class PlanesActivity extends ActionBarActivity {
             text2.setText(plane.getAircraftType() + " / " + plane.getAircraftId());
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                itemView.setBackgroundResource(R.drawable.list_selector_background);
+               itemView.setBackgroundResource(R.drawable.list_selector_background);
             } else {
                 // fallback for API level < 11
                 if (position == selectedItemPosition) {
