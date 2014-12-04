@@ -52,6 +52,7 @@ public class CardioMonitoringService extends Service {
     public static final int MSG_HR_DATA = 10;
     public static final int MSG_CONNECTION_STATUS_CHANGED = 11;
     public static final int MSG_BATTERY_LEVEL = 12;
+    public static final int MSG_RECONNECTING = 13;
 
 
     /* Response messages */
@@ -78,12 +79,20 @@ public class CardioMonitoringService extends Service {
     /**
      * Handler of incoming messages from clients.
      */
-    private class IncomingHandler extends Handler {
+    class IncomingHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_REGISTER_CLIENT:
                     mClients.add(msg.replyTo);
+                    mHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(hrMonitor != null && hrMonitor.isConnected()) {
+                                hrMonitor.requestBatteryLevel();
+                            }
+                        }
+                    }, 100);
                     break;
                 case MSG_UNREGISTER_CLIENT:
                     mClients.remove(msg.replyTo);
@@ -109,6 +118,9 @@ public class CardioMonitoringService extends Service {
                 case MSG_END_SESSION:
                     handleEndSessionRequest(msg);
                     break;
+                case MSG_BATTERY_LEVEL:
+                    handleBatteryLevelRequest(msg);
+                    break;
                 default:
                     super.handleMessage(msg);
             }
@@ -128,26 +140,33 @@ public class CardioMonitoringService extends Service {
 
         @Override
         public void onConnectionStatusChanged(final int oldStatus, final int newStatus) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (newStatus != LeHRMonitor.CONNECTED_STATUS) {
-                        if (mCardioSession != null && mWorkerThread != null) {
-                            handleEndSessionRequest(Message.obtain(null, MSG_END_SESSION));
+            if (hrMonitor != null && newStatus == LeHRMonitor.CONNECTED_STATUS) {
+                hrMonitor.setAutoReconnect(true);
+                mHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (hrMonitor != null && hrMonitor.isConnected()) {
+                            hrMonitor.requestBatteryLevel();
                         }
                     }
-                    for (Messenger m: mClients) {
-                        try {
-                            Message msg = Message.obtain(null, MSG_CONNECTION_STATUS_CHANGED, oldStatus, newStatus);
-                            msg.getData().putString("deviceAddress", mDeviceAddress);
-                            m.send(msg);
-                        } catch (RemoteException ex) {
-                            Log.w(TAG, "onConnectionStatusChanged() failed", ex);
-                        }
-                    }
-                }
-            });
+                }, 100);
+            }
 
+            if (newStatus != LeHRMonitor.CONNECTED_STATUS) {
+                if (mCardioSession != null && mWorkerThread != null) {
+                    handleEndSessionRequest(Message.obtain(null, MSG_END_SESSION));
+                }
+            }
+
+            for (Messenger m: mClients) {
+                try {
+                    Message msg = Message.obtain(null, MSG_CONNECTION_STATUS_CHANGED, oldStatus, newStatus);
+                    msg.getData().putString("deviceAddress", mDeviceAddress);
+                    m.send(msg);
+                } catch (RemoteException ex) {
+                    Log.w(TAG, "onConnectionStatusChanged() failed", ex);
+                }
+            }
         }
 
         @Override
@@ -163,6 +182,9 @@ public class CardioMonitoringService extends Service {
                     msg.getData().setClassLoader(CardioDataPackage.class.getClassLoader());
                     msg.getData().putParcelable("data", data);
                     msg.getData().putString("deviceAddress", mDeviceAddress);
+                    if (mCardioSession != null) {
+                        msg.getData().putLong("t", data.getTimestamp() - mCardioSession.getCreationDate().getTime());
+                    }
                     m.send(msg);
                 } catch (RemoteException ex) {
                     Log.w(TAG, "onDataReceived() failed", ex);
@@ -179,6 +201,19 @@ public class CardioMonitoringService extends Service {
                     m.send(msg);
                 } catch (RemoteException ex) {
                     Log.w(TAG, "onBatteryLevelReceived() failed", ex);
+                }
+            }
+        }
+
+        @Override
+        public void onReconnecting(int attemptNumber, int maxAttempts) {
+            for (Messenger m: mClients) {
+                try {
+                    Message msg = Message.obtain(null, MSG_RECONNECTING, attemptNumber, maxAttempts);
+                    msg.getData().putString("deviceAddress", mDeviceAddress);
+                    m.send(msg);
+                } catch (RemoteException ex) {
+                    Log.w(TAG, "notifyReconnecting() failed", ex);
                 }
             }
         }
@@ -215,6 +250,7 @@ public class CardioMonitoringService extends Service {
     public void onDestroy() {
         try {
             if (hrMonitor != null) {
+                hrMonitor.setAutoReconnect(false);
                 if (hrMonitor.isConnectingOrConnected()) {
                     hrMonitor.disconnect();
                 }
@@ -264,6 +300,7 @@ public class CardioMonitoringService extends Service {
 
     private void reloadMonitor() {
         if (hrMonitor != null) {
+            hrMonitor.setAutoReconnect(false);
             if (hrMonitor.isConnectingOrConnected())
                 hrMonitor.disconnect();
             hrMonitor.setCallback(null);
@@ -319,6 +356,7 @@ public class CardioMonitoringService extends Service {
         try {
             mDeviceAddress = null;
             if (hrMonitor != null) {
+                hrMonitor.setAutoReconnect(false);
                 if (hrMonitor.isConnectingOrConnected()) {
                     hrMonitor.disconnect();
                 }
@@ -330,7 +368,6 @@ public class CardioMonitoringService extends Service {
             Log.w(TAG, "disconnect() failed", ex);
         }
     }
-
     private void handleConnectionStatusRequest(Message msg) {
         try {
             if (msg.replyTo != null) {
@@ -387,10 +424,12 @@ public class CardioMonitoringService extends Service {
                 Message response = Message.obtain(null, RESP_DISCONNECT_RESULT, RESULT_SUCCESS, 0);
                 msg.replyTo.send(response);
             }
+            init();
         } catch (RemoteException ex) {
             Log.d(TAG, "handleDisconnectRequest() failed", ex);
         }
     }
+
 
     private void handleResetRequest(Message msg) {
         if (mCardioSession != null) {
@@ -490,6 +529,12 @@ public class CardioMonitoringService extends Service {
             }
         } catch (RemoteException ex) {
             Log.d(TAG, "handleStartSessionRequest() failed", ex);
+        }
+    }
+
+    private void handleBatteryLevelRequest(Message msg) {
+        if (hrMonitor != null && hrMonitor.isConnected()) {
+            hrMonitor.requestBatteryLevel();
         }
     }
 

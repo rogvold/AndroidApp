@@ -1,11 +1,15 @@
 package com.cardiomood.android.mipt.fragments;
 
 import android.app.ProgressDialog;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -14,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,7 +59,8 @@ import bolts.Task;
  * A fragment representing a list of Items.
  * <p/>
  */
-public class HistoryFragment extends ListFragment {
+public class HistoryFragment extends ListFragment
+        implements SearchView.OnQueryTextListener, SearchView.OnCloseListener {
 
     private static final String TAG = HistoryFragment.class.getSimpleName();
 
@@ -83,13 +89,32 @@ public class HistoryFragment extends ListFragment {
         mSessionAdapter = new CardioSessionArrayAdapter(getActivity(), mCardioSessions);
         setListAdapter(mSessionAdapter);
 
-        refreshSessionList();
+        setHasOptionsMenu(true);
+        refreshSessionList(null);
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_history, menu);
+
+        // Associate searchable configuration with the SearchView
+        SearchManager searchManager =
+                (SearchManager) getActivity().getSystemService(Context.SEARCH_SERVICE);
+        MenuItem menuItem = menu.findItem(R.id.action_search);
+        SearchView searchView = new SearchView(getActivity());
+        MenuItemCompat.setActionView(menuItem, searchView);
+//        searchView.setSearchableInfo(
+//                searchManager.getSearchableInfo(getActivity().getComponentName()));
+
+        EditText txtSearch = ((EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text));
+        txtSearch.setHintTextColor(Color.DKGRAY);
+        txtSearch.setTextColor(Color.WHITE);
+        txtSearch.setHint("Search in history");
+
+        searchView.setOnCloseListener(this);
+        searchView.setOnQueryTextListener(this);
+
     }
 
     @Override
@@ -111,7 +136,9 @@ public class HistoryFragment extends ListFragment {
         startActivity(intent);
     }
 
-    private void refreshSessionList() {
+    private void refreshSessionList(String query) {
+        final String q = (query == null || query.trim().isEmpty())
+                ? "" : query.trim();
         Task.callInBackground(new Callable<List<CardioSessionEntity>>() {
             @Override
             public List<CardioSessionEntity> call() throws Exception {
@@ -121,6 +148,7 @@ public class HistoryFragment extends ListFragment {
                         .where().eq("sync_user_id", ParseUser.getCurrentUser().getObjectId())
                         .and().ne("deleted", true)
                         .and().ne("end_timestamp", 0L)
+                        .and().like("name", "%" + q + "%")
                         .query();
             }
         }).continueWith(new Continuation<List<CardioSessionEntity>, Object>() {
@@ -180,7 +208,7 @@ public class HistoryFragment extends ListFragment {
                             mPrefHelper.putLong(Constants.APP_LAST_SYNC_TIMESTAMP, task.getResult());
                         }
 
-                        refreshSessionList();
+                        refreshSessionList(null);
                         if (pDialog != null) {
                             pDialog.dismiss();
                         }
@@ -206,6 +234,22 @@ public class HistoryFragment extends ListFragment {
 
         // calculate stress
         return HeartRateUtils.getSI(r, t, 2 * 60 * 1000, 5000);
+    }
+
+    @Override
+    public boolean onClose() {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String s) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String s) {
+        refreshSessionList(s);
+        return false;
     }
 
 

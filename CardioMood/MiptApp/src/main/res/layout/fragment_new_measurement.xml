@@ -43,10 +43,10 @@
                     android:layout_weight="1"
                     android:textAppearance="?android:attr/textAppearanceSmall"
                     android:textStyle="bold"
-                    android:textSize="18sp"
+                    android:textSize="16sp"
                     android:gravity="center"
-                    android:text="@string/hr"/>
-
+                    android:text="@string/hr"
+                    android:visibility="gone"/>
 
                 <TextView
                     android:id="@+id/heart_rate"
@@ -56,6 +56,14 @@
                     android:paddingLeft="8dp"
                     android:paddingRight="8dp"
                     android:layout_weight="1"
+                    android:gravity="center"
+                    android:visibility="visible"/>
+
+                <com.cardiomood.android.controls.gauge.BatteryIndicatorGauge
+                    android:id="@+id/hrm_battery"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="10"
                     android:visibility="gone"/>
 
                 <LinearLayout
