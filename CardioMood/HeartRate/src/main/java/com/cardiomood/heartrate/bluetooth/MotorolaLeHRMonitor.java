@@ -152,7 +152,7 @@ public class MotorolaLeHRMonitor extends LeHRMonitor {
     }
 
     @Override
-    public boolean initialize() {
+    protected boolean doInitialize() {
         if (getConnectionStatus() == READY_STATUS)
             return true; // already initialized
 
@@ -206,7 +206,7 @@ public class MotorolaLeHRMonitor extends LeHRMonitor {
     }
 
     @Override
-    public boolean connect(String deviceAddress) {
+    protected boolean doConnect(String deviceAddress) {
         if (getConnectionStatus() == READY_STATUS && deviceAddress != null) {
             device = bluetoothAdapter.getRemoteDevice(deviceAddress);
 
@@ -231,7 +231,7 @@ public class MotorolaLeHRMonitor extends LeHRMonitor {
     }
 
     @Override
-    public void disconnect() {
+    protected void doDisconnect() {
         if (!leDisconnected && (getConnectionStatus() == CONNECTED_STATUS || getConnectionStatus() == CONNECTING_STATUS)) {
             try {
                 int status = hrmService.disconnectLe(device, hrmUUID);
@@ -251,7 +251,7 @@ public class MotorolaLeHRMonitor extends LeHRMonitor {
     }
 
     @Override
-    public void close() {
+    protected void doClose() {
         if (getConnectionStatus() == CONNECTED_STATUS) {
             disconnect();
         }

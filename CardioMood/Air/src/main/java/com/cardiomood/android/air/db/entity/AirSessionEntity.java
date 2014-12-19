@@ -26,6 +26,10 @@ public class AirSessionEntity extends SyncEntity implements Serializable {
     @ParseField(name = "aircraftId")
     private String syncAircraftId;
 
+    @DatabaseField(columnName = "original_session_id")
+    @ParseField(name = "originalSessionId")
+    private String originalSessionId;
+
     @DatabaseField(columnName = "end_timestamp")
     @ParseField(name = "endDate")
     private Long endDate;
@@ -73,4 +77,13 @@ public class AirSessionEntity extends SyncEntity implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
+
+    public String getOriginalSessionId() {
+        return originalSessionId;
+    }
+
+    public void setOriginalSessionId(String originalSessionId) {
+        this.originalSessionId = originalSessionId;
+    }
+
 }

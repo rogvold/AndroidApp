@@ -14,7 +14,7 @@ public class HeartRateGraphView extends LineGraphView {
 
     public HeartRateGraphView(Context context, CharSequence title) {
         super(context, title == null ? null : title.toString());
-        getGraphViewStyle().setTextSize(16);
+        getGraphViewStyle().setTextSize(12 * context.getResources().getDisplayMetrics().density);
         getGraphViewStyle().setNumVerticalLabels(10);
         getGraphViewStyle().setNumHorizontalLabels(7);
 
@@ -82,6 +82,8 @@ public class HeartRateGraphView extends LineGraphView {
         double minY = superMinY - h*0.05;
         if (minY > 120)
             return 120;
+        if (minY < 0)
+            minY = 0;
         return minY;
     }
 }

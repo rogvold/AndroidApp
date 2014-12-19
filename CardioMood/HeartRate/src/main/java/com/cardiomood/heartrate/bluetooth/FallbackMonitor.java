@@ -18,21 +18,21 @@ public class FallbackMonitor extends LeHRMonitor {
     }
 
     @Override
-    public boolean initialize() {
+    protected boolean doInitialize() {
         return false;
     }
 
     @Override
-    public boolean connect(String deviceAddress) {
+    protected boolean doConnect(String deviceAddress) {
         return false;
     }
 
     @Override
-    public void disconnect() {
+    protected void doDisconnect() {
     }
 
     @Override
-    public void close() {
+    protected void doClose() {
         setConnectionStatus(INITIAL_STATUS);
     }
 

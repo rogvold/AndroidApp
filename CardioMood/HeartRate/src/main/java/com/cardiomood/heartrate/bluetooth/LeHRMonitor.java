@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Handler;
 import android.util.Log;
 
 import java.util.Timer;
@@ -43,12 +44,22 @@ public abstract class LeHRMonitor {
     private Context context;
     private Callback callback;
     private boolean enableBroadcasts = true;
+    private String deviceAddress;
 
-    private Timer timer = new Timer("freeze_timer");
+    private boolean autoReconnect = false;
+    private int maxReconnectionAttempts = 0;
+    private int reconnectionAttemptsMade = 0;
+    private boolean reconnectFlag = false;
+
+    private Handler mHandler;
+
+    private Timer timer = new Timer("connection_freeze_timer");
     private TimerTask connectingTimeoutTask;
+
 
     public LeHRMonitor(Context context) {
         this.context = context;
+        mHandler = new Handler();
     }
 
     @SuppressWarnings("NewApi")
@@ -82,26 +93,43 @@ public abstract class LeHRMonitor {
         return new FallbackMonitor(context);
     }
 
+    protected abstract boolean doInitialize();
+    protected abstract boolean doConnect(String deviceAddress);
+    protected abstract void doDisconnect();
+    protected abstract void doClose();
     public abstract boolean isSupported();
-    public abstract boolean initialize();
-    public abstract boolean connect(String deviceAddress);
-    public abstract void disconnect();
-    public abstract void close();
     public abstract BluetoothAdapter getCurrentBluetoothAdapter();
 
-    public void enableBroadcasts(boolean enable) {
+    public synchronized boolean initialize() {
+        return doInitialize();
+    }
+    public synchronized boolean connect(String deviceAddress) {
+        this.deviceAddress = deviceAddress;
+        return doConnect(deviceAddress);
+    }
+
+    public synchronized void disconnect() {
+        doDisconnect();
+    }
+    public synchronized void close() {
+        doClose();
+        deviceAddress = null;
+    }
+
+
+    public synchronized void enableBroadcasts(boolean enable) {
         enableBroadcasts = enable;
     }
 
-    public void setCallback(Callback callback) {
+    public synchronized void setCallback(Callback callback) {
         this.callback = callback;
     }
 
-    public boolean requestBatteryLevel() {
+    public synchronized boolean requestBatteryLevel() {
         return false;
     }
 
-    public BluetoothAdapter getBluetoothAdapter() {
+    public synchronized BluetoothAdapter getBluetoothAdapter() {
         // Use BluetoothManager for API level >= 18
         if (Build.VERSION.SDK_INT >= 18) {
             BluetoothManager btMan = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
@@ -111,55 +139,93 @@ public abstract class LeHRMonitor {
         return BluetoothAdapter.getDefaultAdapter();
     }
 
-    public Context getContext() {
+    public synchronized Context getContext() {
         return context;
     }
 
-    public void setContext(Context context) {
+    public synchronized void setContext(Context context) {
         this.context = context;
     }
 
-    public int getBatteryLevel() {
+    public synchronized int getBatteryLevel() {
         return batteryLevel;
     }
 
-    public void setBatteryLevel(int batteryLevel) {
-        notifyBatteryLevel(batteryLevel);
+    public synchronized void setBatteryLevel(final int batteryLevel) {
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                notifyBatteryLevel(batteryLevel);
+            }
+        });
         this.batteryLevel = batteryLevel;
     }
 
-    public int getLastBPM() {
+    public synchronized int getLastBPM() {
         return lastBPM;
     }
 
-    public void setLastBPM(int bpm) {
+    public synchronized void setLastBPM(final int bpm) {
         if (lastBPM != bpm) {
-            notifyBPMChanged(lastBPM, bpm);
+            final int oldBpm = lastBPM;
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    notifyBPMChanged(oldBpm, bpm);
+                }
+            });
             lastBPM = bpm;
         }
     }
 
-    public boolean isConnected() {
+    public synchronized boolean isAutoReconnect() {
+        return autoReconnect;
+    }
+
+    public synchronized void setAutoReconnect(boolean autoReconnect) {
+        this.autoReconnect = autoReconnect;
+    }
+
+    public synchronized int getMaxReconnectionAttempts() {
+        return maxReconnectionAttempts;
+    }
+
+    public synchronized void setMaxReconnectionAttempts(int maxReconnectionAttempts) {
+        this.maxReconnectionAttempts = maxReconnectionAttempts;
+    }
+
+    public String getDeviceAddress() {
+        return deviceAddress;
+    }
+
+    public synchronized boolean isConnected() {
         return CONNECTED_STATUS == getConnectionStatus();
     }
 
-    public boolean isConnectingOrConnected() {
+    public synchronized boolean isConnectingOrConnected() {
         return (getConnectionStatus() == CONNECTING_STATUS ||
                 getConnectionStatus() == CONNECTED_STATUS);
     }
 
-    public int getConnectionStatus() {
+    public synchronized int getConnectionStatus() {
         return connectionStatus;
     }
 
-    public void setConnectionStatus(int connectionStatus) {
+    public synchronized void setConnectionStatus(final int connectionStatus) {
+        Log.w(TAG, "setConnectionStatus(): " + this.connectionStatus + " -> " + connectionStatus);
         if (this.connectionStatus != connectionStatus) {
-            notifyConnectionStatusChanged(this.connectionStatus, connectionStatus);
+            final int oldStatus = this.connectionStatus;
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    notifyConnectionStatusChanged(oldStatus, connectionStatus);
+                }
+            });
             this.connectionStatus = connectionStatus;
         }
     }
 
-    protected void notifyBatteryLevel(int batteryLevel) {
+    protected synchronized void notifyBatteryLevel(int batteryLevel) {
         if (enableBroadcasts) {
             Intent intent = new Intent(ACTION_BATTERY_LEVEL);
             intent.putExtra(EXTRA_BATTERY_LEVEL, batteryLevel);
@@ -171,7 +237,71 @@ public abstract class LeHRMonitor {
         }
     }
 
-    protected void notifyConnectionStatusChanged(int oldStatus, int newStatus) {
+    protected synchronized void notifyConnectionStatusChanged(int oldStatus, int newStatus) {
+        if (connectingTimeoutTask != null) {
+            connectingTimeoutTask.cancel();
+            connectingTimeoutTask = null;
+            timer.purge();
+        }
+
+        if (newStatus == CONNECTING_STATUS) {
+            // make sure connecting lasts not more than 10 seconds
+            connectingTimeoutTask = new TimerTask() {
+                @Override
+                public void run() {
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (getConnectionStatus() == CONNECTING_STATUS) {
+                                disconnect();
+                                if (!isAutoReconnect()) {
+                                    setConnectionStatus(READY_STATUS);
+                                }
+                            }
+                        }
+                    });
+
+                }
+            };
+            timer.schedule(connectingTimeoutTask, 10000);
+        }
+
+        if (newStatus == CONNECTING_STATUS) {
+            reconnectionAttemptsMade = 0;
+        }
+
+        if (isAutoReconnect()) {
+            // auto-reconnect enabled
+            boolean tryAgain = false;
+            if (reconnectFlag && newStatus != CONNECTING_STATUS) {
+                reconnectFlag = false;
+                // tried to reconnect and the attempt finished
+                tryAgain = newStatus != CONNECTED_STATUS;
+                if (getMaxReconnectionAttempts() > 0) {
+                    if (reconnectionAttemptsMade >= getMaxReconnectionAttempts()) {
+                        tryAgain = false;
+                    }
+                }
+            }
+
+            if (!reconnectFlag && (tryAgain || oldStatus == CONNECTED_STATUS)) {
+                // we are not in reconnecting phase,
+                // and all previous attempts (if any) failed
+
+                reconnectionAttemptsMade++;
+                final String deviceAddress = getDeviceAddress();
+                reconnectFlag = true;
+                connect(deviceAddress);
+                notifyReconnecting(reconnectionAttemptsMade);
+                return;
+            }
+        }
+
+        if (isAutoReconnect() && reconnectFlag) {
+            // prevent notifications when in reconnecting cycle
+            return;
+        }
+
         if (enableBroadcasts) {
             Intent intent = new Intent(ACTION_CONNECTION_STATUS_CHANGED);
             intent.putExtra(EXTRA_OLD_STATUS, oldStatus);
@@ -182,28 +312,15 @@ public abstract class LeHRMonitor {
         if (callback != null) {
             callback.onConnectionStatusChanged(oldStatus, newStatus);
         }
+    }
 
-        if (connectingTimeoutTask != null) {
-            connectingTimeoutTask.cancel();
-            connectingTimeoutTask = null;
-        }
-
-        if (newStatus == CONNECTING_STATUS) {
-            // make sure connecting lasts not more than 10 seconds
-            connectingTimeoutTask = new TimerTask() {
-                @Override
-                public void run() {
-                    if (getConnectionStatus() == CONNECTING_STATUS) {
-                        disconnect();
-                        setConnectionStatus(READY_STATUS);
-                    }
-                }
-            };
-            timer.schedule(connectingTimeoutTask, 10000);
+    protected synchronized void notifyReconnecting(int attemptNumber) {
+        if (callback != null) {
+            callback.onReconnecting(attemptNumber, getMaxReconnectionAttempts());
         }
     }
 
-    protected void notifyBPMChanged(int oldBPM, int newBPM) {
+    protected synchronized void notifyBPMChanged(int oldBPM, int newBPM) {
         if (enableBroadcasts) {
             Intent intent = new Intent(ACTION_BPM_CHANGED);
             intent.putExtra(EXTRA_OLD_BPM, oldBPM);
@@ -216,19 +333,24 @@ public abstract class LeHRMonitor {
         }
     }
 
-    protected void notifyHeartRateDataReceived(int bpm, short energyExpended, short[] rrIntervals) {
+    protected synchronized void notifyHeartRateDataReceived(final int bpm, final short energyExpended, final short[] rrIntervals) {
         Log.d(TAG, "notifyHeartRateDataReceived(): bpm=" + bpm);
-        if (enableBroadcasts) {
-            Intent intent = new Intent(ACTION_HEART_RATE_DATA_RECEIVED);
-            intent.putExtra(EXTRA_BPM, bpm);
-            intent.putExtra(EXTRA_ENERGY_EXPENDED, energyExpended);
-            intent.putExtra(EXTRA_INTERVALS, rrIntervals);
-            context.sendBroadcast(intent);
-        }
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (enableBroadcasts) {
+                    Intent intent = new Intent(ACTION_HEART_RATE_DATA_RECEIVED);
+                    intent.putExtra(EXTRA_BPM, bpm);
+                    intent.putExtra(EXTRA_ENERGY_EXPENDED, energyExpended);
+                    intent.putExtra(EXTRA_INTERVALS, rrIntervals);
+                    context.sendBroadcast(intent);
+                }
 
-        if (callback != null) {
-            callback.onDataReceived(bpm, rrIntervals);
-        }
+                if (callback != null) {
+                    callback.onDataReceived(bpm, rrIntervals);
+                }
+            }
+        });
     }
 
     public static interface Callback {
@@ -236,5 +358,6 @@ public abstract class LeHRMonitor {
         void onConnectionStatusChanged(int oldStatus, int newStatus);
         void onDataReceived(int bpm, short[] rr);
         void onBatteryLevelReceived(int level);
+        void onReconnecting(int attemptNumber, int maxAttempts);
     }
 }

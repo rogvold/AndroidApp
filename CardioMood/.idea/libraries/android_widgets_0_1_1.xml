@@ -5,9 +5,6 @@
       <root url="jar://$PROJECT_DIR$/CardioMoodApp/build/intermediates/exploded-aar/com.cardiomood.android/android-widgets/0.1.1/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES>
-      <root url="file://$PROJECT_DIR$/../../Android/AndroidWidgets/main/src/main/java" />
-      <root url="file://$PROJECT_DIR$/../../Android/AndroidWidgets/main/build/generated/source/r/release" />
-    </SOURCES>
+    <SOURCES />
   </library>
 </component>

@@ -18,21 +18,33 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cardiomood.android.air.data.AirSession;
 import com.cardiomood.android.air.db.AirSessionDAO;
 import com.cardiomood.android.air.db.AircraftDAO;
+import com.cardiomood.android.air.db.CardioItemDAO;
 import com.cardiomood.android.air.db.HelperFactory;
+import com.cardiomood.android.air.db.LocationDAO;
 import com.cardiomood.android.air.db.entity.AirSessionEntity;
 import com.cardiomood.android.air.db.entity.AircraftEntity;
+import com.cardiomood.android.air.db.entity.CardioItemEntity;
+import com.cardiomood.android.air.db.entity.LocationEntity;
 import com.cardiomood.android.air.tools.Constants;
 import com.cardiomood.android.sync.ormlite.SyncHelper;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.ui.TouchEffect;
-import com.google.gson.Gson;
+import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.dao.GenericRawResults;
+import com.j256.ormlite.stmt.DeleteBuilder;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
+
+import org.json.JSONArray;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -43,9 +55,8 @@ import bolts.Task;
 public class HistoryActivity extends ActionBarActivity implements AdapterView.OnItemClickListener {
 
     private static final String TAG = HistoryActivity.class.getSimpleName();
-    private static final DateFormat DATE_FORMAT = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.MEDIUM);
-
-    private static final Gson GSON = new Gson();
+    private static final DateFormat DATE_FORMAT =
+            DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.MEDIUM);
 
     private ListView airSessionsListView;
 
@@ -82,8 +93,8 @@ public class HistoryActivity extends ActionBarActivity implements AdapterView.On
         airSessionsListView = (ListView) findViewById(R.id.air_sessions);
         airSessionsListView.setOnItemClickListener(this);
 
-        // initialize planes list
-        airSessions = new ArrayList<AirSessionInfo>();
+        // initialize sessions list
+        airSessions = new ArrayList<>();
         sessionArrayAdapter = new AirSessionListArrayAdapter(this, airSessions);
         airSessionsListView.setAdapter(sessionArrayAdapter);
 
@@ -116,7 +127,7 @@ public class HistoryActivity extends ActionBarActivity implements AdapterView.On
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         AirSessionInfo info = sessionArrayAdapter.getItem(position);
         Intent intent = new Intent(this, DebriefingActivity.class);
-        intent.putExtra(DebriefingActivity.EXTRA_SESSION_ID, info.syncId);
+        intent.putExtra(DebriefingActivity.EXTRA_SESSION_ID, info.id);
         startActivity(intent);
         Toast.makeText(this, R.string.loading_session_data, Toast.LENGTH_LONG).show();
     }
@@ -135,90 +146,8 @@ public class HistoryActivity extends ActionBarActivity implements AdapterView.On
             public Long call() throws Exception {
                 long syncDate = System.currentTimeMillis();
                 syncHelper.synObjects(AircraftEntity.class, false, null);
-//                syncHelper.synObjects(AirSessionEntity.class,
-//                        true, new SyncHelper.SyncCallback<AirSessionEntity>() {
-//                            @Override
-//                            public void onSaveLocally(AirSessionEntity localObject, ParseObject remoteObject) throws Exception {
-//                                try {
-//                                    if (localObject.getId() != null) {
-//                                        // already exists...
-//                                        if (remoteObject.getBoolean("deleted")) {
-//                                            return;
-//                                        }
-//                                        if (localObject.isDeleted() && remoteObject.getBoolean("deleted")) {
-//                                            return;
-//                                        }
-//                                        // remote object was recovered (un-deleted)
-//                                    }
-//                                    DataPointDAO pointDao = HelperFactory.getHelper().getDataPointDao();
-//                                    // delete old points first!
-//                                    Log.d(TAG, "SyncCallback.onSaveLocally() deleting points for session " + localObject.getSyncId());
-//                                    DeleteBuilder<DataPointEntity, Long> del = pointDao.deleteBuilder();
-//                                    del.where().eq("sync_session_id", localObject.getSyncId());
-//                                    del.delete();
-//
-//                                    publishSyncProgress("Downloading data for session " + localObject.getSyncId());
-//                                    ParseQuery<ParseObject> parseQuery = ParseQuery.getQuery("AirSessionPoint")
-//                                            .whereEqualTo("sessionId", localObject.getSyncId())
-//                                            .orderByAscending("t");
-//                                    List<ParseObject> remoteObjects = ParseTools.findAllParseObjects(parseQuery);
-//                                    Log.d(TAG, "SyncCallback.onSaveLocally() saving data points for session: " + remoteObjects.size());
-//
-//                                    for (ParseObject point : remoteObjects) {
-//                                        DataPointEntity entity = SyncEntity.fromParseObject(point, DataPointEntity.class);
-//                                        entity.setSync(true);
-//                                        pointDao.create(entity);
-//                                    }
-//
-//                                    if (remoteObjects.isEmpty()) {
-//                                        localObject.setDeleted(true);
-//                                        localObject.setSyncDate(new Date());
-//                                    }
-//                                } catch (Exception ex) {
-//                                    Log.e(TAG, "onSaveLocally() failed with exception", ex);
-//                                    throw new SyncException(ex);
-//                                }
-//                            }
-//
-//                            @Override
-//                            public void onSaveRemotely(AirSessionEntity localObject, ParseObject remoteObject) throws Exception {
-//                                // submit data points that don't have "is_sync = true"
-//                                // Assuming local object already has sync_id
-//                                publishSyncProgress("Uploading data for session " + localObject.getSyncId());
-//                                try {
-//                                    DataPointDAO dao = HelperFactory.getHelper().getDataPointDao();
-//                                    List<DataPointEntity> items = dao.queryBuilder()
-//                                            .orderBy("_id", true)
-//                                            .where().eq("sync_session_id", localObject.getSyncId())
-//                                            .and().ne("is_sync", true)
-//                                            .query();
-//                                    Iterator<DataPointEntity> it = items.iterator();
-//                                    while (it.hasNext()) {
-//                                        List<DataPointEntity> chunk = new ArrayList<DataPointEntity>(50);
-//                                        for (int j=0; j<50 && it.hasNext(); j++) {
-//                                            chunk.add(it.next());
-//                                        }
-//
-//                                        Map<String, Object> params = new HashMap<String, Object>();
-//                                        params.put("sessionId", localObject.getSyncId());
-//                                        params.put("points", new JSONArray(GSON.toJson(chunk)));
-//
-//                                        // send to parse
-//                                        ParseCloud.callFunction("saveNewPoints", params);
-//
-//                                        // update sync flag
-//                                        for (DataPointEntity dp: chunk) {
-//                                            dp.setSync(true);
-//                                            dao.update(dp);
-//                                        }
-//
-//                                    }
-//                                } catch (Exception ex) {
-//                                    Log.e(TAG, "onSaveRemotely() failed with exception", ex);
-//                                    throw new SyncException(ex);
-//                                }
-//                            }
-//                        });
+                syncHelper.synObjects(AirSessionEntity.class,
+                        true, new SyncCallback());
                 return syncDate;
             }
         }).continueWith(new Continuation<Long, Object>() {
@@ -228,7 +157,7 @@ public class HistoryActivity extends ActionBarActivity implements AdapterView.On
                     Toast.makeText(HistoryActivity.this, "Faulted", Toast.LENGTH_SHORT).show();
                     Log.w(TAG, "sync failed", task.getError());
                 } else if (task.isCompleted()) {
-                    //prefHelper.putLong(Constants.CONFIG_LAST_SYNC_TIMESTAMP, task.getResult());
+                    prefHelper.putLong(Constants.CONFIG_LAST_SYNC_TIMESTAMP, task.getResult());
                 }
 
                 refreshSessionList();
@@ -378,5 +307,205 @@ public class HistoryActivity extends ActionBarActivity implements AdapterView.On
         String planeName;
         String planeCallName;
         String planeNumber;
+    }
+
+    private static class SyncCallback implements SyncHelper.SyncCallback<AirSessionEntity> {
+
+        private static final int CARDIO_CHUNK_SIZE = 3000;
+        private static final int LOCATION_CHUNK_SIZE = 500;
+
+        @Override
+        public void onSaveLocally(AirSessionEntity localObject, ParseObject remoteObject) throws Exception {
+            AirSessionDAO sessionDao = HelperFactory.getHelper().getAirSessionDao();
+            LocationDAO locItemDao = HelperFactory.getHelper().getLocationDao();
+            CardioItemDAO cardioItemDao = HelperFactory.getHelper().getCardioItemDao();
+
+            Dao.CreateOrUpdateStatus status = sessionDao.createOrUpdate(localObject);
+            if (status.isUpdated()) {
+                // delete cardio items
+                DeleteBuilder del = cardioItemDao.deleteBuilder();
+                del.where().eq("session_id", localObject.getId());
+                del.delete();
+
+                // delete location items
+                del = locItemDao.deleteBuilder();
+                del.where().eq("session_id", localObject.getId());
+                del.delete();
+            }
+
+            // load cardio data items
+            List<ParseObject> cardioChunks = ParseQuery.getQuery("CardioDataChunk")
+                    .whereEqualTo("sessionId", remoteObject.getObjectId())
+                    .orderByAscending("number")
+                    .find();
+
+            long lastT = localObject.getCreationDate().getTime();
+            for (ParseObject chunk: cardioChunks) {
+                JSONArray rrs = chunk.getJSONArray("rrs");
+                JSONArray times = chunk.getJSONArray("times");
+                for (int i = 0; i < rrs.length(); i++) {
+                    CardioItemEntity item = new CardioItemEntity();
+                    item.setRr(rrs.getInt(i));
+                    item.setBpm(Math.round(60 * (item.getRr() / 1000.0f)));
+                    item.setT(times.getLong(i));
+                    item.setSession(localObject);
+                    cardioItemDao.create(item);
+                    if (item.getT() > lastT) {
+                        lastT = item.getT();
+                    }
+                }
+            }
+
+            // load cardio data items
+            List<ParseObject> chunks = ParseQuery.getQuery("LocationDataChunk")
+                    .whereEqualTo("sessionId", remoteObject.getObjectId())
+                    .orderByAscending("number")
+                    .find();
+
+            for (ParseObject chunk: chunks) {
+                JSONArray lat = chunk.getJSONArray("lat");
+                JSONArray lon = chunk.getJSONArray("lon");
+                JSONArray alt = chunk.getJSONArray("alt");
+                JSONArray acc = chunk.getJSONArray("acc");
+                JSONArray vel = chunk.getJSONArray("vel");
+                JSONArray bea = chunk.getJSONArray("bea");
+                JSONArray times = chunk.getJSONArray("times");
+                for (int i = 0; i < lat.length(); i++) {
+                    LocationEntity item = new LocationEntity();
+                    item.setLatitude(lat.getDouble(i));
+                    item.setLongitude(lon.getDouble(i));
+                    if (!alt.isNull(i)) {
+                        item.setAltitude(alt.getDouble(i));
+                    }
+                    if (!acc.isNull(i)) {
+                        item.setAccuracy((float) acc.getDouble(i));
+                    }
+                    if (!vel.isNull(i)) {
+                        item.setVelocity((float) vel.getDouble(i));
+                    }
+                    if (!bea.isNull(i)) {
+                        item.setAccuracy((float) bea.getDouble(i));
+                    }
+                    item.setT(times.getLong(i));
+                    item.setSession(localObject);
+                    locItemDao.create(item);
+                    if (item.getT() > lastT) {
+                        lastT = item.getT();
+                    }
+                }
+            }
+
+            if (localObject.getEndDate() == 0L) {
+                // update endTimestamp
+                localObject.setEndDate(lastT + localObject.getCreationDate().getTime());
+            }
+        }
+
+        @Override
+        public void onSaveRemotely(AirSessionEntity localObject, ParseObject remoteObject) throws Exception {
+            CardioItemDAO cardioItemDao = HelperFactory.getHelper().getCardioItemDao();
+            LocationDAO locItemDao = HelperFactory.getHelper().getLocationDao();
+            GenericRawResults<String[]> results = cardioItemDao.queryBuilder()
+                    .selectColumns("_id", "rr", "t")
+                    .orderBy("_id", true)
+                    .where().eq("session_id", localObject.getId())
+                    .queryRaw();
+            if (remoteObject.getObjectId() == null) {
+                // remote object is new
+                remoteObject.save();
+            } else {
+                // remote object already exists
+                // assuming the data points already up-to-date
+                return;
+            }
+
+            // TODO: delete all cardio data chunks for this session!
+            try {
+                Iterator<String[]> it = results.iterator();
+                int number = 1;
+                do {
+                    long firstT = -1l;
+                    List<Long> t = new ArrayList<>(CARDIO_CHUNK_SIZE);
+                    List<Integer> rrs = new ArrayList<>(CARDIO_CHUNK_SIZE);
+                    for (int i = 0; i < CARDIO_CHUNK_SIZE && it.hasNext(); i++) {
+                        if (it.hasNext()) {
+                            String[] row = it.next();
+                            Integer rrValue = Integer.valueOf(row[1]);
+                            Long tValue = Long.valueOf(row[2]);
+                            rrs.add(rrValue);
+                            if (firstT >= 0) {
+                                firstT = tValue;
+                            }
+                            t.add(tValue - firstT);
+                        }
+                    }
+                    ParseObject chunk = ParseObject.create("CardioDataChunk");
+                    chunk.put("sessionId", remoteObject.getObjectId());
+                    chunk.put("rrs", rrs);
+                    chunk.put("times", t);
+                    chunk.put("number", number);
+                    chunk.save();
+                    number++;
+                } while (it.hasNext());
+            } finally {
+                results.close();
+            }
+
+            results = locItemDao.queryBuilder()
+                    .selectColumns("_id", "lat", "lon", "alt", "acc", "vel", "bea", "t")
+                    .orderBy("_id", true)
+                    .where().eq("session_id", localObject.getId())
+                    .queryRaw();
+            try {
+                Iterator<String[]> it = results.iterator();
+                int number = 1;
+                do {
+                    long firstT = -1l;
+                    List<Long> t = new ArrayList<>(LOCATION_CHUNK_SIZE);
+                    List<Double> lat  = new ArrayList<>(LOCATION_CHUNK_SIZE);
+                    List<Double> lon  = new ArrayList<>(LOCATION_CHUNK_SIZE);
+                    List<Double> alt  = new ArrayList<>(LOCATION_CHUNK_SIZE);
+                    List<Double> acc  = new ArrayList<>(LOCATION_CHUNK_SIZE);
+                    List<Double> vel  = new ArrayList<>(LOCATION_CHUNK_SIZE);
+                    List<Double> bea  = new ArrayList<>(LOCATION_CHUNK_SIZE);
+                    for (int i = 0; i < LOCATION_CHUNK_SIZE && it.hasNext(); i++) {
+                        if (it.hasNext()) {
+                            String[] row = it.next();
+                            lat.add(Double.valueOf(row[1]));
+                            lon.add(Double.valueOf(row[2]));
+                            alt.add(row[3] != null ? Double.valueOf(row[3]) : null);
+                            acc.add(row[4] != null ? Double.valueOf(row[4]) : null);
+                            vel.add(row[5] != null ? Double.valueOf(row[5]) : null);
+                            bea.add(row[6] != null ? Double.valueOf(row[6]) : null);
+
+                            Long tValue = Long.valueOf(row[7]);
+                            if (firstT >= 0) {
+                                firstT = tValue;
+                            }
+                            t.add(tValue - firstT);
+                        }
+                    }
+
+                    ParseObject chunk = ParseObject.create("LocationDataChunk");
+                    chunk.put("sessionId", remoteObject.getObjectId());
+                    chunk.put("lat", lat);
+                    chunk.put("lon", lon);
+                    chunk.put("vel", vel);
+                    chunk.put("acc", acc);
+                    chunk.put("alt", alt);
+                    chunk.put("bea", bea);
+                    chunk.put("times", t);
+                    chunk.put("number", number);
+                    chunk.save();
+                    number++;
+                } while (it.hasNext());
+            } finally {
+                results.close();
+            }
+
+            if (((AirSession) remoteObject).getEndDate() == 0L) {
+                remoteObject.put("endDate", localObject.getEndDate());
+            }
+        }
     }
 }

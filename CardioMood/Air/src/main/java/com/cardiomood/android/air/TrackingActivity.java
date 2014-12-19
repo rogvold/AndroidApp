@@ -113,7 +113,6 @@ public class TrackingActivity extends ActionBarActivity implements GoogleMap.OnM
     private boolean mScanning = false;
     private AlertDialog alertSelectDevice;
 
-
     // current state variables
     private String aircraftId = null;
     private Aircraft mPlane = null;
@@ -211,6 +210,9 @@ public class TrackingActivity extends ActionBarActivity implements GoogleMap.OnM
                 case TrackingService.MSG_LOCATION_DATA:
                     onLocationDataReceived(msg);
                     break;
+                case TrackingService.MSG_RECONNECTING:
+                    onHrmReconnecting(msg);
+                    break;
                 default:
                     super.handleMessage(msg);
             }
@@ -260,10 +262,12 @@ public class TrackingActivity extends ActionBarActivity implements GoogleMap.OnM
     private boolean drawTrack = true;
     private Polyline route = null;
     private PolylineOptions routeOpts = null;
+    private Polyline selectedTrack;
     private Marker mPositionMarker;
 
     // Pubnub
-    Pubnub pubnub = new Pubnub("pub-c-a86ef89b-7858-4b4c-8f89-c4348bfc4b79", "sub-c-e5ae235a-4c3e-11e4-9e3d-02ee2ddab7fe");
+    Pubnub pubnub = new Pubnub("pub-c-a86ef89b-7858-4b4c-8f89-c4348bfc4b79",
+            "sub-c-e5ae235a-4c3e-11e4-9e3d-02ee2ddab7fe");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -369,6 +373,7 @@ public class TrackingActivity extends ActionBarActivity implements GoogleMap.OnM
         mOverlaySpeed = (TextView) findViewById(R.id.overlay_speed);
 
         overlayGestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+
             @Override
             public boolean onDown(MotionEvent e) {
                 return true;
@@ -452,8 +457,6 @@ public class TrackingActivity extends ActionBarActivity implements GoogleMap.OnM
             mMap = mMapFragment.getMap();
             if (mMap != null) {
                 mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-//                mMap.setMyLocationEnabled(false);
-//                mMap.getUiSettings().setMyLocationButtonEnabled(false);
                 gpsMonitor = new GPSMonitor(this);
                 Location lastLocation = gpsMonitor.getLastKnownLocation();
                 this.lastLocation = lastLocation;
@@ -515,6 +518,7 @@ public class TrackingActivity extends ActionBarActivity implements GoogleMap.OnM
                         }
                     }
                 });
+                drawSelectedTrack();
             }
         }
 
@@ -532,6 +536,7 @@ public class TrackingActivity extends ActionBarActivity implements GoogleMap.OnM
 
         if (mMap != null) {
             mMap.setOnMyLocationChangeListener(null);
+            removeSelectedTrack();
         }
 
         if (serviceBound) {
@@ -780,6 +785,43 @@ public class TrackingActivity extends ActionBarActivity implements GoogleMap.OnM
         });
     }
 
+    private void drawSelectedTrack() {
+        final long id = prefHelper.getLong("config.selected_track", -1L);
+        if (id != -1L) {
+            Task.callInBackground(new Callable<PolylineOptions>() {
+                @Override
+                public PolylineOptions call() throws Exception {
+                    List<LocationEntity> points = HelperFactory.getHelper().getLocationDao().queryBuilder()
+                            .orderBy("t", true)
+                            .where().eq("session_id", id)
+                            .query();
+                    final List<LatLng> track = new ArrayList<LatLng>(points.size());
+                    PolylineOptions result = new PolylineOptions()
+                            .width(2)
+                            .color(Color.DKGRAY);
+                    for (LocationEntity point: points) {
+                        result.add(new LatLng(point.getLatitude(), point.getLongitude()));
+                    }
+                    return result;
+                }
+            }).onSuccess(new Continuation<PolylineOptions, Object>() {
+                @Override
+                public Object then(Task<PolylineOptions> task) throws Exception {
+                    if (mMap != null)
+                        selectedTrack = mMap.addPolyline(task.getResult());
+                    return null;
+                }
+            }, Task.UI_THREAD_EXECUTOR);
+        }
+    }
+
+    private void removeSelectedTrack() {
+        if (selectedTrack != null) {
+            selectedTrack.remove();
+            selectedTrack = null;
+        }
+    }
+
     private void onTrackingSessionStarted(int responseCode, long startTimestamp) {
         if (responseCode == TrackingService.RESULT_SUCCESS) {
             mStartButton.setEnabled(false);
@@ -823,6 +865,12 @@ public class TrackingActivity extends ActionBarActivity implements GoogleMap.OnM
             finish();
         }
 
+    }
+
+    private void onHrmReconnecting(Message msg) {
+        Toast.makeText(this, "Connection lost to your HRM has been lost. Reconnecting...", Toast.LENGTH_SHORT).show();
+        //mConnectHRMonitorButton.setEnabled(true);
+        mDeviceNameView.setText("Reconnecting...");
     }
 
     private void onConnectionStatusChanged(int oldStatus, int newStatus, String deviceAddress) {

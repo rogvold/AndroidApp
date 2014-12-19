@@ -47,7 +47,6 @@
                     android:gravity="center"
                     android:text="@string/hr"/>
 
-
                 <TextView
                     android:id="@+id/heart_rate"
                     android:layout_width="wrap_content"
@@ -56,6 +55,14 @@
                     android:paddingLeft="8dp"
                     android:paddingRight="8dp"
                     android:layout_weight="1"
+                    android:visibility="gone"/>
+
+
+                <com.cardiomood.android.controls.gauge.BatteryIndicatorGauge
+                    android:id="@+id/hrm_battery"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="10"
                     android:visibility="gone"/>
 
                 <LinearLayout
@@ -89,8 +96,7 @@
                     android:id="@+id/connect_hr_monitor_button"
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceSmall"
-                    android:textStyle="bold"/>
+                    style="@style/PrimaryButton"/>
 
             </LinearLayout>
 
@@ -149,7 +155,8 @@
         android:id="@+id/start_session_button"
         android:enabled="false"
         android:visibility="visible"
-        android:elevation="8dp"/>
+        android:elevation="8dp"
+        style="@style/PrimaryButton"/>
 
     <Button
         android:layout_width="match_parent"

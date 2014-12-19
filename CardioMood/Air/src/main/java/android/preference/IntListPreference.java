@@ -3,8 +3,7 @@ package android.preference;
 import android.content.Context;
 import android.util.AttributeSet;
 
-public class IntListPreference extends ListPreference
-{
+public class IntListPreference extends ListPreference {
 
     public IntListPreference(Context context, AttributeSet attrs) {
         super(context, attrs);

@@ -76,7 +76,7 @@ public class AndroidLeHRMonitor extends LeHRMonitor {
                     gatt.writeDescriptor(descriptor);
                 } else {
                     Log.e(TAG, "onServicesDiscovered(): Heart Rate Service was not discovered.");
-                    setConnectionStatus(READY_STATUS);
+                    disconnect();
                     return;
                 }
                 setConnectionStatus(CONNECTED_STATUS);
@@ -172,7 +172,8 @@ public class AndroidLeHRMonitor extends LeHRMonitor {
         return bluetoothManager.getAdapter();
     }
 
-    public boolean initialize() {
+    @Override
+    protected boolean doInitialize() {
         // For API level 18 and above, get a reference to BluetoothAdapter through
         // BluetoothManager.
         if (mBluetoothManager == null) {
@@ -194,7 +195,7 @@ public class AndroidLeHRMonitor extends LeHRMonitor {
     }
 
     @Override
-    public boolean connect(String deviceAddress) {
+    protected boolean doConnect(String deviceAddress) {
         if (mBluetoothAdapter == null || deviceAddress == null) {
             Log.w(TAG, "BluetoothAdapter not initialized or unspecified address.");
             return false;
@@ -234,7 +235,7 @@ public class AndroidLeHRMonitor extends LeHRMonitor {
     }
 
     @Override
-    public void disconnect() {
+    protected void doDisconnect() {
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
             if (getConnectionStatus() != INITIAL_STATUS) {
                 setConnectionStatus(INITIAL_STATUS);
@@ -247,7 +248,7 @@ public class AndroidLeHRMonitor extends LeHRMonitor {
     }
 
     @Override
-    public void close() {
+    protected void doClose() {
         if (getConnectionStatus() != INITIAL_STATUS && getConnectionStatus() != READY_STATUS)
             disconnect();
         if (mBluetoothGatt == null) {
@@ -282,6 +283,6 @@ public class AndroidLeHRMonitor extends LeHRMonitor {
         } else {
             Log.i(TAG, "onServicesDiscovered(): Battery Service is not supported. :(");
         }
-        return false;
+        return super.requestBatteryLevel();
     }
 }

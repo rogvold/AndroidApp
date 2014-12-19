@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -54,7 +55,8 @@ import bolts.Task;
  * A fragment representing a list of Items.
  * <p/>
  */
-public class HistoryFragment extends ListFragment {
+public class HistoryFragment extends ListFragment
+        implements SearchView.OnQueryTextListener, SearchView.OnCloseListener {
 
     private static final String TAG = HistoryFragment.class.getSimpleName();
 
@@ -83,7 +85,7 @@ public class HistoryFragment extends ListFragment {
         mSessionAdapter = new CardioSessionArrayAdapter(getActivity(), mCardioSessions);
         setListAdapter(mSessionAdapter);
 
-        refreshSessionList();
+        refreshSessionList(null);
     }
 
     @Override
@@ -111,7 +113,9 @@ public class HistoryFragment extends ListFragment {
         startActivity(intent);
     }
 
-    private void refreshSessionList() {
+    private void refreshSessionList(String query) {
+        final String q = (query == null || query.trim().isEmpty())
+                ? "" : query.trim();
         Task.callInBackground(new Callable<List<CardioSessionEntity>>() {
             @Override
             public List<CardioSessionEntity> call() throws Exception {
@@ -121,6 +125,7 @@ public class HistoryFragment extends ListFragment {
                         .where().eq("sync_user_id", ParseUser.getCurrentUser().getObjectId())
                         .and().ne("deleted", true)
                         .and().ne("end_timestamp", 0L)
+                        .and().like("name", "%" + q + "%")
                         .query();
             }
         }).continueWith(new Continuation<List<CardioSessionEntity>, Object>() {
@@ -144,6 +149,7 @@ public class HistoryFragment extends ListFragment {
             }
         }, Task.UI_THREAD_EXECUTOR);
     }
+
 
     public void sync() {
         // show progress dialog
@@ -189,7 +195,7 @@ public class HistoryFragment extends ListFragment {
                         }
 
                         // refresh UI and hide progress dialog
-                        refreshSessionList();
+                        refreshSessionList(null);
                         if (pDialog != null) {
                             pDialog.dismiss();
                         }
@@ -215,6 +221,22 @@ public class HistoryFragment extends ListFragment {
 
         // calculate stress
         return HeartRateUtils.getSI(r, t, 2 * 60 * 1000, 5000);
+    }
+
+    @Override
+    public boolean onClose() {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String s) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String s) {
+        refreshSessionList(s);
+        return false;
     }
 
 

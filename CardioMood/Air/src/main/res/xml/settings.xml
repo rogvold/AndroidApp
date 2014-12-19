@@ -14,6 +14,10 @@
             android:summary="@string/pref_summary_draw_track"
             android:defaultValue="true"/>
 
+        <com.cardiomood.android.air.prefs.TrackPreference
+            android:key="config.selected_track"
+            android:title="@string/pref_title_selected_track"/>
+
         <!--<Preference-->
             <!--android:key="config.config.selected_aircraft_id"-->
             <!--android:title="@string/pref_title_selected_aircraft" />-->

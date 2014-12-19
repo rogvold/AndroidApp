@@ -6,6 +6,7 @@ import java.io.Serializable;
  * Created by danon on 18.08.2014.
  */
 public class DataPoint implements Serializable {
+
     private long t;
     private double lat;
     private double lon;

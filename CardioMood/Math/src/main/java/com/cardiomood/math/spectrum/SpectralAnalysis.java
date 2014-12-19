@@ -69,7 +69,7 @@ public class SpectralAnalysis {
         HF *= step;
         TP += HF;
 
-        for (; spe.toFrequency(i) <= 0.5 && i < power.length; i++)
+        for (; spe.toFrequency(i) <= 0.4 && i < power.length; i++)
             TP += power[i]*step;
     }
 
@@ -119,7 +119,6 @@ public class SpectralAnalysis {
         ACF;
 
         public SpectralPowerEvaluator getInstance(double t[], double rr[]) {
-            //rr = new SimpleBayevskyArtifactFilter().doFilter(rr);
             switch (this) {
                 case FFT:
                     return new FFT(t, rr);

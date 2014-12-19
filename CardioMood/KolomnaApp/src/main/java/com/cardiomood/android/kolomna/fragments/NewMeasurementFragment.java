@@ -31,6 +31,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cardiomood.android.controls.gauge.BatteryIndicatorGauge;
 import com.cardiomood.android.kolomna.R;
 import com.cardiomood.android.kolomna.SessionViewActivity;
 import com.cardiomood.android.kolomna.components.HeartRateGraphView;
@@ -94,6 +95,8 @@ public class NewMeasurementFragment extends Fragment {
     protected Button stopSessionButton;
     @InjectView(R.id.time_elapsed)
     protected TextView timeElapsedView;
+    @InjectView(R.id.hrm_battery)
+    protected BatteryIndicatorGauge hrmBattery;
 
     //chart is added manually
     protected GraphView mGraphView;
@@ -164,6 +167,17 @@ public class NewMeasurementFragment extends Fragment {
                     break;
                 case CardioMonitoringService.RESP_END_SESSION_RESULT:
                     onSessionFinished(msg);
+                    break;
+                case CardioMonitoringService.MSG_RECONNECTING:
+                    onReconnecting(msg);
+                    break;
+                case CardioMonitoringService.MSG_BATTERY_LEVEL:
+                    int level = msg.arg1;
+                    hrmBattery.setValue(level);
+                    hrmBattery.setVisibility(View.VISIBLE);
+                    Toast.makeText(getActivity(), "Heart rate sensor battery level: "
+                            + hrmBattery.getValue() + "%", Toast.LENGTH_SHORT).show();
+                    break;
                 default:
                     super.handleMessage(msg);
             }
@@ -239,6 +253,15 @@ public class NewMeasurementFragment extends Fragment {
         super.onCreateView(inflater, container, savedInstanceState);
         View root = inflater.inflate(R.layout.fragment_new_measurement, container, false);
         ButterKnife.inject(this, root);
+
+        hrmBattery.setOrientation(BatteryIndicatorGauge.VERTICAL);
+        hrmBattery.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(getActivity(), "Sensor battery level: " + hrmBattery.getValue() + "%",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // user info block
         ParseUser user = ParseUser.getCurrentUser();
@@ -419,6 +442,7 @@ public class NewMeasurementFragment extends Fragment {
 
     private void performDisconnect() {
         Message msg = Message.obtain(null, CardioMonitoringService.MSG_DISCONNECT);
+        msg.replyTo = mMessenger;
         try {
             mCardioService.send(msg);
         } catch (RemoteException ex) {
@@ -607,8 +631,15 @@ public class NewMeasurementFragment extends Fragment {
         heartRateView.setText(String.valueOf(data.getBpm()));
 
         if (mCurrentSession != null && sessionDataLoaded) {
+            long t = msg.getData().getLong("t", 0L);
             int[] rr = data.getRr();
             if (rr != null) {
+                for (int r: rr) {
+                    t -= r;
+                }
+                if (t > graphT) {
+                    graphT = t;
+                }
                 for (int r: rr) {
                     mHeartRateSeries.appendData(
                             new GraphView.GraphViewData(graphT, Math.round(60000.f/r)),
@@ -616,10 +647,6 @@ public class NewMeasurementFragment extends Fragment {
                     graphT += r;
                 }
             }
-        }
-
-        if (data.getBpm() == 0) {
-            CommonTools.vibrate(getActivity(), 1000);
         }
     }
 
@@ -654,6 +681,16 @@ public class NewMeasurementFragment extends Fragment {
 
     }
 
+    private void onReconnecting(Message msg) {
+        if (getActivity() == null)
+            return;
+        Toast.makeText(getActivity(), "Connection lost! Reconnecting...", Toast.LENGTH_SHORT)
+                .show();
+        connectButton.setEnabled(true);
+        hrmDeviceNameView.setText("Reconnecting...");
+        CommonTools.vibrate(getActivity(), 1000);
+    }
+
     private void onConnectionStatusChanged(int oldStatus, int newStatus, String deviceAddress) {
         hrmState = newStatus;
         if (getActivity() == null)
@@ -663,14 +700,17 @@ public class NewMeasurementFragment extends Fragment {
             // disconnected
             if (mCurrentSessionId > 0L)
                 onSessionFinished(null);
+            hrmBattery.setVisibility(View.GONE);
         }
 
         if (oldStatus >= 0) {
             if (oldStatus == LeHRMonitor.CONNECTING_STATUS &&
                     (newStatus == LeHRMonitor.READY_STATUS || newStatus == LeHRMonitor.DISCONNECTING_STATUS)) {
                 Toast.makeText(getActivity(), "Connection failed.", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(getActivity(), "Status changed from " + oldStatus + " to " + newStatus + "!", Toast.LENGTH_SHORT).show();
+            } else if (newStatus == LeHRMonitor.CONNECTED_STATUS) {
+                Toast.makeText(getActivity(), "Connected to " + deviceAddress, Toast.LENGTH_SHORT).show();
+            } else{
+                //Toast.makeText(getActivity(), "Status changed from " + oldStatus + " to " + newStatus + "!", Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -764,27 +804,44 @@ public class NewMeasurementFragment extends Fragment {
                 mCurrentSession = task.getResult();
                 return mCurrentSession;
             }
-        }, Task.UI_THREAD_EXECUTOR).onSuccess(new Continuation<CardioSessionEntity, List<Integer>>() {
+        }, Task.UI_THREAD_EXECUTOR).onSuccess(new Continuation<CardioSessionEntity, List<GraphView.GraphViewData>>() {
             @Override
-            public List<Integer> then(Task<CardioSessionEntity> task) throws Exception {
+            public List<GraphView.GraphViewData> then(Task<CardioSessionEntity> task) throws Exception {
                 long sessionId = task.getResult().getId();
                 CardioItemDAO dao = HelperFactory.getHelper().getCardioItemDao();
                 GenericRawResults<String[]> items = dao.queryBuilder()
-                        .selectColumns("_id", "rr")
+                        .selectColumns("_id", "rr", "t")
                         .orderBy("_id", false)
                         .limit((long) MAX_GRAPH_VIEW_POINTS)
                         .where().eq("session_id", sessionId)
                         .queryRaw();
-                List<Integer> result = new ArrayList<Integer>();
+
+                List<String[]> resultList = new ArrayList<String[]>();
                 for (String[] item : items) {
-                    result.add(Integer.valueOf(item[1]));
+                    resultList.add(item);
                 }
-                Collections.reverse(result);
+                Collections.reverse(resultList);
+                List<GraphView.GraphViewData> result = new ArrayList<GraphView.GraphViewData>(resultList.size());
+                long tt = 0;
+                for (String[] item : resultList) {
+                    float rr = Float.parseFloat(item[1]);
+                    long t = Long.parseLong(item[2]);
+                    if (t > tt)
+                        tt = t;
+                    else tt += 1;
+                    int bpm = Math.round(60000.0f/rr);
+                    result.add(
+                            new GraphView.GraphViewData(
+                                    tt,
+                                    bpm
+                            )
+                    );
+                }
                 return result;
             }
-        }, Task.BACKGROUND_EXECUTOR).continueWith(new Continuation<List<Integer>, Void>() {
+        }, Task.BACKGROUND_EXECUTOR).continueWith(new Continuation<List<GraphView.GraphViewData>, Void>() {
             @Override
-            public Void then(Task<List<Integer>> task) throws Exception {
+            public Void then(Task<List<GraphView.GraphViewData>> task) throws Exception {
                 if (task.isFaulted()) {
                     Context ctx = getActivity();
                     if (ctx != null) {
@@ -794,16 +851,19 @@ public class NewMeasurementFragment extends Fragment {
                     emptyMessageView.setVisibility(View.GONE);
 
                     // init example series data
-                    List<Integer> items = task.getResult();
+                    List<GraphView.GraphViewData> items = task.getResult();
                     GraphView.GraphViewData[] data =
                             new GraphView.GraphViewData[Math.min(items.size(), MAX_GRAPH_VIEW_POINTS)];
                     graphT = 0;
-                    for (int j=0, i=Math.max(items.size() - data.length, 0); i<items.size(); i++, j++) {
-                        int rr = items.get(i);
-                        int bpm = Math.round(60000.0f/rr);
-                        data[j] = new GraphView.GraphViewData(graphT, bpm);
-                        graphT += rr;
+                    long t = 0;
+                    for (int j = 0, i = Math.max(items.size() - data.length, 0); i < items.size(); i++, j++) {
+                        GraphView.GraphViewData item = items.get(i);
+                        if (Math.round(item.getX()) > t) {
+                            t = Math.round(item.getX());
+                        }
+                        data[j] = item;
                     }
+                    graphT = t;
                     mHeartRateSeries.resetData(data);
                     mGraphView.setVisibility(View.VISIBLE);
                 }

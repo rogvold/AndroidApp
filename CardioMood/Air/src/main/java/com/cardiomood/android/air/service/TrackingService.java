@@ -75,6 +75,7 @@ public class TrackingService extends Service {
     public static final int MSG_CONNECTION_STATUS_CHANGED = 11;
     public static final int MSG_BATTERY_LEVEL = 12;
     public static final int MSG_LOCATION_DATA = 13;
+    public static final int MSG_RECONNECTING = 14;
 
     public static final int RESULT_SUCCESS = 1;
     public static final int RESULT_FAIL = 0;
@@ -348,6 +349,10 @@ public class TrackingService extends Service {
 
         @Override
         public void onConnectionStatusChanged(final int oldStatus, final int newStatus) {
+            if (hrMonitor != null && newStatus == LeHRMonitor.CONNECTED_STATUS) {
+                hrMonitor.setAutoReconnect(true);
+            }
+
             synchronized (clientsLock) {
                 for (Messenger m : mClients) {
                     try {
@@ -375,6 +380,9 @@ public class TrackingService extends Service {
                         msg.getData().setClassLoader(CardioDataPackage.class.getClassLoader());
                         msg.getData().putParcelable("data", data);
                         msg.getData().putString("deviceAddress", hrmDeviceAddress);
+                        if (mAirSession != null) {
+                            msg.getData().putLong("t", data.getTimestamp() - mAirSession.getCreationDate().getTime());
+                        }
                         m.send(msg);
                     } catch (RemoteException ex) {
                         Log.w(TAG, "onDataReceived() failed", ex);
@@ -393,6 +401,21 @@ public class TrackingService extends Service {
                         m.send(msg);
                     } catch (RemoteException ex) {
                         Log.w(TAG, "onBatteryLevelReceived() failed", ex);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onReconnecting(int attemptNumber, int maxAttempts) {
+            synchronized (clientsLock) {
+                for (Messenger m: mClients) {
+                    try {
+                        Message msg = Message.obtain(null, MSG_RECONNECTING, attemptNumber, maxAttempts);
+                        msg.getData().putString("deviceAddress", hrmDeviceAddress);
+                        m.send(msg);
+                    } catch (RemoteException ex) {
+                        Log.w(TAG, "notifyReconnecting() failed", ex);
                     }
                 }
             }
@@ -537,6 +560,7 @@ public class TrackingService extends Service {
 
     private void reloadHrm() {
         if (hrMonitor != null) {
+            hrMonitor.setAutoReconnect(false);
             if (hrMonitor.isConnectingOrConnected())
                 hrMonitor.disconnect();
             hrMonitor.setCallback(null);
@@ -584,6 +608,7 @@ public class TrackingService extends Service {
         try {
             hrmDeviceAddress = null;
             if (hrMonitor != null) {
+                hrMonitor.setAutoReconnect(false);
                 if (hrMonitor.isConnectingOrConnected()) {
                     hrMonitor.disconnect();
                 }
@@ -591,6 +616,7 @@ public class TrackingService extends Service {
                 hrMonitor.setCallback(null);
             }
             hrMonitor = null;
+            initHrm();
             return true;
         } catch (Exception ex) {
             Log.w(TAG, "disconnect() failed", ex);
