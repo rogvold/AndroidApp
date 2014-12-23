@@ -10,7 +10,6 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/Air" />
-            <option value="$PROJECT_DIR$/CardioMoodApp" />
             <option value="$PROJECT_DIR$/ClientServerInteraction" />
             <option value="$PROJECT_DIR$/CommonTools" />
             <option value="$PROJECT_DIR$/HeartRate" />
@@ -19,6 +18,7 @@
             <option value="$PROJECT_DIR$/MiptApp" />
             <option value="$PROJECT_DIR$/ShinobiCharts" />
             <option value="$PROJECT_DIR$/StepCounter" />
+            <option value="$PROJECT_DIR$/cardiomood-2.0" />
             <option value="$PROJECT_DIR$/facebook" />
           </set>
         </option>

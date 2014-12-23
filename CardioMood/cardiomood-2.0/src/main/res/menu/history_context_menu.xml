@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:title="@string/menu_delete_item"
+        android:id="@+id/menu_delete"
+        android:icon="@android:drawable/ic_menu_delete"
+        app:showAsAction="always|withText"
+        />
+    <item
+        android:title="@string/menu_rename_item"
+        android:id="@+id/menu_rename_item"
+        android:icon="@android:drawable/ic_menu_edit"
+        app:showAsAction="always|withText"
+        />
+
+    <!--<item android:id="@+id/menu_share_session"-->
+        <!--app:showAsAction="always"-->
+        <!--android:icon="@drawable/ic_action_share"-->
+        <!--android:title="@string/menu_share_session"/>-->
+
+</menu>

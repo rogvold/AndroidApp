@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="1">
+            <TextView
+                android:layout_gravity="center_horizontal"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="Average Pulse"
+                android:layout_column="1"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                />
+            <TextView
+                android:layout_gravity="center_horizontal"
+                android:id="@+id/mean_hear_rate"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="[72 bpm]"
+                android:layout_column="1"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textStyle="bold"
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="1">
+            <TextView
+                android:layout_gravity="center_horizontal"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="Average Stress"
+                android:layout_column="1"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                />
+            <TextView
+                android:layout_gravity="center_horizontal"
+                android:id="@+id/mean_stress"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:text="[114]"
+                android:layout_column="1"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textStyle="bold"
+                />
+        </LinearLayout>
+    </LinearLayout>
+
+    <com.cardiomood.android.controls.gauge.SpeedometerGauge
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:padding="8dp"
+        android:id="@+id/stress_speedometer" />
+
+</LinearLayout>

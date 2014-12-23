@@ -1,0 +1,96 @@
+<p><b>New in CardioMood 2.0:</b><p>
+<p>
++++ Stability improvements
+<br/>
++++ Android 5.0 support
+<br/>
+<b>Rate our app:</b> <a href="market://details?id=com.cardiomood.android">Open Google Play</a>
+</p>
+<br/>
+
+<p><b>New in CardioMood 1.3.5:</b><p>
+<p>
++++ Password change
+<br/>
++++ Facebook login
+</p>
+<br/>
+
+<p><b>New in CardioMood 1.3.4:</b><p>
+<p>
++++ Performance improvements
+<br/>
++++ Fixed reported major bugs.
+<br/>
++++ GPS tracking added (experimental).
+<br/>
++++ Battery charge for last connected device (experimental).
+<br/>
++++ Sync strategies.
+<br/>
++++ Last measurement settings are now saved.
+</p>
+<br/>
+
+<p><b>New in CardioMood 1.3.3:</b><p>
+<p>
++++ UI improvements
+<br/>
++++ Fixed reported last week bugs.
+<br/>
++++ You can choose to use metric or imperial unit system and disable splash screen.
+</p>
+<br/>
+<p><b>New in CardioMood 1.3.2:</b><p>
+<p>
+This update fixes a reported device discovery issue for some phones.
+</p>
+<br/>
+<p><b>New in CardioMood 1.3.1:</b><p>
+<p>
++++ Web-site launched!
+<br/>Visit <a href="http://goo.gl/w9gwrv">beta.cardiomood.com</a>
+<br/>
++++ Profile screen updated.
+<br/>
++++ You can choose to use metric or imperial unit system and disable splash screen.
+<br/>
+=== Fixed a couple of bugs.
+</p>
+<br/>
+<p><b>New in CardioMood 1.3:</b><p>
+<p>
++++ Added filtering feature.
+<br/>
++++ Online monitoring of stress and energy level.
+<br/>
++++ Stress graph added.
+<br/>
+=== Many bugfixes.
+</p>
+<br/>
+<p><b>New in CardioMood 1.2.x:</b><p>
+<p>
++++ Cloud storage (experimental).
+<br/>
++++ Measurement length configuration.
+<br/>
++++ Timer and heart beat counter.
+<br/>
+=== Performance boost
+<br/>
+=== Fixed crashes on Android 4.0.
+</p>
+<br/>
+<p><b>New in CardioMood 1.1.4:</b><p>
+<p>
++++ Unlimited measurement length (experimental).
+<br/>
++++ Export data to text/png file.
+<br/>
++++ Vibration at the end of the measurement.
+<br/>
+=== Fixed crashes when connecting.
+</p>
+<br/>
+<p>Stay with <b><a href="http://goo.gl/ZLmHhJ">www.CardioMood.com</a></b>!</p>

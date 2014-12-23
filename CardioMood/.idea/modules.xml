@@ -4,7 +4,6 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Air/Air.iml" filepath="$PROJECT_DIR$/Air/Air.iml" />
       <module fileurl="file://$PROJECT_DIR$/CardioMood.iml" filepath="$PROJECT_DIR$/CardioMood.iml" />
-      <module fileurl="file://$PROJECT_DIR$/CardioMoodApp/CardioMoodApp.iml" filepath="$PROJECT_DIR$/CardioMoodApp/CardioMoodApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/ClientServerInteraction/ClientServerInteraction.iml" filepath="$PROJECT_DIR$/ClientServerInteraction/ClientServerInteraction.iml" />
       <module fileurl="file://$PROJECT_DIR$/CommonTools/CommonTools.iml" filepath="$PROJECT_DIR$/CommonTools/CommonTools.iml" />
       <module fileurl="file://$PROJECT_DIR$/HeartRate/HeartRate.iml" filepath="$PROJECT_DIR$/HeartRate/HeartRate.iml" />
@@ -13,6 +12,7 @@
       <module fileurl="file://$PROJECT_DIR$/MiptApp/MiptApp.iml" filepath="$PROJECT_DIR$/MiptApp/MiptApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/ShinobiCharts/ShinobiCharts.iml" filepath="$PROJECT_DIR$/ShinobiCharts/ShinobiCharts.iml" />
       <module fileurl="file://$PROJECT_DIR$/StepCounter/StepCounter.iml" filepath="$PROJECT_DIR$/StepCounter/StepCounter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/cardiomood-2.0/cardiomood-2.0.iml" filepath="$PROJECT_DIR$/cardiomood-2.0/cardiomood-2.0.iml" />
       <module fileurl="file://$PROJECT_DIR$/facebook/facebook.iml" filepath="$PROJECT_DIR$/facebook/facebook.iml" />
     </modules>
   </component>

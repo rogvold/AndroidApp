@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:cardiomood="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/action_search"
+        android:title="Search"
+        android:icon="@android:drawable/ic_menu_search"
+        cardiomood:showAsAction="collapseActionView|always"/>
+    <item android:id="@+id/menu_refresh"
+        cardiomood:showAsAction="always"
+        android:icon="@drawable/ic_action_refresh"
+        android:title="@string/refresh" />
+</menu>

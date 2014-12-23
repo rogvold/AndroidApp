@@ -47,7 +47,7 @@ public abstract class LeHRMonitor {
     private String deviceAddress;
 
     private boolean autoReconnect = false;
-    private int maxReconnectionAttempts = 0;
+    private int maxReconnectionAttempts = 10;
     private int reconnectionAttemptsMade = 0;
     private boolean reconnectFlag = false;
 
@@ -208,7 +208,7 @@ public abstract class LeHRMonitor {
     }
 
     public synchronized int getConnectionStatus() {
-        return connectionStatus;
+        return reconnectFlag ? CONNECTED_STATUS : connectionStatus;
     }
 
     public synchronized void setConnectionStatus(final int connectionStatus) {

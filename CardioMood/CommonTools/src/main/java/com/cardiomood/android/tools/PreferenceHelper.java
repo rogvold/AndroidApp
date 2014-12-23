@@ -3,10 +3,11 @@ package com.cardiomood.android.tools;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.annotation.XmlRes;
 
 public class PreferenceHelper {
 
-    private static final String TAG = "CardioMood.CommonTools.PreferenceHelper";
+    private static final String TAG = "CommonTools.PreferenceHelper";
 
     private final Context context;
     private boolean persistent;
@@ -16,7 +17,7 @@ public class PreferenceHelper {
     }
 
     public PreferenceHelper(Context context, boolean persistent) {
-        this.context = context;
+        this.context = context != null ? context.getApplicationContext() : null;
         this.persistent = persistent;
     }
 
@@ -32,13 +33,40 @@ public class PreferenceHelper {
         return context;
     }
 
+    protected SharedPreferences getSharedPreferences() {
+        return context.getSharedPreferences(
+                getDefaultPrefName(context),
+                getDefaultPrefMode()
+        );
+    }
+
+    protected String getDefaultPrefName(Context context) {
+        return context.getPackageName() + "_preferences";
+    }
+
+    protected int getDefaultPrefMode() {
+        return Context.MODE_PRIVATE | Context.MODE_MULTI_PROCESS;
+    }
+
+    public void setDefaultValues(@XmlRes int resId, boolean readAgain) {
+        if (isPersistent()) {
+            PreferenceManager.setDefaultValues(
+                    context,
+                    getDefaultPrefName(context),
+                    getDefaultPrefMode(),
+                    resId,
+                    readAgain
+            );
+        }
+    }
+
     public synchronized void putString(String key, String value, boolean persistent) {
         if (value == null) {
             remove(key);
             return;
         }
         if (persistent) {
-            final SharedPreferences sharedPref =  PreferenceManager.getDefaultSharedPreferences(context);
+            final SharedPreferences sharedPref =  getSharedPreferences();
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putString(key, value);
             editor.commit();
@@ -52,7 +80,7 @@ public class PreferenceHelper {
 
     public synchronized String getString(String key, String defValue, boolean persistent) {
         if (persistent) {
-            final SharedPreferences sharedPref =  PreferenceManager.getDefaultSharedPreferences(context);
+            final SharedPreferences sharedPref =  getSharedPreferences();
             return sharedPref.getString(key, defValue);
         } else {
             return ConfigurationManager.getInstance().getString(key, defValue);
@@ -77,7 +105,7 @@ public class PreferenceHelper {
             return;
         }
         if (persistent) {
-            final SharedPreferences sharedPref =  PreferenceManager.getDefaultSharedPreferences(context);
+            final SharedPreferences sharedPref =  getSharedPreferences();
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putFloat(key, value);
             editor.commit();
@@ -91,7 +119,7 @@ public class PreferenceHelper {
 
     public synchronized Float getFloat(String key, Float defValue, boolean persistent) {
         if (persistent) {
-            final SharedPreferences sharedPref =  PreferenceManager.getDefaultSharedPreferences(context);
+            final SharedPreferences sharedPref =  getSharedPreferences();
             return sharedPref.getFloat(key, defValue);
         } else {
             return ConfigurationManager.getInstance().getFloat(key, defValue);
@@ -116,7 +144,7 @@ public class PreferenceHelper {
             return;
         }
         if (persistent) {
-            final SharedPreferences sharedPref =  PreferenceManager.getDefaultSharedPreferences(context);
+            final SharedPreferences sharedPref =  getSharedPreferences();
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putInt(key, value);
             editor.commit();
@@ -130,7 +158,7 @@ public class PreferenceHelper {
 
     public synchronized int getInt(String key, int defValue, boolean persistent) {
         if (persistent) {
-            final SharedPreferences sharedPref =  PreferenceManager.getDefaultSharedPreferences(context);
+            final SharedPreferences sharedPref =  getSharedPreferences();
             return sharedPref.getInt(key, defValue);
         } else {
             return ConfigurationManager.getInstance().getInt(key, defValue);
@@ -155,7 +183,7 @@ public class PreferenceHelper {
             return;
         }
         if (persistent) {
-            final SharedPreferences sharedPref =  PreferenceManager.getDefaultSharedPreferences(context);
+            final SharedPreferences sharedPref =  getSharedPreferences();
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putLong(key, value);
             editor.commit();
@@ -169,7 +197,7 @@ public class PreferenceHelper {
 
     public synchronized long getLong(String key, long defValue, boolean persistent) {
         if (persistent) {
-            final SharedPreferences sharedPref =  PreferenceManager.getDefaultSharedPreferences(context);
+            final SharedPreferences sharedPref =  getSharedPreferences();
             return sharedPref.getLong(key, defValue);
         } else {
             return ConfigurationManager.getInstance().getLong(key, defValue);
@@ -194,7 +222,7 @@ public class PreferenceHelper {
             return;
         }
         if (persistent) {
-            final SharedPreferences sharedPref =  PreferenceManager.getDefaultSharedPreferences(context);
+            final SharedPreferences sharedPref =  getSharedPreferences();
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.putBoolean(key, value);
             editor.commit();
@@ -208,7 +236,7 @@ public class PreferenceHelper {
 
     public synchronized boolean getBoolean(String key, boolean defValue, boolean persistent) {
         if (persistent) {
-            final SharedPreferences sharedPref =  PreferenceManager.getDefaultSharedPreferences(context);
+            final SharedPreferences sharedPref =  getSharedPreferences();
             return sharedPref.getBoolean(key, defValue);
         } else {
             return ConfigurationManager.getInstance().getBoolean(key, defValue);
@@ -224,18 +252,18 @@ public class PreferenceHelper {
     }
 
     public synchronized void registerListener(SharedPreferences.OnSharedPreferenceChangeListener listener) {
-        final SharedPreferences sharedPref =  PreferenceManager.getDefaultSharedPreferences(context);
+        final SharedPreferences sharedPref =  getSharedPreferences();
         sharedPref.registerOnSharedPreferenceChangeListener(listener);
     }
 
     public synchronized void unregisterListener(SharedPreferences.OnSharedPreferenceChangeListener listener) {
-        final SharedPreferences sharedPref =  PreferenceManager.getDefaultSharedPreferences(context);
+        final SharedPreferences sharedPref =  getSharedPreferences();
         sharedPref.unregisterOnSharedPreferenceChangeListener(listener);
     }
 
     public synchronized void remove(String key) {
         if (isPersistent()) {
-            final SharedPreferences sharedPref =  PreferenceManager.getDefaultSharedPreferences(context);
+            final SharedPreferences sharedPref =  getSharedPreferences();
             SharedPreferences.Editor editor = sharedPref.edit();
             editor.remove(key);
             editor.commit();

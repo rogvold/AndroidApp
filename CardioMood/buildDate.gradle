@@ -19,9 +19,11 @@ def filterResources(buildVariant) {
         resFiltered.delete()
     }
 
+    String resDir = buildVariant.outputs[0].processResources.resDir;
+
     //Copy and filter the resources.
     copy {
-        from(buildVariant.processResources.resDir) {
+        from(resDir) {
             include '**/*.xml'
 
             DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.SHORT)
@@ -33,7 +35,7 @@ def filterResources(buildVariant) {
             filter(ExpandProperties, project: ant.project)
         }
 
-        from(buildVariant.processResources.resDir) {
+        from(resDir) {
             exclude '**/*.xml'
         }
 
@@ -42,9 +44,9 @@ def filterResources(buildVariant) {
     }
 
     //Delete all the original resource files
-    file(buildVariant.processResources.resDir).deleteDir()
+    file(resDir).deleteDir()
     //Replace with the filtered ones.
-    resFiltered.renameTo(file(buildVariant.processResources.resDir))
+    resFiltered.renameTo(file(resDir))
     //Delete the original 'filtered' directory
     file( "${buildDir}/res/all/filtered").deleteDir()
 }
