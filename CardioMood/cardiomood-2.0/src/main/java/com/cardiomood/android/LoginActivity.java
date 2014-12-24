@@ -3,6 +3,8 @@ package com.cardiomood.android;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -61,20 +63,13 @@ public class LoginActivity extends ActionBarActivity implements ConfigurationCon
     private boolean loginInProgress = false;
 
     // UI references.
-    @InjectView(R.id.email)
-    EditText mEmailView;
-    @InjectView(R.id.password)
-    EditText mPasswordView;
-    @InjectView(R.id.login_form)
-    View mLoginFormView;
-    @InjectView(R.id.login_status)
-    View mLoginStatusView;
-    @InjectView(R.id.login_status_message)
-    TextView mLoginStatusMessageView;
-    @InjectView(R.id.sign_in_button)
-    Button mSignInButton;
-    @InjectView(R.id.register_button)
-    Button mRegisterButton;
+    @InjectView(R.id.email) EditText mEmailView;
+    @InjectView(R.id.password) EditText mPasswordView;
+    @InjectView(R.id.login_form) View mLoginFormView;
+    @InjectView(R.id.login_status) View mLoginStatusView;
+    @InjectView(R.id.login_status_message) TextView mLoginStatusMessageView;
+    @InjectView(R.id.sign_in_button) Button mSignInButton;
+    @InjectView(R.id.register_button) Button mRegisterButton;
 
     private PreferenceHelper prefHelper;
 
@@ -157,6 +152,9 @@ public class LoginActivity extends ActionBarActivity implements ConfigurationCon
     protected void onStart() {
         super.onStart();
         FlurryAgent.onStartSession(this, FLURRY_API_KEY);
+        if (prefHelper.getBoolean(ConfigurationConstants.USER_LOGGED_IN)) {
+            showRestoreLoginRequest();
+        }
     }
 
     @Override
@@ -264,6 +262,7 @@ public class LoginActivity extends ActionBarActivity implements ConfigurationCon
                         mPasswordView.requestFocus();
                     } else if (task.isCompleted()) {
                         startMainActivity();
+                        prefHelper.putString(ConfigurationConstants.USER_EMAIL_KEY, mEmail);
                         mPasswordView.setText(null);
                         mPassword = null;
                         showProgress(false);
@@ -279,7 +278,7 @@ public class LoginActivity extends ActionBarActivity implements ConfigurationCon
         }
     }
 
-    public void attemptLogin() {
+    public void attemptLogin(String email, String password) {
         if (loginInProgress) {
             return;
         }
@@ -289,8 +288,9 @@ public class LoginActivity extends ActionBarActivity implements ConfigurationCon
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        mEmail = mEmailView.getText().toString();
-        mPassword = mPasswordView.getText().toString();
+        mEmail = email;
+        mPassword = password;
+        mEmailView.setText(mEmail);
 
         boolean cancel = false;
         View focusView = null;
@@ -340,6 +340,8 @@ public class LoginActivity extends ActionBarActivity implements ConfigurationCon
                                 mPasswordView.requestFocus();
                             } else if (task.isCompleted()) {
                                 startMainActivity();
+                                prefHelper.putString(ConfigurationConstants.USER_EMAIL_KEY,
+                                        task.getResult().getUsername());
                                 mPasswordView.setText(null);
                                 mPassword = null;
                                 showProgress(false);
@@ -351,6 +353,13 @@ public class LoginActivity extends ActionBarActivity implements ConfigurationCon
                         }
                     }, Task.UI_THREAD_EXECUTOR);
         }
+    }
+
+    public void attemptLogin() {
+        attemptLogin(
+                mEmailView.getText().toString(),
+                mPasswordView.getText().toString()
+        );
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -397,6 +406,40 @@ public class LoginActivity extends ActionBarActivity implements ConfigurationCon
 
     public boolean isLoggedIn() {
         return (ParseUser.getCurrentUser() != null);
+    }
+
+    private void showRestoreLoginRequest() {
+        final String email = prefHelper.getString(USER_EMAIL_KEY, "");
+        final String password = prefHelper.getString(USER_PASSWORD_KEY, "");
+        if (TextUtils.isEmpty(email) || TextUtils.isEmpty(password)) {
+            //s no login or password
+            return;
+        }
+        new AlertDialog.Builder(this)
+                .setTitle("Restore previous authentication")
+                .setMessage("We found previous authentication for account "
+                                + email + ".\n"
+                                + "Would you like to sign in under this ID?"
+                )
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        attemptLogin(email, password);
+                        mPasswordView.setText(null);
+                        clearOldPreferences();
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        clearOldPreferences();
+                    }
+                }).show();
+    }
+
+    private void clearOldPreferences() {
+        prefHelper.remove(ConfigurationConstants.USER_LOGGED_IN);
+        prefHelper.remove(ConfigurationConstants.USER_PASSWORD_KEY);
     }
 
     @Override

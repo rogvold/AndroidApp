@@ -69,7 +69,8 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase database, ConnectionSource connectionSource, int oldVersion, int newVersion) {
         // Upgrade or downgrade the database schema
-        new DBUpgradeHelper(mContext, database).performUpgrade(oldVersion, newVersion);
+        new DBUpgradeHelper(mContext, database, connectionSource)
+                .performUpgrade(oldVersion, newVersion);
     }
 
     public SQLiteDatabase getDatabase() {

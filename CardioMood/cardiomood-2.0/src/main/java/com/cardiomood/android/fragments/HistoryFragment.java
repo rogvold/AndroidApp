@@ -418,7 +418,7 @@ public class HistoryFragment extends Fragment
                 long syncDate = System.currentTimeMillis();
                 SyncHelper syncHelper = new SyncHelper(DatabaseHelperFactory.getHelper());
                 syncHelper.setUserId(ParseUser.getCurrentUser().getObjectId());
-                syncHelper.setLastSyncDate(new Date(prefHelper.getLong(ConfigurationConstants.CONFIG_LAST_SYNC_TIMESTAMP, 0L)));
+                syncHelper.setLastSyncDate(new Date(prefHelper.getLong(ConfigurationConstants.CONFIG_LAST_SYNC_TIMESTAMP + "-" + userId, 0L)));
                 syncHelper.synObjects(SessionEntity.class,
                         true, new SyncCallback());
                 return syncDate;
@@ -432,7 +432,7 @@ public class HistoryFragment extends Fragment
                     }
                     Log.w(TAG, "sync failed", task.getError());
                 } else if (task.isCompleted()) {
-                    prefHelper.putLong(ConfigurationConstants.CONFIG_LAST_SYNC_TIMESTAMP, task.getResult());
+                    prefHelper.putLong(ConfigurationConstants.CONFIG_LAST_SYNC_TIMESTAMP + "-" + userId, task.getResult());
                 }
 
                 simpleRefresh();
@@ -485,7 +485,7 @@ public class HistoryFragment extends Fragment
 
     private boolean hasUpdatedSessions() {
         try {
-            long lastSyncTimestamp = prefHelper.getLong(ConfigurationConstants.CONFIG_LAST_SYNC_TIMESTAMP, 0L);
+            long lastSyncTimestamp = prefHelper.getLong(ConfigurationConstants.CONFIG_LAST_SYNC_TIMESTAMP + "-" + userId, 0L);
             SessionDAO sessionDao = DatabaseHelperFactory.getHelper().getSessionDao();
             long count = sessionDao.queryBuilder()
                     .where().eq("sync_user_id", ParseUser.getCurrentUser().getObjectId())

@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import com.cardiomood.android.db.entity.SessionEntity;
 import com.cardiomood.math.HeartRateUtils;
+import com.cardiomood.math.interpolation.ConstrainedSplineInterpolator;
 import com.cardiomood.math.window.DataWindow;
 import com.shinobicontrols.charts.Axis;
 import com.shinobicontrols.charts.DataPoint;
@@ -13,7 +14,6 @@ import com.shinobicontrols.charts.Series;
 import com.shinobicontrols.charts.ShinobiChart;
 import com.shinobicontrols.charts.SimpleDataAdapter;
 
-import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 import java.util.ArrayList;
@@ -71,7 +71,7 @@ public class StressIndexReportFragment extends AbstractSessionReportFragment {
             chart.removeSeries(s);
 
         if (SI[0].length > 2) {
-            PolynomialSplineFunction stress = new SplineInterpolator().interpolate(SI[0], SI[1]);
+            PolynomialSplineFunction stress = new ConstrainedSplineInterpolator().interpolate(SI[0], SI[1]);
 
             xAxis.enableGesturePanning(true);
             xAxis.enableGestureZooming(true);

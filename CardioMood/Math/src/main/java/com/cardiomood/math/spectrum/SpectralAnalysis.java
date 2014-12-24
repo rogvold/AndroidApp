@@ -1,6 +1,7 @@
 package com.cardiomood.math.spectrum;
 
-import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
+import com.cardiomood.math.interpolation.ConstrainedSplineInterpolator;
+
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 /**
@@ -111,7 +112,7 @@ public class SpectralAnalysis {
         for (int i=0; i<freq.length; i++)
             freq[i] = spe.toFrequency(i);
 
-        return new SplineInterpolator().interpolate(freq, power);
+        return new ConstrainedSplineInterpolator().interpolate(freq, power);
     }
 
     public static enum Algorithm {

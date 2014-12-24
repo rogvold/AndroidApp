@@ -3,8 +3,13 @@ package com.cardiomood.android.db;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.cardiomood.android.db.entity.CardioItemEntity;
+import com.cardiomood.android.db.entity.LocationEntity;
+import com.cardiomood.android.db.entity.SessionEntity;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
+import com.j256.ormlite.support.ConnectionSource;
+import com.j256.ormlite.table.TableUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,23 +18,27 @@ public class DBUpgradeHelper {
 
     public static final String TAG = DBUpgradeHelper.class.getSimpleName();
 
-    private PreferenceHelper preferenceHelper;
-    private SQLiteDatabase database;
+    private final PreferenceHelper preferenceHelper;
+    private final SQLiteDatabase database;
+    private final ConnectionSource connectionSource;
 
-    public DBUpgradeHelper(Context context, SQLiteDatabase db) {
-        preferenceHelper = new PreferenceHelper(context, true);
-        database = db;
+    public DBUpgradeHelper(Context context, SQLiteDatabase db, ConnectionSource connection) {
+        this.preferenceHelper = new PreferenceHelper(context, true);
+        this.database = db;
+        this.connectionSource = connection;
 
         addUpgrader(29,  30, new DBUpgrader.Callback() {
 
             @Override
             public void onUpgrade(SQLiteDatabase db) {
                 try {
-                    db.execSQL("DROP TABLE heart_rate_data");
-                    db.execSQL("DROP TABLE gps_data");
-                    db.execSQL("DROP TABLE sessions");
-                    db.execSQL("DROP TABLE users");
-                    db.execSQL("DROP TABLE users");
+                    db.execSQL("DROP TABLE IF EXISTS heart_rate_data");
+                    db.execSQL("DROP TABLE IF EXISTS gps_data");
+                    db.execSQL("DROP TABLE IF EXISTS sessions");
+                    db.execSQL("DROP TABLE IF EXISTS users");
+                    TableUtils.createTable(connectionSource, SessionEntity.class);
+                    TableUtils.createTable(connectionSource, LocationEntity.class);
+                    TableUtils.createTable(connectionSource, CardioItemEntity.class);
                     preferenceHelper.remove(ConfigurationConstants.USER_ID);
                     preferenceHelper.remove(ConfigurationConstants.USER_ABOUT_KEY);
                     preferenceHelper.remove(ConfigurationConstants.USER_DEPARTMENT_KEY);
@@ -37,7 +46,6 @@ public class DBUpgradeHelper {
                     preferenceHelper.remove(ConfigurationConstants.USER_DIAGNOSIS_KEY);
                     preferenceHelper.remove(ConfigurationConstants.USER_HEIGHT_KEY);
                     preferenceHelper.remove(ConfigurationConstants.USER_SEX_KEY);
-                    preferenceHelper.remove(ConfigurationConstants.USER_PASSWORD_KEY);
                     preferenceHelper.remove(ConfigurationConstants.USER_STATUS_KEY);
                     preferenceHelper.remove(ConfigurationConstants.USER_ACCESS_TOKEN_KEY);
                     preferenceHelper.remove(ConfigurationConstants.USER_WEIGHT_KEY);
@@ -47,7 +55,6 @@ public class DBUpgradeHelper {
                     preferenceHelper.remove(ConfigurationConstants.USER_LAST_NAME_KEY);
                     preferenceHelper.remove(ConfigurationConstants.USER_PHONE_NUMBER_KEY);
                     preferenceHelper.remove(ConfigurationConstants.USER_EXTERNAL_ID);
-                    preferenceHelper.remove(ConfigurationConstants.USER_LOGGED_IN);
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
