@@ -490,9 +490,6 @@ public class EditParseUserFragment extends Fragment implements TextWatcher {
     }
 
     private void sync() {
-        if (callback != null) {
-            callback.onSync();
-        }
         ParseUser.getCurrentUser()
                 .fetchInBackground()
                 .continueWith(new Continuation<ParseObject, Object>() {
@@ -507,6 +504,9 @@ public class EditParseUserFragment extends Fragment implements TextWatcher {
                             }
                         } else if (task.isCompleted()) {
                             user = (ParseUser) task.getResult();
+                            if (callback != null) {
+                                callback.onSync();
+                            }
                             reloadData();
                         }
                         return null;

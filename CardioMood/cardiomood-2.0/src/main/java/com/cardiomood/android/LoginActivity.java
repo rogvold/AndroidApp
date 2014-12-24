@@ -251,6 +251,8 @@ public class LoginActivity extends ActionBarActivity implements ConfigurationCon
             user.put("userRole", "user");
             user.put("firstName", "Cardio");
             user.put("lastName", "User");
+            user.put("unitSystem", "METRIC");
+            user.put("realTimeMonitoring", false);
 
             user.signUpInBackground().continueWith(new Continuation<Void, Object>() {
                 @Override

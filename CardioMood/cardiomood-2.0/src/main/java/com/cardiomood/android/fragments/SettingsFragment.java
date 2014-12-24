@@ -11,6 +11,7 @@ import com.cardiomood.android.R;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.android.tools.settings.PreferenceActivityBase;
+import com.parse.ParseUser;
 
 /**
  * Created by danon on 17.02.14.
@@ -80,5 +81,18 @@ public class SettingsFragment extends PreferenceActivityBase.AbstractMainFragmen
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         refreshSummaries();
+
+        // update ParseUser
+        ParseUser user = ParseUser.getCurrentUser();
+        switch (key) {
+            case PREFERRED_MEASUREMENT_SYSTEM:
+                user.put("unitSystem", sharedPreferences.getString(key, "METRIC"));
+                break;
+            case SYNC_DISABLE_REAL_TIME:
+                user.put("realTimeMonitoring", !sharedPreferences.getBoolean(key, false));
+                break;
+            default: return;
+        }
+        user.saveEventually();
     }
 }

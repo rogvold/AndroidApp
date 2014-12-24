@@ -10,6 +10,9 @@ import org.apache.commons.math3.exception.util.LocalizedFormats;
 import org.apache.commons.math3.util.MathArrays;
 
 /**
+ * Constrained Spline Interpolation algorithm (CJC Kruger).
+ * Source: http://www.korf.co.uk/spline.pdf
+ *
  * Created by Anton Danshin on 24/12/14.
  */
 public class ConstrainedSplineInterpolator implements UnivariateInterpolator {
@@ -54,8 +57,8 @@ public class ConstrainedSplineInterpolator implements UnivariateInterpolator {
         f1[0] = 3d * dy[0] / (2d * (dx[0])) - f1[1]/2d;
         f1[n] = 3d * dy[n-1] / (2d * (dx[n-1])) - f1[n-1]/2d;
 
-        // cubic spline coefficients --  b is linear, c quadratic, d is cubic (original y's are constants)
-
+        // cubic spline coefficients -- a contains constants, b is linear, c quadratic, d is cubic
+        final double a[] = new double[n+1];
         final double b[] = new double[n+1];
         final double c[] = new double[n+1];
         final double d[] = new double[n+1];
@@ -69,13 +72,13 @@ public class ConstrainedSplineInterpolator implements UnivariateInterpolator {
                     c[i] * (x[i]*x[i] - x[i-1]*x[i-1]) -
                     d[i] * (x[i]*x[i]*x[i] - x[i-1]*x[i-1]*x[i-1])
             ) / dx[i-1];
+            a[i] = y[i-1] - b[i]*x[i-1] - c[i]*x[i-1]*x[i-1] - d[i]*x[i-1]*x[i-1]*x[i-1];
         }
 
         final PolynomialFunction polynomials[] = new PolynomialFunction[n];
         final double coefficients[] = new double[4];
         for (int i = 1; i <= n; i++) {
-            final double a = y[i-1] - b[i]*x[i-1] - c[i]*x[i-1]*x[i-1] - d[i]*x[i-1]*x[i-1]*x[i-1];
-            coefficients[0] = a;
+            coefficients[0] = a[i];
             coefficients[1] = b[i];
             coefficients[2] = c[i];
             coefficients[3] = d[i];
@@ -83,6 +86,7 @@ public class ConstrainedSplineInterpolator implements UnivariateInterpolator {
             polynomials[i-1] = new PolynomialFunction(coefficients) {
                 @Override
                 public double value(double x) {
+                    // bypass the standard Apache Commons behavior
                     return super.value(x + x0);
                 }
             };

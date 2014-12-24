@@ -330,7 +330,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         public Fragment getItem(int position) {
             // getItem is called to instantiate the fragment for the given page.
             switch (position) {
-                case 0: return new EditParseUserFragment();
+                case 0: return createProfileFragment();
                 case 1: return new NewMeasurementFragment();
                 case 2: return new HistoryFragment();
             }
@@ -355,6 +355,28 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                     return getString(R.string.title_section3).toUpperCase(l);
             }
             return null;
+        }
+
+        private Fragment createProfileFragment() {
+            EditParseUserFragment fragment = new EditParseUserFragment();
+            fragment.setCallback(new EditParseUserFragment.Callback() {
+                @Override
+                public void onSave() {
+
+                }
+
+                @Override
+                public void onSync() {
+                    ParseUser user = ParseUser.getCurrentUser();
+                    mPrefHelper.putString(
+                            ConfigurationConstants.PREFERRED_MEASUREMENT_SYSTEM,
+                            user.has("unitSystem") ? user.getString("unitSystem")
+                                    : "METRIC"
+                    );
+                    mPrefHelper.putBoolean(ConfigurationConstants.SYNC_DISABLE_REAL_TIME, !user.getBoolean("realTimeMonitoring"));
+                }
+            });
+            return fragment;
         }
     }
 
