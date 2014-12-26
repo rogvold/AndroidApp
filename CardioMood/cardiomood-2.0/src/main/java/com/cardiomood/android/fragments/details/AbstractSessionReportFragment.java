@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -172,6 +173,23 @@ public abstract class AbstractSessionReportFragment extends Fragment {
 
         chart.setXAxis(xAxis);
         chart.setYAxis(yAxis);
+
+        // style the chart (default)
+        chart.getStyle().setPlotAreaBackgroundColor(Color.TRANSPARENT);
+        chart.getStyle().setBackgroundColor(Color.TRANSPARENT);
+        chart.getStyle().setCanvasBackgroundColor(Color.TRANSPARENT);
+
+        // style X-Axis (default)
+        xAxis.getStyle().setLineColor(Color.BLACK);
+        xAxis.getStyle().getTickStyle().setLabelTextSize(10);
+        xAxis.getStyle().getTitleStyle().setTextSize(12);
+        xAxis.getStyle().getGridlineStyle().setGridlinesShown(true);
+
+        // style Y-Axis (default)
+        yAxis.getStyle().setLineColor(Color.BLACK);
+        yAxis.getStyle().getTickStyle().setLabelTextSize(10);
+        yAxis.getStyle().getTitleStyle().setTextSize(12);
+        yAxis.getStyle().getGridlineStyle().setGridlinesShown(true);
 
         return v;
     }

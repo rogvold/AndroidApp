@@ -91,7 +91,6 @@ public class OveralSessionReportFragment extends AbstractSessionReportFragment {
     protected void collectDataInBackground(SessionEntity session, double[] time, double[] rrFiltered) {
         bpm = new double[rrFiltered.length];
         this.time = time;
-        long duration = 0;
         for (int i=0; i<rrFiltered.length; i++) {
             bpm[i] = 1000 * 60 / rrFiltered[i];
         }
@@ -116,7 +115,6 @@ public class OveralSessionReportFragment extends AbstractSessionReportFragment {
         xAxis.enableGestureZooming(true);
         xAxis.allowPanningOutOfDefaultRange(false);
         xAxis.setDefaultRange(new NumberRange(time[0], time[time.length-1]/1000));
-        xAxis.getStyle().getTickStyle().setLabelTextSize(10);
 
         // Clear
         List<Series<?>> series = new ArrayList<Series<?>>(chart.getSeries());
@@ -129,6 +127,7 @@ public class OveralSessionReportFragment extends AbstractSessionReportFragment {
 
 
         LineSeries series1 = new LineSeries();
+        series1.getStyle().setLineColor(getResources().getColor(R.color.colorAccent));
         series1.setDataAdapter(dataAdapter1);
         chart.addSeries(series1);
 

@@ -2,6 +2,7 @@ package com.cardiomood.android.fragments.details;
 
 import android.os.Bundle;
 
+import com.cardiomood.android.R;
 import com.cardiomood.android.db.entity.SessionEntity;
 import com.cardiomood.math.HeartRateUtils;
 import com.cardiomood.math.interpolation.ConstrainedSplineInterpolator;
@@ -56,13 +57,9 @@ public class StressIndexReportFragment extends AbstractSessionReportFragment {
         chart.setTitle("Bayevsky Stress Index");
         Axis xAxis = chart.getXAxis();
         xAxis.setTitle("Time, s");
-        xAxis.getStyle().getTickStyle().setLabelTextSize(10);
-        xAxis.getStyle().getTitleStyle().setTextSize(12);
 
         Axis yAxis = chart.getYAxis();
         yAxis.setTitle("Stress Index");
-        yAxis.getStyle().getTickStyle().setLabelTextSize(10);
-        yAxis.getStyle().getTitleStyle().setTextSize(12);
 
 
         // Clear
@@ -84,6 +81,7 @@ public class StressIndexReportFragment extends AbstractSessionReportFragment {
             }
 
             LineSeries series2 = new LineSeries();
+            series2.getStyle().setLineColor(getResources().getColor(R.color.colorAccent));
             series2.setDataAdapter(dataAdapter2);
             chart.addSeries(series2);
             chart.redrawChart();

@@ -32,6 +32,7 @@ public class ACF implements SpectralPowerEvaluator {
             r[k] = s/n;
         }
 
+        g[0] = 0;
         double f = 0;
         for (int i=1; i<=100; i++) {
             double s = 0.0;

@@ -55,12 +55,8 @@ public class ScatterogramReportFragment extends AbstractSessionReportFragment {
         chart.setTitle("Scatterogram");
         Axis xAxis = chart.getXAxis();
         xAxis.setTitle("RR[i-1], ms");
-        xAxis.getStyle().getTitleStyle().setTextSize(12);
-        xAxis.getStyle().getTickStyle().setLabelTextSize(10);
         Axis yAxis = chart.getYAxis();
         yAxis.setTitle("RR[i], ms");
-        yAxis.getStyle().getTitleStyle().setTextSize(12);
-        yAxis.getStyle().getTickStyle().setLabelTextSize(10);
 
         xAxis.enableGesturePanning(true);
         xAxis.enableGestureZooming(true);
@@ -91,9 +87,10 @@ public class ScatterogramReportFragment extends AbstractSessionReportFragment {
         series2.setDataAdapter(dataAdapter2);
         series2.getStyle().setLineShown(false);
         series2.getStyle().getPointStyle().setPointsShown(true);
-        series2.getStyle().getPointStyle().setInnerColor(Color.RED);
+        series2.getStyle().getPointStyle().setInnerColor(getResources().getColor(R.color.colorAccent));
         series2.getStyle().getPointStyle().setColor(Color.BLACK);
-        series2.getStyle().getPointStyle().setRadius(1.0f);
+        series2.getStyle().getPointStyle().setInnerRadius(1.5f);
+        series2.getStyle().getPointStyle().setRadius(1.6f);
         chart.addSeries(series2);
 
         chart.redrawChart();

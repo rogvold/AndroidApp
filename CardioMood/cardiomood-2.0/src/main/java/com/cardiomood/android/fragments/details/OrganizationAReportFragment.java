@@ -2,6 +2,7 @@ package com.cardiomood.android.fragments.details;
 
 import android.os.Bundle;
 
+import com.cardiomood.android.R;
 import com.cardiomood.android.db.entity.SessionEntity;
 import com.cardiomood.math.HeartRateUtils;
 import com.cardiomood.math.interpolation.ConstrainedSplineInterpolator;
@@ -56,14 +57,9 @@ public class OrganizationAReportFragment extends AbstractSessionReportFragment {
         chart.setTitle("Gorgo \"A\" Organization");
         Axis xAxis = chart.getXAxis();
         xAxis.setTitle("Time, s");
-        xAxis.getStyle().getTickStyle().setLabelTextSize(10);
-        xAxis.getStyle().getTitleStyle().setTextSize(12);
 
         Axis yAxis = chart.getYAxis();
         yAxis.setTitle("\"A\" Organization");
-        yAxis.getStyle().getTickStyle().setLabelTextSize(10);
-        yAxis.getStyle().getTitleStyle().setTextSize(12);
-
 
         // Clear
         List<Series<?>> series = new ArrayList<Series<?>>(chart.getSeries());
@@ -84,6 +80,7 @@ public class OrganizationAReportFragment extends AbstractSessionReportFragment {
             }
 
             LineSeries series2 = new LineSeries();
+            series2.getStyle().setLineColor(getResources().getColor(R.color.colorAccent));
             series2.setDataAdapter(dataAdapter2);
             chart.addSeries(series2);
             chart.redrawChart();

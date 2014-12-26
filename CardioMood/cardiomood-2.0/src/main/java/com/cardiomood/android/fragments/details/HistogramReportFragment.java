@@ -60,13 +60,9 @@ public class HistogramReportFragment extends AbstractSessionReportFragment {
         xAxis.setMajorTickFrequency(100.0);
         xAxis.getStyle().getTickStyle().setMinorTicksShown(false);
         xAxis.getStyle().getTickStyle().setMajorTicksShown(true);
-        xAxis.getStyle().getTickStyle().setLabelTextSize(10);
         xAxis.setTitle("NN-interval, ms");
-        xAxis.getStyle().getTitleStyle().setTextSize(12);
 
-        yAxis.getStyle().getTickStyle().setLabelTextSize(10);
         yAxis.setTitle("%");
-        yAxis.getStyle().getTitleStyle().setTextSize(12);
 
         // Clear
         List<Series<?>> series = new ArrayList<Series<?>>(chart.getSeries());

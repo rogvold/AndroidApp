@@ -2,12 +2,20 @@ package com.cardiomood.math.spectrum;
 
 import com.cardiomood.math.interpolation.ConstrainedSplineInterpolator;
 
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
+import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
+import org.apache.commons.math3.analysis.interpolation.UnivariateInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 /**
  * Created by danon on 22.02.14.
  */
 public class SpectralAnalysis {
+
+    public static final UnivariateInterpolator SPLINE_INTERPOLATOR = new SplineInterpolator();
+    public static final UnivariateInterpolator CONSTRAINED_SPLINE_INTERPOLATOR = new ConstrainedSplineInterpolator();
+    public static final UnivariateInterpolator LINEAR_INTERPOLATOR = new LinearInterpolator();
 
     private final Algorithm algorithm;
     private final SpectralPowerEvaluator spe;
@@ -43,7 +51,7 @@ public class SpectralAnalysis {
 
         int i = 1;
         // ULF: [0.0 .. 0.0033 Hz]
-        for (; spe.toFrequency(i) <= 0.0033; i++) {
+        for (; spe.toFrequency(i) <= 0.015; i++) {
             ULF += power[i];
         }
         ULF *= step;
@@ -79,7 +87,7 @@ public class SpectralAnalysis {
     }
 
     public double[] getPower() {
-        return power;
+        return power.clone();
     }
 
     public double getTP() {
@@ -106,13 +114,21 @@ public class SpectralAnalysis {
         return spe.toFrequency(i);
     }
 
-    public PolynomialSplineFunction getSplinePower() {
+    public double getMaxFrequency() {
+        return toFrequency(power.length-1);
+    }
+
+    public UnivariateFunction interpolatePower(UnivariateInterpolator interpolator) {
         double[] power = getPower();
         double[] freq = new double[power.length];
         for (int i=0; i<freq.length; i++)
             freq[i] = spe.toFrequency(i);
 
-        return new ConstrainedSplineInterpolator().interpolate(freq, power);
+        return interpolator.interpolate(freq, power);
+    }
+
+    public PolynomialSplineFunction getSplinePower() {
+        return (PolynomialSplineFunction) interpolatePower(CONSTRAINED_SPLINE_INTERPOLATOR);
     }
 
     public static enum Algorithm {
