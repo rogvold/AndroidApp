@@ -33,12 +33,12 @@ public class HistogramReportFragment extends AbstractSessionReportFragment {
     }
 
     @Override
-    protected Axis getXAxis() {
+    protected Axis createXAxis() {
         return new CategoryAxis();
     }
 
     @Override
-    protected Axis getYAxis() {
+    protected Axis createYAxis() {
         return new NumberAxis();
     }
 

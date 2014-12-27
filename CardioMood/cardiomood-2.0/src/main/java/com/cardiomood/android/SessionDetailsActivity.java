@@ -31,6 +31,7 @@ import com.cardiomood.android.fragments.details.OveralSessionReportFragment;
 import com.cardiomood.android.fragments.details.ScatterogramReportFragment;
 import com.cardiomood.android.fragments.details.SpectralAnalysisReportFragment;
 import com.cardiomood.android.fragments.details.StressIndexReportFragment;
+import com.cardiomood.android.fragments.details.TextReportFragment;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.android.ui.CustomViewPager;
 import com.flurry.android.FlurryAgent;
@@ -113,6 +114,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
         mSectionsPagerAdapter.addFragment(SpectralAnalysisReportFragment.class, "Spectral Analysis");
         mSectionsPagerAdapter.addFragment(HistogramReportFragment.class, "Histogram");
         mSectionsPagerAdapter.addFragment(ScatterogramReportFragment.class, "Scatterogram");
+        mSectionsPagerAdapter.addFragment(TextReportFragment.class, "Numbers");
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (CustomViewPager) findViewById(R.id.pager);

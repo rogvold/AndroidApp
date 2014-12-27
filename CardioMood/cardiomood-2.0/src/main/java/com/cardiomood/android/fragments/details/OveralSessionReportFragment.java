@@ -42,6 +42,8 @@ public class OveralSessionReportFragment extends AbstractSessionReportFragment {
     private double[] bpm = new double[0];
     private double[] time = new double[0];
 
+    private final Object lock = new Object();
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -78,24 +80,26 @@ public class OveralSessionReportFragment extends AbstractSessionReportFragment {
     }
 
     @Override
-    protected Axis getXAxis() {
+    protected Axis createXAxis() {
         return new NumberAxis();
     }
 
     @Override
-    protected Axis getYAxis() {
+    protected Axis createYAxis() {
         return new NumberAxis();
     }
 
     @Override
     protected void collectDataInBackground(SessionEntity session, double[] time, double[] rrFiltered) {
-        bpm = new double[rrFiltered.length];
-        this.time = time;
-        for (int i=0; i<rrFiltered.length; i++) {
-            bpm[i] = 1000 * 60 / rrFiltered[i];
+        synchronized (lock) {
+            bpm = new double[rrFiltered.length];
+            this.time = time;
+            for (int i = 0; i < rrFiltered.length; i++) {
+                bpm[i] = 1000 * 60 / rrFiltered[i];
+            }
+            meanBPM = StatUtils.mean(bpm);
+            stressIndex = StatUtils.mean(HeartRateUtils.getSI(rrFiltered, new DataWindow.Timed(2 * 1000 * 60, 5000))[1]);
         }
-        meanBPM = StatUtils.mean(bpm);
-        stressIndex = StatUtils.mean(HeartRateUtils.getSI(rrFiltered, new DataWindow.Timed(2 * 1000 * 60, 5000))[1]);
     }
 
     @Override
@@ -106,39 +110,41 @@ public class OveralSessionReportFragment extends AbstractSessionReportFragment {
         Axis yAxis = chart.getYAxis();
 
 
-        meanHeartRate.setText(String.valueOf(Math.round(meanBPM)));
-        meanStressIndex.setText(String.valueOf(Math.round(stressIndex)));
-        speedometer.setSpeed(stressIndex, 1200, 200);
+        synchronized (lock) {
+            meanHeartRate.setText(String.valueOf(Math.round(meanBPM)));
+            meanStressIndex.setText(String.valueOf(Math.round(stressIndex)));
+            speedometer.setSpeed(stressIndex, 1200, 200);
 
-        // Heart Rate Chart
-        xAxis.enableGesturePanning(true);
-        xAxis.enableGestureZooming(true);
-        xAxis.allowPanningOutOfDefaultRange(false);
-        xAxis.setDefaultRange(new NumberRange(time[0], time[time.length-1]/1000));
+            // Heart Rate Chart
+            xAxis.enableGesturePanning(true);
+            xAxis.enableGestureZooming(true);
+            xAxis.allowPanningOutOfDefaultRange(false);
+            xAxis.setDefaultRange(new NumberRange(time[0], time[time.length - 1] / 1000));
 
-        // Clear
-        List<Series<?>> series = new ArrayList<Series<?>>(chart.getSeries());
-        for (Series<?> s: series)
-            chart.removeSeries(s);
+            // Clear
+            List<Series<?>> series = new ArrayList<Series<?>>(chart.getSeries());
+            for (Series<?> s : series)
+                chart.removeSeries(s);
 
-        SimpleDataAdapter<Double, Double> dataAdapter1 = new SimpleDataAdapter<Double, Double>();
-        for (int i=0; i<time.length; i++)
-            dataAdapter1.add(new DataPoint<Double, Double>(time[i]/1000, bpm[i]));
+            SimpleDataAdapter<Double, Double> dataAdapter1 = new SimpleDataAdapter<Double, Double>();
+            for (int i = 0; i < time.length; i++)
+                dataAdapter1.add(new DataPoint<Double, Double>(time[i] / 1000, bpm[i]));
 
 
-        LineSeries series1 = new LineSeries();
-        series1.getStyle().setLineColor(getResources().getColor(R.color.colorAccent));
-        series1.setDataAdapter(dataAdapter1);
-        chart.addSeries(series1);
+            LineSeries series1 = new LineSeries();
+            series1.getStyle().setLineColor(getResources().getColor(R.color.colorAccent));
+            series1.setDataAdapter(dataAdapter1);
+            chart.addSeries(series1);
 
-        // Add Mean Heart Rate horizontal line
-        DataAdapter<Double, Double> dataAdapter2 = new SimpleDataAdapter<Double, Double>();
-        dataAdapter2.add(new DataPoint<Double, Double>(-500.0, meanBPM));
-        dataAdapter2.add(new DataPoint<Double, Double>(time[time.length-1]/1000 + 500.0, meanBPM));
+            // Add Mean Heart Rate horizontal line
+            DataAdapter<Double, Double> dataAdapter2 = new SimpleDataAdapter<Double, Double>();
+            dataAdapter2.add(new DataPoint<Double, Double>(-500.0, meanBPM));
+            dataAdapter2.add(new DataPoint<Double, Double>(time[time.length - 1] / 1000 + 500.0, meanBPM));
 
-        LineSeries series2 = new LineSeries();
-        series2.setDataAdapter(dataAdapter2);
-        chart.addSeries(series2);
+            LineSeries series2 = new LineSeries();
+            series2.setDataAdapter(dataAdapter2);
+            chart.addSeries(series2);
+        }
 
         chart.redrawChart();
     }

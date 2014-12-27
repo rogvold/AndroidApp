@@ -5,6 +5,9 @@
         android:icon="@drawable/ic_action_edit"
         android:title="@string/menu_rename" />
 
+    <item android:id="@+id/menu_toggle_action_bar"
+        cardiomood:showAsAction="never"
+        android:title="@string/menu_toggle_action_bar" />
     <item android:id="@+id/menu_remove_artifacts"
         cardiomood:showAsAction="never"
         android:title="@string/menu_remove_artifacts" />

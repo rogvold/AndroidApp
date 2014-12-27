@@ -51,7 +51,7 @@ public class SpectralAnalysis {
 
         int i = 1;
         // ULF: [0.0 .. 0.0033 Hz]
-        for (; spe.toFrequency(i) <= 0.015; i++) {
+        for (; spe.toFrequency(i) <= 0.00333d; i++) {
             ULF += power[i];
         }
         ULF *= step;
@@ -78,8 +78,8 @@ public class SpectralAnalysis {
         HF *= step;
         TP += HF;
 
-        for (; spe.toFrequency(i) <= 0.4 && i < power.length; i++)
-            TP += power[i]*step;
+//        for (; spe.toFrequency(i) <= 0.4 && i < power.length; i++)
+//            TP += power[i]*step;
     }
 
     public Algorithm getAlgorithm() {
@@ -110,6 +110,10 @@ public class SpectralAnalysis {
         return HF;
     }
 
+    public double getIC() {
+        return (getVLF() + getLF()) / getHF();
+    }
+
     public double toFrequency(int i) {
         return spe.toFrequency(i);
     }
@@ -128,7 +132,7 @@ public class SpectralAnalysis {
     }
 
     public PolynomialSplineFunction getSplinePower() {
-        return (PolynomialSplineFunction) interpolatePower(CONSTRAINED_SPLINE_INTERPOLATOR);
+        return (PolynomialSplineFunction) interpolatePower(SPLINE_INTERPOLATOR);
     }
 
     public static enum Algorithm {

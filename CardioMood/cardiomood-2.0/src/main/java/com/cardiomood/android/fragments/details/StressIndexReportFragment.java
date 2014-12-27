@@ -5,7 +5,6 @@ import android.os.Bundle;
 import com.cardiomood.android.R;
 import com.cardiomood.android.db.entity.SessionEntity;
 import com.cardiomood.math.HeartRateUtils;
-import com.cardiomood.math.interpolation.ConstrainedSplineInterpolator;
 import com.cardiomood.math.window.DataWindow;
 import com.shinobicontrols.charts.Axis;
 import com.shinobicontrols.charts.DataPoint;
@@ -15,6 +14,7 @@ import com.shinobicontrols.charts.Series;
 import com.shinobicontrols.charts.ShinobiChart;
 import com.shinobicontrols.charts.SimpleDataAdapter;
 
+import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 import java.util.ArrayList;
@@ -26,6 +26,7 @@ public class StressIndexReportFragment extends AbstractSessionReportFragment {
     private static final String TAG = StressIndexReportFragment.class.getSimpleName();
 
     private double[][] SI = new double[0][0];
+    private final Object lock = new Object();
 
     public StressIndexReportFragment() {
         // Required empty public constructor
@@ -37,18 +38,20 @@ public class StressIndexReportFragment extends AbstractSessionReportFragment {
     }
 
     @Override
-    protected Axis getXAxis() {
+    protected Axis createXAxis() {
         return new NumberAxis();
     }
 
     @Override
-    protected Axis getYAxis() {
+    protected Axis createYAxis() {
         return new NumberAxis();
     }
 
     @Override
     protected void collectDataInBackground(SessionEntity session, double[] time, double[] rrFiltered) {
-        SI = HeartRateUtils.getSI(rrFiltered, new DataWindow.Timed(2 * 60 * 1000, 5000));
+        synchronized (lock) {
+            SI = HeartRateUtils.getSI(rrFiltered, new DataWindow.Timed(2 * 60 * 1000, 5000));
+        }
     }
 
     @Override
@@ -67,25 +70,27 @@ public class StressIndexReportFragment extends AbstractSessionReportFragment {
         for (Series<?> s : series)
             chart.removeSeries(s);
 
-        if (SI[0].length > 2) {
-            PolynomialSplineFunction stress = new ConstrainedSplineInterpolator().interpolate(SI[0], SI[1]);
+        synchronized (lock) {
+            if (SI[0].length > 2) {
+                PolynomialSplineFunction stress = new SplineInterpolator().interpolate(SI[0], SI[1]);
 
-            xAxis.enableGesturePanning(true);
-            xAxis.enableGestureZooming(true);
+                xAxis.enableGesturePanning(true);
+                xAxis.enableGestureZooming(true);
 
-            SimpleDataAdapter<Double, Double> dataAdapter2 = new SimpleDataAdapter<Double, Double>();
-            double t = SI[0][0];
-            while (t <= SI[0][SI[0].length-1]) {
-                dataAdapter2.add(new DataPoint<Double, Double>(t/1000, stress.value(t)));
-                t += 200;
+                SimpleDataAdapter<Double, Double> dataAdapter2 = new SimpleDataAdapter<Double, Double>();
+                double t = SI[0][0];
+                while (t <= SI[0][SI[0].length - 1]) {
+                    dataAdapter2.add(new DataPoint<>(t / 1000, stress.value(t)));
+                    t += 200;
+                }
+
+                LineSeries series2 = new LineSeries();
+                series2.getStyle().setLineColor(getResources().getColor(R.color.colorAccent));
+                series2.setDataAdapter(dataAdapter2);
+                chart.addSeries(series2);
             }
-
-            LineSeries series2 = new LineSeries();
-            series2.getStyle().setLineColor(getResources().getColor(R.color.colorAccent));
-            series2.setDataAdapter(dataAdapter2);
-            chart.addSeries(series2);
-            chart.redrawChart();
         }
+        chart.redrawChart();
     }
 
 }

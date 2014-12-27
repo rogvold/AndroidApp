@@ -162,12 +162,12 @@ public abstract class AbstractSessionReportFragment extends Fragment {
         }
 
         if (xAxis == null)
-            xAxis = getXAxis();
+            xAxis = createXAxis();
         else
             chart.removeXAxis(xAxis);
 
         if (yAxis == null)
-            yAxis = getYAxis();
+            yAxis = createYAxis();
         else
             chart.removeYAxis(yAxis);
 
@@ -245,6 +245,9 @@ public abstract class AbstractSessionReportFragment extends Fragment {
             case R.id.menu_save_this_revision:
                 saveThisRevision();
                 return true;
+            case R.id.menu_toggle_action_bar:
+                toggleActionBar();
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -290,12 +293,30 @@ public abstract class AbstractSessionReportFragment extends Fragment {
         }
     }
 
+    public void toggleActionBar() {
+        if (mHostActivity != null) {
+            if (mHostActivity.getSupportActionBar().isShowing()) {
+                mHostActivity.getSupportActionBar().hide();
+            } else {
+                mHostActivity.getSupportActionBar().show();
+            }
+        }
+    }
+
     protected int getTopCustomLayoutId() {
         return -1;
     }
 
     protected int getBottomCustomLayoutId() {
         return -1;
+    }
+
+    public FrameLayout getTopCustomSection() {
+        return topCustomSection;
+    }
+
+    public FrameLayout getBottomCustomSection() {
+        return bottomCustomSection;
     }
 
     public long getSessionId() {
@@ -427,8 +448,8 @@ public abstract class AbstractSessionReportFragment extends Fragment {
         return DatabaseHelperFactory.getHelper().getCardioItemDao();
     }
 
-    protected abstract Axis getXAxis();
-    protected abstract Axis getYAxis();
+    protected abstract Axis createXAxis();
+    protected abstract Axis createYAxis();
     protected abstract void collectDataInBackground(SessionEntity session, double[] time, double[] rrFiltered);
     protected abstract void displayData(double rr[]);
 
@@ -439,7 +460,7 @@ public abstract class AbstractSessionReportFragment extends Fragment {
             public double[] call() throws Exception {
                 Log.i(TAG, "doInBackground(): START loading session");
 
-
+                double t[] = null;
                 synchronized (lock) {
                     if (rrOriginal == null) {
                         List<String[]> res = getRRIntervalDao().queryRaw(
@@ -457,16 +478,17 @@ public abstract class AbstractSessionReportFragment extends Fragment {
                             i++;
                         }
                     }
+                    t = time;
+                    rr = Arrays.copyOf(rrOriginal, rrOriginal.length);
                 }
 
-                rr = Arrays.copyOf(rrOriginal, rrOriginal.length);
                 artifactsFiltered = 0;
                 for (int i = 0; i < filterCount; i++) {
                     artifactsFiltered += FILTER.getArtifactsCount(rr);
                     rr = FILTER.doFilter(rr);
                 }
                 artifactsLeft = FILTER.getArtifactsCount(rr);
-                collectDataInBackground(session, time, rr);
+                collectDataInBackground(session, t, rr);
                 return rr;
             }
         }).continueWith(new Continuation<double[], Object>() {

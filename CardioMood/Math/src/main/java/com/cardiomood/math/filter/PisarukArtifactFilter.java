@@ -32,7 +32,7 @@ public class PisarukArtifactFilter implements ArtifactFilter, Scan3Filter {
 
     @Override
     public double filter(double a, double x, double b) {
-        if (Math.abs(x - a) > 100.0) {
+        if (Math.abs(x - a) >= 100.0) {
             return (a + b) / 2.0;
         }
         return x;

@@ -6,7 +6,6 @@ import com.cardiomood.math.filter.PisarukArtifactFilter;
 import com.cardiomood.math.histogram.Histogram;
 import com.cardiomood.math.histogram.Histogram128Ext;
 import com.cardiomood.math.spectrum.SpectralAnalysis;
-import com.cardiomood.math.window.DataWindow;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -71,13 +70,209 @@ public class TextReport {
                     "L/W =\tN/A\n" +
                     "S   =\tN/A\n";
 
+//    public static final String HTML_TABLE_REPORT_FORMAT
+//            = "<table border=\"0\" cellpadding=\"0\" cellspacing=\"0\">\n" +
+//            "\t\t\t<tbody>\n" +
+//            "\t\t\t\t<tr>\n" +
+//            "\t\t\t\t\t<td width=\"100\">\n" +
+//            "\t\t\t\t\t\trrs number</td>\n" +
+//            "\t\t\t\t\t<td width=\"100\">\n" +
+//            "\t\t\t\t\t\t<strong>333</strong></td>\n" +
+//            "\t\t\t\t\t<td width=\"100\">\n" +
+//            "\t\t\t\t\t\t&nbsp;</td>\n" +
+//            "\t\t\t\t\t<td width=\"100\">\n" +
+//            "\t\t\t\t\t\t&nbsp;</td>\n" +
+//            "\t\t\t\t</tr>\n" +
+//            "\t\t\t\t<tr>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tartif. count</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>333</strong></td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t&nbsp;</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t&nbsp;</td>\n" +
+//            "\t\t\t\t</tr>\n" +
+//            "\t\t\t\t<tr>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t&nbsp;</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t&nbsp;</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t&nbsp;</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t&nbsp;</td>\n" +
+//            "\t\t\t\t</tr>\n" +
+//            "\t\t\t\t<tr>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tmRR</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>333</strong></td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tLF/HF</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>23323223</strong></td>\n" +
+//            "\t\t\t\t</tr>\n" +
+//            "\t\t\t\t<tr>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tSDNN</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tLF norm</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t</tr>\n" +
+//            "\t\t\t\t<tr>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tRMSSD</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>17.58</strong></td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tHF norm</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t</tr>\n" +
+//            "\t\t\t\t<tr>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tpNN50</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>1.44</strong></td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tVLF/HF</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t</tr>\n" +
+//            "\t\t\t\t<tr>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t&nbsp;</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t&nbsp;</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tIC</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t</tr>\n" +
+//            "\t\t\t\t<tr>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tTP</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t&nbsp;</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t&nbsp;</td>\n" +
+//            "\t\t\t\t</tr>\n" +
+//            "\t\t\t\t<tr>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tln TP</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tMo</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t</tr>\n" +
+//            "\t\t\t\t<tr>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tVLF</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tAmo</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t</tr>\n" +
+//            "\t\t\t\t<tr>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tVLF%</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tSI</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t</tr>\n" +
+//            "\t\t\t\t<tr>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tln VLF</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t&nbsp;</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t&nbsp;</td>\n" +
+//            "\t\t\t\t</tr>\n" +
+//            "\t\t\t\t<tr>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tLF</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tMxDMn</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t</tr>\n" +
+//            "\t\t\t\t<tr>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tLF%</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tWN5</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t</tr>\n" +
+//            "\t\t\t\t<tr>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tln LF</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tWN4</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t</tr>\n" +
+//            "\t\t\t\t<tr>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tHF</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tWN1</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t</tr>\n" +
+//            "\t\t\t\t<tr>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tHF%</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tHRVTi</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t</tr>\n" +
+//            "\t\t\t\t<tr>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\tln HF</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t<strong>-</strong></td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t&nbsp;</td>\n" +
+//            "\t\t\t\t\t<td>\n" +
+//            "\t\t\t\t\t\t&nbsp;</td>\n" +
+//            "\t\t\t\t</tr>\n" +
+//            "\t\t\t</tbody>\n" +
+//            "\t\t</table>";
+
     private static final ArtifactFilter FILTER = new PisarukArtifactFilter();
 
     private String reportFormat = DEFAULT_REPORT_FORMAT;
-    private Date startDate;
+    private Date startDate = new Date();
     private Date endDate;
     private String tag;
-    private double[] rrIntervals;
+    private double[] rrIntervals = new double[0];
     private int artifactsCount = 0;
 
     private double heartRate;
@@ -230,12 +425,6 @@ public class TextReport {
                 report.rrIntervals = FILTER.doFilter(report.rrIntervals);
             }
             report.artifactsCount = FILTER.getArtifactsCount(report.rrIntervals);
-
-
-            double[][] si = HeartRateUtils.getSI(report.rrIntervals, new DataWindow.Timed(2*60*1000, 5000));
-            double[][] d = HeartRateUtils.getSDNN(report.rrIntervals, new DataWindow.IntervalsCount(20, 5));
-            System.out.println(si.length + " " + d.length);
-
             report.spectrum = new SpectralAnalysis(report.rrIntervals);
             report.histogram50 = new Histogram(report.rrIntervals, 50);
             report.mRR = HeartRateUtils.getMRR(report.rrIntervals);

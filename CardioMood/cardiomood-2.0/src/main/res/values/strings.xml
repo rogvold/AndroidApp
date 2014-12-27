@@ -141,9 +141,9 @@
     <string name="menu_start_measurement">Start measurement</string>
     <string name="menu_stop_measurement_condensed">Stop</string>
     <string name="menu_start_measurement_condensed">Start</string>
-    <string name="spectrum_chart_description"></string>
-    <string name="historgam_description">Histogram shows distribution of R-R intervals by various interval ranges. It allows to see how wide is an amplitude of your heart beats.</string>
-    <string name="scatterogram_description">Scattergram is a graphical representation of R-R intervlas distribution (current is on X and previous is on Y). It allows to measure activity of sympathicus.                          Points at scattergram can be visually combined into an ellipse.</string>
+    <string name="spectrum_chart_description">Spectral power graph shows the ratio between activities of sympathetic (VLF and LF) and parasympathetic (HF) nervous systems.</string>
+    <string name="historgam_description">Histogram shows distribution of R-R intervals by various interval ranges. Wider histogram corresponds to a higher HRV.</string>
+    <string name="scatterogram_description">Scattergram is a graphical representation of R-R intervals distribution (current is on X and previous is on Y).\nPoints at scattergram can be visually combined into an ellipse.</string>
     <string name="title_activity_report_preview">Report file</string>
     <string name="file_doesnt_exist">File doesn\'t exist.</string>
     <string name="file_cannot_be_read">Unable to open file.</string>
@@ -203,5 +203,6 @@
     <string name="failed_to_rename_session">Failed to rename session.</string>
     <string name="title_settings_auto_reconnect">Auto reconnect</string>
     <string name="summary_settings_auto_reconnect">Attempt to reconnect when connection with heart rate monitor is lost.</string>
+    <string name="menu_toggle_action_bar">Toggle Action Bar</string>
 
 </resources>

@@ -173,7 +173,11 @@ public class SaveAsDialog extends Dialog {
                 }
                 TextReport.Builder reportBuilder = new TextReport.Builder();
                 reportBuilder.setStartDate(new Date(session.getStartTimestamp()));
-                reportBuilder.setEndDate(new Date(session.getEndTimestamp()));
+                if (session.getEndTimestamp() != null) {
+                    reportBuilder.setEndDate(new Date(session.getEndTimestamp()));
+                } else {
+                    reportBuilder.setEndDate(new Date(session.getStartTimestamp()));
+                }
                 reportBuilder.setTag(name);
                 CardioItemDAO hrDAO = databaseHelper.getCardioItemDao();
                 final List<String[]> res = hrDAO.queryRaw(
