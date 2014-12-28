@@ -631,7 +631,7 @@ public class CardioMonitoringService extends Service {
         private SessionEntity cardioSession;
         private SessionDAO sessionDAO;
         private CardioItemDAO itemDao;
-        private long T = -1;
+        private long T0 = -1, T = -1;
 
         private DataWindow.Timed stressDataWindow = new DataWindow.Timed(120 * 1000, 5000);
         private DataWindow.IntervalsCount sdnnDataWindow = new DataWindow.IntervalsCount(20, 5);
@@ -672,7 +672,7 @@ public class CardioMonitoringService extends Service {
         public void onStop() {
             super.onStop();
             pubnubWorkerThread.finishWork();
-            T = -1;
+            T0 = -1;
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -747,22 +747,23 @@ public class CardioMonitoringService extends Service {
                 return;
             }
             try {
-                if (T < 0) {
+                if (T0 < 0) {
                     // save start of session
-                    T = item.getTimestamp();
+                    T0 = item.getTimestamp();
                 }
 
                 // t = milliseconds from the beginning
-                long t = item.getTimestamp() - T;
+                long t = item.getTimestamp() - T0;
+                T = (t > T) ? t : T + 1;
                 for (int rr : item.getRr()) {
                     stressDataWindow.add(rr);
                     sdnnDataWindow.add(rr);
                     CardioItemEntity entity = new CardioItemEntity();
                     entity.setSession(cardioSession);
-                    entity.setT(t);
+                    entity.setT(T);
                     entity.setRr(rr);
                     entity.setBpm(item.getBpm());
-                    t += rr;
+                    T += rr;
 
                     itemDao.create(entity);
                 }

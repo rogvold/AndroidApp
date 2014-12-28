@@ -1,10 +1,19 @@
 package com.cardiomood.android.fragments.details;
 
 import android.graphics.Color;
+import android.os.Bundle;
+import android.text.Html;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.cardiomood.android.R;
 import com.cardiomood.android.db.entity.SessionEntity;
+import com.cardiomood.math.HeartRateUtils;
 import com.cardiomood.math.histogram.Histogram;
+import com.cardiomood.math.histogram.Histogram128Ext;
+import com.cardiomood.math.window.DataWindow;
 import com.shinobicontrols.charts.Axis;
 import com.shinobicontrols.charts.CategoryAxis;
 import com.shinobicontrols.charts.ColumnSeries;
@@ -22,14 +31,48 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
+import butterknife.Optional;
+
 
 public class HistogramReportFragment extends AbstractSessionReportFragment {
 
     private static final String TAG = HistogramReportFragment.class.getSimpleName();
     private Histogram histogram = new Histogram(new double[0], 50);
+    private Histogram128Ext histogram128Ext = null;
+    private double[] rr, time;
+
+    private double maxNN, minNN;
+
+    @InjectView(R.id.Mo) @Optional
+    TextView moView;
+    @InjectView(R.id.AMo) @Optional
+    TextView aMoView;
+    @InjectView(R.id.Bayevsky) @Optional
+    TextView bayevskyView;
+    @InjectView(R.id.Gorgo) @Optional
+    TextView gorgoView;
+    @InjectView(R.id.MxDMn) @Optional
+    TextView mxdmnView;
+    @InjectView(R.id.WN1) @Optional
+    TextView wn1View;
+    @InjectView(R.id.WN4) @Optional
+    TextView wn4View;
+    @InjectView(R.id.WN5) @Optional
+    TextView wn5View;
+    @InjectView(R.id.HRVTi) @Optional
+    TextView hrvtiView;
 
     public HistogramReportFragment() {
         // Required empty public constructor
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View v = super.onCreateView(inflater, container, savedInstanceState);
+        ButterKnife.inject(this, v);
+        return v;
     }
 
     @Override
@@ -44,7 +87,10 @@ public class HistogramReportFragment extends AbstractSessionReportFragment {
 
     @Override
     protected void collectDataInBackground(SessionEntity session, double[] time, double[] rrFiltered) {
+        this.rr = rrFiltered;
+        this.time = time;
         histogram = new Histogram(rrFiltered, 50);
+        histogram128Ext = new Histogram128Ext(rrFiltered);
     }
 
     @Override
@@ -60,7 +106,7 @@ public class HistogramReportFragment extends AbstractSessionReportFragment {
         xAxis.setMajorTickFrequency(100.0);
         xAxis.getStyle().getTickStyle().setMinorTicksShown(false);
         xAxis.getStyle().getTickStyle().setMajorTicksShown(true);
-        xAxis.setTitle("NN-interval, ms");
+        xAxis.setTitle("NN-interval count");
 
         yAxis.setTitle("%");
 
@@ -74,30 +120,54 @@ public class HistogramReportFragment extends AbstractSessionReportFragment {
         for (Series<?> s: dataSeries) {
             chart.addSeries(s);
         }
+
+        double si = StatUtils.mean(HeartRateUtils.getSI(rr, time, 2*60*1000, 5000)[1]);
+        double gorgo = StatUtils.mean(HeartRateUtils.getA(rr, new DataWindow.IntervalsCount(100, 5))[1]);
+
+        moView.setText(String.valueOf(Math.round(histogram.getMo())) + " ms");
+        aMoView.setText(String.valueOf(Math.round(histogram.getAMo()*10)/10.0) + "%");
+        bayevskyView.setText(Html.fromHtml(String.valueOf(Math.round(si)) + " s<sup>-2</sup>"));
+        gorgoView.setText(String.valueOf(Math.round(gorgo * 1000)/1000.0));
+        mxdmnView.setText(String.valueOf(Math.round(histogram.getMxDMn())) + " ms");
+        wn1View.setText(String.valueOf(Math.round(histogram128Ext.getWN1())) + " ms");
+        wn4View.setText(String.valueOf(Math.round(histogram128Ext.getWN4())) + " ms");
+        wn5View.setText(String.valueOf(Math.round(histogram128Ext.getWN5())) + " ms");
+        hrvtiView.setText(String.valueOf(Math.round(histogram128Ext.getHRVTi()*100)/100.0));
+
+//        xAxis.setDefaultRange(new NumberRange(minNN - 100, maxNN + 100));
         chart.redrawChart();
     }
 
     private List<ColumnSeries> getSeriesForIntervals(double rr[]) {
-        DataAdapter<Integer, Double> dataAdapter = new SimpleDataAdapter<>();
+        DataAdapter<Double, Double> dataAdapter = new SimpleDataAdapter<>();
         double maxRR = StatUtils.max(rr);
         double minRR = StatUtils.min(rr);
         if (minRR < 100)
             minRR = 100;
+        if (maxRR > 2000)
+            maxRR = 2000;
         for (double x=Math.floor((minRR-100)/50)*50; x<=Math.ceil((maxRR+50)/50)*50; x+=50) {
             if (x <= maxRR && 100.0*histogram.getCountFor(x)/rr.length >= 4.0) {
-                dataAdapter.add(new DataPoint<>((int) x, Math.round(100 * 100.0 * histogram.getCountFor(x) / rr.length) / 100.0));
+                dataAdapter.add(new DataPoint<>(x/1000, Math.round(100 * 100.0 * histogram.getCountFor(x) / rr.length) / 100.0));
             } else
-                dataAdapter.add(new DataPoint<>((int) x, 0.0));
+                dataAdapter.add(new DataPoint<>(x/1000, 0.0));
         }
 
-        DataAdapter<Integer, Double> dataAdapter2 = new SimpleDataAdapter<Integer, Double>();
+        DataAdapter<Double, Double> dataAdapter2 = new SimpleDataAdapter<>();
+        minNN = maxRR;
+        maxNN = minRR;
         for (double x=Math.floor((minRR-100)/50)*50; x<=Math.ceil((maxRR+50)/50)*50; x+=50) {
             if (x >= minRR && x <= maxRR)
                 continue;
             if (x <= maxRR && 100.0*histogram.getCountFor(x)/rr.length < 4.0) {
-                dataAdapter2.add(new DataPoint<>((int) x, Math.round(100 * 100.0 * histogram.getCountFor(x) / rr.length) / 100.0));
-            } else
-                dataAdapter2.add(new DataPoint<>((int) x, 0.0));
+                dataAdapter2.add(new DataPoint<>(x/1000, Math.round(100 * 100.0 * histogram.getCountFor(x) / rr.length) / 100.0));
+            } else {
+                dataAdapter2.add(new DataPoint<>(x/1000, 0.0));
+                if (x < minNN)
+                    minNN = x;
+                if (x > maxNN)
+                    maxNN = x;
+            }
         }
 
         ColumnSeries series = new ColumnSeries();

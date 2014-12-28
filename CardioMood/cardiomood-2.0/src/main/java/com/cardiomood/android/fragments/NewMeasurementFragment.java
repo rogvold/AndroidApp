@@ -73,7 +73,7 @@ public class NewMeasurementFragment extends Fragment {
 
     public static final int REQUEST_ENABLE_BT = 2;
 
-    public static boolean inProgress = false;
+    public static boolean inProgress = true;
 
     // UI
     @InjectView(android.R.id.text1)

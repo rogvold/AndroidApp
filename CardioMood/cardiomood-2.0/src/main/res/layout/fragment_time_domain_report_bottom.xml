@@ -1,66 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="@string/historgam_description"/>
+        android:id="@+id/time_domain_description"/>
 
-    <TableLayout
+    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:stretchColumns="1,3">
 
         <TableRow>
             <TextView
-                android:text="Mo ="
+                android:text="RR count ="
                 android:padding="3dip"/>
             <TextView
-                android:id="@+id/Mo"
+                android:id="@+id/rrCount"
                 android:text="[?]"
                 android:padding="3dip"
                 android:textStyle="bold" />
             <TextView
-                android:text="AMo% = "
+                android:text="artifacts = "
                 android:padding="3dip"/>
             <TextView
-                android:id="@+id/AMo"
+                android:id="@+id/artifacts"
                 android:text="[?]"
                 android:padding="3dip"
-                android:textStyle="bold"/>
-        </TableRow>
-
-        <TableRow>
-            <TextView
-                android:text="MxDMn ="
-                android:padding="3dip" />
-            <TextView
-                android:id="@+id/MxDMn"
-                android:text="[?]"
-                android:padding="3dip"
-                android:textStyle="bold" />
-        </TableRow>
-
-        <TableRow>
-            <TextView
-                android:text="mean SI ="
-                android:padding="3dip"/>
-            <TextView
-                android:id="@+id/Bayevsky"
-                android:text="[?]"
-                android:padding="3dip"
-                android:textStyle="bold" />
-            <TextView
-                android:text="mean &quot;A&quot; ="
-                android:padding="3dip"/>
-            <TextView
-                android:id="@+id/Gorgo"
-                android:text="[?]"
                 android:textStyle="bold"/>
         </TableRow>
 
@@ -69,31 +37,40 @@
 
         <TableRow>
             <TextView
-                android:text="WN1 ="
-                android:padding="3dip" />
+                android:text="mean HR ="
+                android:padding="3dip"/>
             <TextView
-                android:id="@+id/WN1"
+                android:id="@+id/meanHR"
                 android:text="[?]"
                 android:padding="3dip"
                 android:textStyle="bold" />
             <TextView
-                android:text="WN4 = "
+                android:text="mRR = "
                 android:padding="3dip"/>
             <TextView
-                android:id="@+id/WN4"
+                android:id="@+id/mRR"
                 android:text="[?]"
+                android:padding="3dip"
                 android:textStyle="bold"/>
         </TableRow>
 
         <TableRow>
             <TextView
-                android:text="WN5 ="
+                android:text="SDNN ="
                 android:padding="3dip" />
             <TextView
-                android:id="@+id/WN5"
+                android:id="@+id/SDNN"
                 android:text="[?]"
                 android:padding="3dip"
                 android:textStyle="bold" />
+            <TextView
+                android:text="RMSSD = "
+                android:padding="3dip"/>
+            <TextView
+                android:id="@+id/RMSSD"
+                android:text="[?]"
+                android:padding="3dip"
+                android:textStyle="bold"/>
         </TableRow>
 
         <View
@@ -101,17 +78,15 @@
 
         <TableRow>
             <TextView
-                android:text="HRVTi ="
+                android:text="pNN50 ="
                 android:padding="3dip" />
             <TextView
-                android:id="@+id/HRVTi"
+                android:id="@+id/pNN50"
                 android:text="[?]"
                 android:padding="3dip"
                 android:textStyle="bold" />
         </TableRow>
-
 
     </TableLayout>
-
 
 </LinearLayout>

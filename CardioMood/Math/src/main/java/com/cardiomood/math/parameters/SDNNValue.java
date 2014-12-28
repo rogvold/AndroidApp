@@ -25,14 +25,16 @@ public class SDNNValue extends AbstractSingleValue {
         StandardDeviation stdDev = new StandardDeviation();
         double t0 = 0;
         int i = begin;
+        int maxIndex = Math.min(y.length, begin + length);
         while (i < begin + length) {
             t0 = x[i];
-            while (x[i] - t0 < t && i < begin + length) {
+            while (i < maxIndex && x[i] - t0 < t && i < begin + length) {
                 rr.addElement(y[i]);
                 i++;
             }
             stdDev.increment(StatUtils.mean(rr.getElements()));
+            rr.clear();
         }
-        return stdDev.evaluate();
+        return stdDev.getResult();
     }
 }

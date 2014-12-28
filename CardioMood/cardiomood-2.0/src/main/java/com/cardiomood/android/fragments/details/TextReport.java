@@ -341,6 +341,10 @@ public class TextReport {
         return tag;
     }
 
+    public int getArtifactsCount() {
+        return artifactsCount;
+    }
+
     @Override
     public String toString() {
         return String.format(

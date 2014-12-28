@@ -67,7 +67,7 @@ import bolts.Task;
 /**
  * Created by danshin on 01.11.13.
  */
-public class HistoryFragment extends Fragment
+public class    HistoryFragment extends Fragment
         implements ListView.OnItemClickListener, AdapterView.OnItemLongClickListener, SearchView.OnQueryTextListener {
 
     private static final String TAG = HistoryFragment.class.getSimpleName();

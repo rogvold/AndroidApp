@@ -181,7 +181,7 @@ public class SaveAsDialog extends Dialog {
                 reportBuilder.setTag(name);
                 CardioItemDAO hrDAO = databaseHelper.getCardioItemDao();
                 final List<String[]> res = hrDAO.queryRaw(
-                        "select rr, t, bpm from cardio_items where session_id = ? order by t asc",
+                        "select rr, t, bpm from cardio_items where session_id = ? order by _id asc",
                         String.valueOf(sessionId)
                 ).getResults();
                 double rr[] = new double[res.size()];

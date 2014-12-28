@@ -3,7 +3,7 @@ package com.cardiomood.math.parameters;
 /**
  * Created by danon on 21.02.14.
  */
-public class SDANN10sRefactor extends SDNNValue {
+public class SDANN10sValue extends SDNNValue {
 
     private final double STEP = 10*1000; // 10s
 

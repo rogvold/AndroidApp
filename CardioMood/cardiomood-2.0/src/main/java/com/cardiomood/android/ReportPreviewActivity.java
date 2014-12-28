@@ -1,11 +1,12 @@
 package com.cardiomood.android;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -13,7 +14,7 @@ import android.widget.Toast;
 import java.io.File;
 
 
-public class ReportPreviewActivity extends Activity {
+public class ReportPreviewActivity extends ActionBarActivity {
 
     private static final String TAG = ReportPreviewActivity.class.getSimpleName();
 
@@ -47,6 +48,8 @@ public class ReportPreviewActivity extends Activity {
         tvPath = (TextView) findViewById(R.id.pathToFile);
 
         tvPath.setText(file.getAbsolutePath());
+        WebSettings settings = webView.getSettings();
+        settings.setDefaultTextEncodingName("utf-8");
         webView.loadUrl("file://" + file.getAbsolutePath());
         webView.getSettings().setDefaultFontSize(12);
         webView.getSettings().setDefaultFixedFontSize(12);

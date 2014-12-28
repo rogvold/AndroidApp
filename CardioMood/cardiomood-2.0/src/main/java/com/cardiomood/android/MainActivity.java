@@ -116,14 +116,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                             .setText(mSectionsPagerAdapter.getPageTitle(i))
                             .setTabListener(this));
         }
-
-        mViewPager.post(new Runnable() {
-            @Override
-            public void run() {
-                CommonTools.hideSoftInputKeyboard(MainActivity.this);
-                actionBar.setSelectedNavigationItem(1);
-            }
-        });
     }
 
     @Override
@@ -144,12 +136,27 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         super.onResume();
 
         if (mPrefHelper.getBoolean(WhatsNewDialog.CONFIG_SHOW_DIALOG_ON_STARTUP, true, true)) {
-            runOnUiThread(new Runnable() {
+            showWhatsNewDialog();
+            mViewPager.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    showWhatsNewDialog();
+                    ActionBar actionBar = getSupportActionBar();
+                    if (actionBar != null) {
+                        actionBar.setSelectedNavigationItem(1);
+                    }
                 }
-            });
+            }, 200);
+        } else {
+            mViewPager.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    CommonTools.hideSoftInputKeyboard(MainActivity.this);
+                    ActionBar actionBar = getSupportActionBar();
+                    if (actionBar != null) {
+                        actionBar.setSelectedNavigationItem(1);
+                    }
+                }
+            }, 200);
         }
 
         invalidateOptionsMenu();

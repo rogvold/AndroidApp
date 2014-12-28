@@ -44,6 +44,7 @@ import com.squareup.otto.Subscribe;
 import java.io.File;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -161,15 +162,20 @@ public abstract class AbstractSessionReportFragment extends Fragment {
             inflater.inflate(bottomCustomLayoutId, bottomCustomSection, true);
         }
 
+        List<Axis<?,?>> allXAxises = new ArrayList<>(chart.getAllXAxes());
+        for (Axis<?, ?> xAxis: allXAxises) {
+            chart.removeXAxis(xAxis);
+        }
+        List<Axis<?,?>> allYAxises = new ArrayList<>(chart.getAllYAxes());
+        for (Axis<?, ?> yAxis: allYAxises) {
+            chart.removeYAxis(yAxis);
+        }
+
         if (xAxis == null)
             xAxis = createXAxis();
-        else
-            chart.removeXAxis(xAxis);
 
         if (yAxis == null)
             yAxis = createYAxis();
-        else
-            chart.removeYAxis(yAxis);
 
         chart.setXAxis(xAxis);
         chart.setYAxis(yAxis);

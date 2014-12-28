@@ -10,6 +10,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NavUtils;
+import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -28,10 +29,14 @@ import com.cardiomood.android.fragments.details.AbstractSessionReportFragment;
 import com.cardiomood.android.fragments.details.HistogramReportFragment;
 import com.cardiomood.android.fragments.details.OrganizationAReportFragment;
 import com.cardiomood.android.fragments.details.OveralSessionReportFragment;
+import com.cardiomood.android.fragments.details.RMSSDReportFragment;
+import com.cardiomood.android.fragments.details.SDNN10sReportFragment;
+import com.cardiomood.android.fragments.details.SDNNReportFragment;
 import com.cardiomood.android.fragments.details.ScatterogramReportFragment;
+import com.cardiomood.android.fragments.details.SeluyanovReportFragment;
 import com.cardiomood.android.fragments.details.SpectralAnalysisReportFragment;
 import com.cardiomood.android.fragments.details.StressIndexReportFragment;
-import com.cardiomood.android.fragments.details.TextReportFragment;
+import com.cardiomood.android.fragments.details.TimeDomainReportFragment;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.android.ui.CustomViewPager;
 import com.flurry.android.FlurryAgent;
@@ -77,6 +82,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
      * The {@link android.support.v4.view.ViewPager} that will host the section contents.
      */
     CustomViewPager mViewPager;
+    PagerTabStrip mPagerTabStrip;
 
     private long sessionId = 0;
     private SessionEntity session;
@@ -101,26 +107,25 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
             Toast.makeText(this, "Low available memory. Possible application crash...", Toast.LENGTH_SHORT).show();
         }
 
-        // Set up the action bar.
-        final ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         mSectionsPagerAdapter.addFragment(OveralSessionReportFragment.class, "General Info");
-        mSectionsPagerAdapter.addFragment(StressIndexReportFragment.class, "Stress Index");
-        mSectionsPagerAdapter.addFragment(OrganizationAReportFragment.class, "Organization \"A\"");
-        mSectionsPagerAdapter.addFragment(SpectralAnalysisReportFragment.class, "Spectral Analysis");
+        mSectionsPagerAdapter.addFragment(TimeDomainReportFragment.class, "Time domain");
+        mSectionsPagerAdapter.addFragment(SpectralAnalysisReportFragment.class, "Frequency domain");
         mSectionsPagerAdapter.addFragment(HistogramReportFragment.class, "Histogram");
         mSectionsPagerAdapter.addFragment(ScatterogramReportFragment.class, "Scatterogram");
-        mSectionsPagerAdapter.addFragment(TextReportFragment.class, "Numbers");
+        mSectionsPagerAdapter.addFragment(SDNN10sReportFragment.class, "SDNN10s");
+        mSectionsPagerAdapter.addFragment(SeluyanovReportFragment.class, "Seluyanov Index");
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (CustomViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
-        mViewPager.setOffscreenPageLimit(6);
+        mViewPager.setOffscreenPageLimit(10);
         mViewPager.setPagingEnabled(true);
+
+        mPagerTabStrip = (PagerTabStrip) findViewById(R.id.pager_header);
+        mPagerTabStrip.setTabIndicatorColorResource(R.color.colorAccent);
 
         // When swiping between different sections, select the corresponding
         // tab. We can also use ActionBar.Tab#select() to do this if we have
@@ -128,28 +133,12 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
         mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
-                actionBar.setSelectedNavigationItem(position);
-
                 // hide soft input keyboard
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                 if (imm != null)
                     imm.hideSoftInputFromWindow(findViewById(android.R.id.content).getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
             }
         });
-
-        // For each of the sections in the app, add a tab to the action bar.
-        for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
-            // Create a tab with text corresponding to the page title defined by
-            // the adapter. Also specify this Activity object, which implements
-            // the TabListener interface, as the callback (listener) for when
-            // this tab is selected.
-            actionBar.addTab(
-                    actionBar.newTab()
-                            .setText(mSectionsPagerAdapter.getPageTitle(i))
-                            .setTabListener(this)
-            );
-        }
-        actionBar.setSelectedNavigationItem(0);
 
         bus = new Bus(ThreadEnforcer.MAIN);
 
@@ -226,11 +215,13 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
         Task.callInBackground(new Callable<Long>() {
             @Override
             public Long call() throws Exception {
-                return DatabaseHelperFactory.getHelper()
+                String result[] = DatabaseHelperFactory.getHelper()
                         .getCardioItemDao()
-                        .queryBuilder()
-                        .where().eq("session_id", sessionId)
-                        .countOf();
+                        .queryRaw(
+                                "select sum(rr) from cardio_items where session_id=?",
+                                String.valueOf(sessionId)
+                        ).getFirstResult();
+                return Long.parseLong(result[0])/1000;
             }
         }).continueWith(new Continuation<Long, Object>() {
             @Override
@@ -241,12 +232,20 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
                         finish();
                     }
                 } else if (task.isCompleted()) {
-                    long count = task.getResult();
-                    if (count < 30 && !isFinishing()) {
+                    long duration = task.getResult();
+                    if (duration < 2*60 && !isFinishing()) {
                         Toast.makeText(SessionDetailsActivity.this,
                                 R.string.measurement_contains_too_few_data, Toast.LENGTH_SHORT).show();
                         finish();
                         return null;
+                    }
+
+                    if (duration > 2*60 + 30) {
+                        addTab(StressIndexReportFragment.class, "Bayevsky Stress Index");
+                        addTab(OrganizationAReportFragment.class, "Gorgo Index \"A\"");
+                        addTab(SDNNReportFragment.class, "SDNN");
+                        addTab(RMSSDReportFragment.class, "RMSSD");
+                        mSectionsPagerAdapter.notifyDataSetChanged();
                     }
 
                     // post event to the bus
@@ -270,6 +269,13 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
             // update menu
             invalidateOptionsMenu();
             executePostRenderAction();
+        }
+    }
+
+    public void addTab(Class<? extends AbstractSessionReportFragment> clazz, String title) {
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            mSectionsPagerAdapter.addFragment(clazz, title);
         }
     }
 

@@ -142,7 +142,7 @@
     <string name="menu_stop_measurement_condensed">Stop</string>
     <string name="menu_start_measurement_condensed">Start</string>
     <string name="spectrum_chart_description">Spectral power graph shows the ratio between activities of sympathetic (VLF and LF) and parasympathetic (HF) nervous systems.</string>
-    <string name="historgam_description">Histogram shows distribution of R-R intervals by various interval ranges. Wider histogram corresponds to a higher HRV.</string>
+    <string name="historgam_description">Histogram shows the distribution of R-R intervals by various interval ranges. Wider histogram corresponds to a higher HRV.</string>
     <string name="scatterogram_description">Scattergram is a graphical representation of R-R intervals distribution (current is on X and previous is on Y).\nPoints at scattergram can be visually combined into an ellipse.</string>
     <string name="title_activity_report_preview">Report file</string>
     <string name="file_doesnt_exist">File doesn\'t exist.</string>

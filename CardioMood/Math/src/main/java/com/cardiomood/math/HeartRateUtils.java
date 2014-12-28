@@ -129,6 +129,28 @@ public final class HeartRateUtils {
         return result;
     }
 
+    public static double[][] getWindowedParameter(final AbstractSingleValue param, double[] rrIntervals, int begin, int length, DataWindow window) {
+        final DoubleArray time = new ResizableDoubleArray();
+        final DoubleArray values = new ResizableDoubleArray();
+
+        window.setCallback(new CallbackAdapter() {
+            @Override
+            public void onStep(DataWindow window, int index, double t, double value) {
+                time.addElement(t);
+                values.addElement(param.evaluate(window.getTime().getElements(), window.getIntervals().getElements()));
+            }
+        });
+        int n = 0;
+        for (int i=begin; i<rrIntervals.length && n<length; i++, n++) {
+            window.add(rrIntervals[i]);
+        }
+
+        double[][] result = new double[2][];
+        result[0] = time.getElements();
+        result[1] = values.getElements();
+        return result;
+    }
+
     public static double[][] getSDNN(double[] rrIntervals, DataWindow window) {
         return getSDNN(rrIntervals, 0, rrIntervals.length, window);
     }
