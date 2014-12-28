@@ -53,6 +53,8 @@ repositories {
     }
 }
 
+project.ext.set("archivesBaseName", "cardiomood-2.0-RC1");
+
 
 dependencies {
     compile files('libs/android-support-multidex.jar')

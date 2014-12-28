@@ -136,6 +136,7 @@ public class AndroidLeHRMonitor extends LeHRMonitor {
                     int i = 0;
                     while(offset < value.length) {
                         intervals[i] = characteristic.getIntValue(BluetoothGattCharacteristic.FORMAT_UINT16, offset).shortValue();
+                        intervals[i] = (short) Math.round(1000.0f/1024.0f*intervals[i]);
                         offset += 2;
                         i++;
                     }
