@@ -3,8 +3,13 @@ package com.cardiomood.android;
 import android.support.multidex.MultiDexApplication;
 
 import com.cardiomood.android.db.DatabaseHelperFactory;
+import com.cardiomood.android.tools.PreferenceHelper;
+import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.parse.Parse;
+import com.parse.ParseConfig;
 
+import bolts.Continuation;
+import bolts.Task;
 import hugo.weaving.DebugLog;
 import timber.log.Timber;
 
@@ -28,11 +33,47 @@ public class Application extends MultiDexApplication {
 
         // initialize DB
         DatabaseHelperFactory.initialize(this);
+
+        ParseConfig.getInBackground()
+                .continueWith(new Continuation<ParseConfig, Object>() {
+                    @Override
+                    public Object then(Task<ParseConfig> task) throws Exception {
+                        ParseConfig config = null;
+                        if (task.isFaulted()) {
+                            Timber.w(task.getError(), "Failed to fetch latest ParseConfig. " +
+                                    "Using the last cached one...");
+                            config = ParseConfig.getCurrentConfig();
+                        } else {
+                            config = task.getResult();
+                        }
+                        if (config != null) {
+                            onParseConfigLoaded(config);
+                        }
+                        return null;
+                    }
+                }, Task.UI_THREAD_EXECUTOR);
     }
 
     @Override @DebugLog
     public void onTerminate() {
         super.onTerminate();
         DatabaseHelperFactory.releaseHelper();
+    }
+
+    void onParseConfigLoaded(ParseConfig parseConfig) {
+        PreferenceHelper prefHelper = new PreferenceHelper(this, true);
+        prefHelper.putString(
+                ConfigurationConstants.CONFIG_PUBNUB_PUB_KEY,
+                parseConfig.getString("pubnub_pub_key", null)
+        );
+        prefHelper.putString(
+                ConfigurationConstants.CONFIG_PUBNUB_SUB_KEY,
+                parseConfig.getString("pubnub_sub_key", null)
+        );
+        prefHelper.putString(
+                ConfigurationConstants.CONFIG_PUBNUB_CHANNEL,
+                parseConfig.getString("pubnub_channel", null)
+        );
+        Timber.d("ParseConfig loaded.");
     }
 }

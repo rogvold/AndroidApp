@@ -79,4 +79,9 @@ public interface ConfigurationConstants {
     String MEASUREMENT_CUSTOM_TIME_LIMIT    = "measurement.custom_time_limit";
     String MEASUREMENT_CUSTOM_COUNT_LIMIT   = "measurement.custom_count_limit";
     String MEASUREMENT_AUTO_START           = "measurement.auto_start";
+
+    String CONFIG_PUBNUB_PUB_KEY            = "config.pubnub_pub_key";
+    String CONFIG_PUBNUB_SUB_KEY            = "config.pubnub_sub_key";
+    String CONFIG_PUBNUB_CHANNEL            = "config.pubnub_channel";
+
 }

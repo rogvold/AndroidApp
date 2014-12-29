@@ -53,7 +53,7 @@ repositories {
     }
 }
 
-project.ext.set("archivesBaseName", "cardiomood-2.0-RC1");
+project.ext.set("archivesBaseName", "cardiomood-2.0-RC2");
 
 
 dependencies {

@@ -48,6 +48,7 @@
                 android:layout_gravity="center_horizontal"
                 android:text="[Session Name]"
                 android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@android:color/secondary_text_light"
                 />
 
             <TextView
@@ -57,6 +58,7 @@
                 android:layout_gravity="center_horizontal"
                 android:text="[Session Date]"
                 android:textAppearance="?android:attr/textAppearanceSmall"
+                android:textColor="@android:color/secondary_text_light"
                 />
 
             <View

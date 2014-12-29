@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -38,12 +39,14 @@ import com.cardiomood.android.db.DatabaseHelperFactory;
 import com.cardiomood.android.db.entity.CardioItemDAO;
 import com.cardiomood.android.db.entity.SessionDAO;
 import com.cardiomood.android.db.entity.SessionEntity;
+import com.cardiomood.android.dialogs.MeasurementDurationDialog;
 import com.cardiomood.android.service.CardioDataPackage;
 import com.cardiomood.android.service.CardioMonitoringService;
 import com.cardiomood.android.sync.parse.ParseTools;
 import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
+import com.cardiomood.android.tools.ui.TouchEffect;
 import com.cardiomood.android.ui.HeartRateGraphView;
 import com.cardiomood.heartrate.bluetooth.LeHRMonitor;
 import com.j256.ormlite.dao.GenericRawResults;
@@ -100,6 +103,8 @@ public class NewMeasurementFragment extends Fragment {
     protected TextView timeElapsedView;
     @InjectView(R.id.hrm_battery)
     protected BatteryIndicatorGauge hrmBattery;
+    @InjectView(R.id.duration_settings_button)
+    protected ImageButton durationSettingsButton;
 
     //chart is added manually
     protected GraphView mGraphView;
@@ -317,6 +322,15 @@ public class NewMeasurementFragment extends Fragment {
                 }
             }
         });
+
+        durationSettingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new MeasurementDurationDialog()
+                        .show(getChildFragmentManager(), "session_duration");
+            }
+        });
+        durationSettingsButton.setOnTouchListener(TouchEffect.FADE_ON_TOUCH);
 
         // Init Graph View
         mGraphView = new HeartRateGraphView(getActivity());
@@ -724,7 +738,7 @@ public class NewMeasurementFragment extends Fragment {
             msg.getData().setClassLoader(long.class.getClassLoader());
             mCurrentSessionId = msg.getData().getLong("sessionId", -1L);
             startSessionButton.setEnabled(false);
-            startSessionButton.setVisibility(View.GONE);
+            //startSessionButton.setVisibility(View.GONE);
 //            stopSessionButton.setEnabled(true);
 //            stopSessionButton.setVisibility(View.VISIBLE);
             loadSessionData(mCurrentSessionId);
@@ -801,7 +815,7 @@ public class NewMeasurementFragment extends Fragment {
                 startSessionButton.setEnabled(true);
                 stopSessionButton.setVisibility(View.GONE);
             } else {
-                startSessionButton.setVisibility(View.GONE);
+                //startSessionButton.setVisibility(View.GONE);
                 startSessionButton.setEnabled(false);
                 //stopSessionButton.setVisibility(View.VISIBLE);
                 //stopSessionButton.setEnabled(true);

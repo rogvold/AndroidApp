@@ -93,9 +93,6 @@ public class CardioMonitoringService extends Service {
     volatile SessionEntity mCardioSession = null;
     WorkerThread<CardioDataPackage> mWorkerThread;
 
-    Pubnub pubnub = new Pubnub("pub-c-a86ef89b-7858-4b4c-8f89-c4348bfc4b79",
-            "sub-c-e5ae235a-4c3e-11e4-9e3d-02ee2ddab7fe");
-
     private Object sessionLock = new Object();
     private PreferenceHelper prefHelper;
 
@@ -567,14 +564,19 @@ public class CardioMonitoringService extends Service {
 
     private class PubnubWorkerThread extends WorkerThread<JSONObject> {
 
-        private final String CHANNEL_NAME = "KolomnaRealTime";
+        private String channelName = null;
         private Queue<JSONObject> buffer = new LinkedList<JSONObject>();
         private boolean disableRealTime = true;
+        private Pubnub pubnub;
 
         @Override
         public void onStart() {
             super.onStart();
             disableRealTime = prefHelper.getBoolean(ConfigurationConstants.SYNC_DISABLE_REAL_TIME, true, true);
+            String pubKey = prefHelper.getString(ConfigurationConstants.CONFIG_PUBNUB_PUB_KEY);
+            String subKey = prefHelper.getString(ConfigurationConstants.CONFIG_PUBNUB_SUB_KEY);
+            pubnub = new Pubnub(pubKey, subKey);
+            channelName = prefHelper.getString(ConfigurationConstants.CONFIG_PUBNUB_CHANNEL);
         }
 
         private Task publish(JSONObject item) {
@@ -584,7 +586,7 @@ public class CardioMonitoringService extends Service {
             if (disableRealTime) {
                 task.setResult(null);
             } else {
-                pubnub.publish(CHANNEL_NAME, item, false, new Callback() {
+                pubnub.publish(channelName, item, false, new Callback() {
                     @Override
                     public void successCallback(String s, Object o) {
                         task.setResult(null);

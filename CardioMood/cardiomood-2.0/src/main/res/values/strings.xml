@@ -107,7 +107,7 @@
     <string name="device_connected_open_monitor">The device is connected.</string>
     <string name="monitoring_title_heart_rate">Heart Rate</string>
     <string name="monitoring_title_stress">Stress Index</string>
-    <string name="auto_start_measurement">Start measurement automatically</string>
+    <string name="auto_start_measurement">Start measurement immediately</string>
     <string name="monitoring_title_spectrum">Frequency</string>
     <string name="login_progress_signing_in">Contacting CardioMood data server...</string>
     <string name="prompt_email">Email</string>

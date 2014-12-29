@@ -48,7 +48,7 @@ public class SaveAsDialog extends Dialog {
     private SavingCallback savingCallback;
 
     public SaveAsDialog(Context context, long sessionId, int filterCount) {
-        super(context, android.R.style.Theme_Holo_Light_Dialog);
+        super(context);
         mContext = context;
         this.databaseHelper = DatabaseHelperFactory.getHelper();
         this.sessionId = sessionId;
