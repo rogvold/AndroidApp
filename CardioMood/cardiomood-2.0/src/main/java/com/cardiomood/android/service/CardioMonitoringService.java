@@ -7,6 +7,7 @@ import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
@@ -41,6 +42,7 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -65,6 +67,7 @@ public class CardioMonitoringService extends Service {
     public static final int MSG_RESET = 6;
     public static final int MSG_START_SESSION = 7;
     public static final int MSG_END_SESSION = 8;
+    public static final int MSG_UPDATE_INFO = 9;
 
     public static final int MSG_HR_DATA = 10;
     public static final int MSG_CONNECTION_STATUS_CHANGED = 11;
@@ -130,6 +133,9 @@ public class CardioMonitoringService extends Service {
                 case MSG_END_SESSION:
                     handleEndSessionRequest(msg);
                     break;
+                case MSG_UPDATE_INFO:
+                    handleUpdateInfoRequest(msg);
+                    break;
                 default:
                     super.handleMessage(msg);
             }
@@ -167,13 +173,18 @@ public class CardioMonitoringService extends Service {
                 }
             }
 
-            for (Messenger m: mClients) {
+            Iterator<Messenger> it = mClients.iterator();
+            while(it.hasNext()) {
+                Messenger m = it.next();
                 try {
                     Message msg = Message.obtain(null, MSG_CONNECTION_STATUS_CHANGED, oldStatus, newStatus);
                     msg.getData().putString("deviceAddress", mDeviceAddress);
                     m.send(msg);
                 } catch (RemoteException ex) {
                     Log.w(TAG, "onConnectionStatusChanged() failed", ex);
+                    if (ex instanceof DeadObjectException) {
+                        it.remove();
+                    }
                 }
             }
         }
@@ -185,7 +196,9 @@ public class CardioMonitoringService extends Service {
             if (mCardioSession != null && mWorkerThread != null) {
                 mWorkerThread.put(data);
             }
-            for (Messenger m: mClients) {
+            Iterator<Messenger> it = mClients.iterator();
+            while(it.hasNext()) {
+                Messenger m = it.next();
                 try {
                     Message msg = Message.obtain(null, MSG_HR_DATA, bpm, 0);
                     msg.getData().setClassLoader(CardioDataPackage.class.getClassLoader());
@@ -197,6 +210,9 @@ public class CardioMonitoringService extends Service {
                     m.send(msg);
                 } catch (RemoteException ex) {
                     Log.w(TAG, "onDataReceived() failed", ex);
+                    if (ex instanceof DeadObjectException) {
+                        it.remove();
+                    }
                 }
             }
         }
@@ -243,7 +259,7 @@ public class CardioMonitoringService extends Service {
 
         mHandler = new Handler();
         hrMonitor = null;
-        mClients = new ArrayList<Messenger>();
+        mClients = new ArrayList<>();
         prefHelper = new PreferenceHelper(this, true);
 
         // create NotificationManager
@@ -469,8 +485,10 @@ public class CardioMonitoringService extends Service {
                         cardioSession.setCreationDate(new Date());
                         cardioSession.setSyncDate(new Date());
                         cardioSession.setSyncUserId(parseUserId);
-                        cardioSession.setName("Measurement " + DATE_FORMAT.format(new Date()));
                         sessionDao.create(cardioSession);
+                        cardioSession.setName(getNewSessionName(cardioSession));
+                        cardioSession.setDescription(getNewSessionDescription(cardioSession));
+                        sessionDao.update(cardioSession);
                         mCardioSession = cardioSession;
                         return null;
                     }
@@ -546,6 +564,40 @@ public class CardioMonitoringService extends Service {
         }
     }
 
+    private void handleUpdateInfoRequest(Message msg) {
+        String name = msg.getData().getString("name");
+        String description = msg.getData().getString("description");
+        try {
+            if (mCardioSession != null) {
+                try {
+                    synchronized (sessionLock) {
+                        SessionDAO sessionDAO = DatabaseHelperFactory.getHelper().getSessionDao();
+                        sessionDAO.refresh(mCardioSession);
+                        mCardioSession.setSyncDate(new Date());
+                        mCardioSession.setName(name);
+                        mCardioSession.setDescription(description);
+                        sessionDAO.update(mCardioSession);
+                    }
+                } catch (SQLException ex) {
+                    if (msg.replyTo != null) {
+                        Message response = Message.obtain(null, MSG_UPDATE_INFO, RESULT_FAIL, 0);
+                        response.getData().putString("errorMessage", ex.getMessage());
+                        msg.replyTo.send(response);
+                    }
+                }
+            } else {
+                prefHelper.putString(ConfigurationConstants.MEASUREMENT_NAME, name);
+                prefHelper.putString(ConfigurationConstants.MEASUREMENT_DESCRIPTION, description);
+            }
+            if (msg.replyTo != null) {
+                Message response = Message.obtain(null, MSG_UPDATE_INFO, RESULT_SUCCESS, 0);
+                msg.replyTo.send(response);
+            }
+        } catch (RemoteException ex) {
+            Log.d(TAG, "handleUpdateInfoRequest() failed", ex);
+        }
+    }
+
     public void showNotification() {
         if (mNotificationManager == null || mNotificationBuilder == null) {
             // onCreate() wasn't invoked????
@@ -559,6 +611,41 @@ public class CardioMonitoringService extends Service {
 
     public void hideNotification() {
         stopForeground(true);
+    }
+
+
+    private String getNewSessionName(SessionEntity session) {
+        String pattern = prefHelper.getString(ConfigurationConstants.MEASUREMENT_NAME, "Measurement $date$");
+        return processMacros(pattern, session);
+    }
+
+    private String getNewSessionDescription(SessionEntity session) {
+        String pattern = prefHelper.getString(ConfigurationConstants.MEASUREMENT_DESCRIPTION, "Measurement $date$");
+        prefHelper.remove(ConfigurationConstants.MEASUREMENT_DESCRIPTION);
+        return processMacros(pattern, session);
+    }
+
+    private String processMacros(String pattern, SessionEntity session) {
+        return pattern.replaceAll("\\$date\\$", DATE_FORMAT.format(session.getCreationDate()))
+                .replaceAll("\\$id\\$", String.valueOf(session.getId()))
+                .replaceAll("\\$device_name\\$", getConnectedDeviceName())
+                .replaceAll("\\$device_address\\$", getConnectedDeviceAddress());
+
+    }
+
+    private String getConnectedDeviceAddress() {
+        if (hrMonitor != null && hrMonitor.isConnectingOrConnected()) {
+            return hrMonitor.getDeviceAddress();
+        } else return "";
+    }
+
+    private String getConnectedDeviceName() {
+        if (hrMonitor != null && hrMonitor.isConnectingOrConnected()) {
+            String name = hrMonitor.getDeviceName();
+            if (name == null)
+                return "";
+            return name;
+        } else return "";
     }
 
 

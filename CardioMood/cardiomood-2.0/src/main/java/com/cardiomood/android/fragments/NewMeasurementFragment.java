@@ -40,6 +40,7 @@ import com.cardiomood.android.db.entity.CardioItemDAO;
 import com.cardiomood.android.db.entity.SessionDAO;
 import com.cardiomood.android.db.entity.SessionEntity;
 import com.cardiomood.android.dialogs.MeasurementDurationDialog;
+import com.cardiomood.android.dialogs.MeasurementInfoDialog;
 import com.cardiomood.android.service.CardioDataPackage;
 import com.cardiomood.android.service.CardioMonitoringService;
 import com.cardiomood.android.sync.parse.ParseTools;
@@ -54,6 +55,7 @@ import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GraphViewSeries;
 import com.parse.ParseUser;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -105,6 +107,8 @@ public class NewMeasurementFragment extends Fragment {
     protected BatteryIndicatorGauge hrmBattery;
     @InjectView(R.id.duration_settings_button)
     protected ImageButton durationSettingsButton;
+    @InjectView(R.id.measurement_params_button)
+    protected ImageButton measurementParamsButton;
 
     //chart is added manually
     protected GraphView mGraphView;
@@ -332,6 +336,42 @@ public class NewMeasurementFragment extends Fragment {
         });
         durationSettingsButton.setOnTouchListener(TouchEffect.FADE_ON_TOUCH);
 
+        measurementParamsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MeasurementInfoDialog dlg = null;
+
+                if (mCurrentSession != null) {
+                    try {
+                        DatabaseHelperFactory
+                                .getHelper().getSessionDao().refresh(mCurrentSession);
+                    } catch (SQLException ex) {
+                        // suppress this
+                    }
+                    dlg = MeasurementInfoDialog.newInstance(
+                            mCurrentSession.getName(),
+                            mCurrentSession.getDescription()
+                    );
+                } else {
+                    dlg = MeasurementInfoDialog.newInstance(
+                            prefHelper.getString(ConfigurationConstants.MEASUREMENT_NAME),
+                            prefHelper.getString(ConfigurationConstants.MEASUREMENT_DESCRIPTION)
+                    );
+                }
+                dlg.setCallback(new MeasurementInfoDialog.Callback() {
+                    @Override
+                    public void onInfoUpdated(String name, String description) {
+                        // send rename command to the service
+                        if (mCardioServiceBound) {
+                            requestUpdateInfo(name, description);
+                        }
+                    }
+                });
+                dlg.show(getChildFragmentManager(), "session_params");
+            }
+        });
+        measurementParamsButton.setOnTouchListener(TouchEffect.FADE_ON_TOUCH);
+
         // Init Graph View
         mGraphView = new HeartRateGraphView(getActivity());
         mGraphView.setVisibility(View.GONE);
@@ -397,7 +437,7 @@ public class NewMeasurementFragment extends Fragment {
             public void run() {
                 CommonTools.hideSoftInputKeyboard(getActivity());
             }
-        }, 100);
+        }, 200);
     }
 
     @Override
@@ -456,6 +496,8 @@ public class NewMeasurementFragment extends Fragment {
         ParseUser user = ParseUser.getCurrentUser();
         userEmailView.setText(user.getEmail());
         userNameView.setText(ParseTools.getUserFullName(user));
+
+        connectButton.requestFocus();
     }
 
     private void registerClient() {
@@ -485,6 +527,17 @@ public class NewMeasurementFragment extends Fragment {
             mCardioService.send(msg);
         } catch (RemoteException ex) {
             Log.w(TAG, "requestConnectionStatus() failed", ex);
+        }
+    }
+
+    private void requestUpdateInfo(String name, String description) {
+        try {
+            Message msg = Message.obtain(null, CardioMonitoringService.MSG_UPDATE_INFO);
+            msg.getData().putString("name", name);
+            msg.getData().putString("description", description);
+            mCardioService.send(msg);
+        } catch (RemoteException ex) {
+            Log.w(TAG, "requestUpdateInfo() failed", ex);
         }
     }
 

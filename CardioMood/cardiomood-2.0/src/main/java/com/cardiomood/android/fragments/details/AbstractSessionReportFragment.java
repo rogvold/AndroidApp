@@ -1,14 +1,7 @@
 package com.cardiomood.android.fragments.details;
 
 import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.ContentLoadingProgressBar;
@@ -26,12 +19,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cardiomood.android.R;
-import com.cardiomood.android.ReportPreviewActivity;
 import com.cardiomood.android.SessionDetailsActivity;
 import com.cardiomood.android.db.DatabaseHelperFactory;
 import com.cardiomood.android.db.entity.CardioItemDAO;
 import com.cardiomood.android.db.entity.SessionDAO;
 import com.cardiomood.android.db.entity.SessionEntity;
+import com.cardiomood.android.dialogs.InputTextDialog;
 import com.cardiomood.android.dialogs.SaveAsDialog;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.math.filter.ArtifactFilter;
@@ -41,9 +34,9 @@ import com.shinobicontrols.charts.ChartView;
 import com.shinobicontrols.charts.ShinobiChart;
 import com.squareup.otto.Subscribe;
 
-import java.io.File;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -377,73 +370,46 @@ public abstract class AbstractSessionReportFragment extends Fragment {
     }
 
     private void showSaveAsDialog() {
-        SaveAsDialog dlg = new SaveAsDialog(getActivity(), sessionId, filterCount);
-        dlg.setTitle(R.string.save_as_dlg_title);
-        dlg.setSavingCallback(new SaveAsDialog.SavingCallback() {
-
+        Date date = new Date() ;
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss") ;
+        String fileName = dateFormat.format(date)+"_s" + String.format("%03d", sessionId);
+        InputTextDialog dlg = InputTextDialog.newInstance(
+                "Save to text file",
+                "Specify file name:",
+                fileName
+        );
+        dlg.setCallback(new InputTextDialog.Callback() {
             @Override
-            public void onBeginSave() {
-                savingInProgress = true;
-                getActivity().invalidateOptionsMenu();
+            public void onCancel() {
+
             }
 
             @Override
-            public void onEndSave(String fileName) {
-                savingInProgress = false;
-                getActivity().invalidateOptionsMenu();
+            public void onOk(String text) {
+                SaveAsDialog dlg = new SaveAsDialog(getActivity(), sessionId, filterCount, text);
+                dlg.setSavingCallback(new SaveAsDialog.SavingCallback() {
+                    @Override
+                    public void onBeginSave() {
+                        savingInProgress = true;
+                        getActivity().invalidateOptionsMenu();
+                    }
 
-                if (fileName == null) {
-                    return;
-                }
+                    @Override
+                    public void onEndSave(String fileName) {
+                        savingInProgress = false;
+                        getActivity().invalidateOptionsMenu();
+                    }
 
-                Intent previewIntent = new Intent(getActivity(), ReportPreviewActivity.class);
-                previewIntent.putExtra(ReportPreviewActivity.EXTRA_FILE_PATH, fileName);
-                startActivity(previewIntent);
-
-                if (!fileName.toLowerCase().endsWith(".png")) {
-                    // saved as not *.png
-                    return;
-                }
-
-                Context context = getActivity();
-                if (context == null)
-                    return;
-
-                // add item to notification
-                Intent intent = new Intent();
-                intent.setAction(Intent.ACTION_VIEW);
-                File file = new File(fileName);
-                intent.setDataAndType(Uri.fromFile(file), "image/png");
-
-                PendingIntent pIntent = PendingIntent.getActivity(context, 0, intent, 0);
-
-                Notification.Builder builder = new Notification.Builder(context);
-                builder.setContentIntent(pIntent)
-                        .setSmallIcon(R.drawable.ic_action_save)
-                        .setTicker(getText(R.string.measurement_saved_notification_text))
-                        .setWhen(System.currentTimeMillis())
-                        .setAutoCancel(true)
-                        .setContentTitle(getText(R.string.measurement_saved_notification_title))
-                        .setContentText(getText(R.string.measurement_saved_notification_text));
-
-                NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-                if(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-                    // build notification for HoneyComb to ICS
-                    notificationManager.notify(1, builder.getNotification());
-                } if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-                    // Notification for Jellybean and above
-                    notificationManager.notify(1, builder.build());
-                }
-            }
-
-            @Override
-            public void onError() {
-                savingInProgress = false;
-                getActivity().invalidateOptionsMenu();
+                    @Override
+                    public void onError() {
+                        savingInProgress = false;
+                        getActivity().invalidateOptionsMenu();
+                    }
+                });
+                dlg.saveAsTxt();
             }
         });
-        dlg.saveAsTxt();
+        dlg.show(getChildFragmentManager(), "save_as_text_dlg");
     }
 
     protected SessionDAO getSessionDao() throws SQLException {

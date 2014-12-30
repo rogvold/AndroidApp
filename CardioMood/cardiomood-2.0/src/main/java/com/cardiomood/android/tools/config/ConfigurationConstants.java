@@ -84,4 +84,6 @@ public interface ConfigurationConstants {
     String CONFIG_PUBNUB_SUB_KEY            = "config.pubnub_sub_key";
     String CONFIG_PUBNUB_CHANNEL            = "config.pubnub_channel";
 
+    String MEASUREMENT_NAME                 = "measurement.default_name_pattern";
+    String MEASUREMENT_DESCRIPTION          = "measurement.current_description";
 }

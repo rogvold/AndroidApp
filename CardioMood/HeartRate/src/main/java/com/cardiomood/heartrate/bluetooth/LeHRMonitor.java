@@ -1,6 +1,7 @@
 package com.cardiomood.heartrate.bluetooth;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
@@ -114,6 +115,20 @@ public abstract class LeHRMonitor {
     public synchronized void close() {
         doClose();
         deviceAddress = null;
+    }
+
+    public synchronized String getDeviceName() {
+        if (deviceAddress == null) {
+            return null;
+        } else {
+            BluetoothAdapter adapter = getCurrentBluetoothAdapter();
+            if (adapter != null) {
+                BluetoothDevice device = adapter.getRemoteDevice(deviceAddress);
+                if (device != null)
+                    return device.getName();
+            }
+        }
+        return null;
     }
 
 

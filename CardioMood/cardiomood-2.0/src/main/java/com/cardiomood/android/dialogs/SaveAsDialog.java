@@ -42,17 +42,19 @@ public class SaveAsDialog extends Dialog {
     private Context mContext;
     private ListView mListView;
     private int filterCount = 0;
+    private String fileName = null;
     private DatabaseHelper databaseHelper;
 
     private boolean savingInProgress = false;
     private SavingCallback savingCallback;
 
-    public SaveAsDialog(Context context, long sessionId, int filterCount) {
+    public SaveAsDialog(Context context, long sessionId, int filterCount, String fileName) {
         super(context);
         mContext = context;
         this.databaseHelper = DatabaseHelperFactory.getHelper();
         this.sessionId = sessionId;
         this.filterCount = filterCount;
+        this.fileName = fileName;
     }
 
     @Override
@@ -143,6 +145,9 @@ public class SaveAsDialog extends Dialog {
         }
 
         private String generateFileName() {
+            if (fileName != null)
+                return fileName;
+            // generate
             Date date = new Date() ;
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss") ;
             return  dateFormat.format(date)+"_s" + String.format("%03d", sessionId) + ".txt";

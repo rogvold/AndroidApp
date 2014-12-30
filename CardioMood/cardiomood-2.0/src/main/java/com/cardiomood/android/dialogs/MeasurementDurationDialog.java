@@ -1,9 +1,11 @@
 package com.cardiomood.android.dialogs;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.view.LayoutInflater;
@@ -48,14 +50,16 @@ public class MeasurementDurationDialog extends DialogFragment {
 
     private String userId = null;
     private PreferenceHelper prefHelper;
+    private Handler mHandler;
 
     public MeasurementDurationDialog() {
-        // required empty constructor
+        // required no-arg constructor
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mHandler = new Handler();
         prefHelper = new PreferenceHelper(getActivity(), true);
         if (ParseUser.getCurrentUser() != null) {
             userId = ParseUser.getCurrentUser().getObjectId();
@@ -112,23 +116,36 @@ public class MeasurementDurationDialog extends DialogFragment {
 
         AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(getActivity());
         dialogBuilder.setView(dialogView);
-        dialogBuilder.setTitle("Measurement duration");
+        dialogBuilder.setTitle("Measurement Duration");
         dialogBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 saveSelectedParameters();
-                CommonTools.hideSoftInputKeyboard(getActivity());
+
             }
         });
         dialogBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 restoreParameters();
-                CommonTools.hideSoftInputKeyboard(getActivity());
             }
         });
 
         return dialogBuilder.create();
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog) {
+        super.onDismiss(dialog);
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                Activity activity = getActivity();
+                if (activity != null) {
+                    CommonTools.hideSoftInputKeyboard(activity);
+                }
+            }
+        }, 100L);
     }
 
     private void restoreParameters() {
@@ -136,7 +153,7 @@ public class MeasurementDurationDialog extends DialogFragment {
                 prefHelper.getInt(ConfigurationConstants.MEASUREMENT_LIMIT_TYPE + "_" + userId, LIMIT_TYPE_TIME)
         );
         timeLimitSpinner.setSelection(
-                prefHelper.getInt(ConfigurationConstants.MEASUREMENT_TIME_LIMIT + "_" + userId, 2*60)
+                prefHelper.getInt(ConfigurationConstants.MEASUREMENT_TIME_LIMIT + "_" + userId, 0)
         );
         countLimitSpinner.setSelection(
                 prefHelper.getInt(ConfigurationConstants.MEASUREMENT_COUNT_LIMIT + "_" + userId, 0)
