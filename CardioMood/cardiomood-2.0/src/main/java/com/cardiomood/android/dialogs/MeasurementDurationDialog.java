@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -177,11 +178,21 @@ public class MeasurementDurationDialog extends DialogFragment {
         prefHelper.putInt(ConfigurationConstants.MEASUREMENT_COUNT_LIMIT + "_" + userId,
                 countLimitSpinner.getSelectedItemPosition());
         prefHelper.putString(ConfigurationConstants.MEASUREMENT_CUSTOM_COUNT_LIMIT + "_" + userId,
-                customCountLimitTxt.getText().toString());
+                getValidInt(customCountLimitTxt.getText().toString()));
         prefHelper.putString(ConfigurationConstants.MEASUREMENT_CUSTOM_TIME_LIMIT + "_" + userId,
-                customTimeLimitTxt.getText().toString());
+                getValidInt(customTimeLimitTxt.getText().toString()));
         prefHelper.putBoolean(ConfigurationConstants.MEASUREMENT_AUTO_START+ "_" + userId,
                 startImmediately.isChecked());
+    }
+
+    private String getValidInt(String s) {
+        if (TextUtils.isEmpty(s))
+            return null;
+        try {
+            return Integer.parseInt(s) + "";
+        } catch (Exception ex) {
+            return null;
+        }
     }
 
     private void disableEnableControls(boolean enable, ViewGroup vg){

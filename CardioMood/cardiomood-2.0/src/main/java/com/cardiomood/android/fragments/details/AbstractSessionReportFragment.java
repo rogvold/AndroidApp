@@ -1,6 +1,7 @@
 package com.cardiomood.android.fragments.details;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cardiomood.android.R;
+import com.cardiomood.android.ReportPreviewActivity;
 import com.cardiomood.android.SessionDetailsActivity;
 import com.cardiomood.android.db.DatabaseHelperFactory;
 import com.cardiomood.android.db.entity.CardioItemDAO;
@@ -241,9 +243,9 @@ public abstract class AbstractSessionReportFragment extends Fragment {
             case R.id.menu_save_as:
                 showSaveAsDialog();
                 return true;
-            case R.id.menu_save_this_revision:
-                saveThisRevision();
-                return true;
+//            case R.id.menu_save_this_revision:
+//                saveThisRevision();
+//                return true;
             case R.id.menu_toggle_action_bar:
                 toggleActionBar();
                 return true;
@@ -398,6 +400,14 @@ public abstract class AbstractSessionReportFragment extends Fragment {
                     public void onEndSave(String fileName) {
                         savingInProgress = false;
                         getActivity().invalidateOptionsMenu();
+
+                        if (fileName == null) {
+                            return;
+                        }
+
+                        Intent previewIntent = new Intent(getActivity(), ReportPreviewActivity.class);
+                        previewIntent.putExtra(ReportPreviewActivity.EXTRA_FILE_PATH, fileName);
+                        startActivity(previewIntent);
                     }
 
                     @Override

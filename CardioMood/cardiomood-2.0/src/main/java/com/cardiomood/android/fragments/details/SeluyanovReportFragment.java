@@ -64,12 +64,12 @@ public class SeluyanovReportFragment extends AbstractSessionReportFragment {
     @Override
     protected void displayData(double[] rr) {
         ShinobiChart chart = getChart();
-        chart.setTitle("Seluyanov Index");
+        chart.setTitle("SDSD (window=30, step=5)");
         Axis xAxis = chart.getXAxis();
         xAxis.setTitle("Time, s");
 
         Axis yAxis = chart.getYAxis();
-        yAxis.setTitle("Seluyanov Index, ms");
+        yAxis.setTitle("SDSD, ms");
 
         // Clear
         List<Series<?>> series = new ArrayList<Series<?>>(chart.getSeries());

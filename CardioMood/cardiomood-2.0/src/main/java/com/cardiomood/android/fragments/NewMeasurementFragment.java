@@ -29,6 +29,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -109,6 +110,8 @@ public class NewMeasurementFragment extends Fragment {
     protected ImageButton durationSettingsButton;
     @InjectView(R.id.measurement_params_button)
     protected ImageButton measurementParamsButton;
+    @InjectView(R.id.measurement_progress)
+    protected ProgressBar measurementProgressBar;
 
     //chart is added manually
     protected GraphView mGraphView;
@@ -194,6 +197,13 @@ public class NewMeasurementFragment extends Fragment {
                     int level = msg.arg1;
                     onBatteryLevelReceived(level);
                     break;
+                case CardioMonitoringService.MSG_PROGRESS:
+                    if (msg.arg1 != 0) {
+                        measurementProgressBar.setVisibility(View.VISIBLE);
+                        double progress = msg.getData().getDouble("progress", 0.0d);
+                        measurementProgressBar.setProgress((int) Math.round(progress));
+                    }
+                    break;
                 default:
                     super.handleMessage(msg);
             }
@@ -235,10 +245,10 @@ public class NewMeasurementFragment extends Fragment {
             } else {
                 if (mCurrentSession != null) {
                     long duration = System.currentTimeMillis() - mCurrentSession.getStartTimestamp();
-                    if (duration <= 2*60*1000) {
+                    if (duration <= 60*1000) {
                         Toast.makeText(
                                 getActivity(),
-                                "You should record for at least 2 minutes.",
+                                "You should record for at least 1 minute.",
                                 Toast.LENGTH_SHORT
                         ).show();
                         return;
@@ -302,12 +312,34 @@ public class NewMeasurementFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 try {
+                    String userId = ParseUser.getCurrentUser().getObjectId();
                     Message msg = Message.obtain(null, CardioMonitoringService.MSG_START_SESSION);
-                    msg.getData().putString("parseUserId", ParseUser.getCurrentUser().getObjectId());
+                    msg.getData().putString("parseUserId", userId);
+                    int limitType = prefHelper.getInt(ConfigurationConstants.MEASUREMENT_LIMIT_TYPE + "_" + userId, 0);
+                    msg.getData().putInt("limitType", limitType);
+                    if (limitType == 1) {
+                        int limitIndex = prefHelper.getInt(ConfigurationConstants.MEASUREMENT_TIME_LIMIT + "_" + userId, 0);
+                        int limit = getResources().getIntArray(R.array.time_limit_values)[limitIndex];
+                        msg.getData().putInt("durationLimit", limit);
+                    } else if (limitType == 2) {
+                        int limitIndex = prefHelper.getInt(ConfigurationConstants.MEASUREMENT_COUNT_LIMIT + "_" + userId, 0);
+                        int limit = getResources().getIntArray(R.array.count_limit_values)[limitIndex];
+                        msg.getData().putInt("countLimit", limit);
+                    } else {
+                        // custom limits
+                        int countLimit = Integer.parseInt(
+                                prefHelper.getString(ConfigurationConstants.MEASUREMENT_CUSTOM_COUNT_LIMIT + "_" + userId, "0")
+                        );
+                        int durationLimit = Integer.parseInt(
+                                prefHelper.getString(ConfigurationConstants.MEASUREMENT_CUSTOM_TIME_LIMIT + "_" + userId, "0")
+                        );
+                        msg.getData().putInt("durationLimit", durationLimit);
+                        msg.getData().putInt("countLimit", countLimit);
+                    }
                     msg.replyTo = mMessenger;
                     mCardioService.send(msg);
-                } catch (RemoteException ex) {
-
+                } catch (Exception ex) {
+                    Log.w(TAG, "failed to start session", ex);
                 }
             }
         });
@@ -842,6 +874,7 @@ public class NewMeasurementFragment extends Fragment {
             if (mCurrentSessionId > 0L)
                 onSessionFinished(null);
             hrmBattery.setVisibility(View.GONE);
+            measurementProgressBar.setVisibility(View.GONE);
         }
 
         if (oldStatus >= 0) {
@@ -873,6 +906,9 @@ public class NewMeasurementFragment extends Fragment {
                 //stopSessionButton.setVisibility(View.VISIBLE);
                 //stopSessionButton.setEnabled(true);
             }
+            if (prefHelper.getBoolean(ConfigurationConstants.MEASUREMENT_AUTO_START +
+                    "_" + ParseUser.getCurrentUser().getObjectId()))
+                startSessionButton.callOnClick();
             return;
         }
         if (newStatus == LeHRMonitor.CONNECTING_STATUS) {

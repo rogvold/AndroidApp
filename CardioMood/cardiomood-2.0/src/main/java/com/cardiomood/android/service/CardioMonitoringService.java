@@ -73,6 +73,7 @@ public class CardioMonitoringService extends Service {
     public static final int MSG_CONNECTION_STATUS_CHANGED = 11;
     public static final int MSG_BATTERY_LEVEL = 12;
     public static final int MSG_RECONNECTING = 13;
+    public static final int MSG_PROGRESS = 14;
 
 
     /* Response messages */
@@ -386,10 +387,15 @@ public class CardioMonitoringService extends Service {
                 if (hrMonitor.isConnectingOrConnected()) {
                     hrMonitor.disconnect();
                 }
-                hrMonitor.close();
-                hrMonitor.setCallback(null);
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        hrMonitor.setCallback(null);
+                        hrMonitor.close();
+                        hrMonitor = null;
+                    }
+                });
             }
-            hrMonitor = null;
         } catch (Exception ex) {
             Log.w(TAG, "disconnect() failed", ex);
         }
@@ -494,8 +500,11 @@ public class CardioMonitoringService extends Service {
                     }
                 });
 
+                int limitType = msg.getData().getInt("limitType", 0);
+                int durationLimit = msg.getData().getInt("durationLimit", 120);
+                int countLimit = msg.getData().getInt("countLimit", 100);
                 // start worker thread
-                mWorkerThread = new CardioDataCollector(mCardioSession);
+                mWorkerThread = new CardioDataCollector(mCardioSession, limitType, durationLimit, countLimit);
                 mWorkerThread.start();
 
                 // SUCCESS
@@ -549,9 +558,17 @@ public class CardioMonitoringService extends Service {
                     msg.replyTo.send(response);
                 } else {
                     // TODO: make notification
+                    for (Messenger m: mClients) {
+                        Message response = Message.obtain(null, RESP_END_SESSION_RESULT, RESULT_SUCCESS, 0);
+                        response.getData().putLong("sessionId", mCardioSession.getId());
+                        response.getData().putLong("endTimestamp", mCardioSession.getEndTimestamp());
+                        m.send(response);
+                    }
                 }
 
-
+                synchronized (sessionLock) {
+                    mCardioSession = null;
+                }
             } catch (SQLException ex) {
                 if (msg.replyTo != null) {
                     Message response = Message.obtain(null, RESP_END_SESSION_RESULT, RESULT_FAIL, 0);
@@ -717,22 +734,37 @@ public class CardioMonitoringService extends Service {
 
     private class CardioDataCollector extends WorkerThread<CardioDataPackage> {
 
-        private SessionEntity cardioSession;
-        private SessionDAO sessionDAO;
-        private CardioItemDAO itemDao;
-        private long T0 = -1, T = -1;
+        private static final int LIMIT_TYPE_NONE = 0;
+        private static final int LIMIT_TYPE_TIME = 1;
+        private static final int LIMIT_TYPE_COUNT = 2;
+        private static final int LIMIT_TYPE_CUSTOM = 3;
 
-        private DataWindow.Timed stressDataWindow = new DataWindow.Timed(120 * 1000, 5000);
-        private DataWindow.IntervalsCount sdnnDataWindow = new DataWindow.IntervalsCount(20, 5);
+        private final SessionEntity cardioSession;
+        private final SessionDAO sessionDAO;
+        private final CardioItemDAO itemDao;
+
+        private final DataWindow.Timed stressDataWindow = new DataWindow.Timed(120 * 1000, 5000);
+        private final DataWindow.IntervalsCount sdnnDataWindow = new DataWindow.IntervalsCount(20, 5);
         private final ArtifactFilter filter = new PisarukArtifactFilter();
 
-        private Double currentSDNN = null;
-        private Integer currentStress = null;
+        private final int limitType;
+        private final int durationLimit;
+        private final int countLimit;
 
-        private WorkerThread<JSONObject> pubnubWorkerThread = new PubnubWorkerThread();
+        private volatile long T0 = -1, T = -1;
+        private volatile int duration = 0;
+        private volatile int count = 0;
+        private volatile Double currentSDNN = null;
+        private volatile Integer currentStress = null;
 
-        private CardioDataCollector(SessionEntity cardioSession) throws SQLException {
+        private volatile WorkerThread<JSONObject> pubnubWorkerThread = new PubnubWorkerThread();
+
+        private CardioDataCollector(SessionEntity cardioSession, int limitType, int durationLimit, int countLimit) throws SQLException {
             this.cardioSession = cardioSession;
+            this.limitType = limitType;
+            this.durationLimit = durationLimit*1000;
+            this.countLimit = countLimit;
+
             this.sessionDAO = DatabaseHelperFactory.getHelper().getSessionDao();
             this.itemDao = DatabaseHelperFactory.getHelper().getCardioItemDao();
 
@@ -765,9 +797,8 @@ public class CardioMonitoringService extends Service {
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    hideNotification();
-                    mCardioSession = null;
                     disconnect();
+                    hideNotification();
                 }
             });
             synchronized (sessionLock) {
@@ -855,6 +886,14 @@ public class CardioMonitoringService extends Service {
                     T += rr;
 
                     itemDao.create(entity);
+
+                    duration += rr;
+                    count++;
+                    publishProgress();
+                    if (limitReached()) {
+                        finishWork();
+                        break;
+                    }
                 }
 
                 synchronized (sessionLock) {
@@ -865,6 +904,60 @@ public class CardioMonitoringService extends Service {
             } catch (SQLException ex) {
                 Log.w(TAG, "workerThread.processItem() failed", ex);
             }
+        }
+
+        private boolean limitReached() {
+            switch (limitType) {
+                case LIMIT_TYPE_COUNT:
+                    return countLimit > 0 && count >= countLimit;
+                case LIMIT_TYPE_TIME:
+                    return durationLimit > 0 && duration >= durationLimit;
+                case LIMIT_TYPE_CUSTOM:
+                    if (countLimit > 0 && count >= countLimit)
+                        return true;
+                    if (durationLimit > 0 && duration >= durationLimit)
+                        return true;
+                    return false;
+                case LIMIT_TYPE_NONE:
+                default:
+                    return false;
+            }
+        }
+
+        private void publishProgress() {
+            double pct = 0;
+            switch (limitType) {
+                case LIMIT_TYPE_COUNT:
+                    pct = ((double) count) / countLimit * 100;
+                    break;
+                case LIMIT_TYPE_TIME:
+                    pct = ((double) duration) / durationLimit * 100;
+                    break;
+                case LIMIT_TYPE_CUSTOM:
+                    if (countLimit > 0)
+                        pct = ((double) count) / countLimit * 100;
+                    if (durationLimit > 0 && duration >= durationLimit)
+                        pct = Math.max(pct, ((double) duration) / durationLimit * 100);
+                    break;
+                case LIMIT_TYPE_NONE:
+                default:
+                    break;
+            }
+            final double progressPct = Math.min(100.0d, pct);
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    for (Messenger m: mClients) {
+                        try {
+                            Message msg = Message.obtain(null, MSG_PROGRESS, limitType, 0);
+                            msg.getData().putDouble("progress", progressPct);
+                            m.send(msg);
+                        } catch (RemoteException ex) {
+                            // suppress this
+                        }
+                    }
+                }
+            });
         }
     }
 

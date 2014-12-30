@@ -15,7 +15,7 @@
         cardiomood:showAsAction="never"
         android:title="@string/menu_undo_remove_artifacts" />
 
-    <item android:id="@+id/menu_save_this_revision"
-        cardiomood:showAsAction="never"
-        android:title="@string/menu_save_this_revision" />
+    <!--<item android:id="@+id/menu_save_this_revision"-->
+        <!--cardiomood:showAsAction="never"-->
+        <!--android:title="@string/menu_save_this_revision" />-->
 </menu>

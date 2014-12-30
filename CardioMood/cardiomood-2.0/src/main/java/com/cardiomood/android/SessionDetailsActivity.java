@@ -1,9 +1,7 @@
 package com.cardiomood.android;
 
 import android.app.ActivityManager;
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -14,17 +12,15 @@ import android.support.v4.view.PagerTabStrip;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cardiomood.android.db.DatabaseHelperFactory;
 import com.cardiomood.android.db.entity.SessionEntity;
+import com.cardiomood.android.dialogs.MeasurementInfoDialog;
 import com.cardiomood.android.fragments.details.AbstractSessionReportFragment;
 import com.cardiomood.android.fragments.details.HistogramReportFragment;
 import com.cardiomood.android.fragments.details.OrganizationAReportFragment;
@@ -116,7 +112,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
         mSectionsPagerAdapter.addFragment(HistogramReportFragment.class, "Histogram");
         mSectionsPagerAdapter.addFragment(ScatterogramReportFragment.class, "Scatterogram");
         mSectionsPagerAdapter.addFragment(SDNN10sReportFragment.class, "SDNN10s");
-        mSectionsPagerAdapter.addFragment(SeluyanovReportFragment.class, "Seluyanov Index");
+        mSectionsPagerAdapter.addFragment(SeluyanovReportFragment.class, "SDSD");
 
         // Set up the ViewPager with the sections adapter.
         mViewPager = (CustomViewPager) findViewById(R.id.pager);
@@ -212,37 +208,43 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
         }
 
         // check session data
-        Task.callInBackground(new Callable<Long>() {
+        Task.callInBackground(new Callable<String[]>() {
             @Override
-            public Long call() throws Exception {
+            public String[] call() throws Exception {
                 String result[] = DatabaseHelperFactory.getHelper()
                         .getCardioItemDao()
                         .queryRaw(
-                                "select sum(rr) from cardio_items where session_id=?",
+                                "select sum(rr), count(rr) from cardio_items where session_id=?",
                                 String.valueOf(sessionId)
                         ).getFirstResult();
-                return Long.parseLong(result[0])/1000;
+                return result;
             }
-        }).continueWith(new Continuation<Long, Object>() {
+        }).continueWith(new Continuation<String[], Object>() {
             @Override
-            public Object then(Task<Long> task) throws Exception {
+            public Object then(Task<String[]> task) throws Exception {
                 if (task.isFaulted()) {
                     Timber.w(task.getError(), "Failed to load session with id = " + sessionId);
                     if (!isFinishing()) {
                         finish();
                     }
                 } else if (task.isCompleted()) {
-                    long duration = task.getResult();
-                    if (duration < 2*60 && !isFinishing()) {
+                    String[] result = task.getResult();
+                    long duration = Long.parseLong(result[0]);
+                    long count = Long.parseLong(result[1]);
+                    if (duration < 2 * 60 * 1000 && count < 100 && !isFinishing()) {
                         Toast.makeText(SessionDetailsActivity.this,
                                 R.string.measurement_contains_too_few_data, Toast.LENGTH_SHORT).show();
                         finish();
                         return null;
                     }
 
-                    if (duration > 2*60 + 30) {
-                        addTab(StressIndexReportFragment.class, "Bayevsky Stress Index");
+                    if (count >= 150) {
                         addTab(OrganizationAReportFragment.class, "Gorgo Index \"A\"");
+                        mSectionsPagerAdapter.notifyDataSetChanged();
+                    }
+
+                    if (duration > 2 * 60 * 1000 + 30 * 1000) {
+                        addTab(StressIndexReportFragment.class, "Bayevsky Stress Index");
                         addTab(SDNNReportFragment.class, "SDNN");
                         addTab(RMSSDReportFragment.class, "RMSSD");
                         mSectionsPagerAdapter.notifyDataSetChanged();
@@ -339,52 +341,25 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
             return;
         }
 
-        LayoutInflater li = LayoutInflater.from(this);
-        View promptsView = li.inflate(R.layout.dialog_input_text, null);
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setView(promptsView);
-
-        final EditText userInput = (EditText) promptsView.findViewById(R.id.editTextDialogUserInput);
-        userInput.setText(session.getName());
-
-        // set dialog message
-        alertDialogBuilder
-                .setCancelable(false)
-                .setPositiveButton("OK",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // get user input and set it to result
-                                // edit text
-                                String newName = userInput.getText() == null ? "" : userInput.getText().toString();
-                                newName = newName.trim();
-                                if (newName.isEmpty())
-                                    newName = null;
-                                renameSession(session, newName);
-                            }
-                        }
-                )
-                .setNegativeButton("Cancel",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                dialog.cancel();
-                            }
-                        }
-                )
-                .setTitle(R.string.rename_session);
-
-        // create alert dialog
-        AlertDialog alertDialog = alertDialogBuilder.create();
-
-        // show it
-        alertDialog.show();
+        MeasurementInfoDialog dlg = MeasurementInfoDialog
+                .newInstance(session.getName(), session.getDescription());
+        dlg.setCallback(new MeasurementInfoDialog.Callback() {
+            @Override
+            public void onInfoUpdated(String name, String description) {
+                renameSession(session, name, description);
+            }
+        });
+        dlg.show(getSupportFragmentManager(), "session_info_dlg");
     }
 
-    private void renameSession(final SessionEntity session, final String newName) {
+    private void renameSession(final SessionEntity session, final String newName, final String newDescription) {
         final String oldName = session.getName();
+        final String oldDescription = session.getDescription();
         Task.callInBackground(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
                 session.setName(newName);
+                session.setDescription(newDescription);
                 session.setSyncDate(new Date());
                 DatabaseHelperFactory.getHelper().getSessionDao().update(session);
                 return null;
@@ -398,6 +373,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
                         Toast.makeText(SessionDetailsActivity.this, R.string.failed_to_rename_session, Toast.LENGTH_SHORT).show();
                     }
                     session.setName(oldName);
+                    session.setDescription(oldDescription);
                 } else if (task.isCompleted()) {
                     if (!isFinishing()) {
                         Toast.makeText(SessionDetailsActivity.this, R.string.session_renamed, Toast.LENGTH_SHORT).show();
