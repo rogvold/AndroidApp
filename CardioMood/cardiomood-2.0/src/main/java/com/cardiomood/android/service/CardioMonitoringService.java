@@ -637,12 +637,14 @@ public class CardioMonitoringService extends Service {
     }
 
     private String getNewSessionDescription(SessionEntity session) {
-        String pattern = prefHelper.getString(ConfigurationConstants.MEASUREMENT_DESCRIPTION, "Measurement $date$");
+        String pattern = prefHelper.getString(ConfigurationConstants.MEASUREMENT_DESCRIPTION);
         prefHelper.remove(ConfigurationConstants.MEASUREMENT_DESCRIPTION);
         return processMacros(pattern, session);
     }
 
     private String processMacros(String pattern, SessionEntity session) {
+        if (pattern == null)
+            return null;
         return pattern.replaceAll("\\$date\\$", DATE_FORMAT.format(session.getCreationDate()))
                 .replaceAll("\\$id\\$", String.valueOf(session.getId()))
                 .replaceAll("\\$device_name\\$", getConnectedDeviceName())

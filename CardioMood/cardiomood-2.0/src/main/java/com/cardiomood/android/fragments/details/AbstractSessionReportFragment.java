@@ -1,6 +1,7 @@
 package com.cardiomood.android.fragments.details;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -90,6 +91,8 @@ public abstract class AbstractSessionReportFragment extends Fragment {
     private int artifactsFiltered = 0;
     private SessionDetailsActivity mHostActivity = null;
     private double rr[] = null;
+
+    private ProgressDialog pDialog = null;
 
     private Object eventHandler = new Object() {
 
@@ -394,12 +397,26 @@ public abstract class AbstractSessionReportFragment extends Fragment {
                     public void onBeginSave() {
                         savingInProgress = true;
                         getActivity().invalidateOptionsMenu();
+
+                        // show pDialog
+                        pDialog = new ProgressDialog(getActivity());
+                        pDialog.setMessage("Generation report file...");
+                        pDialog.setIndeterminate(true);
+                        pDialog.setCancelable(false);
+                        pDialog.show();
                     }
 
                     @Override
                     public void onEndSave(String fileName) {
                         savingInProgress = false;
                         getActivity().invalidateOptionsMenu();
+
+                        // dismiss pDialog
+                        if (pDialog != null) {
+                            if (pDialog.isShowing())
+                                pDialog.dismiss();
+                        }
+                        pDialog = null;
 
                         if (fileName == null) {
                             return;
@@ -414,6 +431,13 @@ public abstract class AbstractSessionReportFragment extends Fragment {
                     public void onError() {
                         savingInProgress = false;
                         getActivity().invalidateOptionsMenu();
+
+                        // dismiss pDialog
+                        if (pDialog != null) {
+                            if (pDialog.isShowing())
+                                pDialog.dismiss();
+                        }
+                        pDialog = null;
                     }
                 });
                 dlg.saveAsTxt();

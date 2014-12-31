@@ -41,7 +41,9 @@ public class HistogramReportFragment extends AbstractSessionReportFragment {
     private static final String TAG = HistogramReportFragment.class.getSimpleName();
     private Histogram histogram = new Histogram(new double[0], 50);
     private Histogram128Ext histogram128Ext = null;
-    private double[] rr, time;
+    private double[] time;
+    private double stressIndex;
+    private double gorgoA;
 
     private double maxNN, minNN;
 
@@ -87,10 +89,15 @@ public class HistogramReportFragment extends AbstractSessionReportFragment {
 
     @Override
     protected void collectDataInBackground(SessionEntity session, double[] time, double[] rrFiltered) {
-        this.rr = rrFiltered;
         this.time = time;
         histogram = new Histogram(rrFiltered, 50);
         histogram128Ext = new Histogram128Ext(rrFiltered);
+
+        double[] SI = HeartRateUtils.getSI(rrFiltered, new DataWindow.Timed(2 * 1000 * 60, 5000))[1];
+        stressIndex = SI.length > 0 ? StatUtils.mean(SI) : HeartRateUtils.getSI(rrFiltered);
+
+        double[] A = HeartRateUtils.getA(rrFiltered, new DataWindow.IntervalsCount(100, 5))[1];
+        gorgoA = A.length > 0 ? StatUtils.mean(A) : HeartRateUtils.getA(rrFiltered);
     }
 
     @Override
@@ -121,13 +128,10 @@ public class HistogramReportFragment extends AbstractSessionReportFragment {
             chart.addSeries(s);
         }
 
-        double si = StatUtils.mean(HeartRateUtils.getSI(rr, time, 2*60*1000, 5000)[1]);
-        double gorgo = StatUtils.mean(HeartRateUtils.getA(rr, new DataWindow.IntervalsCount(100, 5))[1]);
-
         moView.setText(String.valueOf(Math.round(histogram.getMo())) + " ms");
         aMoView.setText(String.valueOf(Math.round(histogram.getAMo()*10)/10.0) + "%");
-        bayevskyView.setText(Html.fromHtml(String.valueOf(Math.round(si)) + " s<sup>-2</sup>"));
-        gorgoView.setText(String.valueOf(Math.round(gorgo * 1000)/1000.0));
+        bayevskyView.setText(Html.fromHtml(String.valueOf(Math.round(stressIndex)) + " s<sup>-2</sup>"));
+        gorgoView.setText(String.valueOf(Math.round(gorgoA * 1000)/1000.0));
         mxdmnView.setText(String.valueOf(Math.round(histogram.getMxDMn())) + " ms");
         wn1View.setText(String.valueOf(Math.round(histogram128Ext.getWN1())) + " ms");
         wn4View.setText(String.valueOf(Math.round(histogram128Ext.getWN4())) + " ms");

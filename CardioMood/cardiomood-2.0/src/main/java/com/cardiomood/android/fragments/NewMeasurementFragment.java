@@ -150,14 +150,20 @@ public class NewMeasurementFragment extends Fragment {
                 //this switch reads the information in the message (usually just
                 //an integer) and will do something depending on which integer is sent
                 case CardioMonitoringService.RESP_STATUS:
-                    mCurrentSessionId = msg.getData().getLong("sessionId", -1L);
+                    long sessionId = msg.getData().getLong("sessionId", -1L);
                     onConnectionStatusChanged(-1, msg.arg1, msg.getData().getString("deviceAddress"));
-                    if (mCurrentSessionId > 0L) {
+                    if (sessionId > 0L) {
+                        mCurrentSessionId = sessionId;
                         inProgress = true;
                         msg.what = CardioMonitoringService.RESP_START_SESSION_RESULT;
                         msg.arg1 = CardioMonitoringService.RESULT_SUCCESS;
                         onSessionStarted(msg);
                     } else {
+                        if (mCurrentSessionId > 0) {
+                            msg.what = CardioMonitoringService.RESP_END_SESSION_RESULT;
+                            msg.arg1 = CardioMonitoringService.RESULT_SUCCESS;
+                            onSessionFinished(msg);
+                        }
                         inProgress = false;
                     }
                     break;
@@ -311,36 +317,7 @@ public class NewMeasurementFragment extends Fragment {
         startSessionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try {
-                    String userId = ParseUser.getCurrentUser().getObjectId();
-                    Message msg = Message.obtain(null, CardioMonitoringService.MSG_START_SESSION);
-                    msg.getData().putString("parseUserId", userId);
-                    int limitType = prefHelper.getInt(ConfigurationConstants.MEASUREMENT_LIMIT_TYPE + "_" + userId, 0);
-                    msg.getData().putInt("limitType", limitType);
-                    if (limitType == 1) {
-                        int limitIndex = prefHelper.getInt(ConfigurationConstants.MEASUREMENT_TIME_LIMIT + "_" + userId, 0);
-                        int limit = getResources().getIntArray(R.array.time_limit_values)[limitIndex];
-                        msg.getData().putInt("durationLimit", limit);
-                    } else if (limitType == 2) {
-                        int limitIndex = prefHelper.getInt(ConfigurationConstants.MEASUREMENT_COUNT_LIMIT + "_" + userId, 0);
-                        int limit = getResources().getIntArray(R.array.count_limit_values)[limitIndex];
-                        msg.getData().putInt("countLimit", limit);
-                    } else {
-                        // custom limits
-                        int countLimit = Integer.parseInt(
-                                prefHelper.getString(ConfigurationConstants.MEASUREMENT_CUSTOM_COUNT_LIMIT + "_" + userId, "0")
-                        );
-                        int durationLimit = Integer.parseInt(
-                                prefHelper.getString(ConfigurationConstants.MEASUREMENT_CUSTOM_TIME_LIMIT + "_" + userId, "0")
-                        );
-                        msg.getData().putInt("durationLimit", durationLimit);
-                        msg.getData().putInt("countLimit", countLimit);
-                    }
-                    msg.replyTo = mMessenger;
-                    mCardioService.send(msg);
-                } catch (Exception ex) {
-                    Log.w(TAG, "failed to start session", ex);
-                }
+                startSession();
             }
         });
 
@@ -452,6 +429,8 @@ public class NewMeasurementFragment extends Fragment {
                                     return null;
                                 }
                             }, Task.UI_THREAD_EXECUTOR);
+                        } else {
+                            timeElapsedView.setText(CommonTools.timeToHumanString(0));
                         }
                     }
                 });
@@ -790,6 +769,41 @@ public class NewMeasurementFragment extends Fragment {
         } return true;
     }
 
+    private void startSession() {
+        try {
+            String userId = ParseUser.getCurrentUser().getObjectId();
+            Message msg = Message.obtain(null, CardioMonitoringService.MSG_START_SESSION);
+            msg.getData().putString("parseUserId", userId);
+            int limitType = prefHelper.getInt(ConfigurationConstants.MEASUREMENT_LIMIT_TYPE + "_" + userId, 1);
+            msg.getData().putInt("limitType", limitType);
+            if (limitType == 1) {
+                int limitIndex = prefHelper.getInt(ConfigurationConstants.MEASUREMENT_TIME_LIMIT + "_" + userId, 0);
+                int limit = getResources().getIntArray(R.array.time_limit_values)[limitIndex];
+                msg.getData().putInt("durationLimit", limit);
+            } else if (limitType == 2) {
+                int limitIndex = prefHelper.getInt(ConfigurationConstants.MEASUREMENT_COUNT_LIMIT + "_" + userId, 0);
+                int limit = getResources().getIntArray(R.array.count_limit_values)[limitIndex];
+                msg.getData().putInt("countLimit", limit);
+            } else {
+                // custom limits
+                int countLimit = Integer.parseInt(
+                        prefHelper.getString(ConfigurationConstants.MEASUREMENT_CUSTOM_COUNT_LIMIT + "_" + userId, "0")
+                );
+                int durationLimit = Integer.parseInt(
+                        prefHelper.getString(ConfigurationConstants.MEASUREMENT_CUSTOM_TIME_LIMIT + "_" + userId, "0")
+                );
+                msg.getData().putInt("durationLimit", durationLimit);
+                msg.getData().putInt("countLimit", countLimit);
+            }
+            msg.replyTo = mMessenger;
+            mCardioService.send(msg);
+        } catch (Exception ex) {
+            Log.w(TAG, "failed to start session", ex);
+            Toast.makeText(getActivity(), "Failed to start measurement. " +
+                    "Try to restart the app.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     protected void onDataReceived(Message msg) {
         msg.getData().setClassLoader(CardioDataPackage.class.getClassLoader());
         CardioDataPackage data = msg.getData().getParcelable("data");
@@ -849,6 +863,9 @@ public class NewMeasurementFragment extends Fragment {
         startSessionButton.setVisibility(View.VISIBLE);
         stopSessionButton.setEnabled(false);
         stopSessionButton.setVisibility(View.GONE);
+        mGraphView.setVisibility(View.GONE);
+        emptyMessageView.setVisibility(View.VISIBLE);
+        measurementProgressBar.setVisibility(View.GONE);
         resetHRM();
         onConnectionStatusChanged(LeHRMonitor.CONNECTED_STATUS, LeHRMonitor.INITIAL_STATUS, null);
         graphT = -1;
@@ -908,7 +925,7 @@ public class NewMeasurementFragment extends Fragment {
             }
             if (prefHelper.getBoolean(ConfigurationConstants.MEASUREMENT_AUTO_START +
                     "_" + ParseUser.getCurrentUser().getObjectId()))
-                startSessionButton.callOnClick();
+                startSession();
             return;
         }
         if (newStatus == LeHRMonitor.CONNECTING_STATUS) {

@@ -115,8 +115,8 @@ public class TimeDomainReportFragment extends AbstractSessionReportFragment {
 
             rrCountView.setText(String.valueOf(rr.length));
             artifactsView.setText(String.valueOf(report.getArtifactsCount()));
-            meanHRView.setText(String.valueOf(Math.round(report.getHeartRate())) + " bpm");
-            mRRView.setText(String.valueOf(Math.round(report.getmRR())) + " ms");
+            meanHRView.setText(String.valueOf(Math.round(report.getHeartRate()*10)/10.0d) + " bpm");
+            mRRView.setText(String.valueOf(Math.round(report.getmRR()*10)/10.0d) + " ms");
             sdnnView.setText(String.valueOf(Math.round(report.getSDNN()*100)/100.0d) + " ms");
             rmssdView.setText(String.valueOf(Math.round(report.getRMSSD()*100)/100.0d) + " ms");
             pnn50iew.setText(String.valueOf(Math.round(report.getpNN50()*100)/100.0d) + "%");

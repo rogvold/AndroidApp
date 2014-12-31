@@ -231,7 +231,7 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
                     String[] result = task.getResult();
                     long duration = Long.parseLong(result[0]);
                     long count = Long.parseLong(result[1]);
-                    if (duration < 2 * 60 * 1000 && count < 100 && !isFinishing()) {
+                    if (duration < 1 * 60 * 1000 && count < 100 && !isFinishing()) {
                         Toast.makeText(SessionDetailsActivity.this,
                                 R.string.measurement_contains_too_few_data, Toast.LENGTH_SHORT).show();
                         finish();

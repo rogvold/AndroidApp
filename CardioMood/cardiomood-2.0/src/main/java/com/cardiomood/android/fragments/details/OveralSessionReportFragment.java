@@ -98,7 +98,8 @@ public class OveralSessionReportFragment extends AbstractSessionReportFragment {
                 bpm[i] = 1000 * 60 / rrFiltered[i];
             }
             meanBPM = StatUtils.mean(bpm);
-            stressIndex = StatUtils.mean(HeartRateUtils.getSI(rrFiltered, new DataWindow.Timed(2 * 1000 * 60, 5000))[1]);
+            double[] SI = HeartRateUtils.getSI(rrFiltered, new DataWindow.Timed(2 * 1000 * 60, 5000))[1];
+            stressIndex = SI.length > 0 ? StatUtils.mean(SI) : HeartRateUtils.getSI(rrFiltered);
         }
     }
 

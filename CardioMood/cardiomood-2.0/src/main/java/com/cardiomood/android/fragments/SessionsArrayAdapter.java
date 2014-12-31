@@ -101,7 +101,10 @@ public class SessionsArrayAdapter extends ArrayAdapter<SessionEntity> {
                                 new String[]{String.valueOf(id)}
                         ).getResults();
                         if (results.size() == 1) {
-                            bpm = Math.round(Double.valueOf(results.get(0)[0]));
+                            String s = results.get(0)[0];
+                            if (s != null)
+                                bpm = Math.round(Double.valueOf(s));
+                            else bpm = 0L;
                         }
                     } catch (SQLException ex) {
                         Timber.d(ex, "Failed to calculate average BPM for session_id=" + id);
