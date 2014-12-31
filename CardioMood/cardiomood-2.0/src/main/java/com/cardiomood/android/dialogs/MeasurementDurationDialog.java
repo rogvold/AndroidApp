@@ -18,7 +18,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
-import com.cardiomood.android.R;
+import com.cardiomood.android.expert.R;
 import com.cardiomood.android.fragments.NewMeasurementFragment;
 import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.android.tools.PreferenceHelper;

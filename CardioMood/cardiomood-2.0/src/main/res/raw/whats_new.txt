@@ -1,5 +1,9 @@
 <p><b>New in CardioMood 2.0:</b><p>
 <p>
++++ Mor analytic features
+<br/>
++++ Improved design
+<br/>
 +++ Stability improvements
 <br/>
 +++ Android 5.0 support

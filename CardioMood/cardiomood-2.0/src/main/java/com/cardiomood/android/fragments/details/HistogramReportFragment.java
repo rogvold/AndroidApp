@@ -8,8 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.cardiomood.android.R;
 import com.cardiomood.android.db.entity.SessionEntity;
+import com.cardiomood.android.expert.R;
 import com.cardiomood.math.HeartRateUtils;
 import com.cardiomood.math.histogram.Histogram;
 import com.cardiomood.math.histogram.Histogram128Ext;

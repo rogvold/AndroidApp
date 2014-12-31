@@ -23,7 +23,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.cardiomood.android.R;
+import com.cardiomood.android.expert.R;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.parse.ParseObject;
 import com.parse.ParseUser;

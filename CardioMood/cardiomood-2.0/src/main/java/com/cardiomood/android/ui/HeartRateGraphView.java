@@ -2,7 +2,7 @@ package com.cardiomood.android.ui;
 
 import android.content.Context;
 
-import com.cardiomood.android.R;
+import com.cardiomood.android.expert.R;
 import com.cardiomood.android.tools.CommonTools;
 import com.jjoe64.graphview.CustomLabelFormatter;
 import com.jjoe64.graphview.LineGraphView;

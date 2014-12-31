@@ -20,7 +20,6 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.cardiomood.android.R;
 import com.cardiomood.android.ReportPreviewActivity;
 import com.cardiomood.android.SessionDetailsActivity;
 import com.cardiomood.android.db.DatabaseHelperFactory;
@@ -29,6 +28,7 @@ import com.cardiomood.android.db.entity.SessionDAO;
 import com.cardiomood.android.db.entity.SessionEntity;
 import com.cardiomood.android.dialogs.InputTextDialog;
 import com.cardiomood.android.dialogs.SaveAsDialog;
+import com.cardiomood.android.expert.R;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.math.filter.ArtifactFilter;
 import com.cardiomood.math.filter.PisarukArtifactFilter;

@@ -14,7 +14,7 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
-import com.cardiomood.android.R;
+import com.cardiomood.android.expert.R;
 import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.parse.ParseUser;

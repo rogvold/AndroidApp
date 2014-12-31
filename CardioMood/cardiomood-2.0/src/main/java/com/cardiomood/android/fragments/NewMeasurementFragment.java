@@ -33,7 +33,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.cardiomood.android.R;
 import com.cardiomood.android.SessionDetailsActivity;
 import com.cardiomood.android.controls.gauge.BatteryIndicatorGauge;
 import com.cardiomood.android.db.DatabaseHelperFactory;
@@ -42,6 +41,7 @@ import com.cardiomood.android.db.entity.SessionDAO;
 import com.cardiomood.android.db.entity.SessionEntity;
 import com.cardiomood.android.dialogs.MeasurementDurationDialog;
 import com.cardiomood.android.dialogs.MeasurementInfoDialog;
+import com.cardiomood.android.expert.R;
 import com.cardiomood.android.service.CardioDataPackage;
 import com.cardiomood.android.service.CardioMonitoringService;
 import com.cardiomood.android.sync.parse.ParseTools;

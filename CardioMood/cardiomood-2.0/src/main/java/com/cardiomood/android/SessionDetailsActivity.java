@@ -21,6 +21,7 @@ import android.widget.Toast;
 import com.cardiomood.android.db.DatabaseHelperFactory;
 import com.cardiomood.android.db.entity.SessionEntity;
 import com.cardiomood.android.dialogs.MeasurementInfoDialog;
+import com.cardiomood.android.expert.R;
 import com.cardiomood.android.fragments.details.AbstractSessionReportFragment;
 import com.cardiomood.android.fragments.details.HistogramReportFragment;
 import com.cardiomood.android.fragments.details.OrganizationAReportFragment;

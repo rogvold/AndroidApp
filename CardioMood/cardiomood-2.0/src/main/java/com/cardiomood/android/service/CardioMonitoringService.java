@@ -17,12 +17,12 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.cardiomood.android.MainActivity;
-import com.cardiomood.android.R;
 import com.cardiomood.android.db.DatabaseHelperFactory;
 import com.cardiomood.android.db.entity.CardioItemDAO;
 import com.cardiomood.android.db.entity.CardioItemEntity;
 import com.cardiomood.android.db.entity.SessionDAO;
 import com.cardiomood.android.db.entity.SessionEntity;
+import com.cardiomood.android.expert.R;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.android.tools.thread.WorkerThread;

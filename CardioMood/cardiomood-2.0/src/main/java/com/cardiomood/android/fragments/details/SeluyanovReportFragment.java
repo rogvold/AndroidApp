@@ -2,8 +2,8 @@ package com.cardiomood.android.fragments.details;
 
 import android.os.Bundle;
 
-import com.cardiomood.android.R;
 import com.cardiomood.android.db.entity.SessionEntity;
+import com.cardiomood.android.expert.R;
 import com.cardiomood.math.HeartRateUtils;
 import com.cardiomood.math.parameters.SeluyanovIndexValue;
 import com.cardiomood.math.window.DataWindow;

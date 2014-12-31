@@ -9,7 +9,7 @@ import android.text.method.LinkMovementMethod;
 import android.text.util.Linkify;
 import android.widget.TextView;
 
-import com.cardiomood.android.R;
+import com.cardiomood.android.expert.R;
 
 import java.io.BufferedReader;
 import java.io.IOException;

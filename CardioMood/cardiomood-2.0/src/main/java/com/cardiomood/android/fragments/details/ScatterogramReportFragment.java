@@ -3,8 +3,8 @@ package com.cardiomood.android.fragments.details;
 import android.graphics.Color;
 import android.os.Bundle;
 
-import com.cardiomood.android.R;
 import com.cardiomood.android.db.entity.SessionEntity;
+import com.cardiomood.android.expert.R;
 import com.shinobicontrols.charts.Axis;
 import com.shinobicontrols.charts.DataAdapter;
 import com.shinobicontrols.charts.DataPoint;

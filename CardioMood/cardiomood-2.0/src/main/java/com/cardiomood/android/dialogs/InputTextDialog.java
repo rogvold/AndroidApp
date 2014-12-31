@@ -13,7 +13,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.cardiomood.android.R;
+import com.cardiomood.android.expert.R;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;

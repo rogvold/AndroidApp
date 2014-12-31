@@ -7,9 +7,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.cardiomood.android.R;
 import com.cardiomood.android.controls.gauge.SpeedometerGauge;
 import com.cardiomood.android.db.entity.SessionEntity;
+import com.cardiomood.android.expert.R;
 import com.cardiomood.math.HeartRateUtils;
 import com.cardiomood.math.window.DataWindow;
 import com.shinobicontrols.charts.Axis;

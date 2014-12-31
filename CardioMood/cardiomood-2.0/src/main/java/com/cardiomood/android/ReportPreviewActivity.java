@@ -11,6 +11,8 @@ import android.webkit.WebView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.cardiomood.android.expert.R;
+
 import java.io.File;
 
 

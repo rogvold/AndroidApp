@@ -9,11 +9,11 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.cardiomood.android.R;
 import com.cardiomood.android.controls.CircledTextView;
 import com.cardiomood.android.db.DatabaseHelperFactory;
 import com.cardiomood.android.db.entity.CardioItemDAO;
 import com.cardiomood.android.db.entity.SessionEntity;
+import com.cardiomood.android.expert.R;
 import com.cardiomood.android.tools.CommonTools;
 
 import java.sql.SQLException;

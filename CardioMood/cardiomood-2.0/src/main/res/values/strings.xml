@@ -3,7 +3,7 @@
     <string name="app_name">CardioMood 2.0</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_splash_screen">CardioMood</string>
+    <string name="title_activity_splash_screen">CardioMood Expert</string>
     <string name="dummy_button">Tap to skip</string>
     <string name="dummy_content">CardioMood.Com</string>
     <string name="title_activity_main">CardioMood</string>

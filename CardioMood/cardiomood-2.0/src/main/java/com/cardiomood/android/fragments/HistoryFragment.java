@@ -26,7 +26,6 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.cardiomood.android.R;
 import com.cardiomood.android.SessionDetailsActivity;
 import com.cardiomood.android.db.DatabaseHelper;
 import com.cardiomood.android.db.DatabaseHelperFactory;
@@ -36,6 +35,7 @@ import com.cardiomood.android.db.entity.LocationDAO;
 import com.cardiomood.android.db.entity.LocationEntity;
 import com.cardiomood.android.db.entity.SessionDAO;
 import com.cardiomood.android.db.entity.SessionEntity;
+import com.cardiomood.android.expert.R;
 import com.cardiomood.android.sync.ormlite.SyncEntity;
 import com.cardiomood.android.sync.ormlite.SyncHelper;
 import com.cardiomood.android.tools.PreferenceHelper;

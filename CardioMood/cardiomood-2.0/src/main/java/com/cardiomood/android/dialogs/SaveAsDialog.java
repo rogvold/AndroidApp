@@ -13,12 +13,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.cardiomood.android.R;
 import com.cardiomood.android.db.DatabaseHelper;
 import com.cardiomood.android.db.DatabaseHelperFactory;
 import com.cardiomood.android.db.entity.CardioItemDAO;
 import com.cardiomood.android.db.entity.SessionDAO;
 import com.cardiomood.android.db.entity.SessionEntity;
+import com.cardiomood.android.expert.R;
 import com.cardiomood.android.fragments.details.TextReport;
 import com.flurry.android.FlurryAgent;
 

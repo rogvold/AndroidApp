@@ -24,6 +24,7 @@ import android.widget.Toast;
 
 import com.cardiomood.android.dialogs.AboutDialog;
 import com.cardiomood.android.dialogs.WhatsNewDialog;
+import com.cardiomood.android.expert.R;
 import com.cardiomood.android.fragments.EditParseUserFragment;
 import com.cardiomood.android.fragments.HistoryFragment;
 import com.cardiomood.android.fragments.NewMeasurementFragment;

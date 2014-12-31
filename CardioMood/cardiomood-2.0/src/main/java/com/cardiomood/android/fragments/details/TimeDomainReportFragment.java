@@ -6,8 +6,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.cardiomood.android.R;
 import com.cardiomood.android.db.entity.SessionEntity;
+import com.cardiomood.android.expert.R;
 import com.cardiomood.math.parameters.SDANN10sValue;
 import com.shinobicontrols.charts.Axis;
 import com.shinobicontrols.charts.DataPoint;
