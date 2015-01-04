@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/time_domain_description"/>
+
+    <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:stretchColumns="1,3">
+
+        <TableRow>
+            <TextView
+                android:text="RR count ="
+                android:padding="3dip"/>
+            <TextView
+                android:id="@+id/rrCount"
+                android:text="[?]"
+                android:padding="3dip"
+                android:textStyle="bold" />
+            <TextView
+                android:text="artifacts = "
+                android:padding="3dip"/>
+            <TextView
+                android:id="@+id/artifacts"
+                android:text="[?]"
+                android:padding="3dip"
+                android:textStyle="bold"/>
+        </TableRow>
+
+        <View
+            android:layout_height="8dp"/>
+
+        <TableRow>
+            <TextView
+                android:text="mean HR ="
+                android:padding="3dip"/>
+            <TextView
+                android:id="@+id/meanHR"
+                android:text="[?]"
+                android:padding="3dip"
+                android:textStyle="bold" />
+            <TextView
+                android:text="mRR = "
+                android:padding="3dip"/>
+            <TextView
+                android:id="@+id/mRR"
+                android:text="[?]"
+                android:padding="3dip"
+                android:textStyle="bold"/>
+        </TableRow>
+
+        <TableRow>
+            <TextView
+                android:text="SDNN ="
+                android:padding="3dip" />
+            <TextView
+                android:id="@+id/SDNN"
+                android:text="[?]"
+                android:padding="3dip"
+                android:textStyle="bold" />
+            <TextView
+                android:text="RMSSD = "
+                android:padding="3dip"/>
+            <TextView
+                android:id="@+id/RMSSD"
+                android:text="[?]"
+                android:padding="3dip"
+                android:textStyle="bold"/>
+        </TableRow>
+
+        <View
+            android:layout_height="8dp"/>
+
+        <TableRow>
+            <TextView
+                android:text="pNN50 ="
+                android:padding="3dip" />
+            <TextView
+                android:id="@+id/pNN50"
+                android:text="[?]"
+                android:padding="3dip"
+                android:textStyle="bold" />
+        </TableRow>
+
+    </TableLayout>
+
+</LinearLayout>

@@ -1,0 +1,20 @@
+<p><b>New in this version:</b><p>
+<p>
+This is version fixes bugs found in CardioMood 2.0.
+<br/>
+<b>Rate our app</b> <a href="https://play.google.com/store/apps/details?id=com.cardiomood.android.expert">on Google Play</a>
+</p>
+<br/>
+<p>Stay with <b><a href="http://goo.gl/ZLmHhJ">www.CardioMood.com</a></b>!</p>
+<p><b>New in CardioMood 2.0:</b><p>
+<p>
++++ More analytic features
+<br/>
++++ Improved design
+<br/>
++++ Stability improvements
+<br/>
++++ Android 5.0 support
+</p>
+<br/>
+<p>Stay with <b><a href="http://goo.gl/ZLmHhJ">www.CardioMood.com</a></b>!</p>

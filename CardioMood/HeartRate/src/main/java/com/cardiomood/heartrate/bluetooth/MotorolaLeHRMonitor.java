@@ -301,7 +301,7 @@ public class MotorolaLeHRMonitor extends LeHRMonitor {
     }
 
     private short[] getRRIntervals(byte[] data, int length) {
-        final double A = 1.0; // 1000.0/1024.0 ???
+        final double A = 1000.0/1024.0;
         if(length <= 0) {
             return new short[]{};
         }

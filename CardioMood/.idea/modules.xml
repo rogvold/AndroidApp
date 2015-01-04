@@ -12,7 +12,8 @@
       <module fileurl="file://$PROJECT_DIR$/MiptApp/MiptApp.iml" filepath="$PROJECT_DIR$/MiptApp/MiptApp.iml" />
       <module fileurl="file://$PROJECT_DIR$/ShinobiCharts/ShinobiCharts.iml" filepath="$PROJECT_DIR$/ShinobiCharts/ShinobiCharts.iml" />
       <module fileurl="file://$PROJECT_DIR$/StepCounter/StepCounter.iml" filepath="$PROJECT_DIR$/StepCounter/StepCounter.iml" />
-      <module fileurl="file://$PROJECT_DIR$/cardiomood-2.0/cardiomood-2.0.iml" filepath="$PROJECT_DIR$/cardiomood-2.0/cardiomood-2.0.iml" />
+      <module fileurl="file://$PROJECT_DIR$/cardiomood-expert/cardiomood-expert.iml" filepath="$PROJECT_DIR$/cardiomood-expert/cardiomood-expert.iml" />
+      <module fileurl="file://$PROJECT_DIR$/cardiomood-lite/cardiomood-lite.iml" filepath="$PROJECT_DIR$/cardiomood-lite/cardiomood-lite.iml" />
       <module fileurl="file://$PROJECT_DIR$/facebook/facebook.iml" filepath="$PROJECT_DIR$/facebook/facebook.iml" />
     </modules>
   </component>

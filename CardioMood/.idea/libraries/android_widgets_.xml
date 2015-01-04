@@ -1,8 +1,8 @@
 <component name="libraryTable">
   <library name="android-widgets-">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/cardiomood-2.0/build/intermediates/exploded-aar/android-widgets/classes.jar!/" />
-      <root url="file://$PROJECT_DIR$/cardiomood-2.0/build/intermediates/exploded-aar/android-widgets/res" />
+      <root url="file://$PROJECT_DIR$/cardiomood-expert/build/intermediates/exploded-aar/android-widgets/res" />
+      <root url="jar://$PROJECT_DIR$/cardiomood-expert/build/intermediates/exploded-aar/android-widgets/classes.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

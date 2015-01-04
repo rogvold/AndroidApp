@@ -1,0 +1,8 @@
+<p><b>New in this version:</b><p>
+<p>
+This version fixes bugs found in CardioMood 2.0.
+<br/>
+<b>Check out expert version</b> <a href="https://play.google.com/store/apps/details?id=com.cardiomood.android.expert">on Google Play</a>
+</p>
+<br/>
+<p>Stay with <b><a href="http://goo.gl/ZLmHhJ">www.CardioMood.com</a></b>!</p>
