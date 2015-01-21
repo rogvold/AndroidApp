@@ -11,6 +11,7 @@ import android.widget.Button;
 
 import com.cardiomood.android.db.entity.SessionEntity;
 import com.cardiomood.android.lite.R;
+import com.flurry.android.FlurryAgent;
 import com.shinobicontrols.charts.Axis;
 import com.shinobicontrols.charts.NumberAxis;
 
@@ -40,6 +41,7 @@ public class FrequencyDomainReportFragment extends AbstractSessionReportFragment
                 } catch (Exception ex) {
                     Log.w("FeedbackActivity", "failed to start google play", ex);
                 }
+                FlurryAgent.logEvent("download_expert_clicked");
             }
         });
         ViewGroup.LayoutParams params = topCustomSection.getLayoutParams();

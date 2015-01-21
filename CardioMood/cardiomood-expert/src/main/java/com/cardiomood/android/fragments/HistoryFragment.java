@@ -39,8 +39,8 @@ import com.cardiomood.android.sync.ormlite.SyncEntity;
 import com.cardiomood.android.sync.ormlite.SyncHelper;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.ReachabilityTest;
+import com.cardiomood.android.tools.analytics.AnalyticsHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
-import com.flurry.android.FlurryAgent;
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.dao.GenericRawResults;
@@ -54,10 +54,8 @@ import org.json.JSONArray;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 import bolts.Continuation;
@@ -66,7 +64,7 @@ import bolts.Task;
 /**
  * Created by danshin on 01.11.13.
  */
-public class    HistoryFragment extends Fragment
+public class HistoryFragment extends Fragment
         implements ListView.OnItemClickListener, AdapterView.OnItemLongClickListener, SearchView.OnQueryTextListener {
 
     private static final String TAG = HistoryFragment.class.getSimpleName();
@@ -81,6 +79,7 @@ public class    HistoryFragment extends Fragment
     private List<SessionEntity> mSessions = new ArrayList<>();
     private SessionsEndlessAdapter mEndlessAdapter;
     private PreferenceHelper prefHelper;
+    private AnalyticsHelper analyticsHelper;
 
     // work around for 'view already has a parent...'
     private boolean initial = true;
@@ -90,7 +89,7 @@ public class    HistoryFragment extends Fragment
         // Called when the action mode is created; startActionMode() was called
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
-            FlurryAgent.logEvent("action_mode_started");
+            analyticsHelper.logEvent("action_mode_started", "Action Mode started");
             // Inflate a menu resource providing context menu items
             MenuInflater inflater = mode.getMenuInflater();
             inflater.inflate(R.menu.history_context_menu, menu);
@@ -109,13 +108,13 @@ public class    HistoryFragment extends Fragment
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.menu_delete:
-                    FlurryAgent.logEvent("menu_delete_item_clicked");
+                    analyticsHelper.logEvent("menu_delete_item_clicked", "Menu Delete item clicked");
                     if (listAdapter.getSelectedItem() >= 0)
                         deleteItem(listAdapter.getSelectedItem());
                     mode.finish(); // Action picked, so close the CAB
                     return true;
                 case R.id.menu_rename_item:
-                    FlurryAgent.logEvent("menu_rename_item_clicked");
+                    analyticsHelper.logEvent("menu_rename_item_clicked", "Menu edit item clicked");
                     if (listAdapter.getSelectedItem() >= 0)
                         renameItem(listAdapter.getSelectedItem());
                     mode.finish(); // Action picked, so close the CAB
@@ -134,7 +133,7 @@ public class    HistoryFragment extends Fragment
         // Called when the user exits the action mode
         @Override
         public void onDestroyActionMode(ActionMode mode) {
-            FlurryAgent.logEvent("action_mode_finished");
+            analyticsHelper.logEvent("action_mode_finished", "Action Mode finished");
             mActionMode = null;
             if (listAdapter != null) {
                 listAdapter.setSelectedItem(-1);
@@ -152,6 +151,7 @@ public class    HistoryFragment extends Fragment
         prefHelper = new PreferenceHelper(getActivity(), true);
         listAdapter = new SessionsArrayAdapter(getActivity(), mSessions);
         mEndlessAdapter = new SessionsEndlessAdapter(listAdapter);
+        analyticsHelper = new AnalyticsHelper(getActivity());
     }
 
     @Override
@@ -204,9 +204,9 @@ public class    HistoryFragment extends Fragment
                 searchManager.getSearchableInfo(getActivity().getComponentName()));
 
         EditText txtSearch = ((EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text));
-        txtSearch.setHintTextColor(Color.DKGRAY);
         txtSearch.setTextColor(Color.WHITE);
         txtSearch.setHint("Search in history");
+        txtSearch.setHintTextColor(Color.GRAY);
         searchView.setOnQueryTextListener(this);
 
         super.onCreateOptionsMenu(menu, inflater);
@@ -216,6 +216,7 @@ public class    HistoryFragment extends Fragment
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_refresh:
+                analyticsHelper.logEvent("menu_sync_clicked", "Menu Sync clicked");
                 sync();
                 return true;
         }
@@ -239,10 +240,7 @@ public class    HistoryFragment extends Fragment
                     Toast.makeText(getActivity(), R.string.failed_to_romove_session, Toast.LENGTH_SHORT).show();
                 } else {
                     // log delete event
-                    Map<String, String> args = new HashMap<String, String>();
-                    args.put("sessionId", session.getId()+"");
-                    args.put("sessionName", session.getName());
-                    FlurryAgent.logEvent("session_deleted", args);
+                    analyticsHelper.logEvent("session_deleted", "Recording deleted by user");
 
                     Toast.makeText(getActivity(), R.string.item_removed, Toast.LENGTH_SHORT).show();
                     listAdapter.remove(session);
@@ -301,12 +299,12 @@ public class    HistoryFragment extends Fragment
                     Toast.makeText(getActivity(), R.string.session_renamed, Toast.LENGTH_SHORT).show();
                     listAdapter.notifyDataSetChanged();
 
-                    if ("SYNC_WHEN_MODIFIED".equals(pHelper.getString(ConfigurationConstants.SYNC_STRATEGY, "SYNC_WHEN_MODIFIED"))) {
+                    if ("SYNC_ON_MODIFIED".equals(pHelper.getString(ConfigurationConstants.SYNC_STRATEGY, "SYNC_ON_MODIFIED"))) {
                         ParseObject parseObject = SyncEntity.toParseObject(renamedSession);
                         parseObject.saveEventually();
                     }
 
-                    FlurryAgent.logEvent("session_renamed");
+                    analyticsHelper.logEvent("session_renamed", "Recording renamed by user");
                 }
                 return null;
             }
@@ -323,11 +321,13 @@ public class    HistoryFragment extends Fragment
                 Intent intent = new Intent(getActivity(), SessionDetailsActivity.class);
                 intent.putExtra(SessionDetailsActivity.SESSION_ID_EXTRA, session.getId());
                 getActivity().startActivity(intent);
+                analyticsHelper.logEvent("session_opened", "History item clicked");
             }
         } else {
             view.setSelected(true);
             listAdapter.setSelectedItem(position);
             listAdapter.notifyDataSetChanged();
+            analyticsHelper.logEvent("session_selected", "History item selected");
         }
     }
 
@@ -343,27 +343,27 @@ public class    HistoryFragment extends Fragment
 
     private void sync() {
         new ReachabilityTest(
-            getActivity(),
-            "api.parse.com",
-             80,
-             new ReachabilityTest.Callback() {
-                 @Override
-                 public void onReachabilityTestPassed() {
-                    if (!NewMeasurementFragment.inProgress) {
-                        performSync(getActivity());
-                    } else {
-                        simpleRefresh();
+                getActivity(),
+                "api.parse.com",
+                80,
+                new ReachabilityTest.Callback() {
+                    @Override
+                    public void onReachabilityTestPassed() {
+                        if (!NewMeasurementFragment.inProgress) {
+                            performSync(getActivity());
+                        } else {
+                            simpleRefresh();
+                        }
                     }
-                 }
 
-                 @Override
-                 public void onReachabilityTestFailed() {
-                    if (getActivity() != null) {
-                        Toast.makeText(getActivity(), "Server is not available.", Toast.LENGTH_SHORT).show();
-                        simpleRefresh();
+                    @Override
+                    public void onReachabilityTestFailed() {
+                        if (getActivity() != null) {
+                            Toast.makeText(getActivity(), "Server is not available.", Toast.LENGTH_SHORT).show();
+                            simpleRefresh();
+                        }
                     }
-                 }
-             }
+                }
         ).execute();
     }
 
@@ -399,8 +399,10 @@ public class    HistoryFragment extends Fragment
                         Toast.makeText(getActivity(), "Faulted", Toast.LENGTH_SHORT).show();
                     }
                     Log.w(TAG, "sync failed", task.getError());
+                    analyticsHelper.logEvent("sessions_sync_failed", "Sync failed");
                 } else if (task.isCompleted()) {
                     prefHelper.putLong(ConfigurationConstants.CONFIG_LAST_SYNC_TIMESTAMP + "-" + userId, task.getResult());
+                    analyticsHelper.logEvent("sessions_synced", "Recordings were synchronized");
                 }
 
                 simpleRefresh();
@@ -420,7 +422,7 @@ public class    HistoryFragment extends Fragment
         }
 
         // started?
-        if (initial && "SYNC_ON_START".equals(pHelper.getString(ConfigurationConstants.SYNC_STRATEGY, "SYNC_WHEN_MODIFIED"))) {
+        if (initial && "SYNC_ON_START".equals(pHelper.getString(ConfigurationConstants.SYNC_STRATEGY, "SYNC_ON_MODIFIED"))) {
             sync();
             return;
         }
@@ -437,7 +439,7 @@ public class    HistoryFragment extends Fragment
                 if (activity == null)
                     return null;
                 if (!task.isFaulted() && task.isCompleted()) {
-                    if ("SYNC_ON_MODIFIED".equals(pHelper.getString(ConfigurationConstants.SYNC_STRATEGY, "SYNC_WHEN_MODIFIED"))) {
+                    if ("SYNC_ON_MODIFIED".equals(pHelper.getString(ConfigurationConstants.SYNC_STRATEGY, "SYNC_ON_MODIFIED"))) {
                         if (task.getResult()) {
                             sync();
                             return null;
@@ -493,6 +495,7 @@ public class    HistoryFragment extends Fragment
     @Override
     public boolean onQueryTextChange(String s) {
         mEndlessAdapter.getFilter().filter(s);
+        analyticsHelper.logEvent("history_search", "History search event");
         return false;
     }
 

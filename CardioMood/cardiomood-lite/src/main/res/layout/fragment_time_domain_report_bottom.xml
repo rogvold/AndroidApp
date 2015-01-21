@@ -6,12 +6,15 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/time_domain_description"/>
+        android:id="@+id/time_domain_description"
+        android:text="Shows RR-intervals (durations of cardiac cycles)."/>
 
     <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:stretchColumns="1,3">
+        android:stretchColumns="1,3"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
 
         <TableRow>
             <TextView

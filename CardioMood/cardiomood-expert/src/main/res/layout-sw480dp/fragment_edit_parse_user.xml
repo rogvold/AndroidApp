@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ScrollView01"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbars="vertical">
+    <LinearLayout
+        android:layout_width="480dp"
+        android:orientation="vertical"
+        android:layout_height="fill_parent"
+        android:padding="8dp"
+        android:layout_gravity="center">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <com.cardiomood.android.ui.GlyphTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="&#59451;"
+                android:textStyle="bold"
+                android:textSize="20sp"
+                android:editable="false"
+                android:focusable="false"
+                android:layout_gravity="center_vertical"
+                android:textColor="@color/colorAccent"/>
+            <EditText
+                    android:id="@+id/editTextEmail"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/email"
+                    android:inputType="none"
+                    android:layout_width="fill_parent"/>
+
+        </LinearLayout>
+
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp">
+
+                <com.cardiomood.android.ui.GlyphTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="&#59636; PERSONAL INFO"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:textColor="@color/colorAccent"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginLeft="8dp"
+                    android:paddingBottom="8dp">
+                    <EditText
+                            android:id="@+id/editTextFirstName"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/first_name"
+                            android:inputType="textPersonName"
+                            android:layout_width="fill_parent">
+                    </EditText>
+                    <EditText
+                            android:id="@+id/editTextLastName"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/last_name"
+                            android:inputType="textPersonName"
+                            android:layout_width="fill_parent"
+                            android:editable="false" >
+                    </EditText>
+                    <EditText
+                            android:id="@+id/editTextPhoneNumber"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/phone_number_hint"
+                            android:inputType="phone"
+                            android:layout_width="fill_parent"
+                            android:editable="false" >
+                    </EditText>
+                    <Spinner
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/gender"
+                            android:entries="@array/gender_names"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            />
+                    <EditText
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:hint="@string/birth_date"
+                            android:inputType="date"
+                            android:id="@+id/birth_date"
+                     />
+                </LinearLayout>
+
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp">
+
+                <com.cardiomood.android.ui.GlyphTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="&#59416; PHYSICAL PARAMETERS"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:textColor="@color/colorAccent"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginLeft="8dp"
+                    android:paddingBottom="8dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/weight"
+                            android:paddingRight="16dp"
+                            android:paddingLeft="0dp"/>
+                        <EditText
+                            android:layout_width="0px"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:inputType="number"
+                            android:id="@+id/weight_major"
+                            android:layout_weight="4"/>
+                        <TextView
+                            android:layout_width="0px"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/weight_major_units"
+                            android:text="@string/weight_units_kg"
+                            android:layout_weight="1"/>
+                        <EditText
+                            android:layout_width="0px"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:inputType="number"
+                            android:id="@+id/weight_minor"
+                            android:layout_weight="4"/>
+                        <TextView
+                            android:layout_width="0px"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/weight_minor_units"
+                            android:text="@string/weight_units_g"
+                            android:layout_weight="1"/>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/height"
+                            android:paddingRight="16dp"
+                            android:paddingLeft="0dp"/>
+                        <EditText
+                            android:layout_width="0px"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:inputType="number"
+                            android:id="@+id/height_major"
+                            android:layout_weight="4"/>
+                        <TextView
+                            android:layout_width="0px"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/height_major_units"
+                            android:text="@string/height_units_m"
+                            android:layout_weight="1"/>
+                        <EditText
+                            android:layout_width="0px"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:inputType="number"
+                            android:id="@+id/height_minor"
+                            android:layout_weight="4"/>
+                        <TextView
+                            android:layout_width="0px"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/height_minor_units"
+                            android:text="@string/height_units_cm"
+                            android:layout_weight="1"/>
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="8dp"
+                        android:textAppearance="?android:attr/textAppearanceSmall"
+                        android:text="@string/you_can_select_unit_system_in_settings" />
+
+                </LinearLayout>
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="8dp">
+
+                <com.cardiomood.android.ui.GlyphTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="&#59631; CARDIO PARAMETERS"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:textColor="@color/colorAccent"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginLeft="8dp"
+                    android:paddingBottom="8dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/resting_heart_rate"
+                            android:paddingLeft="0dp"
+                            android:paddingRight="8dp"/>
+                        <EditText
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="@string/hint_resting_heart_rate"
+                            android:inputType="number"
+                            android:id="@+id/resting_heart_rate" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/aerobic_threshold"
+                            android:paddingLeft="0dp"
+                            android:paddingRight="8dp"/>
+                        <EditText
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text=""
+                            android:hint="@string/hint_aerobic_threshold"
+                            android:inputType="number"
+                            android:id="@+id/aerobic_threshold"
+                            />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/anaerobic_threshold"
+                            android:paddingLeft="0dp"
+                            android:paddingRight="8dp"/>
+                        <EditText
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text=""
+                            android:hint="@string/hint_anaerobic_threshold"
+                            android:inputType="number"
+                            android:id="@+id/anaerobic_threshold"
+                            />
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
+
+    </LinearLayout>
+</ScrollView> 

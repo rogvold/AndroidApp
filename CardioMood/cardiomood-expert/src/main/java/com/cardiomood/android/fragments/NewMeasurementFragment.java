@@ -48,6 +48,7 @@ import com.cardiomood.android.service.CardioMonitoringService;
 import com.cardiomood.android.sync.parse.ParseTools;
 import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.android.tools.PreferenceHelper;
+import com.cardiomood.android.tools.analytics.AnalyticsHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.android.tools.ui.TouchEffect;
 import com.cardiomood.android.ui.HeartRateGraphView;
@@ -133,6 +134,7 @@ public class NewMeasurementFragment extends Fragment {
     protected LeHRMonitor hrMonitor;
     protected Handler mHandler;
     protected PreferenceHelper prefHelper;
+    protected AnalyticsHelper analyticsHelper;
 
     // timer
     protected Timer sessionTimer = new Timer("session_timer");
@@ -297,6 +299,7 @@ public class NewMeasurementFragment extends Fragment {
         hrMonitor = LeHRMonitor.getMonitor(getActivity());
         mHandler = new Handler();
         prefHelper = new PreferenceHelper(getActivity(), true);
+        analyticsHelper = new AnalyticsHelper(getActivity());
     }
 
     @Override
@@ -331,6 +334,7 @@ public class NewMeasurementFragment extends Fragment {
         stopSessionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                analyticsHelper.logEvent("stop_session_clicked", "Stop Session clicked");
                 if (mCurrentSessionId > 0L) {
                     try {
                         Message msg = Message.obtain(null, CardioMonitoringService.MSG_END_SESSION);
@@ -346,6 +350,7 @@ public class NewMeasurementFragment extends Fragment {
         durationSettingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                analyticsHelper.logEvent("duration_limit_clicked", "Duration Limit clicked");
                 new MeasurementDurationDialog()
                         .show(getChildFragmentManager(), "session_duration");
             }
@@ -355,8 +360,9 @@ public class NewMeasurementFragment extends Fragment {
         measurementParamsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MeasurementInfoDialog dlg = null;
+                analyticsHelper.logEvent("measurement_info_clicked", "Measurement Info clicked");
 
+                MeasurementInfoDialog dlg = null;
                 if (mCurrentSession != null) {
                     try {
                         DatabaseHelperFactory
@@ -482,7 +488,7 @@ public class NewMeasurementFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (disableBluetoothOnClose) {
+        if (disableBluetoothOnClose && !inProgress) {
             if (hrMonitor != null) {
                 BluetoothAdapter bluetoothAdapter = hrMonitor.getBluetoothAdapter();
                 if (bluetoothAdapter!= null && bluetoothAdapter.isEnabled())
@@ -497,6 +503,7 @@ public class NewMeasurementFragment extends Fragment {
 
             case REQUEST_ENABLE_BT:
                 if (resultCode == Activity.RESULT_OK) {
+                    analyticsHelper.logEvent("bluetooth_enabled", "Bluetooth was enabled");
                     Log.e(TAG, "onActivityResult(): BT enabled");
                     disableBluetoothOnClose = prefHelper.getBoolean(ConfigurationConstants.CONNECTION_DISABLE_BT_ON_CLOSE);
                     performConnect();
@@ -574,6 +581,7 @@ public class NewMeasurementFragment extends Fragment {
     }
 
     private void performConnect() {
+        analyticsHelper.logEvent("perform_connect", "Perform connect");
         if (!requestEnableBluetooth()) {
             // this will show dialog to enable bluetooth
             return;
@@ -599,6 +607,7 @@ public class NewMeasurementFragment extends Fragment {
     }
 
     private void performDisconnect() {
+        analyticsHelper.logEvent("perform_disconnect", "Perform disconnect");
         Message msg = Message.obtain(null, CardioMonitoringService.MSG_DISCONNECT);
         msg.replyTo = mMessenger;
         try {
@@ -781,6 +790,7 @@ public class NewMeasurementFragment extends Fragment {
     }
 
     private void startSession() {
+        analyticsHelper.logEvent("start_session", "Start recording");
         try {
             String userId = ParseUser.getCurrentUser().getObjectId();
             Message msg = Message.obtain(null, CardioMonitoringService.MSG_START_SESSION);
@@ -896,6 +906,7 @@ public class NewMeasurementFragment extends Fragment {
             startActivity(intent);
 
             Toast.makeText(getActivity(), R.string.please_wait, Toast.LENGTH_SHORT).show();
+            analyticsHelper.logEvent("new_session_opened", "New recording opened");
         }
     }
 
@@ -904,6 +915,8 @@ public class NewMeasurementFragment extends Fragment {
             if (!isDetached()) {
                 CommonTools.vibrate(getActivity(), new long[]{0, 500, 300, 500}, -1);
             }
+
+            analyticsHelper.logEvent("session_finished", "Recording finished");
 
             // validate this recording
             validateSession(mCurrentSessionId)
@@ -914,6 +927,7 @@ public class NewMeasurementFragment extends Fragment {
                             if (entity != null) {
                                 openSessionViewActivity(entity.getId());
                             } else {
+                                analyticsHelper.logEvent("session_too_short", "Recording too short (removed)");
                                 if (getActivity() != null) {
                                     Toast.makeText(getActivity(), "Recording was cancelled.",
                                             Toast.LENGTH_SHORT).show();
@@ -938,6 +952,7 @@ public class NewMeasurementFragment extends Fragment {
     }
 
     private void onReconnecting(Message msg) {
+        analyticsHelper.logEvent("device_reconnecting", "Reconnecting to sensor");
         if (getActivity() == null)
             return;
         Toast.makeText(getActivity(), "Connection lost! Reconnecting...", Toast.LENGTH_SHORT)
@@ -958,14 +973,19 @@ public class NewMeasurementFragment extends Fragment {
                 onSessionFinished(null);
             hrmBattery.setVisibility(View.GONE);
             measurementProgressBar.setVisibility(View.GONE);
+            if (oldStatus == LeHRMonitor.CONNECTED_STATUS) {
+                analyticsHelper.logEvent("device_disconnected", "Sensor disconnected");
+            }
         }
 
         if (oldStatus >= 0) {
             if (oldStatus == LeHRMonitor.CONNECTING_STATUS &&
                     (newStatus == LeHRMonitor.READY_STATUS || newStatus == LeHRMonitor.DISCONNECTING_STATUS)) {
                 Toast.makeText(getActivity(), "Connection failed.", Toast.LENGTH_SHORT).show();
+                analyticsHelper.logEvent("device_disconnection_failed", "Sensor connection failed");
             } else if (newStatus == LeHRMonitor.CONNECTED_STATUS) {
                 Toast.makeText(getActivity(), "Connected to " + deviceAddress, Toast.LENGTH_SHORT).show();
+                analyticsHelper.logEvent("device_connected", "Sensor connected");
             } else{
                 //Toast.makeText(getActivity(), "Status changed from " + oldStatus + " to " + newStatus + "!", Toast.LENGTH_SHORT).show();
             }

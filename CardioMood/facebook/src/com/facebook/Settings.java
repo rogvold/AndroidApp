@@ -20,12 +20,15 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Base64;
 import android.util.Log;
 
 import com.facebook.android.BuildConfig;
@@ -38,6 +41,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Field;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -68,6 +73,7 @@ public final class Settings {
     private static volatile String facebookDomain = FACEBOOK_COM;
     private static AtomicLong onProgressThreshold = new AtomicLong(65536);
     private static volatile boolean platformCompatibilityEnabled;
+    private static volatile boolean isDebugEnabled = BuildConfig.DEBUG;
 
     private static final int DEFAULT_CORE_POOL_SIZE = 5;
     private static final int DEFAULT_MAXIMUM_POOL_SIZE = 128;
@@ -118,6 +124,12 @@ public final class Settings {
         if (sdkInitialized == true) {
           return;
         }
+
+        // Make sure we've loaded default settings if we haven't already.
+        Settings.loadDefaultsFromMetadataIfNeeded(context);
+        // Load app settings from network so that dialog configs are available
+        Utility.loadAppSettingsAsync(context, Settings.getApplicationId());
+
         BoltsMeasurementEventListener.getInstance(context.getApplicationContext());
         sdkInitialized = true;
     }
@@ -190,8 +202,39 @@ public final class Settings {
      */
     public static final boolean isLoggingBehaviorEnabled(LoggingBehavior behavior) {
         synchronized (loggingBehaviors) {
-            return BuildConfig.DEBUG && loggingBehaviors.contains(behavior);
+            return Settings.isDebugEnabled() && loggingBehaviors.contains(behavior);
         }
+    }
+
+    /**
+     * This method is deprecated.  Use {@link com.facebook.Settings#isDebugEnabled()} instead.
+     */
+    @Deprecated
+    public static final boolean isLoggingEnabled() {
+        return isDebugEnabled();
+    }
+
+    /**
+     * This method is deprecated.  Use {@link com.facebook.Settings#setIsDebugEnabled(boolean)} instead.
+     */
+    @Deprecated
+    public static final void setIsLoggingEnabled(boolean enabled) {
+        setIsDebugEnabled(enabled);
+    }
+
+    /**
+     * Indicates if we are in debug mode.
+     */
+    public static final boolean isDebugEnabled() {
+        return isDebugEnabled;
+    }
+
+    /**
+     * Used to enable or disable logging, and other debug features. Defaults to BuildConfig.DEBUG.
+     * @param enabled Debug features (like logging) are enabled if true, disabled if false.
+     */
+    public static final void setIsDebugEnabled(boolean enabled) {
+        isDebugEnabled = enabled;
     }
 
     /**
@@ -307,7 +350,7 @@ public final class Settings {
      *
      * @param shouldAutoPublishInstall true to automatically publish, false to not
      *
-     * This method is deprecated.  See {@link AppEventsLogger#activateApp(Context, String)} for more info.
+     * This method is deprecated.  See {@link AppEventsLogger#activateApp(android.content.Context, String)} for more info.
      */
     @Deprecated
     public static void setShouldAutoPublishInstall(boolean shouldAutoPublishInstall) {
@@ -319,7 +362,7 @@ public final class Settings {
      *
      * @return true to automatically publish, false to not
      *
-     * This method is deprecated.  See {@link AppEventsLogger#activateApp(Context, String)} for more info.
+     * This method is deprecated.  See {@link AppEventsLogger#activateApp(android.content.Context, String)} for more info.
      */
     @Deprecated
     public static boolean getShouldAutoPublishInstall() {
@@ -374,7 +417,8 @@ public final class Settings {
                 } else {
                     return new Response(null, null, null, graphObject, true);
                 }
-            } else if (identifiers.getAndroidAdvertiserId() == null && identifiers.getAttributionId() == null) {
+            } else if (identifiers == null ||
+                       (identifiers.getAndroidAdvertiserId() == null && identifiers.getAttributionId() == null)) {
                 throw new FacebookException("No attribution id available to send to server.");
             } else {
                 if (!Utility.queryAppSettings(applicationId, false).supportsAttribution()) {
@@ -393,7 +437,7 @@ public final class Settings {
                     publishResponse.getGraphObject().getInnerJSONObject() != null) {
                     editor.putString(jsonKey, publishResponse.getGraphObject().getInnerJSONObject().toString());
                 }
-                editor.commit();
+                editor.apply();
 
                 return publishResponse;
             }
@@ -409,18 +453,22 @@ public final class Settings {
      * @return returns null if the facebook app is not present on the phone.
      */
     public static String getAttributionId(ContentResolver contentResolver) {
+        Cursor c = null;
         try {
             String [] projection = {ATTRIBUTION_ID_COLUMN_NAME};
-            Cursor c = contentResolver.query(ATTRIBUTION_ID_CONTENT_URI, projection, null, null, null);
+            c = contentResolver.query(ATTRIBUTION_ID_CONTENT_URI, projection, null, null, null);
             if (c == null || !c.moveToFirst()) {
                 return null;
             }
             String attributionId = c.getString(c.getColumnIndex(ATTRIBUTION_ID_COLUMN_NAME));
-            c.close();
             return attributionId;
         } catch (Exception e) {
             Log.d(TAG, "Caught unexpected exception in getAttributionId(): " + e.toString());
             return null;
+        } finally {
+            if (c != null) {
+                c.close();
+            }
         }
     }
 
@@ -473,10 +521,10 @@ public final class Settings {
      * @param context   Used to persist this value across app runs.
      */
     public static void setLimitEventAndDataUsage(Context context, boolean limitEventUsage) {
-        SharedPreferences preferences = context.getSharedPreferences(APP_EVENT_PREFERENCES, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean("limitEventUsage", limitEventUsage);
-        editor.commit();
+        context.getSharedPreferences(APP_EVENT_PREFERENCES, Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean("limitEventUsage", limitEventUsage)
+            .apply();
     }
 
     /**
@@ -554,6 +602,39 @@ public final class Settings {
         if (!defaultsLoaded) {
             loadDefaultsFromMetadata(context);
         }
+    }
+
+    public static String getApplicationSignature(Context context) {
+        if (context == null) {
+            return null;
+        }
+        PackageManager packageManager = context.getPackageManager();
+        if (packageManager == null) {
+            return null;
+        }
+
+        String packageName = context.getPackageName();
+        PackageInfo pInfo;
+        try {
+            pInfo = packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNATURES);
+        } catch (PackageManager.NameNotFoundException e) {
+            return null;
+        }
+
+        Signature[] signatures = pInfo.signatures;
+        if (signatures == null || signatures.length == 0) {
+            return null;
+        }
+
+        MessageDigest md;
+        try {
+            md = MessageDigest.getInstance("SHA-1");
+        } catch (NoSuchAlgorithmException e) {
+            return null;
+        }
+
+        md.update(pInfo.signatures[0].toByteArray());
+        return Base64.encodeToString(md.digest(),  Base64.URL_SAFE | Base64.NO_PADDING);
     }
 
     /**

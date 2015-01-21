@@ -29,15 +29,18 @@ public class Histogram {
         this.count = new int[(int)(Math.floor(StatUtils.max(values)/step)) + 1];
         Arrays.fill(this.count, 0);
         init();
+        calculateParams();
     }
 
-    private void init() {
+    protected void init() {
         for (double value: values) {
             int i = (int) Math.floor(value / step);
             if (i < 0) i = 0;
             this.count[i]++;
         }
+    }
 
+    protected void calculateParams() {
         int index = 0;
         height = -1;
         for (int i=0; i<count.length; i++) {
@@ -98,7 +101,7 @@ public class Histogram {
 
     public int getCountFor(double x) {
         int i = (int) Math.floor(x/step);
-        if (i > count.length)
+        if (i >= count.length)
             return 0;
         if (i < 0)
             return 0;

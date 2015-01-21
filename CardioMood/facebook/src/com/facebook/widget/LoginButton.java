@@ -19,6 +19,7 @@ package com.facebook.widget;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.TypedArray;
@@ -220,7 +221,7 @@ public class LoginButton extends Button {
     /**
      * Create the LoginButton.
      *
-     * @see View#View(Context)
+     * @see android.view.View#View(android.content.Context)
      */
     public LoginButton(Context context) {
         super(context);
@@ -232,7 +233,7 @@ public class LoginButton extends Button {
     /**
      * Create the LoginButton by inflating from XML
      *
-     * @see View#View(Context, AttributeSet)
+     * @see android.view.View#View(android.content.Context, android.util.AttributeSet)
      */
     public LoginButton(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -272,7 +273,7 @@ public class LoginButton extends Button {
     /**
      * Create the LoginButton by inflating from XML and applying a style.
      *
-     * @see View#View(Context, AttributeSet, int)
+     * @see android.view.View#View(android.content.Context, android.util.AttributeSet, int)
      */
     public LoginButton(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
@@ -389,7 +390,7 @@ public class LoginButton extends Button {
      * manage the setting of permissions outside of the LoginButton class altogether
      * (by managing the session explicitly).
      *
-     * @param permissions the read permissions to use
+     * @param permissions the publish permissions to use
      *
      * @throws UnsupportedOperationException if setReadPermissions has been called
      * @throws IllegalArgumentException if permissions is null or empty
@@ -415,7 +416,7 @@ public class LoginButton extends Button {
      * manage the setting of permissions outside of the LoginButton class altogether
      * (by managing the session explicitly).
      *
-     * @param permissions the read permissions to use
+     * @param permissions the publish permissions to use
      *
      * @throws UnsupportedOperationException if setReadPermissions has been called
      * @throws IllegalArgumentException if permissions is null or empty
@@ -525,8 +526,8 @@ public class LoginButton extends Button {
     }
     
     /**
-     * Return the current {@link ToolTipMode} for this LoginButton
-     * @return The {@link ToolTipMode}
+     * Return the current {@link com.facebook.widget.LoginButton.ToolTipMode} for this LoginButton
+     * @return The {@link com.facebook.widget.LoginButton.ToolTipMode}
      */
     public ToolTipMode getToolTipMode() {
         return nuxMode;
@@ -562,7 +563,7 @@ public class LoginButton extends Button {
     }
 
     /**
-     * Provides an implementation for {@link Activity#onActivityResult
+     * Provides an implementation for {@link android.app.Activity#onActivityResult
      * onActivityResult} that updates the Session based on information returned
      * during the authorization flow. The Activity containing this view
      * should forward the resulting onActivityResult call here to
@@ -582,7 +583,7 @@ public class LoginButton extends Button {
      *            call.
      * @return A boolean indicating whether the requestCode matched a pending
      *         authorization request for this Session.
-     * @see Session#onActivityResult(Activity, int, int, Intent)
+     * @see Session#onActivityResult(android.app.Activity, int, int, android.content.Intent)
      */
     public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
         Session session = sessionTracker.getSession();
@@ -629,7 +630,7 @@ public class LoginButton extends Button {
     /**
      * Sets the fragment that contains this control. This allows the LoginButton to be
      * embedded inside a Fragment, and will allow the fragment to receive the
-     * {@link Fragment#onActivityResult(int, int, android.content.Intent) onActivityResult}
+     * {@link android.support.v4.app.Fragment#onActivityResult(int, int, android.content.Intent) onActivityResult}
      * call rather than the Activity.
      *
      * @param fragment the fragment that contains this control
@@ -851,6 +852,11 @@ public class LoginButton extends Button {
                         openRequest = new Session.OpenRequest(parentFragment);
                     } else if (context instanceof Activity) {
                         openRequest = new Session.OpenRequest((Activity)context);
+                    } else if (context instanceof ContextWrapper) {
+                        Context baseContext = ((ContextWrapper)context).getBaseContext();
+                        if (baseContext instanceof Activity) {
+                            openRequest = new Session.OpenRequest((Activity)baseContext);
+                        }
                     }
 
                     if (openRequest != null) {

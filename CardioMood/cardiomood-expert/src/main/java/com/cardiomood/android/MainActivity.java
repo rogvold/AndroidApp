@@ -30,9 +30,10 @@ import com.cardiomood.android.fragments.HistoryFragment;
 import com.cardiomood.android.fragments.NewMeasurementFragment;
 import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.android.tools.PreferenceHelper;
+import com.cardiomood.android.tools.analytics.AnalyticsHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.android.ui.CustomViewPager;
-import com.flurry.android.FlurryAgent;
+import com.facebook.Session;
 import com.parse.ParseUser;
 
 import java.util.Locale;
@@ -52,6 +53,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
     private PreferenceHelper mPrefHelper;
     private ProgressDialog pDialog;
+    private AnalyticsHelper analyticsHelper;
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -74,6 +76,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         setContentView(R.layout.activity_main);
 
         mPrefHelper = new PreferenceHelper(this, true);
+        analyticsHelper = new AnalyticsHelper(this);
 
         // Set up the action bar.
         final ActionBar actionBar = getSupportActionBar();
@@ -122,7 +125,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     @Override
     protected void onStart() {
         super.onStart();
-        FlurryAgent.onStartSession(this, ConfigurationConstants.FLURRY_API_KEY);
+        analyticsHelper.logActivityStart(this);
     }
 
     @Override
@@ -148,16 +151,18 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                 }
             }, 200);
         } else {
-            mViewPager.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    CommonTools.hideSoftInputKeyboard(MainActivity.this);
-                    ActionBar actionBar = getSupportActionBar();
-                    if (actionBar != null) {
-                        actionBar.setSelectedNavigationItem(1);
+            if (mViewPager.getCurrentItem() == 0) {
+                mViewPager.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        CommonTools.hideSoftInputKeyboard(MainActivity.this);
+                        ActionBar actionBar = getSupportActionBar();
+                        if (actionBar != null) {
+                            actionBar.setSelectedNavigationItem(1);
+                        }
                     }
-                }
-            }, 200);
+                }, 200);
+            }
         }
 
         invalidateOptionsMenu();
@@ -166,7 +171,7 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     @Override
     protected void onStop() {
         super.onStop();
-        FlurryAgent.onEndSession(this);
+        analyticsHelper.logActivityStop(this);
     }
 
     private void showWhatsNewDialog() {
@@ -203,27 +208,27 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         switch (item.getItemId()) {
             case R.id.menu_settings:
-                 FlurryAgent.logEvent("menu_settings_clicked");
+                 analyticsHelper.logEvent("menu_settings_clicked", "Menu Settings clicked");
                  startActivity(new Intent(this, SettingsActivity.class));
                  return true;
             case R.id.menu_bt_settings:
-                FlurryAgent.logEvent("menu_bt_settings_clicked");
+                analyticsHelper.logEvent("menu_bt_settings_clicked", "Menu Bluetooth Settings clicked");
                 openBluetoothSettings();
                 return true;
             case R.id.menu_feedback:
-                FlurryAgent.logEvent("menu_feedback_clicked");
+                analyticsHelper.logEvent("menu_feedback_clicked", "Menu Feedback clicked");
                 startActivity(new Intent(this, FeedbackActivity.class));
                 return true;
             case R.id.menu_about:
-                FlurryAgent.logEvent("menu_about_clicked");
+                analyticsHelper.logEvent("menu_about_clicked", "Menu About clicked");
                 showAboutDialog();
                 return true;
             case R.id.menu_logout:
-                FlurryAgent.logEvent("menu_logout_clicked");
+                analyticsHelper.logEvent("menu_logout_clicked", "Menu Log out clicked");
                 logout();
                 return true;
             case R.id.menu_change_password:
-                FlurryAgent.logEvent("menu_change_password_clicked");
+                analyticsHelper.logEvent("menu_change_password_clicked", "Menu Change password clicked");
                 showChangePasswordDialog();
                 return true;
         }
@@ -247,19 +252,41 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
     }
 
     private void logout() {
+        if (NewMeasurementFragment.inProgress) {
+            Toast.makeText(this, "Stop recording first.", Toast.LENGTH_SHORT).show();
+        }
         Intent loginIntent = new Intent(this, LoginActivity.class);
         ParseUser currentUser = ParseUser.getCurrentUser();
         if (currentUser != null) {
+            // facebook logout
+            Session session = Session.getActiveSession();
+            if (session != null) {
+                if (!session.isClosed()) {
+                    session.closeAndClearTokenInformation();
+                }
+            } else {
+                session = new Session(this);
+                Session.setActiveSession(session);
+                session.closeAndClearTokenInformation();
+            }
+
             // logout
             ParseUser.logOut();
             loginIntent.putExtra(LoginActivity.EXTRA_EMAIL, currentUser.getUsername());
         }
+
+        analyticsHelper.logEvent("user_log_out", "Log out");
+        analyticsHelper.setUserId(null);
 
         startActivity(loginIntent);
         finish();
     }
 
     private void showChangePasswordDialog() {
+        if (NewMeasurementFragment.inProgress) {
+            Toast.makeText(this, "Stop recording first.", Toast.LENGTH_SHORT).show();
+        }
+
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_change_password, null);
         final EditText newPassword = (EditText) dialogView.findViewById(R.id.new_password);
         final EditText confirmNewPassword = (EditText) dialogView.findViewById(R.id.confirm_new_password);
@@ -278,7 +305,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                         if (!TextUtils.isEmpty(p1) && p1.equals(p2) && p1.length() >= 4) {
                             ParseUser user = ParseUser.getCurrentUser();
                             changePassword(user, p1);
-
                         } else {
                             Toast.makeText(MainActivity.this, "Passwords must match!", Toast.LENGTH_SHORT).show();
                         }
@@ -403,6 +429,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             }
             finish();
         }
-        super.onBackPressed();
+        //super.onBackPressed();
     }
 }

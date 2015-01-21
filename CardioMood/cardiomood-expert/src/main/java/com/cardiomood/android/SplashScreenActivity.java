@@ -13,10 +13,12 @@ import android.view.View;
 
 import com.cardiomood.android.expert.R;
 import com.cardiomood.android.tools.PreferenceHelper;
+import com.cardiomood.android.tools.analytics.AnalyticsHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.android.ui.SystemUiHider;
 import com.flurry.android.FlurryAgent;
-import com.google.android.gms.analytics.GoogleAnalytics;
+import com.parse.ParseAnalytics;
+import com.parse.ParseUser;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -65,7 +67,22 @@ public class SplashScreenActivity extends Activity {
         prefHelper = new PreferenceHelper(this, true);
         // Preferences: set default values
         prefHelper.setDefaultValues(R.xml.settings, false);
+
+        // Initialize Google Analytics
+        AnalyticsHelper analyticsHelper = new AnalyticsHelper(this);
+        if (ParseUser.getCurrentUser() != null) {
+            String userId = ParseUser.getCurrentUser().getObjectId();
+            if (userId != null) {
+                analyticsHelper.setUserId(userId);
+            }
+        }
+
+        // track app opened
+        analyticsHelper.logAppOpened(getIntent());
+        ParseAnalytics.trackAppOpenedInBackground(getIntent());
+
         if (prefHelper.getBoolean(ConfigurationConstants.DISABLE_SPLASH_SCREEN)) {
+            analyticsHelper.logEvent("skip_splash_screen", "Skip splash screen");
             openNextActivity();
             return;
         }
@@ -160,15 +177,13 @@ public class SplashScreenActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-        FlurryAgent.onStartSession(this, ConfigurationConstants.FLURRY_API_KEY);
-        GoogleAnalytics.getInstance(this).reportActivityStart(this);
+        FlurryAgent.onStartSession(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         FlurryAgent.onEndSession(this);
-        GoogleAnalytics.getInstance(this).reportActivityStop(this);
     }
 
     /**

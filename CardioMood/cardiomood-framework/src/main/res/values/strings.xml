@@ -1,0 +1,31 @@
+<resources>
+    <string name="height_units_ft">ft.</string>
+    <string name="weight_units_lb">lb.</string>
+    <string name="height_units_in">in.</string>
+    <string name="weight_units_oz">oz.</string>
+    <string name="height_units_m">m</string>
+    <string name="weight_units_kg">kg</string>
+    <string name="height_units_cm">cm</string>
+    <string name="weight_units_g">g</string>
+    <string name="birth_date_dlg_title">Birth date</string>
+    <string name="email">Email</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="phone_number_hint">Phone Number</string>
+    <string name="birth_date">Birth date</string>
+    <string name="weight">Weight:</string>
+    <string name="height">Height:</string>
+    <string name="you_can_select_unit_system_in_settings">*** You can choose preferred unit system in Settings</string>
+    <string name="menu_sync">Sync</string>
+    <string name="aerobic_threshold">Aerobic threshold:</string>
+    <string name="anaerobic_threshold">Anaerobic threshold:</string>
+    <string name="resting_heart_rate">Resting heart rate:</string>
+    <string name="hint_resting_heart_rate">e.g. 52</string>
+    <string name="hint_aerobic_threshold">e.g. 140</string>
+    <string name="hint_anaerobic_threshold">e.g. 167</string>
+    <string name="refresh">Sync</string>
+    <string name="menu_delete_item">Delete</string>
+    <string name="menu_rename_item">Edit</string>
+    <string name="progress_loading">Loading...</string>
+    <string name="menu_refresh">Refresh</string>
+</resources>

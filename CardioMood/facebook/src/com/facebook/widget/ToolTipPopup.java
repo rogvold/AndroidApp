@@ -88,7 +88,7 @@ public class ToolTipPopup {
     }
     
     /**
-     * Sets the {@link Style} of this tool tip.
+     * Sets the {@link com.facebook.widget.ToolTipPopup.Style} of this tool tip.
      * @param mStyle
      */
     public void setStyle(Style mStyle) {

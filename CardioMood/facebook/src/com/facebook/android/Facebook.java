@@ -148,7 +148,7 @@ public class Facebook {
      * <p/>
      * See authorize() below for @params.
      * <p/>
-     * This method is deprecated.  See {@link Facebook} and {@link Session} for more info.
+     * This method is deprecated.  See {@link com.facebook.android.Facebook} and {@link Session} for more info.
      */
     @Deprecated
     public void authorize(Activity activity, final DialogListener listener) {
@@ -161,7 +161,7 @@ public class Facebook {
      * <p/>
      * See authorize() below for @params.
      * <p/>
-     * This method is deprecated.  See {@link Facebook} and {@link Session} for more info.
+     * This method is deprecated.  See {@link com.facebook.android.Facebook} and {@link Session} for more info.
      */
     @Deprecated
     public void authorize(Activity activity, String[] permissions, final DialogListener listener) {
@@ -206,7 +206,7 @@ public class Facebook {
      * information. single sign-on may be disabled by passing FORCE_DIALOG_AUTH
      * as the activityCode parameter in your call to authorize().
      * <p/>
-     * This method is deprecated.  See {@link Facebook} and {@link Session} for more info.
+     * This method is deprecated.  See {@link com.facebook.android.Facebook} and {@link Session} for more info.
      *
      * @param activity
      *            The Android activity in which we want to display the
@@ -436,7 +436,7 @@ public class Facebook {
      * http://developer.android.com/reference/android/app/
      * Activity.html#onActivityResult(int, int, android.content.Intent)
      * <p/>
-     * This method is deprecated.  See {@link Facebook} and {@link Session} for more info.
+     * This method is deprecated.  See {@link com.facebook.android.Facebook} and {@link Session} for more info.
      */
     @Deprecated
     public void authorizeCallback(int requestCode, int resultCode, Intent data) {
@@ -460,7 +460,7 @@ public class Facebook {
      * method is asynchronous and the callback will be invoked in the original
      * calling thread (not in a background thread).
      * <p/>
-     * This method is deprecated.  See {@link Facebook} and {@link Session} for more info.
+     * This method is deprecated.  See {@link com.facebook.android.Facebook} and {@link Session} for more info.
      *
      * @param context
      *            The Android Context that will be used to bind to the Facebook
@@ -493,7 +493,7 @@ public class Facebook {
     /**
      * Calls extendAccessToken if shouldExtendAccessToken returns true.
      * <p/>
-     * This method is deprecated.  See {@link Facebook} and {@link Session} for more info.
+     * This method is deprecated.  See {@link com.facebook.android.Facebook} and {@link Session} for more info.
      *
      * @return the same value as extendAccessToken if the the token requires
      *         refreshing, true otherwise
@@ -510,7 +510,7 @@ public class Facebook {
     /**
      * Check if the access token requires refreshing.
      * <p/>
-     * This method is deprecated.  See {@link Facebook} and {@link Session} for more info.
+     * This method is deprecated.  See {@link com.facebook.android.Facebook} and {@link Session} for more info.
      *
      * @return true if the last time a new token was obtained was over 24 hours
      *         ago.
@@ -550,9 +550,13 @@ public class Facebook {
         @Override
         public void onServiceDisconnected(ComponentName arg) {
             serviceListener.onError(new Error("Service disconnected"));
-            // We returned an error so there's no point in
-            // keeping the binding open.
-            applicationsContext.unbindService(TokenRefreshServiceConnection.this);
+            try {
+                // We returned an error so there's no point in
+                // keeping the binding open.
+                applicationsContext.unbindService(TokenRefreshServiceConnection.this);
+            } catch (IllegalArgumentException ex) {
+                // Do nothing, the connection was already unbound
+            }
         }
 
         private void refreshToken() {
@@ -645,14 +649,14 @@ public class Facebook {
      * Note that this method blocks waiting for a network response, so do not
      * call it in a UI thread.
      * <p/>
-     * This method is deprecated.  See {@link Facebook} and {@link Session} for more info.
+     * This method is deprecated.  See {@link com.facebook.android.Facebook} and {@link Session} for more info.
      *
      * @param context
      *            The Android context in which the logout should be called: it
      *            should be the same context in which the login occurred in
      *            order to clear any stored cookies
-     * @throws IOException
-     * @throws MalformedURLException
+     * @throws java.io.IOException
+     * @throws java.net.MalformedURLException
      * @return JSON string representation of the auth.expireSession response
      *         ("true" if successful)
      */
@@ -703,14 +707,14 @@ public class Facebook {
      *  String response = request(parameters);
      * </code>
      * <p/>
-     * This method is deprecated.  See {@link Facebook} and {@link Request} for more info.
+     * This method is deprecated.  See {@link com.facebook.android.Facebook} and {@link Request} for more info.
      *
      * @param parameters
      *            Key-value pairs of parameters to the request. Refer to the
      *            documentation: one of the parameters must be "method".
-     * @throws IOException
+     * @throws java.io.IOException
      *             if a network error occurs
-     * @throws MalformedURLException
+     * @throws java.net.MalformedURLException
      *             if accessing an invalid endpoint
      * @throws IllegalArgumentException
      *             if one of the parameters is not "method"
@@ -734,14 +738,14 @@ public class Facebook {
      * Note that this method blocks waiting for a network response, so do not
      * call it in a UI thread.
      * <p/>
-     * This method is deprecated.  See {@link Facebook} and {@link Request} for more info.
+     * This method is deprecated.  See {@link com.facebook.android.Facebook} and {@link Request} for more info.
      *
      * @param graphPath
      *            Path to resource in the Facebook graph, e.g., to fetch data
      *            about the currently logged authenticated user, provide "me",
      *            which will fetch http://graph.facebook.com/me
-     * @throws IOException
-     * @throws MalformedURLException
+     * @throws java.io.IOException
+     * @throws java.net.MalformedURLException
      * @return JSON string representation of the response
      */
     @Deprecated
@@ -758,7 +762,7 @@ public class Facebook {
      * Note that this method blocks waiting for a network response, so do not
      * call it in a UI thread.
      * <p/>
-     * This method is deprecated.  See {@link Facebook} and {@link Request} for more info.
+     * This method is deprecated.  See {@link com.facebook.android.Facebook} and {@link Request} for more info.
      *
      * @param graphPath
      *            Path to resource in the Facebook graph, e.g., to fetch data
@@ -769,8 +773,8 @@ public class Facebook {
      *            parameters "q" : "facebook" would produce a query for the
      *            following graph resource:
      *            https://graph.facebook.com/search?q=facebook
-     * @throws IOException
-     * @throws MalformedURLException
+     * @throws java.io.IOException
+     * @throws java.net.MalformedURLException
      * @return JSON string representation of the response
      */
     @Deprecated
@@ -788,7 +792,7 @@ public class Facebook {
      * Note that this method blocks waiting for a network response, so do not
      * call it in a UI thread.
      * <p/>
-     * This method is deprecated.  See {@link Facebook} and {@link Request} for more info.
+     * This method is deprecated.  See {@link com.facebook.android.Facebook} and {@link Request} for more info.
      *
      * @param graphPath
      *            Path to resource in the Facebook graph, e.g., to fetch data
@@ -801,8 +805,8 @@ public class Facebook {
      *            https://graph.facebook.com/search?q=facebook
      * @param httpMethod
      *            http verb, e.g. "GET", "POST", "DELETE"
-     * @throws IOException
-     * @throws MalformedURLException
+     * @throws java.io.IOException
+     * @throws java.net.MalformedURLException
      * @return JSON string representation of the response
      */
     @Deprecated
@@ -1045,7 +1049,7 @@ public class Facebook {
      * These should be values obtained from getAccessToken(), getAccessExpires, and
      * getLastAccessUpdate() respectively.
      * <p/>
-     * This method is deprecated.  See {@link Facebook} and {@link Session} for more info.
+     * This method is deprecated.  See {@link com.facebook.android.Facebook} and {@link Session} for more info.
      *
      * @param accessToken - access token
      * @param accessExpires - access token expiration time
@@ -1064,7 +1068,7 @@ public class Facebook {
     /**
      * Set the OAuth 2.0 access token for API access.
      * <p/>
-     * This method is deprecated.  See {@link Facebook} and {@link Session} for more info.
+     * This method is deprecated.  See {@link com.facebook.android.Facebook} and {@link Session} for more info.
      *
      * @param token
      *            - access token
@@ -1083,7 +1087,7 @@ public class Facebook {
      * Set the current session's expiration time (in milliseconds since Unix
      * epoch), or 0 if the session doesn't expire.
      * <p/>
-     * This method is deprecated.  See {@link Facebook} and {@link Session} for more info.
+     * This method is deprecated.  See {@link com.facebook.android.Facebook} and {@link Session} for more info.
      *
      * @param timestampInMsec
      *            - timestamp in milliseconds
@@ -1102,7 +1106,7 @@ public class Facebook {
      * Set the current session's duration (in seconds since Unix epoch), or "0"
      * if session doesn't expire.
      * <p/>
-     * This method is deprecated.  See {@link Facebook} and {@link Session} for more info.
+     * This method is deprecated.  See {@link com.facebook.android.Facebook} and {@link Session} for more info.
      *
      * @param expiresInSecsFromNow
      *            - duration in seconds (or 0 if the session doesn't expire)
@@ -1118,7 +1122,7 @@ public class Facebook {
     }
 
     /**
-     * This method is deprecated.  See {@link Facebook} and {@link Session} for more info.
+     * This method is deprecated.  See {@link com.facebook.android.Facebook} and {@link Session} for more info.
      *
      * @return the String representing application ID
      */
@@ -1128,7 +1132,7 @@ public class Facebook {
     }
 
     /**
-     * This method is deprecated.  See {@link Facebook} and {@link Session} for more info.
+     * This method is deprecated.  See {@link com.facebook.android.Facebook} and {@link Session} for more info.
      *
      * @param appId the String representing the application ID
      */
@@ -1205,7 +1209,7 @@ public class Facebook {
     /**
      * Get Attribution ID for app install conversion tracking.
      * <p/>
-     * This method is deprecated.  See {@link Facebook} and {@link Settings} for more info.
+     * This method is deprecated.  See {@link com.facebook.android.Facebook} and {@link Settings} for more info.
      *
      * @param contentResolver
      * @return Attribution ID that will be used for conversion tracking. It will be null only if
@@ -1221,7 +1225,7 @@ public class Facebook {
      * it has occurred previously or the app does not have install attribution enabled on the application's developer
      * config page.
      * <p/>
-     * This method is deprecated.  See {@link Facebook} and {@link Settings} for more info.
+     * This method is deprecated.  See {@link com.facebook.android.Facebook} and {@link Settings} for more info.
      *
      * @return a Boolean indicating whether installation of the app should be auto-published.
      */
@@ -1233,7 +1237,7 @@ public class Facebook {
     /**
      * Sets whether auto publishing of installs will occur.
      * <p/>
-     * This method is deprecated.  See {@link Facebook} and {@link Settings} for more info.
+     * This method is deprecated.  See {@link com.facebook.android.Facebook} and {@link Settings} for more info.
      *
      * @param value a Boolean indicating whether installation of the app should be auto-published.
      */

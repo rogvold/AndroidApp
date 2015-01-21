@@ -36,7 +36,7 @@ import java.util.List;
 
 /**
  * This class represents an access token returned by the Facebook Login service, along with associated
- * metadata such as its expiration date and permissions. In general, the {@link Session} class will
+ * metadata such as its expiration date and permissions. In general, the {@link com.facebook.Session} class will
  * abstract away the need to worry about the details of an access token, but there are situations
  * (such as handling native links, importing previously-obtained access tokens, etc.) where it is
  * useful to deal with access tokens directly. Factory methods are provided to construct access tokens.
@@ -241,9 +241,11 @@ public final class AccessToken implements Serializable {
     static AccessToken createFromRefresh(AccessToken current, Bundle bundle) {
         // Only tokens obtained via SSO support refresh. Token refresh returns the expiration date in
         // seconds from the epoch rather than seconds from now.
-        assert (current.source == AccessTokenSource.FACEBOOK_APPLICATION_WEB ||
-                current.source == AccessTokenSource.FACEBOOK_APPLICATION_NATIVE ||
-                current.source == AccessTokenSource.FACEBOOK_APPLICATION_SERVICE);
+        if (current.source != AccessTokenSource.FACEBOOK_APPLICATION_WEB &&
+                current.source != AccessTokenSource.FACEBOOK_APPLICATION_NATIVE &&
+                current.source != AccessTokenSource.FACEBOOK_APPLICATION_SERVICE) {
+            throw new FacebookException("Invalid token source: " + current.source);
+        }
 
         Date expires = getBundleLongAsDate(bundle, EXPIRES_IN_KEY, new Date(0));
         String token = bundle.getString(ACCESS_TOKEN_KEY);

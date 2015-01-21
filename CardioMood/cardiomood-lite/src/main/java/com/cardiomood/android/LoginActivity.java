@@ -6,18 +6,12 @@ import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.Signature;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
-import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
@@ -26,13 +20,28 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cardiomood.android.lite.R;
+import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.android.tools.PreferenceHelper;
+import com.cardiomood.android.tools.analytics.AnalyticsHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
-import com.flurry.android.FlurryAgent;
+import com.facebook.Request;
+import com.facebook.Response;
+import com.facebook.Session;
+import com.facebook.SessionState;
+import com.facebook.UiLifecycleHelper;
+import com.facebook.model.GraphUser;
+import com.facebook.widget.LoginButton;
+import com.parse.LogInCallback;
 import com.parse.ParseAnalytics;
+import com.parse.ParseException;
+import com.parse.ParseFacebookUtils;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
-import java.security.MessageDigest;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 import bolts.Continuation;
 import bolts.Task;
@@ -40,7 +49,7 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 
 /**
- * Project: CardioSport
+ * Project: CardioMood
  * User: danon
  * Date: 15.06.13
  * Time: 14:16
@@ -58,10 +67,17 @@ public class LoginActivity extends ActionBarActivity implements ConfigurationCon
     private String mEmail;
     private String mPassword;
 
-    private String mFirstName;
-    private String mLastName;
+    private UiLifecycleHelper uiHelper;
+    private Session.StatusCallback callback =
+            new Session.StatusCallback() {
+                @Override
+                public void call(Session session, SessionState state, Exception exception) {
+                    onSessionStateChange(session, state, exception);
+                }
+            };
 
     private boolean loginInProgress = false;
+    private boolean resumed = false;
 
     // UI references.
     @InjectView(R.id.email) EditText mEmailView;
@@ -71,8 +87,10 @@ public class LoginActivity extends ActionBarActivity implements ConfigurationCon
     @InjectView(R.id.login_status_message) TextView mLoginStatusMessageView;
     @InjectView(R.id.sign_in_button) Button mSignInButton;
     @InjectView(R.id.register_button) Button mRegisterButton;
+    @InjectView(R.id.facebook_login_button) LoginButton mFacebookButton;
 
     private PreferenceHelper prefHelper;
+    private AnalyticsHelper analyticsHelper;
 
     private Toast toast;
     private long lastBackPressTime = 0;
@@ -82,23 +100,13 @@ public class LoginActivity extends ActionBarActivity implements ConfigurationCon
         super.onCreate(savedInstanceState);
         ParseAnalytics.trackAppOpenedInBackground(getIntent());
 
-        // Add code to print out the key hash
-        try {
-            PackageInfo info = getPackageManager().getPackageInfo(
-                    "com.cardiomood.android",
-                    PackageManager.GET_SIGNATURES);
-            for (Signature signature : info.signatures) {
-                MessageDigest md = MessageDigest.getInstance("SHA");
-                md.update(signature.toByteArray());
-                Log.d("KeyHash:", Base64.encodeToString(md.digest(), Base64.DEFAULT));
-            }
-        } catch (Exception e) {
-
-        }
-
         prefHelper = new PreferenceHelper(this, true);
+        analyticsHelper = new AnalyticsHelper(this);
 
         if (isLoggedIn()) {
+            ParseUser user = ParseUser.getCurrentUser();
+            user.put("lastLogin", new Date());
+            user.saveEventually();
             startMainActivity();
             return;
         }
@@ -134,7 +142,7 @@ public class LoginActivity extends ActionBarActivity implements ConfigurationCon
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        FlurryAgent.logEvent("sign_in_clicked");
+                        analyticsHelper.logEvent("sign_in_clicked", "Sign in button clicked");
                         attemptLogin();
                     }
                 });
@@ -143,16 +151,22 @@ public class LoginActivity extends ActionBarActivity implements ConfigurationCon
 
                     @Override
                     public void onClick(View v) {
-                        FlurryAgent.logEvent("register_clicked");
+                        analyticsHelper.logEvent("register_clicked", "Sign up button clicked");
                         attemptRegister();
                     }
                 });
+        mFacebookButton.setReadPermissions(Arrays.asList("public_profile", "email"));
+
+        uiHelper = new UiLifecycleHelper(this, callback);
+        uiHelper.onCreate(savedInstanceState);
+
+        getSupportActionBar().hide();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        FlurryAgent.onStartSession(this, FLURRY_API_KEY);
+        analyticsHelper.logActivityStart(this);
         if (prefHelper.getBoolean(ConfigurationConstants.USER_LOGGED_IN)) {
             showRestoreLoginRequest();
         }
@@ -161,32 +175,42 @@ public class LoginActivity extends ActionBarActivity implements ConfigurationCon
     @Override
     protected void onStop() {
         super.onStop();
-        FlurryAgent.onEndSession(this);
+        analyticsHelper.logActivityStop(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        uiHelper.onPause();
+        resumed = false;
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        uiHelper.onResume();
+        resumed = true;
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (uiHelper != null) {
+            uiHelper.onDestroy();
+            uiHelper = null;
+        }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        uiHelper.onSaveInstanceState(outState);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        uiHelper.onActivityResult(requestCode, resultCode, data);
     }
 
     public void startMainActivity() {
@@ -194,6 +218,196 @@ public class LoginActivity extends ActionBarActivity implements ConfigurationCon
                 .show();
         startActivity(new Intent(this, MainActivity.class));
         finish();
+    }
+
+    private void onSessionStateChange(Session session, SessionState state, Exception exception) {
+        // Only make changes if the activity is visible
+        if (resumed) {
+            if (state.isOpened()) {
+                // session is opened => request email
+                // make request to the /me API
+                mFacebookButton.setEnabled(false);
+                loginInProgress = true;
+                showProgress(true);
+                Request request = Request.newMeRequest(session,
+                        new Request.GraphUserCallback() {
+                            // callback after Graph API response with user object
+
+                            @Override
+                            public void onCompleted(GraphUser user,
+                                                    Response response) {
+                                if (user != null) {
+                                    attemptFacebookLogin(user, Session.getActiveSession().getAccessToken(),
+                                            Session.getActiveSession().getExpirationDate());
+                                } else {
+                                    if (Session.getActiveSession().isOpened()) {
+                                        Session.getActiveSession().closeAndClearTokenInformation();
+                                    }
+                                    loginInProgress = false;
+                                    mFacebookButton.setEnabled(true);
+                                    showProgress(false);
+                                    Toast.makeText(LoginActivity.this, "Facebook authentication failed!", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                Request.executeBatchAsync(request);
+            } else {
+                mFacebookButton.setEnabled(true);
+                showProgress(false);
+            }
+        }
+    }
+
+
+    private void attemptFacebookLogin(final GraphUser facebookUser, final String accessToken, final Date expirationDate) {
+        analyticsHelper.logEvent("attempt_facebook_login", "Attempt Facebook login");
+        @SuppressWarnings("unchecked")
+        final String email = (String) facebookUser.asMap().get("email");
+        // validate email
+        if (email == null || email.isEmpty()) {
+            Toast.makeText(this, R.string.email_is_not_accessible, Toast.LENGTH_SHORT).show();
+            if (Session.getActiveSession().isOpened()) {
+                Session.getActiveSession().closeAndClearTokenInformation();
+            }
+            loginInProgress = false;
+            mFacebookButton.setEnabled(true);
+            showProgress(false);
+            return;
+        }
+        checkUserExists(email).continueWith(new Continuation<ParseUser, Object>() {
+            @Override
+            public Object then(Task<ParseUser> task) throws Exception {
+                if (task.isFaulted()) {
+                    mFacebookButton.setEnabled(true);
+                    showProgress(false);
+                    Toast.makeText(LoginActivity.this, "Unable to check user existence." +
+                            " Check your internet connection.", Toast.LENGTH_SHORT).show();
+                } else {
+                    ParseUser user = task.getResult();
+                    if (user != null) {
+                        // the existing user
+                        signUpAndLink(user, facebookUser, accessToken, expirationDate);
+                    } else {
+                        // new user --> create account and link it to facebook
+                        String firstName = facebookUser.getFirstName();
+                        String lastName = facebookUser.getLastName();
+                        String password = CommonTools.generateRandomString(8);
+                        ParseUser parseUser = createParseUser(email, password, firstName, lastName);
+
+                        signUpAndLink(parseUser, facebookUser, accessToken, expirationDate);
+                    }
+                }
+                return null;
+            }
+        }, Task.UI_THREAD_EXECUTOR);
+    }
+
+    private void signUpAndLink(final ParseUser parseUser, GraphUser facebookUser, final String accessToken, final Date expirationDate) {
+        if (parseUser.getObjectId() != null) {
+            // existing user
+            final String facebookId = facebookUser.getId();
+            ParseFacebookUtils.logIn(facebookId, accessToken, expirationDate, new LogInCallback() {
+                @Override
+                public void done(ParseUser parseUser, ParseException e) {
+                    loginInProgress = false;
+                    if (e != null) {
+                        // facebook login failed
+                        analyticsHelper.logUserSignIn(parseUser.getObjectId());
+                        analyticsHelper.logEvent("facebook_login", "User logged in via Facebook");
+                    } else {
+                        startMainActivity();
+                        prefHelper.putString(ConfigurationConstants.USER_EMAIL_KEY,
+                                parseUser.getUsername());
+                        mPasswordView.setText(null);
+                        mPassword = null;
+                    }
+                    mFacebookButton.setEnabled(true);
+                    showProgress(false);
+                }
+            });
+            return;
+        }
+
+        String gender = (String) facebookUser.asMap().get("gender");
+        if (!TextUtils.isEmpty(gender)) {
+            if ("MALE".equalsIgnoreCase(gender)) {
+                parseUser.put("gender", "MALE");
+            } else if ("FEMALE".equalsIgnoreCase(gender)) {
+                parseUser.put("gender", "FEMALE");
+            } else {
+                parseUser.put("gender", "UNSPECIFIED");
+            }
+        }
+        final String facebookId = facebookUser.getId();
+        parseUser.signUpInBackground()
+                .continueWith(new Continuation<Void, Object>() {
+                    @Override
+                    public Object then(Task<Void> task) throws Exception {
+                        loginInProgress = false;
+                        if (task.isFaulted()) {
+                            throw task.getError();
+                        } else if (task.isCompleted()) {
+                            Toast.makeText(
+                                    LoginActivity.this,
+                                    "Please change your password!",
+                                    Toast.LENGTH_LONG
+                            ).show();
+                            ParseFacebookUtils.link(parseUser, facebookId, accessToken,
+                                    expirationDate, new SaveCallback() {
+                                        @Override
+                                        public void done(ParseException e) {
+                                            if (e == null) {
+                                                analyticsHelper.logUserSignUp(ParseUser.getCurrentUser().getObjectId());
+                                                analyticsHelper.logEvent("facebook_sign_up", "User signed up via Facebook");
+                                                startMainActivity();
+                                                prefHelper.putString(ConfigurationConstants.USER_EMAIL_KEY,
+                                                        parseUser.getUsername());
+                                            } else {
+                                                // failed to link
+                                                ParseUser.logOut();
+                                            }
+                                            mPasswordView.setText(null);
+                                            mPassword = null;
+                                        }
+                                    });
+                        }
+                        mFacebookButton.setEnabled(true);
+                        showProgress(false);
+                        return null;
+                    }
+                }, Task.UI_THREAD_EXECUTOR)
+                .continueWith(new Continuation<Object, Object>() {
+                    @Override
+                    public Object then(Task<Object> task) throws Exception {
+                        if (task.isFaulted()) {
+                            Toast.makeText(LoginActivity.this, "Unable to use facebook login.",
+                                    Toast.LENGTH_SHORT).show();
+                            Log.w(TAG, "signUpAndLink() failed", task.getError());
+                        }
+                        return null;
+                    }
+                }, Task.UI_THREAD_EXECUTOR);
+    }
+
+    private Task<ParseUser> checkUserExists(String email) {
+        return ParseUser.getQuery()
+                .whereEqualTo("username", email)
+                .findInBackground()
+                .continueWith(new Continuation<List<ParseUser>, ParseUser>() {
+                    @Override
+                    public ParseUser then(Task<List<ParseUser>> task) throws Exception {
+                        if (task.isFaulted())
+                            throw task.getError();
+                        if (task.isCompleted()) {
+                            List<ParseUser> result = task.getResult();
+                            if (result.isEmpty()) {
+                                return null;
+                            }
+                            return result.iterator().next();
+                        }
+                        return null;
+                    }
+                });
     }
 
     public void attemptRegister() {
@@ -245,16 +459,7 @@ public class LoginActivity extends ActionBarActivity implements ConfigurationCon
             mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
             showProgress(true);
 
-            ParseUser user = new ParseUser();
-            user.setUsername(mEmail);
-            user.setPassword(mPassword);
-            user.setEmail(mEmail);
-            user.put("userRole", "user");
-            user.put("firstName", "Cardio");
-            user.put("lastName", "User");
-            user.put("unitSystem", "METRIC");
-            user.put("realTimeMonitoring", false);
-            user.put("reg_via", "android_lite");
+            ParseUser user = createParseUser(mEmail, mPassword, "Cardio", "User");
 
             user.signUpInBackground().continueWith(new Continuation<Void, Object>() {
                 @Override
@@ -265,6 +470,7 @@ public class LoginActivity extends ActionBarActivity implements ConfigurationCon
                         mPasswordView.setError(task.getError().getLocalizedMessage());
                         mPasswordView.requestFocus();
                     } else if (task.isCompleted()) {
+                        analyticsHelper.logUserSignUp(ParseUser.getCurrentUser().getObjectId());
                         startMainActivity();
                         prefHelper.putString(ConfigurationConstants.USER_EMAIL_KEY, mEmail);
                         mPasswordView.setText(null);
@@ -343,9 +549,13 @@ public class LoginActivity extends ActionBarActivity implements ConfigurationCon
                                 mPasswordView.setError(task.getError().getLocalizedMessage());
                                 mPasswordView.requestFocus();
                             } else if (task.isCompleted()) {
+                                ParseUser user = task.getResult();
+                                analyticsHelper.logUserSignIn(user.getObjectId());
+                                user.put("lastLogin", new Date());
+                                user.saveEventually();
                                 startMainActivity();
                                 prefHelper.putString(ConfigurationConstants.USER_EMAIL_KEY,
-                                        task.getResult().getUsername());
+                                        user.getUsername());
                                 mPasswordView.setText(null);
                                 mPassword = null;
                                 showProgress(false);
@@ -364,6 +574,22 @@ public class LoginActivity extends ActionBarActivity implements ConfigurationCon
                 mEmailView.getText().toString(),
                 mPasswordView.getText().toString()
         );
+    }
+
+    private ParseUser createParseUser(String email, String password, String firstName, String lastName) {
+        ParseUser user = new ParseUser();
+        user.setUsername(email);
+        user.setPassword(password);
+        user.setEmail(email);
+        user.put("userRole", "user");
+        user.put("firstName", firstName);
+        user.put("lastName", lastName);
+        user.put("unitSystem", "METRIC");
+        user.put("realTimeMonitoring", false);
+        user.put("reg_via", "android_lite");
+        user.put("locale", Locale.getDefault().toString());
+        user.put("lastLogin", new Date());
+        return user;
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
@@ -462,23 +688,6 @@ public class LoginActivity extends ActionBarActivity implements ConfigurationCon
             loginInProgress = false;
             finish();
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.activity_login, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-//            case R.id.menu_service_settings:
-//                startActivity(new Intent(this, ServiceSettingsActivity.class));
-//                return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
 }

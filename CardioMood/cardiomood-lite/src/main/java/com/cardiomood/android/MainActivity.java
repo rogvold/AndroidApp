@@ -32,6 +32,7 @@ import com.cardiomood.android.tools.CommonTools;
 import com.cardiomood.android.tools.PreferenceHelper;
 import com.cardiomood.android.tools.config.ConfigurationConstants;
 import com.cardiomood.android.ui.CustomViewPager;
+import com.facebook.Session;
 import com.flurry.android.FlurryAgent;
 import com.parse.ParseUser;
 
@@ -148,16 +149,18 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
                 }
             }, 200);
         } else {
-            mViewPager.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    CommonTools.hideSoftInputKeyboard(MainActivity.this);
-                    ActionBar actionBar = getSupportActionBar();
-                    if (actionBar != null) {
-                        actionBar.setSelectedNavigationItem(1);
+            if (mViewPager.getCurrentItem() == 0) {
+                mViewPager.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        CommonTools.hideSoftInputKeyboard(MainActivity.this);
+                        ActionBar actionBar = getSupportActionBar();
+                        if (actionBar != null) {
+                            actionBar.setSelectedNavigationItem(1);
+                        }
                     }
-                }
-            }, 200);
+                }, 200);
+            }
         }
 
         invalidateOptionsMenu();
@@ -203,9 +206,9 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
 
         switch (item.getItemId()) {
             case R.id.menu_settings:
-                 FlurryAgent.logEvent("menu_settings_clicked");
-                 startActivity(new Intent(this, SettingsActivity.class));
-                 return true;
+                FlurryAgent.logEvent("menu_settings_clicked");
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
             case R.id.menu_bt_settings:
                 FlurryAgent.logEvent("menu_bt_settings_clicked");
                 openBluetoothSettings();
@@ -250,6 +253,18 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
         Intent loginIntent = new Intent(this, LoginActivity.class);
         ParseUser currentUser = ParseUser.getCurrentUser();
         if (currentUser != null) {
+            // facebook logout
+            Session session = Session.getActiveSession();
+            if (session != null) {
+                if (!session.isClosed()) {
+                    session.closeAndClearTokenInformation();
+                }
+            } else {
+                session = new Session(this);
+                Session.setActiveSession(session);
+                session.closeAndClearTokenInformation();
+            }
+
             // logout
             ParseUser.logOut();
             loginIntent.putExtra(LoginActivity.EXTRA_EMAIL, currentUser.getUsername());
@@ -403,6 +418,6 @@ public class MainActivity extends ActionBarActivity implements ActionBar.TabList
             }
             finish();
         }
-        super.onBackPressed();
+        //super.onBackPressed();
     }
 }

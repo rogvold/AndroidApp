@@ -10,7 +10,7 @@ public abstract class AbstractSingleValue {
     public abstract double evaluate(double x[], double y[], int begin, int length);
 
     public double evaluate(double x[], double y[]) {
-        return evaluate(x, y, 0, x.length);
+        return evaluate(x, y, 0, y.length);
     }
 
 }

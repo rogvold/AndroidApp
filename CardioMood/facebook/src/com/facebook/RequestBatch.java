@@ -195,7 +195,7 @@ public class RequestBatch extends AbstractList<Request> {
      * Executes this batch asynchronously. This function will return immediately, and the batch will
      * be processed on a separate thread. In order to process results of a request, or determine
      * whether a request succeeded or failed, a callback must be specified (see
-     * {@link Request#setCallback(com.facebook.Request.Callback)})
+     * {@link com.facebook.Request#setCallback(com.facebook.Request.Callback)})
      * <p/>
      * This should only be called from the UI thread.
      *
@@ -224,7 +224,7 @@ public class RequestBatch extends AbstractList<Request> {
     /**
      * Specifies the interface that consumers of the RequestBatch class can implement in order to be notified when the
      * batch makes progress. The frequency of the callbacks can be controlled using
-     * {@link com.facebook.Settings#setOnProgressThreshold(long)}.
+     * {@link Settings#setOnProgressThreshold(long)}.
      */
     public interface OnProgressCallback extends Callback {
         /**

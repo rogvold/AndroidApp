@@ -54,7 +54,7 @@
     <string name="menu_about_condensed">About...</string>
     <string name="about_dialog_title">About CardioMood...</string>
     <string name="monitoring_is_in_progress">Viewing results is not allowed when connected to the heart rate monitor.</string>
-    <string name="press_back_to_close">Tap BACK again to disconnect and exit.</string>
+    <string name="press_back_to_close">Tap BACK again close.</string>
     <string name="opening_measurement">Wait a few seconds for the report generation.</string>
     <string name="connect_device">Connect device</string>
     <string name="loading_data_for_measurement">Loading data for measurement #</string>
@@ -181,7 +181,7 @@
     <string name="sign_up_with_facebook">Try Facebook log in! (experimental)</string>
     <string name="menu_change_password">Change Password...</string>
     <string name="facebook_authentication_failed">Unable to perform Facebook authorization.</string>
-    <string name="email_is_not_accessible">Unable to access your email. Use standard login.</string>
+    <string name="email_is_not_accessible">Your facebook email is not public. Use standard login.</string>
     <string name="aerobic_threshold">Aerobic threshold:</string>
     <string name="anaerobic_threshold">Anaerobic threshold:</string>
     <string name="resting_heart_rate">Resting heart rate:</string>
@@ -204,5 +204,7 @@
     <string name="title_settings_auto_reconnect">Auto reconnect</string>
     <string name="summary_settings_auto_reconnect">Attempt to reconnect when connection with heart rate monitor is lost.</string>
     <string name="menu_toggle_action_bar">Toggle Action Bar</string>
+    <string name="title_settings_disable_analytics">Disable usage statistics reports</string>
+    <string name="summary_settings_disable_analytics">By default we collect app usage statistics to provide you better user experience.</string>
 
 </resources>

@@ -2,7 +2,7 @@ package com.cardiomood.android.tools.config;
 
 public interface ConfigurationConstants {
 
-    String FLURRY_API_KEY           = "KC9R5WHFTBYZQNKNDJX3";
+    String FLURRY_API_KEY           = "BDKYHFHFW4T2RCNWTHBH";
     String SHINOBI_CHARTS_API_KEY   =  "DVV28uA7FXRiD+UMjAxNDAzMjRpbmZvQHNoaW5vYmljb250cm9scy5jb20=dBojhaYWgRWi56ysuwnVEVqU6zNFtZi5IGwx6DSxf/UUCepFZ68RECBCVtRODYWIOKFoc0WaXDfGKf+813zC5ipQ6SFSoyGWQGZCEtP4YMZyLbaEORdC5qx3Tqxd2i3DyCScq+TTvsgMjnZMtV5cZNgDNW1E=BQxSUisl3BaWf/7myRmmlIjRnMU2cA7q+/03ZX9wdj30RzapYANf51ee3Pi8m2rVW6aD7t6Hi4Qy5vv9xpaQYXF5T7XzsafhzS3hbBokp36BoJZg8IrceBj742nQajYyV7trx5GIw9jy/V6r0bvctKYwTim7Kzq+YPWGMtqtQoU=PFJTQUtleVZhbHVlPjxNb2R1bHVzPnh6YlRrc2dYWWJvQUh5VGR6dkNzQXUrUVAxQnM5b2VrZUxxZVdacnRFbUx3OHZlWStBK3pteXg4NGpJbFkzT2hGdlNYbHZDSjlKVGZQTTF4S2ZweWZBVXBGeXgxRnVBMThOcDNETUxXR1JJbTJ6WXA3a1YyMEdYZGU3RnJyTHZjdGhIbW1BZ21PTTdwMFBsNWlSKzNVMDg5M1N4b2hCZlJ5RHdEeE9vdDNlMD08L01vZHVsdXM+PEV4cG9uZW50PkFRQUI8L0V4cG9uZW50PjwvUlNBS2V5VmFsdWU+";
 
     // service
@@ -59,6 +59,7 @@ public interface ConfigurationConstants {
     String DO_NOT_ASK_INFO_ON_START     = "app.do_not_ask_info_on_start";
     String PREFERRED_MEASUREMENT_SYSTEM = "app.preferred_measurement_system";
     String CONFIG_LAST_SYNC_TIMESTAMP   = "app.last_sync_timestamp";
+    String CONFIG_DISABLE_ANALYTICS     = "app.disable_analytics";
 
     // Synchronization parameters
     String SYNC_STRATEGY                = "sync.strategy"; // SYNC_ON_START, SYNC_ON_DEMAND

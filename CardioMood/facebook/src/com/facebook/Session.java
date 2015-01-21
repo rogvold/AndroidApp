@@ -80,7 +80,7 @@ import java.util.UUID;
  * </p>
  * <p>
  * Instances of Session provide state change notification via a callback
- * interface, {@link Session.StatusCallback StatusCallback}.
+ * interface, {@link com.facebook.Session.StatusCallback StatusCallback}.
  * </p>
  */
 public class Session implements Serializable {
@@ -94,7 +94,7 @@ public class Session implements Serializable {
     /**
      * The default activity code used for authorization.
      *
-     * @see #openForRead(OpenRequest)
+     * @see #openForRead(com.facebook.Session.OpenRequest)
      *      open
      */
     public static final int DEFAULT_AUTHORIZE_ACTIVITY_CODE = 0xface;
@@ -154,8 +154,6 @@ public class Session implements Serializable {
     private static final String AUTH_BUNDLE_SAVE_KEY = "com.facebook.sdk.Session.authBundleKey";
     private static final String PUBLISH_PERMISSION_PREFIX = "publish";
     private static final String MANAGE_PERMISSION_PREFIX = "manage";
-
-    private static final String BASIC_INFO_PERMISSION = "basic_info";
 
     @SuppressWarnings("serial")
     private static final Set<String> OTHER_PUBLISH_PERMISSIONS = new HashSet<String>() {{
@@ -221,6 +219,7 @@ public class Session implements Serializable {
      * class should not be modified. If serializations formats change,
      * create a new class SerializationProxyVx.
      */
+    @SuppressWarnings("UnusedDeclaration")
     private static class SerializationProxyV2 implements Serializable {
         private static final long serialVersionUID = 7663436173185080064L;
         private final String applicationId;
@@ -474,7 +473,7 @@ public class Session implements Serializable {
      * Logs a user in to Facebook.
      * </p>
      * <p>
-     * A session may not be used with {@link Request Request} and other classes
+     * A session may not be used with {@link com.facebook.Request Request} and other classes
      * in the SDK until it is open. If, prior to calling open, the session is in
      * the {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED}
      * state, and the requested permissions are a subset of the previously authorized
@@ -504,7 +503,7 @@ public class Session implements Serializable {
      * Logs a user in to Facebook.
      * </p>
      * <p>
-     * A session may not be used with {@link Request Request} and other classes
+     * A session may not be used with {@link com.facebook.Request Request} and other classes
      * in the SDK until it is open. If, prior to calling open, the session is in
      * the {@link SessionState#CREATED_TOKEN_LOADED CREATED_TOKEN_LOADED}
      * state, and the requested permissions are a subset of the previously authorized
@@ -728,7 +727,7 @@ public class Session implements Serializable {
     }
 
     /**
-     * Provides an implementation for {@link Activity#onActivityResult
+     * Provides an implementation for {@link android.app.Activity#onActivityResult
      * onActivityResult} that updates the Session based on information returned
      * during the authorization flow. The Activity that calls open or
      * requestNewPermissions should forward the resulting onActivityResult call here to
@@ -1036,7 +1035,7 @@ public class Session implements Serializable {
      * @param activity     The Activity that is opening the new Session.
      * @param allowLoginUI if false, only sets the active session and opens it if it
      *                     does not require user interaction
-     * @param callback     The {@link StatusCallback SessionStatusCallback} to
+     * @param callback     The {@link com.facebook.Session.StatusCallback SessionStatusCallback} to
      *                     notify regarding Session state changes. May be null.
      * @return The new Session or null if one could not be created
      */
@@ -1060,7 +1059,7 @@ public class Session implements Serializable {
      * @param allowLoginUI if false, only sets the active session and opens it if it
      *                     does not require user interaction
      * @param permissions  The permissions to request for this Session
-     * @param callback     The {@link StatusCallback SessionStatusCallback} to
+     * @param callback     The {@link com.facebook.Session.StatusCallback SessionStatusCallback} to
      *                     notify regarding Session state changes. May be null.
      * @return The new Session or null if one could not be created
      */
@@ -1086,7 +1085,7 @@ public class Session implements Serializable {
      * @param fragment     The Fragment that is opening the new Session.
      * @param allowLoginUI if false, only sets the active session and opens it if it
      *                     does not require user interaction
-     * @param callback     The {@link StatusCallback SessionStatusCallback} to
+     * @param callback     The {@link com.facebook.Session.StatusCallback SessionStatusCallback} to
      *                     notify regarding Session state changes.
      * @return The new Session or null if one could not be created
      */
@@ -1111,7 +1110,7 @@ public class Session implements Serializable {
      * @param allowLoginUI if false, only sets the active session and opens it if it
      *                     does not require user interaction
      * @param permissions  The permissions to request for this Session
-     * @param callback     The {@link StatusCallback SessionStatusCallback} to
+     * @param callback     The {@link com.facebook.Session.StatusCallback SessionStatusCallback} to
      *                     notify regarding Session state changes.
      * @return The new Session or null if one could not be created
      */
@@ -1700,9 +1699,13 @@ public class Session implements Serializable {
         public void onServiceDisconnected(ComponentName arg) {
             cleanup();
 
-            // We returned an error so there's no point in
-            // keeping the binding open.
-            staticContext.unbindService(TokenRefreshRequest.this);
+            try {
+                // We returned an error so there's no point in
+                // keeping the binding open.
+                staticContext.unbindService(TokenRefreshRequest.this);
+            } catch (IllegalArgumentException ex) {
+                // Do nothing, the connection was already unbound
+            }
         }
 
         private void cleanup() {
@@ -1766,9 +1769,15 @@ public class Session implements Serializable {
     /**
      * Provides asynchronous notification of Session state changes.
      *
-     * @see Session#open open
+     * @see com.facebook.Session#open open
      */
     public interface StatusCallback {
+        /**
+         * The function that is called when status of the session changes.
+         * @param session   The session that was updated.
+         * @param state     The new state of the session.
+         * @param exception The exception that is related to state change, may be null.
+         */
         public void call(Session session, SessionState state, Exception exception);
     }
 
@@ -1905,7 +1914,7 @@ public class Session implements Serializable {
     }
 
     /**
-     * Base class for authorization requests {@link OpenRequest} and {@link NewPermissionsRequest}.
+     * Base class for authorization requests {@link com.facebook.Session.OpenRequest} and {@link com.facebook.Session.NewPermissionsRequest}.
      */
     public static class AuthorizationRequest implements Serializable {
 
@@ -2157,7 +2166,7 @@ public class Session implements Serializable {
         /**
          * Sets the StatusCallback for the OpenRequest.
          *
-         * @param statusCallback The {@link StatusCallback SessionStatusCallback} to
+         * @param statusCallback The {@link com.facebook.Session.StatusCallback SessionStatusCallback} to
          *                       notify regarding Session state changes.
          * @return the OpenRequest object to allow for chaining
          */
@@ -2183,7 +2192,7 @@ public class Session implements Serializable {
          * Sets the request code for the OpenRequest.
          *
          * @param requestCode An integer that identifies this request. This integer will be used
-         *                    as the request code in {@link Activity#onActivityResult
+         *                    as the request code in {@link android.app.Activity#onActivityResult
          *                    onActivityResult}. This integer should be >= 0. If a value < 0 is
          *                    passed in, then a default value will be used.
          * @return the OpenRequest object to allow for chaining
@@ -2285,7 +2294,7 @@ public class Session implements Serializable {
          * Sets the StatusCallback for the NewPermissionsRequest. Note that once the request is made, this callback
          * will be added to the session, and will receive all future state changes on the session.
          *
-         * @param statusCallback The {@link StatusCallback SessionStatusCallback} to
+         * @param statusCallback The {@link com.facebook.Session.StatusCallback SessionStatusCallback} to
          *                       notify regarding Session state changes.
          * @return the NewPermissionsRequest object to allow for chaining
          */
@@ -2311,7 +2320,7 @@ public class Session implements Serializable {
          * Sets the request code for the NewPermissionsRequest.
          *
          * @param requestCode An integer that identifies this request. This integer will be used
-         *                    as the request code in {@link Activity#onActivityResult
+         *                    as the request code in {@link android.app.Activity#onActivityResult
          *                    onActivityResult}. This integer should be >= 0. If a value < 0 is
          *                    passed in, then a default value will be used.
          * @return the NewPermissionsRequest object to allow for chaining

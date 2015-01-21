@@ -15,12 +15,11 @@ public class Histogram128Ext extends Histogram {
 
     public Histogram128Ext(double[] values) {
         super(values, STEP);
-        init();
     }
 
 
-
-    private void init() {
+    protected void calculateParams() {
+        super.calculateParams();
         int height = getHeight();
         HRVTi = ((double) values.length) / ((double) height);
         WN1 = getWN(1.0);

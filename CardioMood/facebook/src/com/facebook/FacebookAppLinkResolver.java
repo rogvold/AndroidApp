@@ -37,12 +37,13 @@ import bolts.Continuation;
 import bolts.Task;
 
 /**
- * Provides an implementation for the {@link AppLinkResolver AppLinkResolver} interface that uses the Facebook App Link
+ * Provides an implementation for the {@link bolts.AppLinkResolver AppLinkResolver} interface that uses the Facebook App Link
  * index to solve App Links, given a Url. It also provides an additional helper method that can resolve multiple App
  * Links in a single call.
  */
 public class FacebookAppLinkResolver implements AppLinkResolver {
 
+    private static final String APP_LINK_KEY = "app_links";
     private static final String APP_LINK_ANDROID_TARGET_KEY = "android";
     private static final String APP_LINK_WEB_TARGET_KEY = "web";
     private static final String APP_LINK_TARGET_PACKAGE_KEY = "package";
@@ -112,11 +113,12 @@ public class FacebookAppLinkResolver implements AppLinkResolver {
         final Task<Map<Uri, AppLink>>.TaskCompletionSource taskCompletionSource = Task.create();
 
         Bundle appLinkRequestParameters = new Bundle();
-        appLinkRequestParameters.putString("type", "al");
+
         appLinkRequestParameters.putString("ids", graphRequestFields.toString());
         appLinkRequestParameters.putString(
                 "fields",
-                String.format("%s,%s", APP_LINK_ANDROID_TARGET_KEY, APP_LINK_WEB_TARGET_KEY));
+                String.format("%s.fields(%s,%s)", APP_LINK_KEY, APP_LINK_ANDROID_TARGET_KEY, APP_LINK_WEB_TARGET_KEY));
+
 
         Request appLinkRequest = new Request(
                 null, /* Session */
@@ -148,7 +150,9 @@ public class FacebookAppLinkResolver implements AppLinkResolver {
                             JSONObject urlData = null;
                             try {
                                 urlData = responseJson.getJSONObject(uri.toString());
-                                JSONArray rawTargets = urlData.getJSONArray(APP_LINK_ANDROID_TARGET_KEY);
+                                JSONObject appLinkData = urlData.getJSONObject(APP_LINK_KEY);
+
+                                JSONArray rawTargets = appLinkData.getJSONArray(APP_LINK_ANDROID_TARGET_KEY);
 
                                 int targetsCount = rawTargets.length();
                                 List<AppLink.Target> targets = new ArrayList<AppLink.Target>(targetsCount);
@@ -160,7 +164,7 @@ public class FacebookAppLinkResolver implements AppLinkResolver {
                                     }
                                 }
 
-                                Uri webFallbackUrl = getWebFallbackUriFromJson(uri, urlData);
+                                Uri webFallbackUrl = getWebFallbackUriFromJson(uri, appLinkData);
                                 AppLink appLink = new AppLink(uri, targets, webFallbackUrl);
 
                                 appLinkResults.put(uri, appLink);

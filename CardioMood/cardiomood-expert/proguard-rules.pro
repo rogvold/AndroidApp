@@ -156,3 +156,6 @@
     public static int w(...);
     public static int d(...);
 }
+
+# Facebook SDK
+-keep class com.facebook.** { *; }

@@ -86,6 +86,8 @@ public class SessionDetailsActivity extends ActionBarActivity implements ActionB
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_session_details);
 
+
+
         postRenderAction = getIntent().getIntExtra(POST_RENDER_ACTION_EXTRA, DO_NOTHING_ACTION);
         sessionId = getIntent().getLongExtra(SESSION_ID_EXTRA, 0);
         if (sessionId == 0) {

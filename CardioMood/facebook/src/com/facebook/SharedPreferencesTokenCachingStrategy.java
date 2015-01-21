@@ -78,7 +78,7 @@ public class SharedPreferencesTokenCachingStrategy extends TokenCachingStrategy 
     private SharedPreferences cache;
 
     /**
-     * Creates a default {@link SharedPreferencesTokenCachingStrategy SharedPreferencesTokenCachingStrategy}
+     * Creates a default {@link com.facebook.SharedPreferencesTokenCachingStrategy SharedPreferencesTokenCachingStrategy}
      * instance that provides access to a single set of token information.
      *
      * @param context
@@ -91,7 +91,7 @@ public class SharedPreferencesTokenCachingStrategy extends TokenCachingStrategy 
     }
 
     /**
-     * Creates a {@link SharedPreferencesTokenCachingStrategy SharedPreferencesTokenCachingStrategy} instance
+     * Creates a {@link com.facebook.SharedPreferencesTokenCachingStrategy SharedPreferencesTokenCachingStrategy} instance
      * that is distinct for the passed in cacheKey.
      *
      * @param context
@@ -165,18 +165,14 @@ public class SharedPreferencesTokenCachingStrategy extends TokenCachingStrategy 
                 return;
             }
         }
-
-        boolean successfulCommit = editor.commit();
-        if (!successfulCommit) {
-            Logger.log(LoggingBehavior.CACHE, Log.WARN, TAG, "SharedPreferences.Editor.commit() was not successful");
-        }
+        editor.apply();
     }
 
     /**
      * Clears out all token information stored in this cache.
      */
     public void clear() {
-        cache.edit().clear().commit();
+        cache.edit().clear().apply();
     }
 
     private void serializeKey(String key, Bundle bundle, SharedPreferences.Editor editor)

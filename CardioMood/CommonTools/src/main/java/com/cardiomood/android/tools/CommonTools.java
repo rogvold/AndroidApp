@@ -66,13 +66,14 @@ public abstract class CommonTools {
     }
 
     public static void hideSoftInputKeyboard(Activity activity) {
-        InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (imm != null)
-            imm.hideSoftInputFromWindow(
-                    activity.findViewById(android.R.id.content).getWindowToken(),
-                    InputMethodManager.HIDE_NOT_ALWAYS
-            );
-
+        if (activity != null) {
+            InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            if (imm != null)
+                imm.hideSoftInputFromWindow(
+                        activity.findViewById(android.R.id.content).getWindowToken(),
+                        InputMethodManager.HIDE_NOT_ALWAYS
+                );
+        }
     }
 
     public static boolean isNetworkAvailable(Context context) {

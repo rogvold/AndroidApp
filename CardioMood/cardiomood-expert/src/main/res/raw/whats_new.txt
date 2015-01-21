@@ -1,12 +1,33 @@
-<p><b>New in this version:</b><p>
-<p>
-This is version fixes bugs found in CardioMood 2.0.
+<p>Dear user,<br/>
+Thank you for staying with CardioMood!<br/>
+If you like our app or have some ideas, leave us a feedback in Google Play.
 <br/>
-<b>Rate our app</b> <a href="https://play.google.com/store/apps/details?id=com.cardiomood.android.expert">on Google Play</a>
+<br/>
+Please, note that now we are collecting usage statistics in order to provide better experience.
+You may disable this in application Settings.
 </p>
 <br/>
-<p>Stay with <b><a href="http://goo.gl/ZLmHhJ">www.CardioMood.com</a></b>!</p>
-<p><b>New in CardioMood 2.0:</b><p>
+<p><b>New in this version (2.0.4):</b></p>
+<p>
++++ App usage statistics
+<br/>
++++ Bug fixes
+</p>
+<p><b>New in CardioMood 2.0.3:</b></p>
+<p>
++++ Facebook login
+<br/>
++++ Better user experience for tablets
+<br/>
++++ Bug fixes
+</p>
+<br/>
+<p><b>New in CardioMood (2.0.2):</b></p>
+<p>
+This version fixes bugs found in CardioMood 2.0.
+</p>
+<br/>
+<p><b>New in CardioMood 2.0:</b></p>
 <p>
 +++ More analytic features
 <br/>

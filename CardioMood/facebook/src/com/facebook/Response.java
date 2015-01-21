@@ -57,6 +57,9 @@ public class Response {
      */
     public static final String NON_JSON_RESPONSE_PROPERTY = "FACEBOOK_NON_JSON_RESULT";
 
+    // From v2.1 of the Graph API, write endpoints will now return valid JSON with the result as the value for the "success" key
+    public static final String SUCCESS_KEY = "success";
+
     private static final int INVALID_SESSION_FACEBOOK_ERROR_CODE = 190;
 
     private static final String CODE_KEY = "code";
